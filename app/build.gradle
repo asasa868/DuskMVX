@@ -1,0 +1,59 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    compileSdk Versions.compileSdk
+
+    defaultConfig {
+        applicationId Versions.applicationId
+        minSdk Versions.minSdk
+        targetSdk Versions.targetSdk
+        versionCode Versions.versionCode
+        versionName Versions.versionName
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+    lintOptions {
+        baseline file("lint-baseline.xml")
+    }
+    viewBinding{
+        enable true
+    }
+
+    packagingOptions{
+        resources.excludes.add("META-INF/gradle/incremental.annotation.processors")
+    }
+
+
+    android.applicationVariants.configureEach { variant ->
+        variant.outputs.configureEach { output ->
+            if (outputFileName != null && outputFileName.endsWith('.apk')) {
+                outputFileName = "${Versions.applicationId}" +
+                        "${Versions.versionName}" +
+                        "_${variant.buildType.name}" +
+                        ".apk"
+            }
+        }
+    }
+}
+
+dependencies {
+
+    implementation project(path: ':dawn')
+
+}

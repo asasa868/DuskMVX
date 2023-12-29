@@ -1,0 +1,19 @@
+package com.lzq.dawn.base.controller
+
+import com.lzq.dawn.base.model.IBaseRootRepository
+
+/**
+ * @projectName com.lzq.dawn.base.controller
+ * @author Lzq
+ * @date : Created by Lzq on 2023/12/28 17:48
+ * @version
+ * @description: 最初始的ViewModel接口
+ */
+interface IBaseRootViewModel {
+
+    /**
+     * 创建model对象
+     */
+    fun createModel(): IBaseRootRepository
+
+}

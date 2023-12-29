@@ -1,0 +1,1060 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 7.3.1" type="baseline" client="gradle" dependencies="false" name="AGP (7.3.1)" variant="all" version="7.3.1">
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="        List&lt;ScanResult> results = wm.getScanResults();"
+        errorLine2="                                   ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/network/NetworkUtils.java"
+            line="784"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="AnnotateVersionCheck"
+        message="This method should be annotated with `@ChecksSdkIntAtLeast(api=ANDROID_12)`"
+        errorLine1="        fun isAndroid12(): Boolean {"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/permission/util/AndroidVersion.kt"
+            line="35"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="AnnotateVersionCheck"
+        message="This method should be annotated with `@ChecksSdkIntAtLeast(api=ANDROID_11)`"
+        errorLine1="        fun isAndroid11(): Boolean {"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/permission/util/AndroidVersion.kt"
+            line="42"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="AnnotateVersionCheck"
+        message="This method should be annotated with `@ChecksSdkIntAtLeast(api=ANDROID_10)`"
+        errorLine1="        fun isAndroid10(): Boolean {"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/permission/util/AndroidVersion.kt"
+            line="49"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="AnnotateVersionCheck"
+        message="This method should be annotated with `@ChecksSdkIntAtLeast(api=ANDROID_9)`"
+        errorLine1="        fun isAndroid9(): Boolean {"
+        errorLine2="            ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/permission/util/AndroidVersion.kt"
+            line="56"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="AnnotateVersionCheck"
+        message="This method should be annotated with `@ChecksSdkIntAtLeast(api=ANDROID_8)`"
+        errorLine1="        fun isAndroid8(): Boolean {"
+        errorLine2="            ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/permission/util/AndroidVersion.kt"
+            line="63"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="AnnotateVersionCheck"
+        message="This method should be annotated with `@ChecksSdkIntAtLeast(api=ANDROID_6)`"
+        errorLine1="        fun isAndroid6(): Boolean {"
+        errorLine2="            ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/permission/util/AndroidVersion.kt"
+            line="70"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="AnnotateVersionCheck"
+        message="This method should be annotated with `@ChecksSdkIntAtLeast(api=ANDROID_5_1)`"
+        errorLine1="        fun isAndroid5_1(): Boolean {"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/permission/util/AndroidVersion.kt"
+            line="77"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="AnnotateVersionCheck"
+        message="This method should be annotated with `@ChecksSdkIntAtLeast(api=ANDROID_5)`"
+        errorLine1="        fun isAndroid5(): Boolean {"
+        errorLine2="            ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/permission/util/AndroidVersion.kt"
+            line="84"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="AnnotateVersionCheck"
+        message="This method should be annotated with `@ChecksSdkIntAtLeast(api=ANDROID_4_3)`"
+        errorLine1="        fun isAndroid4_3(): Boolean {"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/permission/util/AndroidVersion.kt"
+            line="91"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="AnnotateVersionCheck"
+        message="This method should be annotated with `@ChecksSdkIntAtLeast(api=ANDROID_4_2)`"
+        errorLine1="        fun isAndroid4_2(): Boolean {"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/permission/util/AndroidVersion.kt"
+            line="98"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        errorLine1="            sp.edit().putString(key, value).commit();"
+        errorLine2="                                            ~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/sp/SPUtils.java"
+            line="109"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        errorLine1="            sp.edit().putInt(key, value).commit();"
+        errorLine2="                                         ~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/sp/SPUtils.java"
+            line="156"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        errorLine1="            sp.edit().putLong(key, value).commit();"
+        errorLine2="                                          ~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/sp/SPUtils.java"
+            line="203"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        errorLine1="            sp.edit().putFloat(key, value).commit();"
+        errorLine2="                                           ~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/sp/SPUtils.java"
+            line="250"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        errorLine1="            sp.edit().putBoolean(key, value).commit();"
+        errorLine2="                                             ~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/sp/SPUtils.java"
+            line="297"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        errorLine1="            sp.edit().putStringSet(key, value).commit();"
+        errorLine2="                                               ~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/sp/SPUtils.java"
+            line="346"
+            column="48"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        errorLine1="            sp.edit().remove(key).commit();"
+        errorLine2="                                  ~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/sp/SPUtils.java"
+            line="412"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        errorLine1="            sp.edit().clear().commit();"
+        errorLine2="                              ~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/sp/SPUtils.java"
+            line="433"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toUpperCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="        char[] hexBytes = hexString.toUpperCase().toCharArray();"
+        errorLine2="                                    ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/convert/ConvertUtils.java"
+            line="204"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="                || Build.FINGERPRINT.toLowerCase().contains(&quot;vbox&quot;)"
+        errorLine2="                                     ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/device/DeviceUtils.java"
+            line="378"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="                || Build.FINGERPRINT.toLowerCase().contains(&quot;test-keys&quot;)"
+        errorLine2="                                     ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/device/DeviceUtils.java"
+            line="379"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="        boolean checkOperatorName = operatorName.toLowerCase().equals(&quot;android&quot;);"
+        errorLine2="                                                 ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/device/DeviceUtils.java"
+            line="398"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="                String lowerTrans = transformation.toLowerCase();"
+        errorLine2="                                                   ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/encrypt/EncryptUtils.java"
+            line="1133"
+            column="52"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toUpperCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="        String type = DawnBridge.bytes2HexString(bytes).toUpperCase();"
+        errorLine2="                                                        ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/image/ImageUtils.java"
+            line="2113"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toUpperCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="                                    ? hostAddress.toUpperCase()"
+        errorLine2="                                                  ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/network/NetworkUtils.java"
+            line="581"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toUpperCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="                                    : hostAddress.substring(0, index).toUpperCase();"
+        errorLine2="                                                                      ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/network/NetworkUtils.java"
+            line="582"
+            column="71"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="            return string.toLowerCase();"
+        errorLine2="                          ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/reflect/ReflectUtils.java"
+            line="479"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="            return string.substring(0, 1).toLowerCase() + string.substring(1);"
+        errorLine2="                                          ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/reflect/ReflectUtils.java"
+            line="481"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="                return manufacturer.toLowerCase();"
+        errorLine2="                                    ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/rom/RomUtils.java"
+            line="348"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="                return brand.toLowerCase();"
+        errorLine2="                             ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/rom/RomUtils.java"
+            line="358"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="                    ret = display.toLowerCase();"
+        errorLine2="                                  ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/rom/RomUtils.java"
+            line="373"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="            if (&quot;mounted&quot;.equals(state.toLowerCase())) {"
+        errorLine2="                                       ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/sdcard/SDCardUtils.java"
+            line="125"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="DiscouragedPrivateApi"
+        message="Reflective access to mTN, which is not part of the public SDK and therefore likely to change in future Android releases"
+        errorLine1="                Field mTNField = Toast.class.getDeclaredField(&quot;mTN&quot;);"
+        errorLine2="                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/toast/SystemToast.java"
+            line="25"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 29 (current min is 23): `android.telephony.TelephonyManager#NETWORK_TYPE_NR`"
+        errorLine1="                &amp;&amp; info.getSubtype() == TelephonyManager.NETWORK_TYPE_NR;"
+        errorLine2="                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/network/NetworkUtils.java"
+            line="324"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="InternalInsetResource"
+        message="Using internal inset dimension resource `navigation_bar_height` is not supported"
+        errorLine1="        int resourceId = resources.getIdentifier(&quot;navigation_bar_height&quot;, &quot;dimen&quot;, &quot;android&quot;);"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/adaptScreen/AdaptScreenUtils.java"
+            line="58"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="InternalInsetResource"
+        message="Using internal inset dimension resource `status_bar_height` is not supported"
+        errorLine1="        int resourceId = resources.getIdentifier(&quot;status_bar_height&quot;, &quot;dimen&quot;, &quot;android&quot;);"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/statusBar/StatusBarUtil.java"
+            line="44"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="InternalInsetResource"
+        message="Using internal inset dimension resource `status_bar_height` is not supported"
+        errorLine1="        int resourceId = resources.getIdentifier(&quot;status_bar_height&quot;, &quot;dimen&quot;, &quot;android&quot;);"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/statusBar/StatusBarUtil.java"
+            line="53"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="PrivateApi"
+        message="Accessing internal APIs via reflection is not supported and may not work on all devices or in the future"
+        errorLine1="            Class activityThreadClass = Class.forName(&quot;android.app.ActivityThread&quot;);"
+        errorLine2="                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/activity/ActivityLifecycleImpl.java"
+            line="217"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="SimpleDateFormat"
+        message="To get local formatting use `getDateInstance()`, `getDateTimeInstance()`, or `getTimeInstance()`, or use `new SimpleDateFormat(String template, Locale locale)` with for example `Locale.US` for ASCII dates."
+        errorLine1="                final String time = new SimpleDateFormat(&quot;yyyy_MM_dd-HH_mm_ss&quot;).format(new Date());"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/crash/CrashUtils.java"
+            line="98"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="AppBundleLocaleChanges"
+        message="Found dynamic locale changes, but did not find corresponding Play Core library calls for downloading languages and splitting by language is not disabled in the `bundle` configuration"
+        errorLine1="        configuration.setLocale(locale);"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/language/LanguageUtils.java"
+            line="317"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="CoarseFineLocation"
+        message="If you need access to FINE location, you must request both `ACCESS_FINE_LOCATION` and `ACCESS_COARSE_LOCATION`"
+        errorLine1="    &lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="5"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ProtectedPermissions"
+        message="Permission is only granted to system apps"
+        errorLine1="    &lt;uses-permission android:name=&quot;android.permission.LOCAL_MAC_ADDRESS&quot; />"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="8"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="ProtectedPermissions"
+        message="Permission is only granted to system apps"
+        errorLine1="    &lt;uses-permission android:name=&quot;android.permission.READ_PRIVILEGED_PHONE_STATE&quot; />"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="10"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="QueryPermissionsNeeded"
+        message="Consider adding a `&lt;queries>` declaration to your manifest when calling this \&#xA;method; see https://g.co/dev/packagevisibility for details"
+        errorLine1="                intent.resolveActivity(pm) == null ||"
+        errorLine2="                       ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/activity/ActivityUtils.java"
+            line="104"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="QueryPermissionsNeeded"
+        message="Consider adding a `&lt;queries>` declaration to your manifest when calling this \&#xA;method; see https://g.co/dev/packagevisibility for details"
+        errorLine1="                pm.queryIntentActivities(intent, 0).size() == 0);"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/activity/ActivityUtils.java"
+            line="105"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="QueryPermissionsNeeded"
+        message="Consider adding a `&lt;queries>` declaration to your manifest when calling this \&#xA;method; see https://g.co/dev/packagevisibility for details"
+        errorLine1="        List&lt;ResolveInfo> info = pm.queryIntentActivities(intent, 0);"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/activity/ActivityUtils.java"
+            line="1294"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="QueryPermissionsNeeded"
+        message="Consider adding a `&lt;queries>` declaration to your manifest when calling this \&#xA;method; see https://g.co/dev/packagevisibility for details"
+        errorLine1="        List&lt;ResolveInfo> info = pm.queryIntentActivities(intent, 0);"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/activity/ActivityUtils.java"
+            line="1321"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="QueryPermissionsNeeded"
+        message="Consider adding a `&lt;queries>` declaration to your manifest when calling this \&#xA;method; see https://g.co/dev/packagevisibility for details"
+        errorLine1="                .queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/activity/ActivityUtils.java"
+            line="1888"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="QueryPermissionsNeeded"
+        message="As of Android 11, this method no longer returns information about all apps; \&#xA;see https://g.co/dev/packagevisibility for details"
+        errorLine1="        List&lt;PackageInfo> installedPackages = pm.getInstalledPackages(0);"
+        errorLine2="                                                 ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/app/AppUtils.java"
+            line="798"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="QueryPermissionsNeeded"
+        message="Consider adding a `&lt;queries>` declaration to your manifest when calling this \&#xA;method; see https://g.co/dev/packagevisibility for details"
+        errorLine1="        boolean checkDial = intent.resolveActivity(DawnUtil.getApp().getPackageManager()) == null;"
+        errorLine2="                                   ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/device/DeviceUtils.java"
+            line="407"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="QueryPermissionsNeeded"
+        message="Consider adding a `&lt;queries>` declaration to your manifest when calling this \&#xA;method; see https://g.co/dev/packagevisibility for details"
+        errorLine1="                .queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/intent/IntentUtils.java"
+            line="46"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="QueryPermissionsNeeded"
+        message="Consider adding a `&lt;queries>` declaration to your manifest when calling this \&#xA;method; see https://g.co/dev/packagevisibility for details"
+        errorLine1="                pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/process/ProcessUtils.java"
+            line="68"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="        int resourceId = resources.getIdentifier(&quot;navigation_bar_height&quot;, &quot;dimen&quot;, &quot;android&quot;);"
+        errorLine2="                                   ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/adaptScreen/AdaptScreenUtils.java"
+            line="58"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="        return DawnUtil.getApp().getResources().getIdentifier(name, &quot;id&quot;, DawnUtil.getApp().getPackageName());"
+        errorLine2="                                                ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/resource/ResourceUtils.java"
+            line="49"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="        return DawnUtil.getApp().getResources().getIdentifier(name, &quot;string&quot;, DawnUtil.getApp().getPackageName());"
+        errorLine2="                                                ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/resource/ResourceUtils.java"
+            line="59"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="        return DawnUtil.getApp().getResources().getIdentifier(name, &quot;color&quot;, DawnUtil.getApp().getPackageName());"
+        errorLine2="                                                ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/resource/ResourceUtils.java"
+            line="69"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="        return DawnUtil.getApp().getResources().getIdentifier(name, &quot;dimen&quot;, DawnUtil.getApp().getPackageName());"
+        errorLine2="                                                ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/resource/ResourceUtils.java"
+            line="79"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="        return DawnUtil.getApp().getResources().getIdentifier(name, &quot;drawable&quot;, DawnUtil.getApp().getPackageName());"
+        errorLine2="                                                ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/resource/ResourceUtils.java"
+            line="89"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="        return DawnUtil.getApp().getResources().getIdentifier(name, &quot;mipmap&quot;, DawnUtil.getApp().getPackageName());"
+        errorLine2="                                                ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/resource/ResourceUtils.java"
+            line="99"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="        return DawnUtil.getApp().getResources().getIdentifier(name, &quot;layout&quot;, DawnUtil.getApp().getPackageName());"
+        errorLine2="                                                ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/resource/ResourceUtils.java"
+            line="109"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="        return DawnUtil.getApp().getResources().getIdentifier(name, &quot;style&quot;, DawnUtil.getApp().getPackageName());"
+        errorLine2="                                                ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/resource/ResourceUtils.java"
+            line="119"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="        return DawnUtil.getApp().getResources().getIdentifier(name, &quot;anim&quot;, DawnUtil.getApp().getPackageName());"
+        errorLine2="                                                ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/resource/ResourceUtils.java"
+            line="129"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="        return DawnUtil.getApp().getResources().getIdentifier(name, &quot;menu&quot;, DawnUtil.getApp().getPackageName());"
+        errorLine2="                                                ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/resource/ResourceUtils.java"
+            line="139"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="        int resourceId = resources.getIdentifier(&quot;status_bar_height&quot;, &quot;dimen&quot;, &quot;android&quot;);"
+        errorLine2="                                   ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/statusBar/StatusBarUtil.java"
+            line="44"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="        int resourceId = resources.getIdentifier(&quot;status_bar_height&quot;, &quot;dimen&quot;, &quot;android&quot;);"
+        errorLine2="                                   ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/statusBar/StatusBarUtil.java"
+            line="53"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="PackageManagerGetSignatures"
+        message="Reading app signatures from `getPackageInfo`: The app signatures could be exploited if not validated properly; see issue explanation for details"
+        errorLine1="                PackageInfo pi = pm.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);"
+        errorLine2="                                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/app/AppUtils.java"
+            line="587"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is never &lt; 23"
+        errorLine1="        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.LOLLIPOP) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/click/ClickDrawableWrapper.java"
+            line="40"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is never &lt; 23"
+        errorLine1="        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.LOLLIPOP) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/click/ClickDrawableWrapper.java"
+            line="51"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 23"
+        errorLine1="    @RequiresApi(api = Build.VERSION_CODES.M)"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/DawnBridge.java"
+            line="477"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 17"
+        errorLine1="    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/device/DeviceUtils.java"
+            line="72"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 17"
+        errorLine1="    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/device/DeviceUtils.java"
+            line="420"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 17"
+        errorLine1="    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/image/ImageUtils.java"
+            line="1428"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 17"
+        errorLine1="    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/image/ImageUtils.java"
+            line="1444"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 23"
+        errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/log/LogFormatter.java"
+            line="161"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 23"
+        errorLine1="        if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/log/LogFormatter.java"
+            line="181"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 16"
+        errorLine1="    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/log/LogFormatter.java"
+            line="197"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is never &lt; 23"
+        errorLine1="            methodName = (Build.VERSION.SDK_INT &lt;= 16) ? &quot;expand&quot; : &quot;expandNotificationsPanel&quot;;"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/notification/NotificationUtils.java"
+            line="150"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is never &lt; 23"
+        errorLine1="            methodName = (Build.VERSION.SDK_INT &lt;= 16) ? &quot;collapse&quot; : &quot;collapsePanels&quot;;"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/notification/NotificationUtils.java"
+            line="152"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 23"
+        errorLine1="        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/uri/UriUtils.java"
+            line="170"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 23"
+        errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/view/ViewUtils.java"
+            line="80"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        message="Do not place Android context classes in static fields (static reference to `ActivityLifecycleImpl` which has field `STUB` pointing to `Activity`); this is a memory leak"
+        errorLine1="    public static final ActivityLifecycleImpl INSTANCE = new ActivityLifecycleImpl();"
+        errorLine2="           ~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/activity/ActivityLifecycleImpl.java"
+            line="38"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        message="Do not place Android context classes in static fields; this is a memory leak"
+        errorLine1="    private static final Activity STUB = new Activity();"
+        errorLine2="            ~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/activity/ActivityLifecycleImpl.java"
+            line="69"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UseValueOf"
+        message="Use `Character.valueOf(array[i])` instead"
+        errorLine1="            result[i] = new Character(array[i]);"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/arrays/ArrayUtils.java"
+            line="1671"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="UseValueOf"
+        message="Use `Long.valueOf(array[i])` instead"
+        errorLine1="            result[i] = new Long(array[i]);"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/arrays/ArrayUtils.java"
+            line="1718"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="UseValueOf"
+        message="Use `Integer.valueOf(array[i])` instead"
+        errorLine1="            result[i] = new Integer(array[i]);"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/arrays/ArrayUtils.java"
+            line="1765"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="UseValueOf"
+        message="Use `Byte.valueOf(array[i])` instead"
+        errorLine1="            result[i] = new Byte(array[i]);"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/arrays/ArrayUtils.java"
+            line="1859"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="UseValueOf"
+        message="Use `Double.valueOf(array[i])` instead"
+        errorLine1="            result[i] = new Double(array[i]);"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/arrays/ArrayUtils.java"
+            line="1906"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="UseValueOf"
+        message="Use `Float.valueOf(array[i])` instead"
+        errorLine1="            result[i] = new Float(array[i]);"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/arrays/ArrayUtils.java"
+            line="1953"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="ClickableViewAccessibility"
+        message="`OnUtilsTouchListener#onTouch` should call `View#performClick` when a click is detected"
+        errorLine1="    public boolean onTouch(final View v, MotionEvent event) {"
+        errorLine2="                   ~~~~~~~">
+        <location
+            file="src/main/java/com/lzq/dawn/click/OnUtilsTouchListener.java"
+            line="21"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="RtlHardcoded"
+        message="Consider replacing `android:layout_alignParentLeft` with `android:layout_alignParentStart=&quot;true&quot;` to better support right-to-left layouts"
+        errorLine1="        android:layout_alignParentLeft=&quot;true&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/utils_toast_view.xml"
+            line="17"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="RtlHardcoded"
+        message="Consider replacing `android:layout_marginRight` with `android:layout_marginEnd=&quot;8dp&quot;` to better support right-to-left layouts"
+        errorLine1="        android:layout_marginRight=&quot;8dp&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/utils_toast_view.xml"
+            line="19"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="RtlHardcoded"
+        message="Consider replacing `android:layout_alignParentRight` with `android:layout_alignParentEnd=&quot;true&quot;` to better support right-to-left layouts"
+        errorLine1="        android:layout_alignParentRight=&quot;true&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/utils_toast_view.xml"
+            line="39"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="RtlHardcoded"
+        message="Consider replacing `android:layout_marginLeft` with `android:layout_marginStart=&quot;8dp&quot;` to better support right-to-left layouts"
+        errorLine1="        android:layout_marginLeft=&quot;8dp&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/utils_toast_view.xml"
+            line="41"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="RtlHardcoded"
+        message="Consider replacing `android:layout_toLeftOf` with `android:layout_toStartOf=&quot;@id/utvRightIconView&quot;` to better support right-to-left layouts"
+        errorLine1="        android:layout_toLeftOf=&quot;@id/utvRightIconView&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/utils_toast_view.xml"
+            line="64"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="RtlHardcoded"
+        message="Consider replacing `android:layout_toRightOf` with `android:layout_toEndOf=&quot;@id/utvLeftIconView&quot;` to better support right-to-left layouts"
+        errorLine1="        android:layout_toRightOf=&quot;@id/utvLeftIconView&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/utils_toast_view.xml"
+            line="65"
+            column="9"/>
+    </issue>
+
+</issues>
