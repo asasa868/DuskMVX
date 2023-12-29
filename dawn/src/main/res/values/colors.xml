@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="dawn_dialog_bg">#f5f5f5</color>
+    <color name="dawn_shadow">#25808080</color>
+
+    <!--    loading-->
+    <color name="dawn_triangle">#aa72d572</color>
+    <color name="dawn_circle">#aa738ffe</color>
+    <color name="dawn_rect">#aae84e40</color>
+    <color name="dawn_view_bg">#00000000</color>
+
+</resources>

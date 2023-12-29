@@ -1,0 +1,148 @@
+import org.gradle.api.initialization.resolve.RepositoriesMode
+
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+        maven { url = URI.create("https://maven.google.com") }
+        maven { url 'https://jitpack.io' }
+    }
+
+}
+
+buildscript {
+    repositories {
+        mavenLocal()
+        google()
+        mavenCentral()
+    }
+
+}
+
+dependencyResolutionManagement{
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url = URI.create("https://maven.google.com") }
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+rootProject.name = "Dusk"
+include ':app'
+include ':dawn'
+
+//================== 初始化阶段 start ==================
+println '----(初始化阶段)---- 这是在初始化阶段执行的(在 settings.gradle 文件中)'
+gradle.settingsEvaluated {
+    println '----(初始化阶段)---- Settings 配置完毕'
+}
+gradle.projectsLoaded {
+    println '----(初始化阶段)---- 所有 Project 对象创建（此时 build.gradle 中的配置代码还未执行）'
+}
+//================== 初始化阶段 end   ==================
+
+//================== 配置阶段   start ==================
+//执行子模块的build.gradle文件监听
+//可以在子build.gradle的project.beforeEvaluate 和 project.afterEvaluate 等价
+gradle.addProjectEvaluationListener(new ProjectEvaluationListener() {
+    @Override
+    void beforeEvaluate(Project project) {
+      //  println '----(配置阶段)---- project: ' + project.name + '执行前'
+    }
+
+    @Override
+    void afterEvaluate(Project project, ProjectState state) {
+      //  println '----(配置阶段)---- project: ' + project.name + '执行后' + '   状态：' + state.getExecuted()
+    }
+})
+//依赖关系解析完毕监听
+gradle.addListener(new DependencyResolutionListener() {
+
+    @Override
+    void beforeResolve(ResolvableDependencies dependencies) {
+        // println '依赖关系：' + dependencies.name + '前'
+    }
+
+    @Override
+    void afterResolve(ResolvableDependencies dependencies) {
+        //  println '依赖关系：' + dependencies.name + '后'
+    }
+})
+// Task DAG 构造完毕
+//gradle.taskGraph.whenReady {
+//    println 'Task DAG 构造完毕'
+//}
+// 与 gradle.taskGraph.whenReady 等价
+gradle.addListener(new TaskExecutionGraphListener() {
+    @Override
+    void graphPopulated(TaskExecutionGraph graph) {
+        println '----(配置阶段)---- Task DAG 构造完毕' + 'graph:' + graph.allTasks
+    }
+})
+// 所有 Project 的 build.gradle 执行完毕
+gradle.projectsEvaluated {
+    println '----(配置阶段)---- 所有 Project 的 build.gradle 执行完毕'
+}
+
+//================== 配置阶段   end   ==================
+
+
+//================== 执行阶段 start   ==================
+gradle.addListener(new TaskExecutionListener() {
+
+    // 执行 Task 前
+    @Override
+    void beforeExecute(Task task) {
+      //  println '----(执行阶段)---- task:' + task.name + '执行前'
+
+    }
+
+    // 执行 Task 后
+    @Override
+    void afterExecute(Task task, TaskState state) {
+      //  println '----(执行阶段)---- task:' + task.name + '执行后' + 'state:' + state.getExecuted()
+    }
+})
+gradle.addListener(new TaskActionListener() {
+
+    // 开始执行 Action 列表前，回调时机略晚于 TaskExecutionListener#beforeExecute
+    @Override
+    void beforeActions(Task task) {
+       // println '----(执行阶段)---- task动作监听 task:' + task.name + '执行前'
+    }
+
+    // 执行 Action 列表完毕，回调时机略早于 TaskExecutionListener#afterExecute
+    @Override
+    void afterActions(Task task) {
+      //  println '----(执行阶段)---- task动作监听 task:' + task.name + '执行后'
+    }
+})
+
+//================== 执行阶段 end     ==================
+
+//================== 构建结束   ========================
+gradle.addBuildListener(new BuildListener() {
+    @Override
+    void settingsEvaluated(Settings settings) {
+
+    }
+
+    @Override
+    void projectsLoaded(Gradle gradle) {
+
+    }
+
+    @Override
+    void projectsEvaluated(Gradle gradle) {
+
+    }
+
+    @Override
+    void buildFinished(BuildResult result) {
+        println '-----------------(构建结束)-----------------'
+    }
+})

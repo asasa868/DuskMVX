@@ -1,0 +1,23 @@
+<project version="4">
+  <component name="ASMSmaliIdeaPluginConfiguration">
+    <asm skipDebug="true" skipFrames="true" skipCode="false" expandFrames="false" />
+    <groovy codeStyle="LEGACY" />
+  </component>
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="../../../../layout/custom_preview.xml" value="0.24166666666666667" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.24864130434782608" />
+        <entry key="dawn/src/main/res/drawable/utils_toast_bg.xml" value="0.205" />
+        <entry key="dawn/src/main/res/layout/utils_toast_view.xml" value="0.9407887776692709" />
+        <entry key="dawn/src/main/res/xml/dawn_provider_paths.xml" value="0.3129528985507246" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="corretto-11" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
