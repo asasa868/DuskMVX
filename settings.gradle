@@ -2,38 +2,41 @@ import org.gradle.api.initialization.resolve.RepositoriesMode
 
 pluginManagement {
     repositories {
-        gradlePluginPortal()
         google()
         mavenCentral()
-        maven { url = URI.create("https://maven.google.com") }
+        gradlePluginPortal()
+        maven { url 'https://maven.google.com' }
         maven { url 'https://jitpack.io' }
     }
-
 }
 
 buildscript {
     repositories {
-        mavenLocal()
         google()
+        mavenLocal()
         mavenCentral()
     }
-
 }
 
-dependencyResolutionManagement{
+dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
+    versionCatalogs {
+        create("app") {from(files("gradle/app.versions.toml"))}
+    }
+
     repositories {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven { url = URI.create("https://maven.google.com") }
+        maven { url 'https://maven.google.com' }
         maven { url 'https://jitpack.io' }
     }
 }
 
 rootProject.name = "Dusk"
-include ':app'
-include ':dawn'
+include(":app")
+include(":dawn")
 
 //================== 初始化阶段 start ==================
 println '----(初始化阶段)---- 这是在初始化阶段执行的(在 settings.gradle 文件中)'
@@ -51,12 +54,12 @@ gradle.projectsLoaded {
 gradle.addProjectEvaluationListener(new ProjectEvaluationListener() {
     @Override
     void beforeEvaluate(Project project) {
-      //  println '----(配置阶段)---- project: ' + project.name + '执行前'
+        //  println '----(配置阶段)---- project: ' + project.name + '执行前'
     }
 
     @Override
     void afterEvaluate(Project project, ProjectState state) {
-      //  println '----(配置阶段)---- project: ' + project.name + '执行后' + '   状态：' + state.getExecuted()
+        //  println '----(配置阶段)---- project: ' + project.name + '执行后' + '   状态：' + state.getExecuted()
     }
 })
 //依赖关系解析完毕监听
@@ -97,31 +100,16 @@ gradle.addListener(new TaskExecutionListener() {
     // 执行 Task 前
     @Override
     void beforeExecute(Task task) {
-      //  println '----(执行阶段)---- task:' + task.name + '执行前'
+        //  println '----(执行阶段)---- task:' + task.name + '执行前'
 
     }
 
     // 执行 Task 后
     @Override
     void afterExecute(Task task, TaskState state) {
-      //  println '----(执行阶段)---- task:' + task.name + '执行后' + 'state:' + state.getExecuted()
+        //  println '----(执行阶段)---- task:' + task.name + '执行后' + 'state:' + state.getExecuted()
     }
 })
-gradle.addListener(new TaskActionListener() {
-
-    // 开始执行 Action 列表前，回调时机略晚于 TaskExecutionListener#beforeExecute
-    @Override
-    void beforeActions(Task task) {
-       // println '----(执行阶段)---- task动作监听 task:' + task.name + '执行前'
-    }
-
-    // 执行 Action 列表完毕，回调时机略早于 TaskExecutionListener#afterExecute
-    @Override
-    void afterActions(Task task) {
-      //  println '----(执行阶段)---- task动作监听 task:' + task.name + '执行后'
-    }
-})
-
 //================== 执行阶段 end     ==================
 
 //================== 构建结束   ========================

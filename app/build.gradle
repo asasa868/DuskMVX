@@ -38,6 +38,7 @@ android {
     packagingOptions{
         resources.excludes.add("META-INF/gradle/incremental.annotation.processors")
     }
+    namespace 'com.lzq.dusk'
 
 
     android.applicationVariants.configureEach { variant ->
