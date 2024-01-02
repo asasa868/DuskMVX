@@ -1,22 +1,19 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("com.android.library")
     id("maven-publish")
     id("kotlin-android")
     id("kotlin-kapt")
+    id("publishing")
 }
 
 android {
     namespace = "com.lzq.dawn"
     resourcePrefix = "dawn_"
-
     compileSdk = 33
 
     defaultConfig {
         minSdk = 23
-        targetSdk = 33
-
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro", "proguard-rules.pro")
@@ -27,20 +24,23 @@ android {
             }
         }
     }
+
     testFixtures {
         enable = true
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
         }
 
-        debug{
-
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 
@@ -49,31 +49,23 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    tasks.withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "11"
-        }
+    kotlinOptions {
+        jvmTarget = "11"
     }
 
-    viewBinding {
-        enable = true
+    buildFeatures {
+        viewBinding = true
+        compose = true
     }
 
-
-
-
-
+    sourceSets.named("main") {
+        java.srcDirs("src/main/java")
+        kotlin.srcDirs("src/main/kotlin")
+        jniLibs.srcDirs("libs", "jniLibs")
+    }
 
     lint {
         baseline = file("lint-baseline.xml")
-    }
-
-    publishing {
-        multipleVariants("${project.name}--${project.version}.aar") {
-            allVariants()
-            withJavadocJar()
-        }
-
     }
 
 }
@@ -116,25 +108,26 @@ dependencies {
     //-------------------------注解依赖--------------------------
 }
 
-//publishing {
-//    publications {
-//        register<MavenPublication>("release") {
-//            groupId = "com.lzq.dawn"
-//            artifactId = "dawn"
-//            version = "1.0.0"
-//
-//            afterEvaluate{
-//                from(components["release"])
-//            }
-//        }
-//    }
-//
-//    repositories{
-//        maven{
-//            name = "dawnRepo"
-//            url =uri("${project.buildDir}/repo")
-//        }
-//    }
-//}
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.lzq.dawn"
+            artifactId = "dawn"
+            version = "1.0.0"
+
+            afterEvaluate{
+                from(components["release"])
+            }
+        }
+    }
+
+    repositories{
+        maven{
+            name = "dawnRepo"
+            url =uri("${project.buildDir}/repo")
+        }
+    }
+
+}
 
 
