@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.flowOn
  * @projectName com.lzq.dawn.base.model
  * @author Lzq
  * @date : Created by Lzq on 2023/12/28 17:55
- * @version
+ * @version 0.0.1
  * @description: 最初始的Model
  */
 abstract class BaseRootRepository :IBaseRootRepository {

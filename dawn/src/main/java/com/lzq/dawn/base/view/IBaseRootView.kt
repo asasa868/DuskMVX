@@ -4,7 +4,7 @@ package com.lzq.dawn.base.view
  * @projectName com.lzq.dawn.base.activity
  * @author Lzq
  * @date : Created by Lzq on 2023/12/25 16:12
- * @version
+ * @version 0.0.1
  * @description: 最初始的Activity接口
  */
 interface IBaseRootView {
@@ -25,9 +25,14 @@ interface IBaseRootView {
     fun initData()
 
     /**
-     * 请求数据
+     * 初始化请求数据
      */
     fun initRequest()
+
+    /**
+     * 初始化ViewModel的数据观察者
+     */
+    fun initObserver()
 
     /**
      * 显示占位弹框
@@ -38,7 +43,6 @@ interface IBaseRootView {
      * 隐藏占位弹框
      */
     fun hideLoading()
-
 
     /**
      * 返回网络状态

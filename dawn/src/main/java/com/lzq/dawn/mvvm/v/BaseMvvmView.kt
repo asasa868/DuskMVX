@@ -1,8 +1,8 @@
 package com.lzq.dawn.mvvm.v
 
 import androidx.viewbinding.ViewBinding
-import com.lzq.dawn.base.controller.IBaseRootViewModel
 import com.lzq.dawn.base.view.IBaseRootView
+import com.lzq.dawn.mvvm.vm.IBaseMvvmViewModel
 
 /**
  * @projectName com.lzq.dawn.mvvm.v
@@ -11,7 +11,7 @@ import com.lzq.dawn.base.view.IBaseRootView
  * @version 0.0.1
  * @description: MVVM架构模式的V层接口
  */
-interface BaseMvvmView<VB : ViewBinding, VM : IBaseRootViewModel> : IBaseRootView {
+interface BaseMvvmView<out VB : ViewBinding,out VM : IBaseMvvmViewModel> : IBaseRootView {
 
     /**
      * NVVM采用ViewBinding 来获取布局，所以用不到次方法，返回0不执行

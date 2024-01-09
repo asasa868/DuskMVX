@@ -1,17 +1,18 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+   // alias(app.plugins.android.application)
 }
 
 android {
-    compileSdk Versions.compileSdk
+    compileSdk ProjectConfigs.compileSdk
 
     defaultConfig {
-        applicationId Versions.applicationId
-        minSdk Versions.minSdk
-        targetSdk Versions.targetSdk
-        versionCode Versions.versionCode
-        versionName Versions.versionName
+        applicationId ProjectConfigs.applicationId
+        minSdk ProjectConfigs.minSdk
+        targetSdk ProjectConfigs.targetSdk
+        versionCode ProjectConfigs.versionCode
+        versionName ProjectConfigs.versionName
 
     }
 
@@ -44,8 +45,8 @@ android {
     android.applicationVariants.configureEach { variant ->
         variant.outputs.configureEach { output ->
             if (outputFileName != null && outputFileName.endsWith('.apk')) {
-                outputFileName = "${Versions.applicationId}" +
-                        "${Versions.versionName}" +
+                outputFileName = "${ProjectConfigs.applicationId}" +
+                        "${ProjectConfigs.versionName}" +
                         "_${variant.buildType.name}" +
                         ".apk"
             }
@@ -56,5 +57,8 @@ android {
 dependencies {
 
     implementation project(path: ':dawn')
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.constraintlayout
 
 }
