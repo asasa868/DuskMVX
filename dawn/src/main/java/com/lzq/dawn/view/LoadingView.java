@@ -3,10 +3,8 @@ package com.lzq.dawn.view;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -16,6 +14,8 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.lzq.dawn.R;
 
@@ -39,10 +39,9 @@ public class LoadingView extends LinearLayout {
     private ImageView mIndicationIm;
 
     private TextView mLoadTextView;
-    private int mTextAppearance;
 
-    private String mLoadText;
     private AnimatorSet mUpAnimatorSet;
+
     private AnimatorSet mDownAnimatorSet;
 
     private boolean mStopped = false;
@@ -61,13 +60,11 @@ public class LoadingView extends LinearLayout {
     }
 
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public LoadingView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public LoadingView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs);
@@ -76,7 +73,7 @@ public class LoadingView extends LinearLayout {
     private void init(Context context, AttributeSet attrs) {
 
         setOrientation(VERTICAL);
-        mDistance = dip2px(context, 54f);
+        mDistance = dip2px(context);
         LayoutInflater.from(context).inflate(R.layout.dawn_load_view, this, true);
         mShapeLoadingView = findViewById(R.id.shapeLoadingView);
         mIndicationIm = findViewById(R.id.indication);
@@ -95,9 +92,9 @@ public class LoadingView extends LinearLayout {
         setLoadingText(loadText);
     }
 
-    private int dip2px(Context context, float dipValue) {
+    private int dip2px(Context context) {
         final float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (dipValue * scale + 0.5f);
+        return (int) ((float) 54.0 * scale + 0.5f);
     }
 
 
@@ -109,12 +106,9 @@ public class LoadingView extends LinearLayout {
         }
     }
 
-    private Runnable mFreeFallRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mStopped = false;
-            freeFall();
-        }
+    private final Runnable mFreeFallRunnable = () -> {
+        mStopped = false;
+        freeFall();
     };
 
     private void startLoading(long delay) {
@@ -188,11 +182,10 @@ public class LoadingView extends LinearLayout {
         } else {
             mLoadTextView.setVisibility(VISIBLE);
         }
-
         mLoadTextView.setText(loadingText);
     }
 
-    public CharSequence getLoadingText(){
+    public CharSequence getLoadingText() {
         return mLoadTextView.getText();
     }
 
@@ -200,28 +193,10 @@ public class LoadingView extends LinearLayout {
      * 上抛
      */
     public void upThrow() {
-
         if (mUpAnimatorSet == null) {
             ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(mShapeLoadingView, "translationY", mDistance, 0);
             ObjectAnimator scaleIndication = ObjectAnimator.ofFloat(mIndicationIm, "scaleX", 1f, 0.2f);
-
-            ObjectAnimator objectAnimator1 = null;
-            switch (mShapeLoadingView.getShape()) {
-                case SHAPE_RECT:
-
-                    objectAnimator1 = ObjectAnimator.ofFloat(mShapeLoadingView, "rotation", 0, 180);
-
-                    break;
-                case SHAPE_CIRCLE:
-                    objectAnimator1 = ObjectAnimator.ofFloat(mShapeLoadingView, "rotation", 0, 180);
-
-                    break;
-                case SHAPE_TRIANGLE:
-
-                    objectAnimator1 = ObjectAnimator.ofFloat(mShapeLoadingView, "rotation", 0, 180);
-
-                    break;
-            }
+            ObjectAnimator objectAnimator1 = ObjectAnimator.ofFloat(mShapeLoadingView, "rotation", 0, 180);
 
             mUpAnimatorSet = new AnimatorSet();
             mUpAnimatorSet.playTogether(objectAnimator, objectAnimator1, scaleIndication);
@@ -231,12 +206,12 @@ public class LoadingView extends LinearLayout {
 
             mUpAnimatorSet.addListener(new Animator.AnimatorListener() {
                 @Override
-                public void onAnimationStart(Animator animation) {
+                public void onAnimationStart(@NonNull Animator animation) {
 
                 }
 
                 @Override
-                public void onAnimationEnd(Animator animation) {
+                public void onAnimationEnd(@NonNull Animator animation) {
                     if (!mStopped) {
                         freeFall();
                     }
@@ -244,26 +219,23 @@ public class LoadingView extends LinearLayout {
                 }
 
                 @Override
-                public void onAnimationCancel(Animator animation) {
+                public void onAnimationCancel(@NonNull Animator animation) {
 
                 }
 
                 @Override
-                public void onAnimationRepeat(Animator animation) {
+                public void onAnimationRepeat(@NonNull Animator animation) {
 
                 }
             });
         }
         mUpAnimatorSet.start();
-
-
     }
 
     /**
      * 下落
      */
     public void freeFall() {
-
         if (mDownAnimatorSet == null) {
             ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(mShapeLoadingView, "translationY", 0, mDistance);
             ObjectAnimator scaleIndication = ObjectAnimator.ofFloat(mIndicationIm, "scaleX", 0.2f, 1f);
@@ -274,12 +246,12 @@ public class LoadingView extends LinearLayout {
             mDownAnimatorSet.setInterpolator(new AccelerateInterpolator(FACTOR));
             mDownAnimatorSet.addListener(new Animator.AnimatorListener() {
                 @Override
-                public void onAnimationStart(Animator animation) {
+                public void onAnimationStart(@NonNull Animator animation) {
 
                 }
 
                 @Override
-                public void onAnimationEnd(Animator animation) {
+                public void onAnimationEnd(@NonNull Animator animation) {
                     if (!mStopped) {
                         mShapeLoadingView.changeShape();
                         upThrow();
@@ -287,19 +259,17 @@ public class LoadingView extends LinearLayout {
                 }
 
                 @Override
-                public void onAnimationCancel(Animator animation) {
+                public void onAnimationCancel(@NonNull Animator animation) {
 
                 }
 
                 @Override
-                public void onAnimationRepeat(Animator animation) {
+                public void onAnimationRepeat(@NonNull Animator animation) {
 
                 }
             });
         }
         mDownAnimatorSet.start();
-
-
     }
 
 }

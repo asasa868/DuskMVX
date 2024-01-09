@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.alibaba.android.arouter.launcher.ARouter
 import com.lzq.dawn.base.RegisterEventBus
-import com.lzq.dawn.util.EventBusUtils
+import com.lzq.dawn.tools.EventBusUtils
 import com.lzq.dawn.util.network.NetworkType
 import com.lzq.dawn.util.network.NetworkUtils
 import com.lzq.dawn.util.network.OnNetworkStatusChangedListener
@@ -23,10 +23,7 @@ abstract class BaseRootActivity : AppCompatActivity(), IBaseRootView, OnNetworkS
      * 占位弹窗
      */
     private val loadingDialog by lazy {
-        ShapeLoadingDialog.Builder(this)
-            .cancelable(false)
-            .canceledOnTouchOutside(true)
-            .build()
+        ShapeLoadingDialog.Builder(this).cancelable(false).canceledOnTouchOutside(true).build()
     }
 
     /**
@@ -49,6 +46,7 @@ abstract class BaseRootActivity : AppCompatActivity(), IBaseRootView, OnNetworkS
         initView()
         initData()
         initRequest()
+        initObserver()
     }
 
     override fun onDestroy() {
@@ -62,6 +60,7 @@ abstract class BaseRootActivity : AppCompatActivity(), IBaseRootView, OnNetworkS
      * 显示弹窗
      */
     override fun showLoading(content: String?) {
+        if(loadingDialog.isShowing) return
         loadingDialog.builder.setContentTxt(content)
         loadingDialog.show()
     }
@@ -70,6 +69,7 @@ abstract class BaseRootActivity : AppCompatActivity(), IBaseRootView, OnNetworkS
      * 隐藏弹窗
      */
     override fun hideLoading() {
+        if (loadingDialog == null) return
         loadingDialog.dismiss()
     }
 

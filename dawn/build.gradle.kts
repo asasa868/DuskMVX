@@ -8,15 +8,15 @@ plugins {
 }
 
 android {
-    namespace = "com.lzq.dawn"
-    resourcePrefix = "dawn_"
-    compileSdk = 33
+    namespace = ProjectConfigs.namespace
+    resourcePrefix = ProjectConfigs.resourcePrefix
+    compileSdk = ProjectConfigs.compileSdk
 
     defaultConfig {
-        minSdk = 23
+        minSdk = ProjectConfigs.minSdk
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro", "proguard-rules.pro")
+        testInstrumentationRunner = ProjectConfigs.testRunner
+        consumerProguardFiles(ProjectConfigs.consumerRules, ProjectConfigs.proguardRules)
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -32,10 +32,8 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
-            )
+            isShrinkResources = false
+            proguardFiles(getDefaultProguardFile(ProjectConfigs.proguardName), ProjectConfigs.proguardRules)
         }
 
         debug {
@@ -50,22 +48,25 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = ProjectConfigs.jvmTarget
     }
 
     buildFeatures {
         viewBinding = true
         compose = true
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = ProjectConfigs.kotlinCompiler
+    }
 
     sourceSets.named("main") {
-        java.srcDirs("src/main/java")
-        kotlin.srcDirs("src/main/kotlin")
-        jniLibs.srcDirs("libs", "jniLibs")
+        java.srcDirs(ProjectConfigs.javaSrc)
+        kotlin.srcDirs(ProjectConfigs.ktSrc)
+        jniLibs.srcDirs(ProjectConfigs.libs, ProjectConfigs.jniLibs)
     }
 
     lint {
-        baseline = file("lint-baseline.xml")
+        baseline = file(ProjectConfigs.lintName)
     }
 
 }
@@ -84,6 +85,15 @@ dependencies {
     api(JetPack.viewModel)
     api(JetPack.liveData)
     api(JetPack.lifecycle)
+    api(platform(compose.bom))
+    api(compose.androidx.activity)
+    api(compose.androidx.material3)
+    api(compose.androidx.material)
+    api(compose.androidx.ui.tooling)
+    api(compose.androidx.ui.util)
+    api(compose.androidx.material.icons.extended)
+    api(compose.accompanist.themeadapter)
+    api(compose.accompanist.systemuicontroller)
 
 
     api(Kotlin.stdlibJdk)
@@ -107,27 +117,32 @@ dependencies {
 
     //-------------------------注解依赖--------------------------
 }
-
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            groupId = "com.lzq.dawn"
-            artifactId = "dawn"
-            version = "1.0.0"
-
-            afterEvaluate{
-                from(components["release"])
-            }
-        }
-    }
-
-    repositories{
-        maven{
-            name = "dawnRepo"
-            url =uri("${project.buildDir}/repo")
-        }
-    }
-
-}
+//
+//publishing {
+//    publications {
+//        register<MavenPublication>("release") {
+//            groupId = "com.lzq.dawn"
+//            artifactId = "dawn"
+//            version = "1.0.0"
+//
+//            afterEvaluate{
+//                from(components["release"])
+//            }
+//        }
+//
+//    }
+//
+//    repositories{
+//        maven{
+//            name = "dawnRepo"
+//            url =uri("${project.buildDir}/repo")
+//            credentials{
+//                username = project.findProperty("mavenUsername").toString()
+//                password = project.findProperty("mavenPassword").toString()
+//            }
+//        }
+//    }
+//
+//}
 
 

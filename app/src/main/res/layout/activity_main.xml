@@ -7,8 +7,37 @@
     tools:context=".MainActivity">
 
   <TextView
-      android:id="@+id/tv_center"
+      android:id="@+id/tv_successTime"
       app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintBottom_toBottomOf="parent"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="                         "/>
+  <TextView
+      android:id="@+id/tv_successOrFailureTime"
+      app:layout_constraintTop_toBottomOf="@+id/tv_successTime"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintBottom_toBottomOf="parent"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="                         "/>
+
+  <TextView
+      android:id="@+id/tv_successRxjavaTime"
+      app:layout_constraintTop_toBottomOf="@+id/tv_successOrFailureTime"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintBottom_toBottomOf="parent"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="                         "/>
+
+  <TextView
+      android:id="@+id/tv_successOrFailureRxjavaTime"
+      app:layout_constraintTop_toBottomOf="@+id/tv_successRxjavaTime"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintBottom_toBottomOf="parent"

@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Contract
  * @version 0.0.1
  * @description: Application基类多模块项目的唯一application可继承此基类
  */
-abstract class BaseApplication : Application(), OnNetworkStatusChangedListener {
+abstract class BaseApplication : RootApplication(), OnNetworkStatusChangedListener {
 
 
     override fun onCreate() {

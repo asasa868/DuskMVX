@@ -1,4 +1,4 @@
-package com.lzq.dawn.util
+package com.lzq.dawn.tools
 
 import org.greenrobot.eventbus.EventBus
 
@@ -6,7 +6,7 @@ import org.greenrobot.eventbus.EventBus
  * @projectName com.lzq.dawn.util
  * @author Lzq
  * @date : Created by Lzq on 2023/12/25 17:29
- * @version
+ * @version 0.0.1
  * @description: EventBus工具类
  */
 object EventBusUtils {

@@ -23,7 +23,7 @@ import kotlin.system.measureTimeMillis
  */
 
 
- open class Application internal constructor(): MultiDexApplication() {
+ open class RootApplication internal constructor(): MultiDexApplication() {
 
     private val applicationProxy by lazy(mode = LazyThreadSafetyMode.NONE) { ModuleApplicationProxy() }
 

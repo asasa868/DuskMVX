@@ -73,7 +73,7 @@ import java.util.Map;
  * @Name :DawnBridge
  * @Time :2022/7/12 14:21
  * @Author :  Lzq
- * @Desc :
+ * @Desc : Dawn框架
  */
 public class DawnBridge {
     private static Application mApp;
