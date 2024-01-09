@@ -4,7 +4,6 @@ plugins {
     id("maven-publish")
     id("kotlin-android")
     id("kotlin-kapt")
-    id("publishing")
 }
 
 android {
@@ -117,32 +116,4 @@ dependencies {
 
     //-------------------------注解依赖--------------------------
 }
-//
-//publishing {
-//    publications {
-//        register<MavenPublication>("release") {
-//            groupId = "com.lzq.dawn"
-//            artifactId = "dawn"
-//            version = "1.0.0"
-//
-//            afterEvaluate{
-//                from(components["release"])
-//            }
-//        }
-//
-//    }
-//
-//    repositories{
-//        maven{
-//            name = "dawnRepo"
-//            url =uri("${project.buildDir}/repo")
-//            credentials{
-//                username = project.findProperty("mavenUsername").toString()
-//                password = project.findProperty("mavenPassword").toString()
-//            }
-//        }
-//    }
-//
-//}
-
 
