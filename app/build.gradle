@@ -1,7 +1,6 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-   // alias(app.plugins.android.application)
 }
 
 android {
@@ -56,9 +55,8 @@ android {
 
 dependencies {
 
-    implementation project(path: ':dawn')
-    implementation libs.appcompat
-    implementation libs.material
-    implementation libs.constraintlayout
+   // implementation project(path: ':dawn')
+    implementation 'com.github.asasa868:DuskMVX:v0.0.1'
+
 
 }
