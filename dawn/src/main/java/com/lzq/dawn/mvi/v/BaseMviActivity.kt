@@ -28,10 +28,12 @@ abstract class BaseMviActivity<out VM : IBaseMviViewModel<I>, out VB : ViewBindi
     protected val mViewModel get() = _viewModel
 
 
-    override fun onOutput(
-        state: Lifecycle.State, flowResult: IMviViewStateFlowResult<I>
-    ) {
-        repeatOnLifecycle(state) { _viewModel.outputViewState { intent -> flowResult.onResult(intent) } }
+    override fun onOutput(state: Lifecycle.State) {
+        repeatOnLifecycle(state) {
+            _viewModel.outputViewState { intent ->
+                outputViewIntent(intent)
+            }
+        }
     }
 
 
@@ -39,5 +41,10 @@ abstract class BaseMviActivity<out VM : IBaseMviViewModel<I>, out VB : ViewBindi
         super.onCreate(savedInstanceState)
         setContentView(_viewBinding.root)
     }
+
+    /**
+     *
+     */
+    abstract fun outputViewIntent(intent: I)
 
 }

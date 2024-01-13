@@ -39,7 +39,6 @@ interface IBaseMviView<out VB : ViewBinding, out VM : IBaseMviViewModel<I>, I : 
      * view层监听intent状态变化
      */
     fun onOutput(
-        state: Lifecycle.State = Lifecycle.State.STARTED,
-        flowResult: IMviViewStateFlowResult<I>
+        state: Lifecycle.State = Lifecycle.State.STARTED
     )
 }
