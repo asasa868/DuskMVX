@@ -7,9 +7,11 @@ import static android.Manifest.permission.CHANGE_WIFI_STATE;
 import static android.Manifest.permission.INTERNET;
 import static android.content.Context.WIFI_SERVICE;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
@@ -23,6 +25,7 @@ import android.text.format.Formatter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
+import androidx.core.app.ActivityCompat;
 
 import com.lzq.dawn.DawnBridge;
 import com.lzq.dawn.util.shell.CommandResult;
@@ -126,7 +129,7 @@ public final class NetworkUtils {
      */
     @RequiresPermission(INTERNET)
     public static DawnBridge.Task<Boolean> isAvailableByPingAsync(final String ip,
-                                                                @NonNull final DawnBridge.Consumer<Boolean> consumer) {
+                                                                  @NonNull final DawnBridge.Consumer<Boolean> consumer) {
         return DawnBridge.doAsync(new DawnBridge.Task<Boolean>(consumer) {
             @RequiresPermission(INTERNET)
             @Override
@@ -183,7 +186,7 @@ public final class NetworkUtils {
      */
     @RequiresPermission(INTERNET)
     public static DawnBridge.Task isAvailableByDnsAsync(final String domain,
-                                                      @NonNull final DawnBridge.Consumer<Boolean> consumer) {
+                                                        @NonNull final DawnBridge.Consumer<Boolean> consumer) {
         return DawnBridge.doAsync(new DawnBridge.Task<Boolean>(consumer) {
             @RequiresPermission(INTERNET)
             @Override
@@ -527,7 +530,7 @@ public final class NetworkUtils {
      * @return the task
      */
     public static DawnBridge.Task<String> getIPAddressAsync(final boolean useIPv4,
-                                                          @NonNull final DawnBridge.Consumer<String> consumer) {
+                                                            @NonNull final DawnBridge.Consumer<String> consumer) {
         return DawnBridge.doAsync(new DawnBridge.Task<String>(consumer) {
             @RequiresPermission(INTERNET)
             @Override
@@ -623,7 +626,7 @@ public final class NetworkUtils {
      */
     @RequiresPermission(INTERNET)
     public static DawnBridge.Task<String> getDomainAddressAsync(final String domain,
-                                                              @NonNull final DawnBridge.Consumer<String> consumer) {
+                                                                @NonNull final DawnBridge.Consumer<String> consumer) {
         return DawnBridge.doAsync(new DawnBridge.Task<String>(consumer) {
             @RequiresPermission(INTERNET)
             @Override
@@ -775,6 +778,9 @@ public final class NetworkUtils {
         @SuppressLint("WifiManagerLeak")
         WifiManager wm = (WifiManager) DawnBridge.getApp().getSystemService(WIFI_SERVICE);
         //noinspection ConstantConditions
+        if (ActivityCompat.checkSelfPermission(DawnBridge.getApp(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return null;
+        }
         List<ScanResult> results = wm.getScanResults();
         if (results != null) {
             result.setAllResults(results);

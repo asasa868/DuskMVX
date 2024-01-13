@@ -2,14 +2,17 @@ package com.lzq.dawn.util.notification;
 
 import static android.Manifest.permission.EXPAND_STATUS_BAR;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Build;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.RequiresPermission;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
@@ -88,6 +91,9 @@ public final class NotificationUtils {
      * @param consumer      创建通知构建器的消费者
      */
     public static void notify(String tag, int id, ChannelConfig channelConfig, DawnBridge.Consumer<NotificationCompat.Builder> consumer) {
+        if (ActivityCompat.checkSelfPermission(DawnBridge.getApp(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         NotificationManagerCompat.from(DawnBridge.getApp()).notify(tag, id, getNotification(channelConfig, consumer));
     }
 

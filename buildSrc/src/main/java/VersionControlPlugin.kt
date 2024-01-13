@@ -6,7 +6,7 @@
  */
 object Versions {
     //Androidx------------------------------------------------------------------
-    const val appcompat       = "1.3.1"
+    const val appcompat       = "1.5.0"
     const val coreKtx         = "1.7.0"
     const val kotlin          = "1.5.31"
     const val multiDex        = "2.0.1"
