@@ -55,8 +55,8 @@ android {
 
 dependencies {
 
-   // implementation project(path: ':dawn')
-    implementation 'com.github.asasa868:DuskMVX:v0.0.1'
+    implementation project(path: ':dawn')
+    //implementation 'com.github.asasa868:DuskMVX:v0.0.1'
 
 
 }
