@@ -19,9 +19,11 @@ class MainMviActivity : BaseMviActivity<MainMviViewModel, ActivityMainMviBinding
     }
 
     override fun initObserver() {
-        onOutput { intent ->
-            Toaster.show(intent.toString())
-        }
+
+    }
+
+    override fun outputViewIntent(intent: MainMviIntent) {
+        Toaster.show(intent.toString())
     }
 
     override fun createBinding(): ActivityMainMviBinding = ActivityMainMviBinding.inflate(layoutInflater)
