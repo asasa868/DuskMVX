@@ -1466,34 +1466,16 @@ object ImageUtils {
      * @param filePath 文件的路径。
      * @param format   图像的格式。
      * @param quality  提示压缩机，0-100。 0 表示压缩为小尺寸，100 表示压缩为最大质量。某些格式，例如无损的 PNG，将忽略质量设置
-     * @return `true`: success<br></br>`false`: fail
-     */
-    fun save(
-        src: Bitmap, filePath: String?, format: CompressFormat?, quality: Int
-    ): Boolean {
-        return save(src, DawnBridge.getFileByPath(filePath), format, quality, false)
-    }
-    /**
-     * 保存位图。
-     *
-     * @param src      位图的来源
-     * @param filePath 文件的路径。
-     * @param format   图像的格式。
-     * @param quality  提示压缩机，0-100。 0 表示压缩为小尺寸，100 表示压缩为最大质量。某些格式，例如无损的 PNG，将忽略质量设置
      * @param recycle  True 回收位图的来源，否则为 false。
-     * @return `true`: success<br></br>`false`: fail
-     */
-    /**
-     * 保存位图。
-     *
-     * @param src      位图的来源
-     * @param filePath 文件的路径。
-     * @param format   图像的格式。
      * @return `true`: success<br></br>`false`: fail
      */
     @JvmOverloads
     fun save(
-        src: Bitmap, filePath: String?, format: CompressFormat?, quality: Int = 100, recycle: Boolean = false
+        src: Bitmap,
+        filePath: String?,
+        format: CompressFormat?,
+        quality: Int = 100,
+        recycle: Boolean = false
     ): Boolean {
         return save(src, DawnBridge.getFileByPath(filePath), format, quality, recycle)
     }
@@ -1507,25 +1489,13 @@ object ImageUtils {
      * @param recycle True 回收位图的来源，否则为 false。
      * @return `true`: success<br></br>`false`: fail
      */
-    /**
-     * 保存位图。
-     *
-     * @param src    位图的来源
-     * @param file   file.
-     * @param format 图像的格式
-     * @return `true`: success<br></br>`false`: fail
-     */
-    /**
-     * 保存位图。
-     *
-     * @param src    位图的来源
-     * @param file   file.
-     * @param format 图像的格式。
-     * @return `true`: success<br></br>`false`: fail
-     */
     @JvmOverloads
     fun save(
-        src: Bitmap, file: File, format: CompressFormat?, quality: Int = 100, recycle: Boolean = false
+        src: Bitmap,
+        file: File,
+        format: CompressFormat?,
+        quality: Int = 100,
+        recycle: Boolean = false
     ): Boolean {
         if (isEmptyBitmap(src)) {
             Log.e("ImageUtils", "bitmap is empty.")
