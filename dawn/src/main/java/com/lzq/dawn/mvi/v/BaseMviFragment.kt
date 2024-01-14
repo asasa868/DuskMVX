@@ -31,12 +31,19 @@ abstract class BaseMviFragment<out VM : IBaseMviViewModel<I>, out VB : ViewBindi
 
 
     override fun onOutput(
-        state: Lifecycle.State, flowResult: IMviViewStateFlowResult<I>
+        state: Lifecycle.State
     ) {
-        repeatOnLifecycle(state) { _viewModel.outputViewState { intent -> flowResult.onResult(intent) } }
+        repeatOnLifecycle(state) {
+            _viewModel.outputViewState { intent ->
+                outputViewIntent(intent)
+            }
+        }
     }
 
-
+    /**
+     *获取viewModel的intent
+     */
+    abstract fun outputViewIntent(intent: I)
     override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
         return _viewBinding.root
     }
