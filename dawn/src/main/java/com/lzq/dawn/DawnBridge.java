@@ -39,7 +39,6 @@ import com.lzq.dawn.util.file.FileUtils;
 import com.lzq.dawn.util.gson.GsonUtils;
 import com.lzq.dawn.util.image.ImageUtils;
 import com.lzq.dawn.util.intent.IntentUtils;
-import com.lzq.dawn.util.json.JsonUtils;
 import com.lzq.dawn.util.notification.ChannelConfig;
 import com.lzq.dawn.util.notification.NotificationUtils;
 import com.lzq.dawn.util.process.ProcessUtils;
@@ -221,7 +220,7 @@ public class DawnBridge {
     }
 
     public static String bytes2String(final byte[] bytes) {
-        return ConvertUtils.bytes2String(bytes);
+        return ConvertUtils.bytes2String(bytes,"");
     }
 
     public static byte[] jsonObject2Bytes(final JSONObject jsonObject) {
@@ -392,9 +391,6 @@ public class DawnBridge {
         return ImageUtils.bytes2Drawable(bytes);
     }
 
-    public static Bitmap view2Bitmap(final View view) {
-        return ImageUtils.view2Bitmap(view);
-    }
 
     public static Bitmap drawable2Bitmap(final Drawable drawable) {
         return ImageUtils.drawable2Bitmap(drawable);
@@ -442,14 +438,6 @@ public class DawnBridge {
 
     public static Intent getLaunchAppDetailsSettingsIntent(final String pkgName, final boolean isNewTask) {
         return IntentUtils.getLaunchAppDetailsSettingsIntent(pkgName, isNewTask);
-    }
-
-
-    ///////////////////////////////////////////////////////////////////////////
-    // JsonUtils
-    ///////////////////////////////////////////////////////////////////////////
-    public static String formatJson(String json) {
-        return JsonUtils.formatJson(json);
     }
 
 

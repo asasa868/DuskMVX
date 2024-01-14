@@ -40,7 +40,7 @@ class DawnApplication : BaseApplicationLifecycle {
 
     override fun initForeground(): MutableList<() -> String> {
         val list = mutableListOf<() -> String>()
-        if (ProcessUtils.isMainProcess()) {
+        if (ProcessUtils.isMainProcess) {
             list.add { initARouter() }
         }
         return list
