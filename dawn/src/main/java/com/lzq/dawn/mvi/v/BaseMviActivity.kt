@@ -43,7 +43,7 @@ abstract class BaseMviActivity<out VM : IBaseMviViewModel<I>, out VB : ViewBindi
     }
 
     /**
-     *
+     *获取viewModel的intent
      */
     abstract fun outputViewIntent(intent: I)
 
