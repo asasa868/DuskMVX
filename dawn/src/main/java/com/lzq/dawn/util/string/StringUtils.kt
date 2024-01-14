@@ -1,14 +1,10 @@
-package com.lzq.dawn.util.string;
+package com.lzq.dawn.util.string
 
-import android.content.res.Resources;
-
-import androidx.annotation.ArrayRes;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-
-import com.lzq.dawn.DawnBridge;
-
-import java.util.IllegalFormatException;
+import android.content.res.Resources
+import androidx.annotation.ArrayRes
+import androidx.annotation.StringRes
+import com.lzq.dawn.DawnBridge
+import java.util.IllegalFormatException
 
 /**
  * @Name :StringUtils
@@ -16,49 +12,47 @@ import java.util.IllegalFormatException;
  * @Author :  Lzq
  * @Desc : string
  */
-public final class StringUtils {
-
-
-    private StringUtils() {
-
-    }
-
+object StringUtils {
     /**
      * 返回字符串是null还是0长度。
      *
      * @param s string.
-     * @return {@code true}: yes<br> {@code false}: no
+     * @return `true`: yes<br></br> `false`: no
      */
-    public static boolean isEmpty(final CharSequence s) {
-        return s == null || s.length() == 0;
+    fun isEmpty(s: CharSequence?): Boolean {
+        return s.isNullOrEmpty()
     }
 
     /**
      * 返回字符串是空还是空白。
      *
      * @param s string.
-     * @return {@code true}: yes<br> {@code false}: no
+     * @return `true`: yes<br></br> `false`: no
      */
-    public static boolean isTrimEmpty(final String s) {
-        return (s == null || s.trim().length() == 0);
+    fun isTrimEmpty(s: String?): Boolean {
+        return s == null || s.trim { it <= ' ' }.isEmpty()
     }
 
     /**
      * 返回字符串是空还是空白
      *
      * @param s string.
-     * @return {@code true}: yes<br> {@code false}: no
+     * @return `true`: yes<br></br> `false`: no
      */
-    public static boolean isSpace(final String s) {
+    @JvmStatic
+    fun isSpace(s: String?): Boolean {
         if (s == null) {
-            return true;
+            return true
         }
-        for (int i = 0, len = s.length(); i < len; ++i) {
-            if (!Character.isWhitespace(s.charAt(i))) {
-                return false;
+        var i = 0
+        val len = s.length
+        while (i < len) {
+            if (!Character.isWhitespace(s[i])) {
+                return false
             }
+            ++i
         }
-        return true;
+        return true
     }
 
     /**
@@ -66,26 +60,26 @@ public final class StringUtils {
      *
      * @param s1 string.
      * @param s2 string.
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean equals(final CharSequence s1, final CharSequence s2) {
-        if (s1 == s2) {
-            return true;
+    @JvmStatic
+    fun equals(s1: CharSequence?, s2: CharSequence?): Boolean {
+        if (s1 === s2) {
+            return true
         }
-        int length;
-        if (s1 != null && s2 != null && (length = s1.length()) == s2.length()) {
-            if (s1 instanceof String && s2 instanceof String) {
-                return s1.equals(s2);
+        var length = 0
+        return if (s1 != null && s2 != null && s1.length.also { length = it } == s2.length) {
+            if (s1 is String && s2 is String) {
+                s1 == s2
             } else {
-                for (int i = 0; i < length; i++) {
-                    if (s1.charAt(i) != s2.charAt(i)) {
-                        return false;
+                for (i in 0 until length) {
+                    if (s1[i] != s2[i]) {
+                        return false
                     }
                 }
-                return true;
+                true
             }
-        }
-        return false;
+        } else false
     }
 
     /**
@@ -93,30 +87,30 @@ public final class StringUtils {
      *
      * @param s1 string.
      * @param s2 string.
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean equalsIgnoreCase(final String s1, final String s2) {
-        return s1 == null ? s2 == null : s1.equalsIgnoreCase(s2);
+    fun equalsIgnoreCase(s1: String?, s2: String?): Boolean {
+        return s1?.equals(s2, ignoreCase = true) ?: (s2 == null)
     }
 
     /**
-     * Return {@code ""} 如果字符串等于null
+     * Return `""` 如果字符串等于null
      *
      * @param s string.
-     * @return {@code ""} 如果字符串等于null
+     * @return `""` 如果字符串等于null
      */
-    public static String null2Length0(final String s) {
-        return s == null ? "" : s;
+    fun null2Length0(s: String?): String {
+        return s ?: ""
     }
 
     /**
-     *返回字符串的长度。
+     * 返回字符串的长度。
      *
      * @param s  string.
      * @return 字符串的长度。
      */
-    public static int length(final CharSequence s) {
-        return s == null ? 0 : s.length();
+    fun length(s: CharSequence?): Int {
+        return s?.length ?: 0
     }
 
     /**
@@ -125,14 +119,13 @@ public final class StringUtils {
      * @param s  string.
      * @return 第一个字母大写的字符串
      */
-    public static String upperFirstLetter(final String s) {
-        if (s == null || s.length() == 0) {
-            return "";
+    fun upperFirstLetter(s: String?): String {
+        if (s.isNullOrEmpty()) {
+            return ""
         }
-        if (!Character.isLowerCase(s.charAt(0))) {
-            return s;
-        }
-        return (char) (s.charAt(0) - 32) + s.substring(1);
+        return if (!Character.isLowerCase(s[0])) {
+            s
+        } else (s[0].code - 32).toChar().toString() + s.substring(1)
     }
 
     /**
@@ -141,14 +134,15 @@ public final class StringUtils {
      * @param s  string.
      * @return 第一个字母小写的字符串。
      */
-    public static String lowerFirstLetter(final String s) {
-        if (s == null || s.length() == 0) {
-            return "";
+    fun lowerFirstLetter(s: String?): String {
+        if (s.isNullOrEmpty()) {
+            return ""
         }
-        if (!Character.isUpperCase(s.charAt(0))) {
-            return s;
-        }
-        return String.valueOf((char) (s.charAt(0) + 32)) + s.substring(1);
+        return if (!Character.isUpperCase(s[0])) {
+            s
+        } else (s[0].code + 32).toChar().toString() + s.substring(
+            1
+        )
     }
 
     /**
@@ -157,23 +151,23 @@ public final class StringUtils {
      * @param s  string.
      * @return 反转字符串
      */
-    public static String reverse(final String s) {
+    fun reverse(s: String?): String {
         if (s == null) {
-            return "";
+            return ""
         }
-        int len = s.length();
+        val len = s.length
         if (len <= 1) {
-            return s;
+            return s
         }
-        int mid = len >> 1;
-        char[] chars = s.toCharArray();
-        char c;
-        for (int i = 0; i < mid; ++i) {
-            c = chars[i];
-            chars[i] = chars[len - i - 1];
-            chars[len - i - 1] = c;
+        val mid = len shr 1
+        val chars = s.toCharArray()
+        var c: Char
+        for (i in 0 until mid) {
+            c = chars[i]
+            chars[i] = chars[len - i - 1]
+            chars[len - i - 1] = c
         }
-        return new String(chars);
+        return String(chars)
     }
 
     /**
@@ -182,21 +176,24 @@ public final class StringUtils {
      * @param s  string.
      * @return DBC字符串
      */
-    public static String toDBC(final String s) {
-        if (s == null || s.length() == 0) {
-            return "";
+    fun toDBC(s: String?): String {
+        if (s.isNullOrEmpty()) {
+            return ""
         }
-        char[] chars = s.toCharArray();
-        for (int i = 0, len = chars.length; i < len; i++) {
-            if (chars[i] == 12288) {
-                chars[i] = ' ';
-            } else if (65281 <= chars[i] && chars[i] <= 65374) {
-                chars[i] = (char) (chars[i] - 65248);
+        val chars = s.toCharArray()
+        var i = 0
+        val len = chars.size
+        while (i < len) {
+            if (chars[i].code == 12288) {
+                chars[i] = ' '
+            } else if (chars[i].code in 65281..65374) {
+                chars[i] = (chars[i].code - 65248).toChar()
             } else {
-                chars[i] = chars[i];
+                chars[i] = chars[i]
             }
+            i++
         }
-        return new String(chars);
+        return String(chars)
     }
 
     /**
@@ -205,21 +202,24 @@ public final class StringUtils {
      * @param s  string.
      * @return SBC字符串
      */
-    public static String toSBC(final String s) {
-        if (s == null || s.length() == 0) {
-            return "";
+    fun toSBC(s: String?): String {
+        if (s.isNullOrEmpty()) {
+            return ""
         }
-        char[] chars = s.toCharArray();
-        for (int i = 0, len = chars.length; i < len; i++) {
+        val chars = s.toCharArray()
+        var i = 0
+        val len = chars.size
+        while (i < len) {
             if (chars[i] == ' ') {
-                chars[i] = (char) 12288;
-            } else if (33 <= chars[i] && chars[i] <= 126) {
-                chars[i] = (char) (chars[i] + 65248);
+                chars[i] = 12288.toChar()
+            } else if (chars[i].code in 33..126) {
+                chars[i] = (chars[i].code + 65248).toChar()
             } else {
-                chars[i] = chars[i];
+                chars[i] = chars[i]
             }
+            i++
         }
-        return new String(chars);
+        return String(chars)
     }
 
     /**
@@ -228,8 +228,9 @@ public final class StringUtils {
      * @param id  resource id
      * @return 与特定资源ID关联的字符串值。
      */
-    public static String getString(@StringRes int id) {
-        return getString(id, (Object[]) null);
+    @JvmStatic
+    fun getString(@StringRes id: Int): String? {
+        return getString(id, *(null as Array<Any?>?)!!)
     }
 
     /**
@@ -239,12 +240,13 @@ public final class StringUtils {
      * @param formatArgs 将用于替换的格式参数。
      * @return 与特定资源ID关联的字符串值
      */
-    public static String getString(@StringRes int id, Object... formatArgs) {
-        try {
-            return format(DawnBridge.getApp().getString(id), formatArgs);
-        } catch (Resources.NotFoundException e) {
-            e.printStackTrace();
-            return String.valueOf(id);
+    @JvmStatic
+    fun getString(@StringRes id: Int, vararg formatArgs: Any?): String? {
+        return try {
+            format(DawnBridge.getApp().getString(id), *formatArgs)
+        } catch (e: Resources.NotFoundException) {
+            e.printStackTrace()
+            id.toString()
         }
     }
 
@@ -254,33 +256,34 @@ public final class StringUtils {
      * @param id   resource id
      * @return 与资源关联的字符串数组。
      */
-    public static String[] getStringArray(@ArrayRes int id) {
-        try {
-            return DawnBridge.getApp().getResources().getStringArray(id);
-        } catch (Resources.NotFoundException e) {
-            e.printStackTrace();
-            return new String[]{String.valueOf(id)};
+    fun getStringArray(@ArrayRes id: Int): Array<String> {
+        return try {
+            DawnBridge.getApp().resources.getStringArray(id)
+        } catch (e: Resources.NotFoundException) {
+            e.printStackTrace()
+            arrayOf(id.toString())
         }
     }
 
     /**
-     *格式化字符串。
+     * 格式化字符串。
      *
      * @param str   string.
      * @param args  args.
      * @return  格式化字符串。
      */
-    public static String format(@Nullable String str, Object... args) {
-        String text = str;
+    @JvmStatic
+    fun format(str: String?, vararg args: Any?): String? {
+        var text = str
         if (text != null) {
-            if (args != null && args.length > 0) {
+            if (args.isNotEmpty()) {
                 try {
-                    text = String.format(str, args);
-                } catch (IllegalFormatException e) {
-                    e.printStackTrace();
+                    text = String.format(str!!, *args)
+                } catch (e: IllegalFormatException) {
+                    e.printStackTrace()
                 }
             }
         }
-        return text;
+        return text
     }
 }

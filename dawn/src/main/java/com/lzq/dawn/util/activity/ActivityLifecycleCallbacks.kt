@@ -1,9 +1,7 @@
-package com.lzq.dawn.util.activity;
+package com.lzq.dawn.util.activity
 
-import android.app.Activity;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.Lifecycle;
+import android.app.Activity
+import androidx.lifecycle.Lifecycle
 
 /**
  * className :ActivityLifecycleCallbacks
@@ -11,19 +9,25 @@ import androidx.lifecycle.Lifecycle;
  *
  * @Author :  Lzq
  */
-public class ActivityLifecycleCallbacks {
+class ActivityLifecycleCallbacks {
+    fun onActivityCreated(activity: Activity) { /**/
+    }
 
-    public void onActivityCreated(@NonNull Activity activity) {/**/}
+    fun onActivityStarted(activity: Activity) { /**/
+    }
 
-    public void onActivityStarted(@NonNull Activity activity) {/**/}
+    fun onActivityResumed(activity: Activity) { /**/
+    }
 
-    public void onActivityResumed(@NonNull Activity activity) {/**/}
+    fun onActivityPaused(activity: Activity) { /**/
+    }
 
-    public void onActivityPaused(@NonNull Activity activity) {/**/}
+    fun onActivityStopped(activity: Activity) { /**/
+    }
 
-    public void onActivityStopped(@NonNull Activity activity) {/**/}
+    fun onActivityDestroyed(activity: Activity) { /**/
+    }
 
-    public void onActivityDestroyed(@NonNull Activity activity) {/**/}
-
-    public void onLifecycleChanged(@NonNull Activity activity, Lifecycle.Event event) {/**/}
+    fun onLifecycleChanged(activity: Activity, event: Lifecycle.Event?) { /**/
+    }
 }

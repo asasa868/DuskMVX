@@ -1,16 +1,13 @@
-package com.lzq.dawn.util.vibrate;
+package com.lzq.dawn.util.vibrate
 
-import static android.Manifest.permission.VIBRATE;
-
-import android.content.Context;
-import android.os.Build;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
-import android.os.VibratorManager;
-
-import androidx.annotation.RequiresPermission;
-
-import com.lzq.dawn.DawnBridge;
+import android.Manifest.permission
+import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import androidx.annotation.RequiresPermission
+import com.lzq.dawn.DawnBridge
 
 /**
  * @Name : VibrateUtils
@@ -18,74 +15,63 @@ import com.lzq.dawn.DawnBridge;
  * @Author :  Lzq
  * @Desc : 振动
  */
-public final class VibrateUtils {
-
-    private static Vibrator vibrator;
-
-    private VibrateUtils(){}
-
+object VibrateUtils {
+    private var vibrator: Vibrator? = null
+        get() {
+            if (field == null) {
+                field = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+                    (DawnBridge.getApp()
+                        .getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+                } else {
+                    DawnBridge.getApp().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                }
+            }
+            return field
+        }
 
     /**
      * 震动.
-     * <p>必须要有 {@code <uses-permission android:name="android.permission.VIBRATE" />}</p>
+     *
+     * 必须要有 `<uses-permission android:name="android.permission.VIBRATE" />`
      *
      * @param milliseconds 振动的毫秒数。
      */
-    @RequiresPermission(VIBRATE)
-    public static void vibrate(final long milliseconds) {
-        Vibrator vibrator = getVibrator();
-        if (vibrator == null) {
-            return;
-        }
+    @RequiresPermission(permission.VIBRATE)
+    fun vibrate(milliseconds: Long) {
+        val vibrator = vibrator ?: return
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE));
+            vibrator.vibrate(VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE))
         } else {
-            vibrator.vibrate(milliseconds);
+            vibrator.vibrate(milliseconds)
         }
     }
 
     /**
      * 震动.
-     * <p>必须要有 {@code <uses-permission android:name="android.permission.VIBRATE" />}</p>
+     *
+     * 必须要有 `<uses-permission android:name="android.permission.VIBRATE" />`
      *
      * @param pattern 打开或关闭振动器的长时间数组。
      * @param repeat  索引到要重复的模式，如果不想重复，则为 -1。
      */
-    @RequiresPermission(VIBRATE)
-    public static void vibrate(final long[] pattern, final int repeat) {
-        Vibrator vibrator = getVibrator();
-        if (vibrator == null) {
-            return;
-        }
+    @RequiresPermission(permission.VIBRATE)
+    fun vibrate(pattern: LongArray?, repeat: Int) {
+        val vibrator = vibrator ?: return
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createWaveform(pattern, repeat));
+            vibrator.vibrate(VibrationEffect.createWaveform(pattern, repeat))
         } else {
-            vibrator.vibrate(pattern,repeat);
+            vibrator.vibrate(pattern, repeat)
         }
-
     }
 
     /**
      * 取消震动
-     * <p>必须要有 {@code <uses-permission android:name="android.permission.VIBRATE" />}</p>
+     *
+     * 必须要有 `<uses-permission android:name="android.permission.VIBRATE" />`
      */
-    @RequiresPermission(VIBRATE)
-    public static void cancel() {
-        Vibrator vibrator = getVibrator();
-        if (vibrator == null) {
-            return;
-        }
-        vibrator.cancel();
-    }
-
-    private static Vibrator getVibrator() {
-        if (vibrator == null) {
-            if (Build.VERSION.SDK_INT>Build.VERSION_CODES.R){
-                vibrator = ((VibratorManager) DawnBridge.getApp().getSystemService(Context.VIBRATOR_MANAGER_SERVICE)).getDefaultVibrator();
-            }else {
-                vibrator = (Vibrator) DawnBridge.getApp().getSystemService(Context.VIBRATOR_SERVICE);
-            }
-        }
-        return vibrator;
+    @RequiresPermission(permission.VIBRATE)
+    fun cancel() {
+        val vibrator = vibrator ?: return
+        vibrator.cancel()
     }
 }

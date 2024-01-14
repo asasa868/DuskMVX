@@ -1,27 +1,19 @@
-package com.lzq.dawn.util.intent;
+package com.lzq.dawn.util.intent
 
-import static android.Manifest.permission.CALL_PHONE;
-
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.provider.MediaStore;
-import android.provider.Settings;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresPermission;
-import androidx.core.content.FileProvider;
-
-import com.lzq.dawn.DawnBridge;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import android.Manifest.permission
+import android.content.ComponentName
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.provider.MediaStore
+import android.provider.Settings
+import androidx.annotation.RequiresPermission
+import androidx.core.content.FileProvider
+import com.lzq.dawn.DawnBridge
+import java.io.File
+import java.util.LinkedList
 
 /**
  * @Name :IntentDawnBridge
@@ -29,91 +21,96 @@ import java.util.List;
  * @Author :  Lzq
  * @Desc : intent
  */
-public class IntentUtils {
-    private IntentUtils() {
-    }
-
+object IntentUtils {
     /**
      * 返回意图是否可用。
      *
      * @param intent intent.
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean isIntentAvailable(final Intent intent) {
-        return DawnBridge.getApp()
-                .getPackageManager()
-                .queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
-                .size() > 0;
+    @JvmStatic
+    fun isIntentAvailable(intent: Intent?): Boolean {
+        return DawnBridge.getApp().packageManager.queryIntentActivities(
+                intent!!,
+                PackageManager.MATCH_DEFAULT_ONLY
+            ).size > 0
     }
 
     /**
      * 返回安装应用程序的意图。
-     * <p>大于 25 的目标 API 必须持有
-     * {@code <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />}</p>
+     *
+     * 大于 25 的目标 API 必须持有
+     * `<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />`
      *
      * @param filePath 文件的路径。
      * @return 安装应用程序的意图
      */
-    public static Intent getInstallAppIntent(final String filePath) {
-        return getInstallAppIntent(DawnBridge.getFileByPath(filePath));
+    fun getInstallAppIntent(filePath: String?): Intent? {
+        return getInstallAppIntent(DawnBridge.getFileByPath(filePath))
     }
-
 
     /**
      * 返回安装应用程序的意图。
-     * * <p>大于 25 的目标 API 必须持有
-     * {@code <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />}</p>
+     * *
+     *
+     *大于 25 的目标 API 必须持有
+     * `<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />`
      *
      * @param file file.
      * @return 安装应用程序的意图
      */
-    public static Intent getInstallAppIntent(final File file) {
+    @JvmStatic
+    fun getInstallAppIntent(file: File?): Intent? {
         if (!DawnBridge.isFileExists(file)) {
-            return null;
+            return null
         }
-        Uri uri;
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            uri = Uri.fromFile(file);
+        val uri: Uri
+        uri = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            Uri.fromFile(file)
         } else {
-            String authority = DawnBridge.getApp().getPackageName() + ".fileprovider";
-            uri = FileProvider.getUriForFile(DawnBridge.getApp(), authority, file);
+            val authority = DawnBridge.getApp().packageName + ".fileprovider"
+            FileProvider.getUriForFile(DawnBridge.getApp(), authority, file!!)
         }
-        return getInstallAppIntent(uri);
+        return getInstallAppIntent(uri)
     }
 
     /**
      * 返回安装应用程序的意图。
-     * <p>大于 25 的目标 API 必须持有
-     * {@code <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />}</p>
+     *
+     * 大于 25 的目标 API 必须持有
+     * `<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />`
      *
      * @param uri uri.
      * @return 安装应用程序的意图。
      */
-    public static Intent getInstallAppIntent(final Uri uri) {
+    @JvmStatic
+    fun getInstallAppIntent(uri: Uri?): Intent? {
         if (uri == null) {
-            return null;
+            return null
         }
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        String type = "application/vnd.android.package-archive";
-        intent.setDataAndType(uri, type);
+        val intent = Intent(Intent.ACTION_VIEW)
+        val type = "application/vnd.android.package-archive"
+        intent.setDataAndType(uri, type)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
         }
-        return intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 
     /**
      * 返回卸载应用程序的意图。
-     * <p>大于 25 的目标 API 必须持有
-     * Must hold {@code <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />}</p>
+     *
+     * 大于 25 的目标 API 必须持有
+     * Must hold `<uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />`
      *
      * @param pkgName 包名
      * @return v
      */
-    public static Intent getUninstallAppIntent(final String pkgName) {
-        Intent intent = new Intent(Intent.ACTION_DELETE);
-        intent.setData(Uri.parse("package:" + pkgName));
-        return intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    @JvmStatic
+    fun getUninstallAppIntent(pkgName: String): Intent {
+        val intent = Intent(Intent.ACTION_DELETE)
+        intent.data = Uri.parse("package:$pkgName")
+        return intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 
     /**
@@ -122,15 +119,16 @@ public class IntentUtils {
      * @param pkgName 包名
      * @return 返回启动应用程序的意图。
      */
-    public static Intent getLaunchAppIntent(final String pkgName) {
-        String launcherActivity = DawnBridge.getLauncherActivity(pkgName);
+    @JvmStatic
+    fun getLaunchAppIntent(pkgName: String?): Intent? {
+        val launcherActivity = DawnBridge.getLauncherActivity(pkgName)
         if (DawnBridge.isSpace(launcherActivity)) {
-            return null;
+            return null
         }
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        intent.setClassName(pkgName, launcherActivity);
-        return intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        val intent = Intent(Intent.ACTION_MAIN)
+        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+        intent.setClassName(pkgName!!, launcherActivity)
+        return intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 
     /**
@@ -139,10 +137,9 @@ public class IntentUtils {
      * @param pkgName 包名
      * @return 返回启动应用详细信息设置的意图。
      */
-    public static Intent getLaunchAppDetailsSettingsIntent(final String pkgName) {
-        return getLaunchAppDetailsSettingsIntent(pkgName, false);
+    fun getLaunchAppDetailsSettingsIntent(pkgName: String): Intent {
+        return getLaunchAppDetailsSettingsIntent(pkgName, false)
     }
-
 
     /**
      * 返回启动应用详细信息设置的意图。
@@ -150,10 +147,11 @@ public class IntentUtils {
      * @param pkgName 包名
      * @return 返回启动应用详细信息设置的意图
      */
-    public static Intent getLaunchAppDetailsSettingsIntent(final String pkgName, final boolean isNewTask) {
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        intent.setData(Uri.parse("package:" + pkgName));
-        return getIntent(intent, isNewTask);
+    @JvmStatic
+    fun getLaunchAppDetailsSettingsIntent(pkgName: String, isNewTask: Boolean): Intent {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        intent.data = Uri.parse("package:$pkgName")
+        return getIntent(intent, isNewTask)
     }
 
     /**
@@ -162,12 +160,12 @@ public class IntentUtils {
      * @param content content.
      * @return 返回分享文本的意图。
      */
-    public static Intent getShareTextIntent(final String content) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, content);
-        intent = Intent.createChooser(intent, "");
-        return getIntent(intent, true);
+    fun getShareTextIntent(content: String?): Intent {
+        var intent = Intent(Intent.ACTION_SEND)
+        intent.type = "text/plain"
+        intent.putExtra(Intent.EXTRA_TEXT, content)
+        intent = Intent.createChooser(intent, "")
+        return getIntent(intent, true)
     }
 
     /**
@@ -176,8 +174,8 @@ public class IntentUtils {
      * @param imagePath 图像的路径。
      * @return 分享图片的意图。
      */
-    public static Intent getShareImageIntent(final String imagePath) {
-        return getShareTextImageIntent("", imagePath);
+    fun getShareImageIntent(imagePath: String?): Intent {
+        return getShareTextImageIntent("", imagePath)
     }
 
     /**
@@ -186,8 +184,8 @@ public class IntentUtils {
      * @param imageFile 图像的文件
      * @return 分享图片的意图。
      */
-    public static Intent getShareImageIntent(final File imageFile) {
-        return getShareTextImageIntent("", imageFile);
+    fun getShareImageIntent(imageFile: File?): Intent {
+        return getShareTextImageIntent("", imageFile)
     }
 
     /**
@@ -196,8 +194,8 @@ public class IntentUtils {
      * @param imageUri 图片的uri
      * @return 返回分享图片的意图
      */
-    public static Intent getShareImageIntent(final Uri imageUri) {
-        return getShareTextImageIntent("", imageUri);
+    fun getShareImageIntent(imageUri: Uri?): Intent {
+        return getShareTextImageIntent("", imageUri)
     }
 
     /**
@@ -207,8 +205,8 @@ public class IntentUtils {
      * @param imagePath 图像的路径。
      * @return 返回分享图片的意图
      */
-    public static Intent getShareTextImageIntent(@Nullable final String content, final String imagePath) {
-        return getShareTextImageIntent(content, DawnBridge.getFileByPath(imagePath));
+    fun getShareTextImageIntent(content: String?, imagePath: String?): Intent {
+        return getShareTextImageIntent(content, DawnBridge.getFileByPath(imagePath))
     }
 
     /**
@@ -218,8 +216,8 @@ public class IntentUtils {
      * @param imageFile 图像的文件
      * @return 返回分享图片的意图
      */
-    public static Intent getShareTextImageIntent(@Nullable final String content, final File imageFile) {
-        return getShareTextImageIntent(content, DawnBridge.file2Uri(imageFile));
+    fun getShareTextImageIntent(content: String?, imageFile: File?): Intent {
+        return getShareTextImageIntent(content, DawnBridge.file2Uri(imageFile))
     }
 
     /**
@@ -229,13 +227,13 @@ public class IntentUtils {
      * @param imageUri 图片的uri
      * @return 返回分享图片的意图
      */
-    public static Intent getShareTextImageIntent(@Nullable final String content, final Uri imageUri) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.putExtra(Intent.EXTRA_TEXT, content);
-        intent.putExtra(Intent.EXTRA_STREAM, imageUri);
-        intent.setType("image/*");
-        intent = Intent.createChooser(intent, "");
-        return getIntent(intent, true);
+    fun getShareTextImageIntent(content: String?, imageUri: Uri?): Intent {
+        var intent = Intent(Intent.ACTION_SEND)
+        intent.putExtra(Intent.EXTRA_TEXT, content)
+        intent.putExtra(Intent.EXTRA_STREAM, imageUri)
+        intent.type = "image/*"
+        intent = Intent.createChooser(intent, "")
+        return getIntent(intent, true)
     }
 
     /**
@@ -244,8 +242,8 @@ public class IntentUtils {
      * @param imagePaths 图片的路径
      * @return 返回分享图片的意图
      */
-    public static Intent getShareImageIntent(final LinkedList<String> imagePaths) {
-        return getShareTextImageIntent("", imagePaths);
+    fun getShareImageIntent(imagePaths: LinkedList<String?>?): Intent {
+        return getShareTextImageIntent("", imagePaths)
     }
 
     /**
@@ -254,8 +252,8 @@ public class IntentUtils {
      * @param images 图片的文件
      * @return 返回分享图片的意图
      */
-    public static Intent getShareImageIntent(final List<File> images) {
-        return getShareTextImageIntent("", images);
+    fun getShareImageIntent(images: List<File?>?): Intent {
+        return getShareTextImageIntent("", images)
     }
 
     /**
@@ -264,8 +262,8 @@ public class IntentUtils {
      * @param uris 图片的uri
      * @return 返回分享图片的意图
      */
-    public static Intent getShareImageIntent(final ArrayList<Uri> uris) {
-        return getShareTextImageIntent("", uris);
+    fun getShareImageIntent(uris: ArrayList<Uri?>?): Intent {
+        return getShareTextImageIntent("", uris)
     }
 
     /**
@@ -275,18 +273,19 @@ public class IntentUtils {
      * @param imagePaths 图像的路径。
      * @return 返回分享图片的意图
      */
-    public static Intent getShareTextImageIntent(@Nullable final String content,
-                                                 final LinkedList<String> imagePaths) {
-        List<File> files = new ArrayList<>();
+    fun getShareTextImageIntent(
+        content: String?, imagePaths: LinkedList<String?>?
+    ): Intent {
+        val files: MutableList<File?> = ArrayList()
         if (imagePaths != null) {
-            for (String imagePath : imagePaths) {
-                File file = DawnBridge.getFileByPath(imagePath);
+            for (imagePath in imagePaths) {
+                val file = DawnBridge.getFileByPath(imagePath)
                 if (file != null) {
-                    files.add(file);
+                    files.add(file)
                 }
             }
         }
-        return getShareTextImageIntent(content, files);
+        return getShareTextImageIntent(content, files)
     }
 
     /**
@@ -296,17 +295,17 @@ public class IntentUtils {
      * @param images  图片的文件
      * @return 返回分享图片的意图
      */
-    public static Intent getShareTextImageIntent(@Nullable final String content, final List<File> images) {
-        ArrayList<Uri> uris = new ArrayList<>();
+    fun getShareTextImageIntent(content: String?, images: List<File?>?): Intent {
+        val uris = ArrayList<Uri?>()
         if (images != null) {
-            for (File image : images) {
-                Uri uri = DawnBridge.file2Uri(image);
+            for (image in images) {
+                val uri = DawnBridge.file2Uri(image)
                 if (uri != null) {
-                    uris.add(uri);
+                    uris.add(uri)
                 }
             }
         }
-        return getShareTextImageIntent(content, uris);
+        return getShareTextImageIntent(content, uris)
     }
 
     /**
@@ -316,13 +315,13 @@ public class IntentUtils {
      * @param uris    图片的uri
      * @return 返回分享图片的意图
      */
-    public static Intent getShareTextImageIntent(@Nullable final String content, final ArrayList<Uri> uris) {
-        Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-        intent.putExtra(Intent.EXTRA_TEXT, content);
-        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-        intent.setType("image/*");
-        intent = Intent.createChooser(intent, "");
-        return getIntent(intent, true);
+    fun getShareTextImageIntent(content: String?, uris: ArrayList<Uri?>?): Intent {
+        var intent = Intent(Intent.ACTION_SEND_MULTIPLE)
+        intent.putExtra(Intent.EXTRA_TEXT, content)
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+        intent.type = "image/*"
+        intent = Intent.createChooser(intent, "")
+        return getIntent(intent, true)
     }
 
     /**
@@ -332,8 +331,8 @@ public class IntentUtils {
      * @param className 类名
      * @return 返回组件的意图
      */
-    public static Intent getComponentIntent(final String pkgName, final String className) {
-        return getComponentIntent(pkgName, className, null, false);
+    fun getComponentIntent(pkgName: String?, className: String?): Intent {
+        return getComponentIntent(pkgName, className, null, false)
     }
 
     /**
@@ -344,10 +343,10 @@ public class IntentUtils {
      * @param isNewTask True 添加新任务的标志，否则为 false。
      * @return 返回组件的意图
      */
-    public static Intent getComponentIntent(final String pkgName,
-                                            final String className,
-                                            final boolean isNewTask) {
-        return getComponentIntent(pkgName, className, null, isNewTask);
+    fun getComponentIntent(
+        pkgName: String?, className: String?, isNewTask: Boolean
+    ): Intent {
+        return getComponentIntent(pkgName, className, null, isNewTask)
     }
 
     /**
@@ -358,10 +357,10 @@ public class IntentUtils {
      * @param bundle    附加到此意图的附加组件。
      * @return 返回组件的意图
      */
-    public static Intent getComponentIntent(final String pkgName,
-                                            final String className,
-                                            final Bundle bundle) {
-        return getComponentIntent(pkgName, className, bundle, false);
+    fun getComponentIntent(
+        pkgName: String?, className: String?, bundle: Bundle?
+    ): Intent {
+        return getComponentIntent(pkgName, className, bundle, false)
     }
 
     /**
@@ -373,37 +372,38 @@ public class IntentUtils {
      * @param isNewTask True 添加新任务的标志，否则为 false。
      * @return 返回组件的意图
      */
-    public static Intent getComponentIntent(final String pkgName,
-                                            final String className,
-                                            final Bundle bundle,
-                                            final boolean isNewTask) {
-        Intent intent = new Intent();
+    fun getComponentIntent(
+        pkgName: String?, className: String?, bundle: Bundle?, isNewTask: Boolean
+    ): Intent {
+        val intent = Intent()
         if (bundle != null) {
-            intent.putExtras(bundle);
+            intent.putExtras(bundle)
         }
-        ComponentName cn = new ComponentName(pkgName, className);
-        intent.setComponent(cn);
-        return getIntent(intent, isNewTask);
+        val cn = ComponentName(pkgName!!, className!!)
+        intent.component = cn
+        return getIntent(intent, isNewTask)
     }
 
-    /**
-     * 返回关闭的意图。
-     * <p>需要root权限或持有 {@code android:sharedUserId="android.uid.system"},
-     * {@code <uses-permission android:name="android.permission.SHUTDOWN" />}
-     * in manifest.</p>
-     *
-     * @return 返回关闭的意图
-     */
-    public static Intent getShutdownIntent() {
-        Intent intent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            intent = new Intent("com.android.internal.intent.action.REQUEST_SHUTDOWN");
-        } else {
-            intent = new Intent("android.intent.action.ACTION_REQUEST_SHUTDOWN");
+    val shutdownIntent: Intent
+        /**
+         * 返回关闭的意图。
+         *
+         * 需要root权限或持有 `android:sharedUserId="android.uid.system"`,
+         * `<uses-permission android:name="android.permission.SHUTDOWN" />`
+         * in manifest.
+         *
+         * @return 返回关闭的意图
+         */
+        get() {
+            val intent: Intent
+            intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Intent("com.android.internal.intent.action.REQUEST_SHUTDOWN")
+            } else {
+                Intent("android.intent.action.ACTION_REQUEST_SHUTDOWN")
+            }
+            intent.putExtra("android.intent.extra.KEY_CONFIRM", false)
+            return intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        intent.putExtra("android.intent.extra.KEY_CONFIRM", false);
-        return intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    }
 
     /**
      * 返回拨号的意图。
@@ -411,22 +411,25 @@ public class IntentUtils {
      * @param phoneNumber 手机号
      * @return 返回拨号的意图。
      */
-    public static Intent getDialIntent(@NonNull final String phoneNumber) {
-        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + Uri.encode(phoneNumber)));
-        return getIntent(intent, true);
+    @JvmStatic
+    fun getDialIntent(phoneNumber: String): Intent {
+        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + Uri.encode(phoneNumber)))
+        return getIntent(intent, true)
     }
 
     /**
      * 返回通话的意图。
-     * <p>必须持有{@code <uses-permission android:name="android.permission.CALL_PHONE" />}</p>
+     *
+     * 必须持有`<uses-permission android:name="android.permission.CALL_PHONE" />`
      *
      * @param phoneNumber phoneNumber
      * @return 通话的意图
      */
-    @RequiresPermission(CALL_PHONE)
-    public static Intent getCallIntent(@NonNull final String phoneNumber) {
-        Intent intent = new Intent("android.intent.action.CALL", Uri.parse("tel:" + Uri.encode(phoneNumber)));
-        return getIntent(intent, true);
+    @JvmStatic
+    @RequiresPermission(permission.CALL_PHONE)
+    fun getCallIntent(phoneNumber: String): Intent {
+        val intent = Intent("android.intent.action.CALL", Uri.parse("tel:" + Uri.encode(phoneNumber)))
+        return getIntent(intent, true)
     }
 
     /**
@@ -436,11 +439,12 @@ public class IntentUtils {
      * @param content     内容
      * @return 返回发送短信的意图。
      */
-    public static Intent getSendSmsIntent(@NonNull final String phoneNumber, final String content) {
-        Uri uri = Uri.parse("smsto:" + Uri.encode(phoneNumber));
-        Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
-        intent.putExtra("sms_body", content);
-        return getIntent(intent, true);
+    @JvmStatic
+    fun getSendSmsIntent(phoneNumber: String, content: String?): Intent {
+        val uri = Uri.parse("smsto:" + Uri.encode(phoneNumber))
+        val intent = Intent(Intent.ACTION_SENDTO, uri)
+        intent.putExtra("sms_body", content)
+        return getIntent(intent, true)
     }
 
     /**
@@ -449,8 +453,8 @@ public class IntentUtils {
      * @param outUri 输出的uri。
      * @return 返回捕获的意图
      */
-    public static Intent getCaptureIntent(final Uri outUri) {
-        return getCaptureIntent(outUri, false);
+    fun getCaptureIntent(outUri: Uri?): Intent {
+        return getCaptureIntent(outUri, false)
     }
 
     /**
@@ -460,16 +464,14 @@ public class IntentUtils {
      * @param isNewTask True 添加新任务的标志，否则为 false。
      * @return 返回捕获的意图
      */
-    public static Intent getCaptureIntent(final Uri outUri, final boolean isNewTask) {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, outUri);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        return getIntent(intent, isNewTask);
+    fun getCaptureIntent(outUri: Uri?, isNewTask: Boolean): Intent {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, outUri)
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        return getIntent(intent, isNewTask)
     }
 
-    private static Intent getIntent(final Intent intent, final boolean isNewTask) {
-        return isNewTask ? intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) : intent;
+    private fun getIntent(intent: Intent, isNewTask: Boolean): Intent {
+        return if (isNewTask) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) else intent
     }
-
-
 }

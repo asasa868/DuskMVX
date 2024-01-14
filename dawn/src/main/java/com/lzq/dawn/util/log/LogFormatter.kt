@@ -1,33 +1,20 @@
-package com.lzq.dawn.util.log;
+package com.lzq.dawn.util.log
 
-import android.content.ClipData;
-import android.content.ComponentName;
-import android.content.Intent;
-import android.graphics.Rect;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-
-import androidx.annotation.RequiresApi;
-
-import com.lzq.dawn.DawnBridge;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Set;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
+import android.content.ClipData
+import android.content.Intent
+import android.os.Build
+import android.os.Bundle
+import com.lzq.dawn.DawnBridge
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.StringReader
+import java.io.StringWriter
+import javax.xml.transform.OutputKeys
+import javax.xml.transform.Source
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.stream.StreamResult
+import javax.xml.transform.stream.StreamSource
 
 /**
  * @Name :LogFormatter
@@ -35,268 +22,264 @@ import javax.xml.transform.stream.StreamSource;
  * @Author :  Lzq
  * @Desc :
  */
-public final class LogFormatter {
-    static String object2String(Object object) {
-        return object2String(object, -1);
-    }
-
-    static String object2String(Object object, int type) {
-        if (object.getClass().isArray()) {
-            return array2String(object);
+object LogFormatter {
+    @JvmStatic
+    @JvmOverloads
+    fun object2String(`object`: Any, type: Int = -1): String {
+        if (`object`.javaClass.isArray) {
+            return array2String(`object`)
         }
-        if (object instanceof Throwable) {
-            return DawnBridge.getFullStackTrace((Throwable) object);
+        if (`object` is Throwable) {
+            return DawnBridge.getFullStackTrace(`object`)
         }
-        if (object instanceof Bundle) {
-            return bundle2String((Bundle) object);
+        if (`object` is Bundle) {
+            return bundle2String(`object`)
         }
-        if (object instanceof Intent) {
-            return intent2String((Intent) object);
+        if (`object` is Intent) {
+            return intent2String(`object`)
         }
         if (type == LogUtils.JSON) {
-            return object2Json(object);
+            return object2Json(`object`)
         } else if (type == LogUtils.XML) {
-            return formatXml(object.toString());
+            return formatXml(`object`.toString())
         }
-        return object.toString();
+        return `object`.toString()
     }
 
-    private static String bundle2String(Bundle bundle) {
-        Iterator<String> iterator = bundle.keySet().iterator();
+    private fun bundle2String(bundle: Bundle): String {
+        val iterator: Iterator<String> = bundle.keySet().iterator()
         if (!iterator.hasNext()) {
-            return "Bundle {}";
+            return "Bundle {}"
         }
-        StringBuilder sb = new StringBuilder(128);
-        sb.append("Bundle { ");
-        for (; ; ) {
-            String key = iterator.next();
-            Object value = bundle.get(key);
-            sb.append(key).append('=');
-            if (value instanceof Bundle) {
-                sb.append(value == bundle ? "(this Bundle)" : bundle2String((Bundle) value));
+        val sb = StringBuilder(128)
+        sb.append("Bundle { ")
+        while (true) {
+            val key = iterator.next()
+            val value = bundle[key]
+            sb.append(key).append('=')
+            if (value is Bundle) {
+                sb.append(if (value === bundle) "(this Bundle)" else bundle2String(value))
             } else {
-                sb.append(LogUtils.formatObject(value));
+                sb.append(LogUtils.formatObject(value))
             }
             if (!iterator.hasNext()) {
-                return sb.append(" }").toString();
+                return sb.append(" }").toString()
             }
-            sb.append(',').append(' ');
+            sb.append(',').append(' ')
         }
     }
 
-    private static String intent2String(Intent intent) {
-        StringBuilder sb = new StringBuilder(128);
-        sb.append("Intent { ");
-        boolean first = true;
-        String mAction = intent.getAction();
+    private fun intent2String(intent: Intent): String {
+        val sb = StringBuilder(128)
+        sb.append("Intent { ")
+        var first = true
+        val mAction = intent.action
         if (mAction != null) {
-            sb.append("act=").append(mAction);
-            first = false;
+            sb.append("act=").append(mAction)
+            first = false
         }
-        Set<String> mCategories = intent.getCategories();
+        val mCategories = intent.categories
         if (mCategories != null) {
             if (!first) {
-                sb.append(' ');
+                sb.append(' ')
             }
-            first = false;
-            sb.append("cat=[");
-            boolean firstCategory = true;
-            for (String c : mCategories) {
+            first = false
+            sb.append("cat=[")
+            var firstCategory = true
+            for (c in mCategories) {
                 if (!firstCategory) {
-                    sb.append(',');
+                    sb.append(',')
                 }
-                sb.append(c);
-                firstCategory = false;
+                sb.append(c)
+                firstCategory = false
             }
-            sb.append("]");
+            sb.append("]")
         }
-        Uri mData = intent.getData();
+        val mData = intent.data
         if (mData != null) {
             if (!first) {
-                sb.append(' ');
+                sb.append(' ')
             }
-            first = false;
-            sb.append("dat=").append(mData);
+            first = false
+            sb.append("dat=").append(mData)
         }
-        String mType = intent.getType();
+        val mType = intent.type
         if (mType != null) {
             if (!first) {
-                sb.append(' ');
+                sb.append(' ')
             }
-            first = false;
-            sb.append("typ=").append(mType);
+            first = false
+            sb.append("typ=").append(mType)
         }
-        int mFlags = intent.getFlags();
+        val mFlags = intent.flags
         if (mFlags != 0) {
             if (!first) {
-                sb.append(' ');
+                sb.append(' ')
             }
-            first = false;
-            sb.append("flg=0x").append(Integer.toHexString(mFlags));
+            first = false
+            sb.append("flg=0x").append(Integer.toHexString(mFlags))
         }
-        String mPackage = intent.getPackage();
+        val mPackage = intent.getPackage()
         if (mPackage != null) {
             if (!first) {
-                sb.append(' ');
+                sb.append(' ')
             }
-            first = false;
-            sb.append("pkg=").append(mPackage);
+            first = false
+            sb.append("pkg=").append(mPackage)
         }
-        ComponentName mComponent = intent.getComponent();
+        val mComponent = intent.component
         if (mComponent != null) {
             if (!first) {
-                sb.append(' ');
+                sb.append(' ')
             }
-            first = false;
-            sb.append("cmp=").append(mComponent.flattenToShortString());
+            first = false
+            sb.append("cmp=").append(mComponent.flattenToShortString())
         }
-        Rect mSourceBounds = intent.getSourceBounds();
+        val mSourceBounds = intent.sourceBounds
         if (mSourceBounds != null) {
             if (!first) {
-                sb.append(' ');
+                sb.append(' ')
             }
-            first = false;
-            sb.append("bnds=").append(mSourceBounds.toShortString());
+            first = false
+            sb.append("bnds=").append(mSourceBounds.toShortString())
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            ClipData mClipData = intent.getClipData();
+            val mClipData = intent.clipData
             if (mClipData != null) {
                 if (!first) {
-                    sb.append(' ');
+                    sb.append(' ')
                 }
-                first = false;
-                clipData2String(mClipData, sb);
+                first = false
+                clipData2String(mClipData, sb)
             }
         }
-        Bundle mExtras = intent.getExtras();
+        val mExtras = intent.extras
         if (mExtras != null) {
             if (!first) {
-                sb.append(' ');
+                sb.append(' ')
             }
-            first = false;
-            sb.append("extras={");
-            sb.append(bundle2String(mExtras));
-            sb.append('}');
+            first = false
+            sb.append("extras={")
+            sb.append(bundle2String(mExtras))
+            sb.append('}')
         }
-        if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-            Intent mSelector = intent.getSelector();
-            if (mSelector != null) {
-                if (!first) {
-                    sb.append(' ');
-                }
-                first = false;
-                sb.append("sel={");
-                sb.append(mSelector == intent ? "(this Intent)" : intent2String(mSelector));
-                sb.append("}");
+        val mSelector = intent.selector
+        if (mSelector != null) {
+            if (!first) {
+                sb.append(' ')
             }
+            first = false
+            sb.append("sel={")
+            sb.append(if (mSelector === intent) "(this Intent)" else intent2String(mSelector))
+            sb.append("}")
         }
-        sb.append(" }");
-        return sb.toString();
+        sb.append(" }")
+        return sb.toString()
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    private static void clipData2String(ClipData clipData, StringBuilder sb) {
-        ClipData.Item item = clipData.getItemAt(0);
+    private fun clipData2String(clipData: ClipData, sb: StringBuilder) {
+        val item = clipData.getItemAt(0)
         if (item == null) {
-            sb.append("ClipData.Item {}");
-            return;
+            sb.append("ClipData.Item {}")
+            return
         }
-        sb.append("ClipData.Item { ");
-        String mHtmlText = item.getHtmlText();
+        sb.append("ClipData.Item { ")
+        val mHtmlText = item.htmlText
         if (mHtmlText != null) {
-            sb.append("H:");
-            sb.append(mHtmlText);
-            sb.append("}");
-            return;
+            sb.append("H:")
+            sb.append(mHtmlText)
+            sb.append("}")
+            return
         }
-        CharSequence mText = item.getText();
+        val mText = item.text
         if (mText != null) {
-            sb.append("T:");
-            sb.append(mText);
-            sb.append("}");
-            return;
+            sb.append("T:")
+            sb.append(mText)
+            sb.append("}")
+            return
         }
-        Uri uri = item.getUri();
+        val uri = item.uri
         if (uri != null) {
-            sb.append("U:").append(uri);
-            sb.append("}");
-            return;
+            sb.append("U:").append(uri)
+            sb.append("}")
+            return
         }
-        Intent intent = item.getIntent();
+        val intent = item.intent
         if (intent != null) {
-            sb.append("I:");
-            sb.append(intent2String(intent));
-            sb.append("}");
-            return;
+            sb.append("I:")
+            sb.append(intent2String(intent))
+            sb.append("}")
+            return
         }
-        sb.append("NULL");
-        sb.append("}");
+        sb.append("NULL")
+        sb.append("}")
     }
 
-    private static String object2Json(Object object) {
-        if (object instanceof CharSequence) {
-            return DawnBridge.formatJson(object.toString());
-        }
-        try {
-            return DawnBridge.getGson4LogUtils().toJson(object);
-        } catch (Throwable t) {
-            return object.toString();
+    private fun object2Json(`object`: Any): String {
+        return try {
+            DawnBridge.getGson4LogUtils().toJson(`object`)
+        } catch (t: Throwable) {
+            `object`.toString()
         }
     }
 
-    private static String formatJson(String json) {
+    private fun formatJson(json: String): String {
         try {
-            for (int i = 0, len = json.length(); i < len; i++) {
-                char c = json.charAt(i);
+            var i = 0
+            val len = json.length
+            while (i < len) {
+                val c = json[i]
                 if (c == '{') {
-                    return new JSONObject(json).toString(2);
+                    return JSONObject(json).toString(2)
                 } else if (c == '[') {
-                    return new JSONArray(json).toString(2);
+                    return JSONArray(json).toString(2)
                 } else if (!Character.isWhitespace(c)) {
-                    return json;
+                    return json
                 }
+                i++
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } catch (e: JSONException) {
+            e.printStackTrace()
         }
-        return json;
+        return json
     }
 
-    private static String formatXml(String xml) {
+    private fun formatXml(xml: String): String {
+        var xml = xml
         try {
-            Source xmlInput = new StreamSource(new StringReader(xml));
-            StreamResult xmlOutput = new StreamResult(new StringWriter());
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-            transformer.transform(xmlInput, xmlOutput);
-            xml = xmlOutput.getWriter().toString().replaceFirst(">", ">" + LogUtils.LINE_SEP);
-        } catch (Exception e) {
-            e.printStackTrace();
+            val xmlInput: Source = StreamSource(StringReader(xml))
+            val xmlOutput = StreamResult(StringWriter())
+            val transformer = TransformerFactory.newInstance().newTransformer()
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes")
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
+            transformer.transform(xmlInput, xmlOutput)
+            xml = xmlOutput.writer.toString().replaceFirst(">".toRegex(), ">" + LogUtils.LINE_SEP)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        return xml;
+        return xml
     }
 
-    private static String array2String(Object object) {
-        if (object instanceof Object[]) {
-            return Arrays.deepToString((Object[]) object);
-        } else if (object instanceof boolean[]) {
-            return Arrays.toString((boolean[]) object);
-        } else if (object instanceof byte[]) {
-            return Arrays.toString((byte[]) object);
-        } else if (object instanceof char[]) {
-            return Arrays.toString((char[]) object);
-        } else if (object instanceof double[]) {
-            return Arrays.toString((double[]) object);
-        } else if (object instanceof float[]) {
-            return Arrays.toString((float[]) object);
-        } else if (object instanceof int[]) {
-            return Arrays.toString((int[]) object);
-        } else if (object instanceof long[]) {
-            return Arrays.toString((long[]) object);
-        } else if (object instanceof short[]) {
-            return Arrays.toString((short[]) object);
+    private fun array2String(`object`: Any): String {
+        if (`object` is Array<*> && `object`.isArrayOf<Any>()) {
+            return `object`.contentDeepToString()
+        } else if (`object` is BooleanArray) {
+            return `object`.contentToString()
+        } else if (`object` is ByteArray) {
+            return `object`.contentToString()
+        } else if (`object` is CharArray) {
+            return `object`.contentToString()
+        } else if (`object` is DoubleArray) {
+            return `object`.contentToString()
+        } else if (`object` is FloatArray) {
+            return `object`.contentToString()
+        } else if (`object` is IntArray) {
+            return `object`.contentToString()
+        } else if (`object` is LongArray) {
+            return `object`.contentToString()
+        } else if (`object` is ShortArray) {
+            return `object`.contentToString()
         }
-        throw new IllegalArgumentException("Array has incompatible type: " + object.getClass());
+        throw IllegalArgumentException("Array has incompatible type: " + `object`.javaClass)
     }
 }

@@ -1,4 +1,4 @@
-package com.lzq.dawn.util.crash;
+package com.lzq.dawn.util.crash
 
 /**
  * @Name :OnCrashListener
@@ -6,10 +6,10 @@ package com.lzq.dawn.util.crash;
  * @Author :  Lzq
  * @Desc :
  */
-public interface OnCrashListener {
+interface OnCrashListener {
     /**
      * Crash
      * @param crashInfo  crashInfo
      */
-    void onCrash(CrashInfo crashInfo);
+    fun onCrash(crashInfo: CrashInfo?)
 }

@@ -1,6 +1,6 @@
-package com.lzq.dawn.util.file;
+package com.lzq.dawn.util.file
 
-import java.io.File;
+import java.io.File
 
 /**
  * @Name :OnReplaceListener
@@ -8,12 +8,12 @@ import java.io.File;
  * @Author :  Lzq
  * @Desc :
  */
-public interface OnReplaceListener {
+interface OnReplaceListener {
     /**
      * 替换
      * @param srcFile srcFile
      * @param destFile destFile
      * @return  Replace
      */
-    boolean onReplace(File srcFile, File destFile);
+    fun onReplace(srcFile: File?, destFile: File?): Boolean
 }

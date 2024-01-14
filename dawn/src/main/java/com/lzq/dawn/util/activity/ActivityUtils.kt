@@ -1,31 +1,22 @@
-package com.lzq.dawn.util.activity;
+package com.lzq.dawn.util.activity
 
-import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.ContextWrapper;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.View;
-
-import androidx.annotation.AnimRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.util.Pair;
-import androidx.fragment.app.Fragment;
-
-import com.lzq.dawn.DawnBridge;
-
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
+import android.app.Activity
+import android.content.ComponentName
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
+import android.os.Bundle
+import android.text.TextUtils
+import android.util.Log
+import android.view.View
+import androidx.annotation.AnimRes
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.util.Pair
+import androidx.fragment.app.Fragment
+import com.lzq.dawn.DawnBridge
+import java.lang.ref.WeakReference
 
 /**
  * className :ActivityUtils
@@ -33,18 +24,14 @@ import java.util.List;
  *
  * @Author :  Lzq
  */
-public final class ActivityUtils {
-
-    private ActivityUtils() {
-    }
-
+object ActivityUtils {
     /**
      * Add callbacks of activity lifecycle.
      *
      * @param callbacks The callbacks.
      */
-    public static void addActivityLifecycleCallbacks(@Nullable final ActivityLifecycleCallbacks callbacks) {
-        DawnBridge.addActivityLifecycleCallbacks(callbacks);
+    fun addActivityLifecycleCallbacks(callbacks: ActivityLifecycleCallbacks?) {
+        DawnBridge.addActivityLifecycleCallbacks(callbacks)
     }
 
     /**
@@ -53,9 +40,10 @@ public final class ActivityUtils {
      * @param activity  The activity.
      * @param callbacks The callbacks.
      */
-    public static void addActivityLifecycleCallbacks(@Nullable final Activity activity,
-                                                     @Nullable final ActivityLifecycleCallbacks callbacks) {
-        DawnBridge.addActivityLifecycleCallbacks(activity, callbacks);
+    fun addActivityLifecycleCallbacks(
+        activity: Activity?, callbacks: ActivityLifecycleCallbacks?
+    ) {
+        DawnBridge.addActivityLifecycleCallbacks(activity, callbacks)
     }
 
     /**
@@ -63,8 +51,8 @@ public final class ActivityUtils {
      *
      * @param callbacks The callbacks.
      */
-    public static void removeActivityLifecycleCallbacks(@Nullable final ActivityLifecycleCallbacks callbacks) {
-        DawnBridge.removeActivityLifecycleCallbacks(callbacks);
+    fun removeActivityLifecycleCallbacks(callbacks: ActivityLifecycleCallbacks?) {
+        DawnBridge.removeActivityLifecycleCallbacks(callbacks)
     }
 
     /**
@@ -72,8 +60,8 @@ public final class ActivityUtils {
      *
      * @param activity The activity.
      */
-    public static void removeActivityLifecycleCallbacks(@Nullable final Activity activity) {
-        DawnBridge.removeActivityLifecycleCallbacks(activity);
+    fun removeActivityLifecycleCallbacks(activity: Activity?) {
+        DawnBridge.removeActivityLifecycleCallbacks(activity)
     }
 
     /**
@@ -82,9 +70,10 @@ public final class ActivityUtils {
      * @param activity  The activity.
      * @param callbacks The callbacks.
      */
-    public static void removeActivityLifecycleCallbacks(@Nullable final Activity activity,
-                                                        @Nullable final ActivityLifecycleCallbacks callbacks) {
-        DawnBridge.removeActivityLifecycleCallbacks(activity, callbacks);
+    fun removeActivityLifecycleCallbacks(
+        activity: Activity?, callbacks: ActivityLifecycleCallbacks?
+    ) {
+        DawnBridge.removeActivityLifecycleCallbacks(activity, callbacks)
     }
 
     /**
@@ -92,16 +81,17 @@ public final class ActivityUtils {
      *
      * @param pkg 包名
      * @param cls activity类名.
-     * @return {@code true}: 是<br>{@code false}: 否
+     * @return `true`: 是<br></br>`false`: 否
      */
-    public static boolean isActivityExists(@NonNull final String pkg,
-                                           @NonNull final String cls) {
-        Intent intent = new Intent();
-        intent.setClassName(pkg, cls);
-        PackageManager pm = DawnBridge.getApp().getPackageManager();
-        return !(pm.resolveActivity(intent, 0) == null ||
-                intent.resolveActivity(pm) == null ||
-                pm.queryIntentActivities(intent, 0).size() == 0);
+    fun isActivityExists(
+        pkg: String, cls: String
+    ): Boolean {
+        val intent = Intent()
+        intent.setClassName(pkg, cls)
+        val pm = DawnBridge.getApp().packageManager
+        return !(pm.resolveActivity(
+            intent, 0
+        ) == null || intent.resolveActivity(pm) == null || pm.queryIntentActivities(intent, 0).size == 0)
     }
 
     /**
@@ -109,21 +99,22 @@ public final class ActivityUtils {
      *
      * @param clz 目标activity .
      */
-    public static void startActivity(@NonNull final Class<? extends Activity> clz) {
-        Context context = getTopActivityOrApp();
-        startActivity(context, null, context.getPackageName(), clz.getName(), null);
+    fun startActivity(clz: Class<out Activity?>) {
+        val context = topActivityOrApp
+        startActivity(context, null, context.packageName, clz.name, null)
     }
 
     /**
      * 前往 activity
      *
      * @param clz     目标activity .
-     * @param options 跳转的动画. 使用{@link ActivityOptionsCompat}.toBundle 生成所需要的bundle
+     * @param options 跳转的动画. 使用[ActivityOptionsCompat].toBundle 生成所需要的bundle
      */
-    public static void startActivity(@NonNull final Class<? extends Activity> clz,
-                                     @Nullable final Bundle options) {
-        Context context = getTopActivityOrApp();
-        startActivity(context, null, context.getPackageName(), clz.getName(), options);
+    fun startActivity(
+        clz: Class<out Activity?>, options: Bundle?
+    ) {
+        val context = topActivityOrApp
+        startActivity(context, null, context.packageName, clz.name, options)
     }
 
     /**
@@ -133,24 +124,13 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivity(@NonNull final Class<? extends Activity> clz,
-                                     @AnimRes final int enterAnim,
-                                     @AnimRes final int exitAnim) {
-        Context context = getTopActivityOrApp();
-        startActivity(context, null, context.getPackageName(), clz.getName(),
-                getOptionsBundle(context, enterAnim, exitAnim));
-    }
-
-
-    /**
-     * 前往 activity
-     *
-     * @param activity activity.
-     * @param clz      目标activity.class.
-     */
-    public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final Class<? extends Activity> clz) {
-        startActivity(activity, null, activity.getPackageName(), clz.getName(), null);
+    fun startActivity(
+        clz: Class<out Activity?>, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        val context = topActivityOrApp
+        startActivity(
+            context, null, context.packageName, clz.name, getOptionsBundle(context, enterAnim, exitAnim)
+        )
     }
 
     /**
@@ -158,12 +138,24 @@ public final class ActivityUtils {
      *
      * @param activity activity.
      * @param clz      目标activity.class.
-     * @param options  跳转的动画. 使用{@link ActivityOptionsCompat}.toBundle 生成所需要的bundle
      */
-    public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final Class<? extends Activity> clz,
-                                     @Nullable final Bundle options) {
-        startActivity(activity, null, activity.getPackageName(), clz.getName(), options);
+    fun startActivity(
+        activity: Activity, clz: Class<out Activity?>
+    ) {
+        startActivity(activity, null, activity.packageName, clz.name, null)
+    }
+
+    /**
+     * 前往 activity
+     *
+     * @param activity activity.
+     * @param clz      目标activity.class.
+     * @param options  跳转的动画. 使用[ActivityOptionsCompat].toBundle 生成所需要的bundle
+     */
+    fun startActivity(
+        activity: Activity, clz: Class<out Activity?>, options: Bundle?
+    ) {
+        startActivity(activity, null, activity.packageName, clz.name, options)
     }
 
     /**
@@ -173,11 +165,16 @@ public final class ActivityUtils {
      * @param clz            目标activity.class.
      * @param sharedElements 和目标的view联动的动画 比如平移啥的
      */
-    public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final Class<? extends Activity> clz,
-                                     final View... sharedElements) {
-        startActivity(activity, null, activity.getPackageName(), clz.getName(),
-                getOptionsBundle(activity, sharedElements));
+    fun startActivity(
+        activity: Activity, clz: Class<out Activity?>, vararg sharedElements: View
+    ) {
+        startActivity(
+            activity,
+            null,
+            activity.packageName,
+            clz.name,
+            getOptionsBundle(activity, sharedElements.toMutableList().toTypedArray())
+        )
     }
 
     /**
@@ -188,12 +185,12 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final Class<? extends Activity> clz,
-                                     @AnimRes final int enterAnim,
-                                     @AnimRes final int exitAnim) {
-        startActivity(activity, null, activity.getPackageName(), clz.getName(),
-                getOptionsBundle(activity, enterAnim, exitAnim));
+    fun startActivity(
+        activity: Activity, clz: Class<out Activity?>, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        startActivity(
+            activity, null, activity.packageName, clz.name, getOptionsBundle(activity, enterAnim, exitAnim)
+        )
     }
 
     /**
@@ -202,10 +199,11 @@ public final class ActivityUtils {
      * @param extras 携带跳转的bundle数据.
      * @param clz    目标activity class.
      */
-    public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final Class<? extends Activity> clz) {
-        Context context = getTopActivityOrApp();
-        startActivity(context, extras, context.getPackageName(), clz.getName(), null);
+    fun startActivity(
+        extras: Bundle, clz: Class<out Activity?>
+    ) {
+        val context = topActivityOrApp
+        startActivity(context, extras, context.packageName, clz.name, null)
     }
 
     /**
@@ -213,13 +211,13 @@ public final class ActivityUtils {
      *
      * @param extras  携带的bundle数据
      * @param clz     目标activity class.
-     * @param options 跳转的动画. 使用{@link ActivityOptionsCompat}.toBundle 生成所需要的bundle
+     * @param options 跳转的动画. 使用[ActivityOptionsCompat].toBundle 生成所需要的bundle
      */
-    public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final Class<? extends Activity> clz,
-                                     @Nullable final Bundle options) {
-        Context context = getTopActivityOrApp();
-        startActivity(context, extras, context.getPackageName(), clz.getName(), options);
+    fun startActivity(
+        extras: Bundle, clz: Class<out Activity?>, options: Bundle?
+    ) {
+        val context = topActivityOrApp
+        startActivity(context, extras, context.packageName, clz.name, options)
     }
 
     /**
@@ -230,13 +228,13 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final Class<? extends Activity> clz,
-                                     @AnimRes final int enterAnim,
-                                     @AnimRes final int exitAnim) {
-        Context context = getTopActivityOrApp();
-        startActivity(context, extras, context.getPackageName(), clz.getName(),
-                getOptionsBundle(context, enterAnim, exitAnim));
+    fun startActivity(
+        extras: Bundle, clz: Class<out Activity?>, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        val context = topActivityOrApp
+        startActivity(
+            context, extras, context.packageName, clz.name, getOptionsBundle(context, enterAnim, exitAnim)
+        )
     }
 
     /**
@@ -246,10 +244,10 @@ public final class ActivityUtils {
      * @param activity 当前activity.
      * @param clz      目标activity class.
      */
-    public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final Activity activity,
-                                     @NonNull final Class<? extends Activity> clz) {
-        startActivity(activity, extras, activity.getPackageName(), clz.getName(), null);
+    fun startActivity(
+        extras: Bundle, activity: Activity, clz: Class<out Activity?>
+    ) {
+        startActivity(activity, extras, activity.packageName, clz.name, null)
     }
 
     /**
@@ -258,13 +256,12 @@ public final class ActivityUtils {
      * @param extras   携带的bundle数据
      * @param activity 当前activity.
      * @param clz      目标activity class.
-     * @param options  跳转的动画. 使用{@link ActivityOptionsCompat}.toBundle 生成所需要的bundle
+     * @param options  跳转的动画. 使用[ActivityOptionsCompat].toBundle 生成所需要的bundle
      */
-    public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final Activity activity,
-                                     @NonNull final Class<? extends Activity> clz,
-                                     @Nullable final Bundle options) {
-        startActivity(activity, extras, activity.getPackageName(), clz.getName(), options);
+    fun startActivity(
+        extras: Bundle, activity: Activity, clz: Class<out Activity?>, options: Bundle?
+    ) {
+        startActivity(activity, extras, activity.packageName, clz.name, options)
     }
 
     /**
@@ -275,12 +272,16 @@ public final class ActivityUtils {
      * @param sharedElements 和目标的view联动的动画 比如平移啥的
      * @param extras         携带的bundle数据
      */
-    public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final Activity activity,
-                                     @NonNull final Class<? extends Activity> clz,
-                                     final View... sharedElements) {
-        startActivity(activity, extras, activity.getPackageName(), clz.getName(),
-                getOptionsBundle(activity, sharedElements));
+    fun startActivity(
+        extras: Bundle, activity: Activity, clz: Class<out Activity?>, vararg sharedElements: View
+    ) {
+        startActivity(
+            activity,
+            extras,
+            activity.packageName,
+            clz.name,
+            getOptionsBundle(activity, sharedElements.toMutableList().toTypedArray())
+        )
     }
 
     /**
@@ -292,13 +293,16 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final Activity activity,
-                                     @NonNull final Class<? extends Activity> clz,
-                                     @AnimRes final int enterAnim,
-                                     @AnimRes final int exitAnim) {
-        startActivity(activity, extras, activity.getPackageName(), clz.getName(),
-                getOptionsBundle(activity, enterAnim, exitAnim));
+    fun startActivity(
+        extras: Bundle,
+        activity: Activity,
+        clz: Class<out Activity?>,
+        @AnimRes enterAnim: Int,
+        @AnimRes exitAnim: Int
+    ) {
+        startActivity(
+            activity, extras, activity.packageName, clz.name, getOptionsBundle(activity, enterAnim, exitAnim)
+        )
     }
 
     /**
@@ -307,9 +311,10 @@ public final class ActivityUtils {
      * @param pkg 包名
      * @param cls 目标activity.class.
      */
-    public static void startActivity(@NonNull final String pkg,
-                                     @NonNull final String cls) {
-        startActivity(getTopActivityOrApp(), null, pkg, cls, null);
+    fun startActivity(
+        pkg: String, cls: String
+    ) {
+        startActivity(topActivityOrApp, null, pkg, cls, null)
     }
 
     /**
@@ -317,12 +322,12 @@ public final class ActivityUtils {
      *
      * @param pkg     包名
      * @param cls     目标activity.class.
-     * @param options 跳转的动画. 使用{@link ActivityOptionsCompat}.toBundle 生成所需要的bundle
+     * @param options 跳转的动画. 使用[ActivityOptionsCompat].toBundle 生成所需要的bundle
      */
-    public static void startActivity(@NonNull final String pkg,
-                                     @NonNull final String cls,
-                                     @Nullable final Bundle options) {
-        startActivity(getTopActivityOrApp(), null, pkg, cls, options);
+    fun startActivity(
+        pkg: String, cls: String, options: Bundle?
+    ) {
+        startActivity(topActivityOrApp, null, pkg, cls, options)
     }
 
     /**
@@ -333,12 +338,11 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivity(@NonNull final String pkg,
-                                     @NonNull final String cls,
-                                     @AnimRes final int enterAnim,
-                                     @AnimRes final int exitAnim) {
-        Context context = getTopActivityOrApp();
-        startActivity(context, null, pkg, cls, getOptionsBundle(context, enterAnim, exitAnim));
+    fun startActivity(
+        pkg: String, cls: String, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        val context = topActivityOrApp
+        startActivity(context, null, pkg, cls, getOptionsBundle(context, enterAnim, exitAnim))
     }
 
     /**
@@ -348,10 +352,10 @@ public final class ActivityUtils {
      * @param cls      目标activity.class.
      * @param activity 当前 activity.
      */
-    public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final String pkg,
-                                     @NonNull final String cls) {
-        startActivity(activity, null, pkg, cls, null);
+    fun startActivity(
+        activity: Activity, pkg: String, cls: String
+    ) {
+        startActivity(activity, null, pkg, cls, null)
     }
 
     /**
@@ -360,15 +364,13 @@ public final class ActivityUtils {
      * @param pkg      包名
      * @param cls      目标activity.class.
      * @param activity 当前 activity.
-     * @param options  跳转的动画. 使用{@link ActivityOptionsCompat#toBundle()} 生成所需要的bundle
+     * @param options  跳转的动画. 使用[ActivityOptionsCompat.toBundle] 生成所需要的bundle
      */
-    public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final String pkg,
-                                     @NonNull final String cls,
-                                     @Nullable final Bundle options) {
-        startActivity(activity, null, pkg, cls, options);
+    fun startActivity(
+        activity: Activity, pkg: String, cls: String, options: Bundle?
+    ) {
+        startActivity(activity, null, pkg, cls, options)
     }
-
 
     /**
      * 前往 activity
@@ -378,11 +380,16 @@ public final class ActivityUtils {
      * @param cls            目标activity.class.
      * @param sharedElements 和目标的view联动的动画 比如平移啥的
      */
-    public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final String pkg,
-                                     @NonNull final String cls,
-                                     final View... sharedElements) {
-        startActivity(activity, null, pkg, cls, getOptionsBundle(activity, sharedElements));
+    fun startActivity(
+        activity: Activity, pkg: String, cls: String, vararg sharedElements: View
+    ) {
+        startActivity(
+            activity,
+            null,
+            pkg,
+            cls,
+            getOptionsBundle(activity, sharedElements.toMutableList().toTypedArray())
+        )
     }
 
     /**
@@ -394,12 +401,10 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final String pkg,
-                                     @NonNull final String cls,
-                                     @AnimRes final int enterAnim,
-                                     @AnimRes final int exitAnim) {
-        startActivity(activity, null, pkg, cls, getOptionsBundle(activity, enterAnim, exitAnim));
+    fun startActivity(
+        activity: Activity, pkg: String, cls: String, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        startActivity(activity, null, pkg, cls, getOptionsBundle(activity, enterAnim, exitAnim))
     }
 
     /**
@@ -409,10 +414,10 @@ public final class ActivityUtils {
      * @param pkg    包名
      * @param cls    目标activity.class.
      */
-    public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final String pkg,
-                                     @NonNull final String cls) {
-        startActivity(getTopActivityOrApp(), extras, pkg, cls, null);
+    fun startActivity(
+        extras: Bundle, pkg: String, cls: String
+    ) {
+        startActivity(topActivityOrApp, extras, pkg, cls, null)
     }
 
     /**
@@ -421,13 +426,12 @@ public final class ActivityUtils {
      * @param extras  携带的bundle数据
      * @param pkg     包名
      * @param cls     目标activity.class.
-     * @param options 跳转的动画. 使用{@link ActivityOptionsCompat#toBundle()} 生成所需要的bundle
+     * @param options 跳转的动画. 使用[ActivityOptionsCompat.toBundle] 生成所需要的bundle
      */
-    public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final String pkg,
-                                     @NonNull final String cls,
-                                     @Nullable final Bundle options) {
-        startActivity(getTopActivityOrApp(), extras, pkg, cls, options);
+    fun startActivity(
+        extras: Bundle, pkg: String, cls: String, options: Bundle?
+    ) {
+        startActivity(topActivityOrApp, extras, pkg, cls, options)
     }
 
     /**
@@ -439,13 +443,11 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final String pkg,
-                                     @NonNull final String cls,
-                                     @AnimRes final int enterAnim,
-                                     @AnimRes final int exitAnim) {
-        Context context = getTopActivityOrApp();
-        startActivity(context, extras, pkg, cls, getOptionsBundle(context, enterAnim, exitAnim));
+    fun startActivity(
+        extras: Bundle, pkg: String, cls: String, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        val context = topActivityOrApp
+        startActivity(context, extras, pkg, cls, getOptionsBundle(context, enterAnim, exitAnim))
     }
 
     /**
@@ -456,11 +458,10 @@ public final class ActivityUtils {
      * @param pkg      包名
      * @param cls      目标activity.class.
      */
-    public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final Activity activity,
-                                     @NonNull final String pkg,
-                                     @NonNull final String cls) {
-        startActivity(activity, extras, pkg, cls, null);
+    fun startActivity(
+        extras: Bundle, activity: Activity, pkg: String, cls: String
+    ) {
+        startActivity(activity, extras, pkg, cls, null)
     }
 
     /**
@@ -470,14 +471,12 @@ public final class ActivityUtils {
      * @param extras   携带的bundle数据
      * @param pkg      包名
      * @param cls      目标activity.class.
-     * @param options  跳转的动画. 使用{@link ActivityOptionsCompat#toBundle()} 生成所需要的bundle
+     * @param options  跳转的动画. 使用[ActivityOptionsCompat.toBundle] 生成所需要的bundle
      */
-    public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final Activity activity,
-                                     @NonNull final String pkg,
-                                     @NonNull final String cls,
-                                     @Nullable final Bundle options) {
-        startActivity(activity, extras, pkg, cls, options);
+    fun startActivity(
+        extras: Bundle, activity: Activity, pkg: String, cls: String, options: Bundle?
+    ) {
+        startActivity(activity, extras, pkg, cls, options)
     }
 
     /**
@@ -489,12 +488,16 @@ public final class ActivityUtils {
      * @param cls            目标activity.class.
      * @param sharedElements 和目标的view联动的动画 比如平移啥的
      */
-    public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final Activity activity,
-                                     @NonNull final String pkg,
-                                     @NonNull final String cls,
-                                     final View... sharedElements) {
-        startActivity(activity, extras, pkg, cls, getOptionsBundle(activity, sharedElements));
+    fun startActivity(
+        extras: Bundle, activity: Activity, pkg: String, cls: String, vararg sharedElements: View
+    ) {
+        startActivity(
+            activity,
+            extras,
+            pkg,
+            cls,
+            getOptionsBundle(activity, sharedElements.toMutableList().toTypedArray())
+        )
     }
 
     /**
@@ -507,35 +510,38 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final Activity activity,
-                                     @NonNull final String pkg,
-                                     @NonNull final String cls,
-                                     @AnimRes final int enterAnim,
-                                     @AnimRes final int exitAnim) {
-        startActivity(activity, extras, pkg, cls, getOptionsBundle(activity, enterAnim, exitAnim));
+    fun startActivity(
+        extras: Bundle,
+        activity: Activity,
+        pkg: String,
+        cls: String,
+        @AnimRes enterAnim: Int,
+        @AnimRes exitAnim: Int
+    ) {
+        startActivity(activity, extras, pkg, cls, getOptionsBundle(activity, enterAnim, exitAnim))
     }
 
     /**
      * 前往 activity
      *
      * @param intent intent
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean startActivity(@NonNull final Intent intent) {
-        return startActivity(intent, getTopActivityOrApp(), null);
+    fun startActivity(intent: Intent): Boolean {
+        return startActivity(intent, topActivityOrApp, null)
     }
 
     /**
      * 前往 activity
      *
      * @param intent  intent
-     * @param options 跳转的动画. 使用{@link ActivityOptionsCompat#toBundle()} 生成所需要的bundle
-     * @return {@code true}: success<br>{@code false}: fail
+     * @param options 跳转的动画. 使用[ActivityOptionsCompat.toBundle] 生成所需要的bundle
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean startActivity(@NonNull final Intent intent,
-                                        @Nullable final Bundle options) {
-        return startActivity(intent, getTopActivityOrApp(), options);
+    fun startActivity(
+        intent: Intent, options: Bundle?
+    ): Boolean {
+        return startActivity(intent, topActivityOrApp, options)
     }
 
     /**
@@ -544,13 +550,13 @@ public final class ActivityUtils {
      * @param intent    intent
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean startActivity(@NonNull final Intent intent,
-                                        @AnimRes final int enterAnim,
-                                        @AnimRes final int exitAnim) {
-        Context context = getTopActivityOrApp();
-        return startActivity(intent, context, getOptionsBundle(context, enterAnim, exitAnim));
+    fun startActivity(
+        intent: Intent, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ): Boolean {
+        val context = topActivityOrApp
+        return startActivity(intent, context, getOptionsBundle(context, enterAnim, exitAnim))
     }
 
     /**
@@ -559,9 +565,10 @@ public final class ActivityUtils {
      * @param activity activity.
      * @param intent   intent
      */
-    public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final Intent intent) {
-        startActivity(intent, activity, null);
+    fun startActivity(
+        activity: Activity, intent: Intent
+    ) {
+        startActivity(intent, activity, null)
     }
 
     /**
@@ -569,12 +576,12 @@ public final class ActivityUtils {
      *
      * @param activity activity.
      * @param intent   intent
-     * @param options  跳转的动画. 使用{@link ActivityOptionsCompat#toBundle()} 生成所需要的bundle
+     * @param options  跳转的动画. 使用[ActivityOptionsCompat.toBundle] 生成所需要的bundle
      */
-    public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final Intent intent,
-                                     @Nullable final Bundle options) {
-        startActivity(intent, activity, options);
+    fun startActivity(
+        activity: Activity, intent: Intent, options: Bundle?
+    ) {
+        startActivity(intent, activity, options)
     }
 
     /**
@@ -584,10 +591,14 @@ public final class ActivityUtils {
      * @param intent         intent
      * @param sharedElements 和目标的view联动的动画 比如平移啥的
      */
-    public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final Intent intent,
-                                     final View... sharedElements) {
-        startActivity(intent, activity, getOptionsBundle(activity, sharedElements));
+    fun startActivity(
+        activity: Activity, intent: Intent, vararg sharedElements: View
+    ) {
+        startActivity(
+            intent,
+            activity,
+            getOptionsBundle(activity, sharedElements.toMutableList().toTypedArray())
+        )
     }
 
     /**
@@ -598,11 +609,10 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final Intent intent,
-                                     @AnimRes final int enterAnim,
-                                     @AnimRes final int exitAnim) {
-        startActivity(intent, activity, getOptionsBundle(activity, enterAnim, exitAnim));
+    fun startActivity(
+        activity: Activity, intent: Intent, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        startActivity(intent, activity, getOptionsBundle(activity, enterAnim, exitAnim))
     }
 
     /**
@@ -612,11 +622,12 @@ public final class ActivityUtils {
      * @param clz         目标activity.class
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      */
-    public static void startActivityForResult(@NonNull final Activity activity,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode) {
-        startActivityForResult(activity, null, activity.getPackageName(), clz.getName(),
-                requestCode, null);
+    fun startActivityForResult(
+        activity: Activity, clz: Class<out Activity?>, requestCode: Int
+    ) {
+        startActivityForResult(
+            activity, null, activity.packageName, clz.name, requestCode, null
+        )
     }
 
     /**
@@ -625,14 +636,14 @@ public final class ActivityUtils {
      * @param activity    activity.
      * @param clz         目标activity.class
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
-     * @param options     跳转的动画. 使用{@link ActivityOptionsCompat#toBundle()} 生成所需要的bundle
+     * @param options     跳转的动画. 使用[ActivityOptionsCompat.toBundle] 生成所需要的bundle
      */
-    public static void startActivityForResult(@NonNull final Activity activity,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode,
-                                              @Nullable final Bundle options) {
-        startActivityForResult(activity, null, activity.getPackageName(), clz.getName(),
-                requestCode, options);
+    fun startActivityForResult(
+        activity: Activity, clz: Class<out Activity?>, requestCode: Int, options: Bundle?
+    ) {
+        startActivityForResult(
+            activity, null, activity.packageName, clz.name, requestCode, options
+        )
     }
 
     /**
@@ -643,12 +654,17 @@ public final class ActivityUtils {
      * @param requestCode    如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      * @param sharedElements 和目标的view联动的动画 比如平移啥的
      */
-    public static void startActivityForResult(@NonNull final Activity activity,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode,
-                                              final View... sharedElements) {
-        startActivityForResult(activity, null, activity.getPackageName(), clz.getName(),
-                requestCode, getOptionsBundle(activity, sharedElements));
+    fun startActivityForResult(
+        activity: Activity, clz: Class<out Activity?>, requestCode: Int, vararg sharedElements: View
+    ) {
+        startActivityForResult(
+            activity,
+            null,
+            activity.packageName,
+            clz.name,
+            requestCode,
+            getOptionsBundle(activity, sharedElements.toMutableList().toTypedArray())
+        )
     }
 
     /**
@@ -660,13 +676,21 @@ public final class ActivityUtils {
      * @param enterAnim   进入动画 使用r.anim.xxx 的资源
      * @param exitAnim    退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivityForResult(@NonNull final Activity activity,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode,
-                                              @AnimRes final int enterAnim,
-                                              @AnimRes final int exitAnim) {
-        startActivityForResult(activity, null, activity.getPackageName(), clz.getName(),
-                requestCode, getOptionsBundle(activity, enterAnim, exitAnim));
+    fun startActivityForResult(
+        activity: Activity,
+        clz: Class<out Activity?>,
+        requestCode: Int,
+        @AnimRes enterAnim: Int,
+        @AnimRes exitAnim: Int
+    ) {
+        startActivityForResult(
+            activity,
+            null,
+            activity.packageName,
+            clz.name,
+            requestCode,
+            getOptionsBundle(activity, enterAnim, exitAnim)
+        )
     }
 
     /**
@@ -677,12 +701,12 @@ public final class ActivityUtils {
      * @param clz         目标activity.class
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Activity activity,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode) {
-        startActivityForResult(activity, extras, activity.getPackageName(), clz.getName(),
-                requestCode, null);
+    fun startActivityForResult(
+        extras: Bundle, activity: Activity, clz: Class<out Activity?>, requestCode: Int
+    ) {
+        startActivityForResult(
+            activity, extras, activity.packageName, clz.name, requestCode, null
+        )
     }
 
     /**
@@ -692,15 +716,14 @@ public final class ActivityUtils {
      * @param activity    当前 activity.
      * @param clz         目标activity.class
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
-     * @param options     跳转的动画. 使用{@link ActivityOptionsCompat#toBundle()} 生成所需要的bundle
+     * @param options     跳转的动画. 使用[ActivityOptionsCompat.toBundle] 生成所需要的bundle
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Activity activity,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode,
-                                              @Nullable final Bundle options) {
-        startActivityForResult(activity, extras, activity.getPackageName(), clz.getName(),
-                requestCode, options);
+    fun startActivityForResult(
+        extras: Bundle, activity: Activity, clz: Class<out Activity?>, requestCode: Int, options: Bundle?
+    ) {
+        startActivityForResult(
+            activity, extras, activity.packageName, clz.name, requestCode, options
+        )
     }
 
     /**
@@ -712,13 +735,21 @@ public final class ActivityUtils {
      * @param requestCode    如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      * @param sharedElements 和目标的view联动的动画 比如平移啥的
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Activity activity,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode,
-                                              final View... sharedElements) {
-        startActivityForResult(activity, extras, activity.getPackageName(), clz.getName(),
-                requestCode, getOptionsBundle(activity, sharedElements));
+    fun startActivityForResult(
+        extras: Bundle,
+        activity: Activity,
+        clz: Class<out Activity?>,
+        requestCode: Int,
+        vararg sharedElements: View
+    ) {
+        startActivityForResult(
+            activity,
+            extras,
+            activity.packageName,
+            clz.name,
+            requestCode,
+            getOptionsBundle(activity, sharedElements.toMutableList().toTypedArray())
+        )
     }
 
     /**
@@ -731,14 +762,22 @@ public final class ActivityUtils {
      * @param enterAnim   进入动画 使用r.anim.xxx 的资源
      * @param exitAnim    退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Activity activity,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode,
-                                              @AnimRes final int enterAnim,
-                                              @AnimRes final int exitAnim) {
-        startActivityForResult(activity, extras, activity.getPackageName(), clz.getName(),
-                requestCode, getOptionsBundle(activity, enterAnim, exitAnim));
+    fun startActivityForResult(
+        extras: Bundle,
+        activity: Activity,
+        clz: Class<out Activity?>,
+        requestCode: Int,
+        @AnimRes enterAnim: Int,
+        @AnimRes exitAnim: Int
+    ) {
+        startActivityForResult(
+            activity,
+            extras,
+            activity.packageName,
+            clz.name,
+            requestCode,
+            getOptionsBundle(activity, enterAnim, exitAnim)
+        )
     }
 
     /**
@@ -750,12 +789,10 @@ public final class ActivityUtils {
      * @param cls         目标activity.class
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Activity activity,
-                                              @NonNull final String pkg,
-                                              @NonNull final String cls,
-                                              final int requestCode) {
-        startActivityForResult(activity, extras, pkg, cls, requestCode, null);
+    fun startActivityForResult(
+        extras: Bundle, activity: Activity, pkg: String, cls: String, requestCode: Int
+    ) {
+        startActivityForResult(activity, extras, pkg, cls, requestCode, null)
     }
 
     /**
@@ -766,15 +803,12 @@ public final class ActivityUtils {
      * @param pkg         包名
      * @param cls         目标activity.class
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
-     * @param options     跳转的动画. 使用{@link ActivityOptionsCompat#toBundle()} 生成所需要的bundle
+     * @param options     跳转的动画. 使用[ActivityOptionsCompat.toBundle] 生成所需要的bundle
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Activity activity,
-                                              @NonNull final String pkg,
-                                              @NonNull final String cls,
-                                              final int requestCode,
-                                              @Nullable final Bundle options) {
-        startActivityForResult(activity, extras, pkg, cls, requestCode, options);
+    fun startActivityForResult(
+        extras: Bundle, activity: Activity, pkg: String, cls: String, requestCode: Int, options: Bundle?
+    ) {
+        startActivityForResult(activity, extras, pkg, cls, requestCode, options)
     }
 
     /**
@@ -787,14 +821,22 @@ public final class ActivityUtils {
      * @param requestCode    如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      * @param sharedElements 和目标的view联动的动画 比如平移啥的
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Activity activity,
-                                              @NonNull final String pkg,
-                                              @NonNull final String cls,
-                                              final int requestCode,
-                                              final View... sharedElements) {
-        startActivityForResult(activity, extras, pkg, cls,
-                requestCode, getOptionsBundle(activity, sharedElements));
+    fun startActivityForResult(
+        extras: Bundle,
+        activity: Activity,
+        pkg: String,
+        cls: String,
+        requestCode: Int,
+        vararg sharedElements: View
+    ) {
+        startActivityForResult(
+            activity,
+            extras,
+            pkg,
+            cls,
+            requestCode,
+            getOptionsBundle(activity, sharedElements.toMutableList().toTypedArray())
+        )
     }
 
     /**
@@ -807,15 +849,18 @@ public final class ActivityUtils {
      * @param enterAnim   进入动画 使用r.anim.xxx 的资源
      * @param exitAnim    退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Activity activity,
-                                              @NonNull final String pkg,
-                                              @NonNull final String cls,
-                                              final int requestCode,
-                                              @AnimRes final int enterAnim,
-                                              @AnimRes final int exitAnim) {
-        startActivityForResult(activity, extras, pkg, cls,
-                requestCode, getOptionsBundle(activity, enterAnim, exitAnim));
+    fun startActivityForResult(
+        extras: Bundle,
+        activity: Activity,
+        pkg: String,
+        cls: String,
+        requestCode: Int,
+        @AnimRes enterAnim: Int,
+        @AnimRes exitAnim: Int
+    ) {
+        startActivityForResult(
+            activity, extras, pkg, cls, requestCode, getOptionsBundle(activity, enterAnim, exitAnim)
+        )
     }
 
     /**
@@ -825,10 +870,10 @@ public final class ActivityUtils {
      * @param intent      intent
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      */
-    public static void startActivityForResult(@NonNull final Activity activity,
-                                              @NonNull final Intent intent,
-                                              final int requestCode) {
-        startActivityForResult(intent, activity, requestCode, null);
+    fun startActivityForResult(
+        activity: Activity, intent: Intent, requestCode: Int
+    ) {
+        startActivityForResult(intent, activity, requestCode, null)
     }
 
     /**
@@ -837,13 +882,12 @@ public final class ActivityUtils {
      * @param activity    The activity.
      * @param intent      intent
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
-     * @param options     跳转的动画. 使用{@link ActivityOptionsCompat#toBundle()} 生成所需要的bundle
+     * @param options     跳转的动画. 使用[ActivityOptionsCompat.toBundle] 生成所需要的bundle
      */
-    public static void startActivityForResult(@NonNull final Activity activity,
-                                              @NonNull final Intent intent,
-                                              final int requestCode,
-                                              @Nullable final Bundle options) {
-        startActivityForResult(intent, activity, requestCode, options);
+    fun startActivityForResult(
+        activity: Activity, intent: Intent, requestCode: Int, options: Bundle?
+    ) {
+        startActivityForResult(intent, activity, requestCode, options)
     }
 
     /**
@@ -854,12 +898,15 @@ public final class ActivityUtils {
      * @param requestCode    如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      * @param sharedElements 和目标的view联动的动画 比如平移啥的
      */
-    public static void startActivityForResult(@NonNull final Activity activity,
-                                              @NonNull final Intent intent,
-                                              final int requestCode,
-                                              final View... sharedElements) {
-        startActivityForResult(intent, activity,
-                requestCode, getOptionsBundle(activity, sharedElements));
+    fun startActivityForResult(
+        activity: Activity, intent: Intent, requestCode: Int, vararg sharedElements: View
+    ) {
+        startActivityForResult(
+            intent,
+            activity,
+            requestCode,
+            getOptionsBundle(activity, sharedElements.toMutableList().toTypedArray())
+        )
     }
 
     /**
@@ -871,13 +918,12 @@ public final class ActivityUtils {
      * @param enterAnim   进入动画 使用r.anim.xxx 的资源
      * @param exitAnim    退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivityForResult(@NonNull final Activity activity,
-                                              @NonNull final Intent intent,
-                                              final int requestCode,
-                                              @AnimRes final int enterAnim,
-                                              @AnimRes final int exitAnim) {
-        startActivityForResult(intent, activity,
-                requestCode, getOptionsBundle(activity, enterAnim, exitAnim));
+    fun startActivityForResult(
+        activity: Activity, intent: Intent, requestCode: Int, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        startActivityForResult(
+            intent, activity, requestCode, getOptionsBundle(activity, enterAnim, exitAnim)
+        )
     }
 
     /**
@@ -887,11 +933,12 @@ public final class ActivityUtils {
      * @param clz         The activity class.
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      */
-    public static void startActivityForResult(@NonNull final Fragment fragment,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode) {
-        startActivityForResult(fragment, null, DawnBridge.getApp().getPackageName(), clz.getName(),
-                requestCode, null);
+    fun startActivityForResult(
+        fragment: Fragment, clz: Class<out Activity?>, requestCode: Int
+    ) {
+        startActivityForResult(
+            fragment, null, DawnBridge.getApp().packageName, clz.name, requestCode, null
+        )
     }
 
     /**
@@ -900,14 +947,14 @@ public final class ActivityUtils {
      * @param fragment    fragment
      * @param clz         The activity class.
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
-     * @param options     跳转的动画. 使用{@link ActivityOptionsCompat#toBundle()} 生成所需要的bundle
+     * @param options     跳转的动画. 使用[ActivityOptionsCompat.toBundle] 生成所需要的bundle
      */
-    public static void startActivityForResult(@NonNull final Fragment fragment,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode,
-                                              @Nullable final Bundle options) {
-        startActivityForResult(fragment, null, DawnBridge.getApp().getPackageName(), clz.getName(),
-                requestCode, options);
+    fun startActivityForResult(
+        fragment: Fragment, clz: Class<out Activity?>, requestCode: Int, options: Bundle?
+    ) {
+        startActivityForResult(
+            fragment, null, DawnBridge.getApp().packageName, clz.name, requestCode, options
+        )
     }
 
     /**
@@ -918,12 +965,17 @@ public final class ActivityUtils {
      * @param requestCode    如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      * @param sharedElements 和目标的view联动的动画 比如平移啥的
      */
-    public static void startActivityForResult(@NonNull final Fragment fragment,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode,
-                                              final View... sharedElements) {
-        startActivityForResult(fragment, null, DawnBridge.getApp().getPackageName(), clz.getName(),
-                requestCode, getOptionsBundle(fragment, sharedElements));
+    fun startActivityForResult(
+        fragment: Fragment, clz: Class<out Activity?>, requestCode: Int, vararg sharedElements: View
+    ) {
+        startActivityForResult(
+            fragment,
+            null,
+            DawnBridge.getApp().packageName,
+            clz.name,
+            requestCode,
+            getOptionsBundle(fragment, sharedElements.toMutableList().toTypedArray())
+        )
     }
 
     /**
@@ -935,13 +987,21 @@ public final class ActivityUtils {
      * @param enterAnim   进入动画 使用r.anim.xxx 的资源
      * @param exitAnim    退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivityForResult(@NonNull final Fragment fragment,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode,
-                                              @AnimRes final int enterAnim,
-                                              @AnimRes final int exitAnim) {
-        startActivityForResult(fragment, null, DawnBridge.getApp().getPackageName(), clz.getName(),
-                requestCode, getOptionsBundle(fragment, enterAnim, exitAnim));
+    fun startActivityForResult(
+        fragment: Fragment,
+        clz: Class<out Activity?>,
+        requestCode: Int,
+        @AnimRes enterAnim: Int,
+        @AnimRes exitAnim: Int
+    ) {
+        startActivityForResult(
+            fragment,
+            null,
+            DawnBridge.getApp().packageName,
+            clz.name,
+            requestCode,
+            getOptionsBundle(fragment, enterAnim, exitAnim)
+        )
     }
 
     /**
@@ -952,12 +1012,12 @@ public final class ActivityUtils {
      * @param clz         The activity class.
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Fragment fragment,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode) {
-        startActivityForResult(fragment, extras, DawnBridge.getApp().getPackageName(), clz.getName(),
-                requestCode, null);
+    fun startActivityForResult(
+        extras: Bundle, fragment: Fragment, clz: Class<out Activity?>, requestCode: Int
+    ) {
+        startActivityForResult(
+            fragment, extras, DawnBridge.getApp().packageName, clz.name, requestCode, null
+        )
     }
 
     /**
@@ -967,15 +1027,14 @@ public final class ActivityUtils {
      * @param fragment    fragment
      * @param clz         The activity class.
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
-     * @param options     跳转的动画. 使用{@link ActivityOptionsCompat#toBundle()} 生成所需要的bundle
+     * @param options     跳转的动画. 使用[ActivityOptionsCompat.toBundle] 生成所需要的bundle
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Fragment fragment,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode,
-                                              @Nullable final Bundle options) {
-        startActivityForResult(fragment, extras, DawnBridge.getApp().getPackageName(), clz.getName(),
-                requestCode, options);
+    fun startActivityForResult(
+        extras: Bundle, fragment: Fragment, clz: Class<out Activity?>, requestCode: Int, options: Bundle?
+    ) {
+        startActivityForResult(
+            fragment, extras, DawnBridge.getApp().packageName, clz.name, requestCode, options
+        )
     }
 
     /**
@@ -987,13 +1046,21 @@ public final class ActivityUtils {
      * @param requestCode    如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      * @param sharedElements 和目标的view联动的动画 比如平移啥的
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Fragment fragment,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode,
-                                              final View... sharedElements) {
-        startActivityForResult(fragment, extras, DawnBridge.getApp().getPackageName(), clz.getName(),
-                requestCode, getOptionsBundle(fragment, sharedElements));
+    fun startActivityForResult(
+        extras: Bundle,
+        fragment: Fragment,
+        clz: Class<out Activity?>,
+        requestCode: Int,
+        vararg sharedElements: View
+    ) {
+        startActivityForResult(
+            fragment,
+            extras,
+            DawnBridge.getApp().packageName,
+            clz.name,
+            requestCode,
+            getOptionsBundle(fragment, sharedElements.toMutableList().toTypedArray())
+        )
     }
 
     /**
@@ -1006,14 +1073,22 @@ public final class ActivityUtils {
      * @param enterAnim   进入动画 使用r.anim.xxx 的资源
      * @param exitAnim    退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Fragment fragment,
-                                              @NonNull final Class<? extends Activity> clz,
-                                              final int requestCode,
-                                              @AnimRes final int enterAnim,
-                                              @AnimRes final int exitAnim) {
-        startActivityForResult(fragment, extras, DawnBridge.getApp().getPackageName(), clz.getName(),
-                requestCode, getOptionsBundle(fragment, enterAnim, exitAnim));
+    fun startActivityForResult(
+        extras: Bundle,
+        fragment: Fragment,
+        clz: Class<out Activity?>,
+        requestCode: Int,
+        @AnimRes enterAnim: Int,
+        @AnimRes exitAnim: Int
+    ) {
+        startActivityForResult(
+            fragment,
+            extras,
+            DawnBridge.getApp().packageName,
+            clz.name,
+            requestCode,
+            getOptionsBundle(fragment, enterAnim, exitAnim)
+        )
     }
 
     /**
@@ -1025,12 +1100,10 @@ public final class ActivityUtils {
      * @param cls         目标activity.class.
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Fragment fragment,
-                                              @NonNull final String pkg,
-                                              @NonNull final String cls,
-                                              final int requestCode) {
-        startActivityForResult(fragment, extras, pkg, cls, requestCode, null);
+    fun startActivityForResult(
+        extras: Bundle, fragment: Fragment, pkg: String, cls: String, requestCode: Int
+    ) {
+        startActivityForResult(fragment, extras, pkg, cls, requestCode, null)
     }
 
     /**
@@ -1041,15 +1114,12 @@ public final class ActivityUtils {
      * @param pkg         包名
      * @param cls         目标activity.class.
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
-     * @param options     跳转的动画. 使用{@link ActivityOptionsCompat#toBundle()} 生成所需要的bundle
+     * @param options     跳转的动画. 使用[ActivityOptionsCompat.toBundle] 生成所需要的bundle
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Fragment fragment,
-                                              @NonNull final String pkg,
-                                              @NonNull final String cls,
-                                              final int requestCode,
-                                              @Nullable final Bundle options) {
-        startActivityForResult(fragment, extras, pkg, cls, requestCode, options);
+    fun startActivityForResult(
+        extras: Bundle, fragment: Fragment, pkg: String, cls: String, requestCode: Int, options: Bundle?
+    ) {
+        startActivityForResult(fragment, extras, pkg, cls, requestCode, options)
     }
 
     /**
@@ -1062,14 +1132,22 @@ public final class ActivityUtils {
      * @param requestCode    如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      * @param sharedElements 和目标的view联动的动画 比如平移啥的
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Fragment fragment,
-                                              @NonNull final String pkg,
-                                              @NonNull final String cls,
-                                              final int requestCode,
-                                              final View... sharedElements) {
-        startActivityForResult(fragment, extras, pkg, cls,
-                requestCode, getOptionsBundle(fragment, sharedElements));
+    fun startActivityForResult(
+        extras: Bundle,
+        fragment: Fragment,
+        pkg: String,
+        cls: String,
+        requestCode: Int,
+        vararg sharedElements: View
+    ) {
+        startActivityForResult(
+            fragment,
+            extras,
+            pkg,
+            cls,
+            requestCode,
+            getOptionsBundle(fragment, sharedElements.toMutableList().toTypedArray())
+        )
     }
 
     /**
@@ -1082,15 +1160,18 @@ public final class ActivityUtils {
      * @param enterAnim   进入动画 使用r.anim.xxx 的资源
      * @param exitAnim    退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivityForResult(@NonNull final Bundle extras,
-                                              @NonNull final Fragment fragment,
-                                              @NonNull final String pkg,
-                                              @NonNull final String cls,
-                                              final int requestCode,
-                                              @AnimRes final int enterAnim,
-                                              @AnimRes final int exitAnim) {
-        startActivityForResult(fragment, extras, pkg, cls,
-                requestCode, getOptionsBundle(fragment, enterAnim, exitAnim));
+    fun startActivityForResult(
+        extras: Bundle,
+        fragment: Fragment,
+        pkg: String,
+        cls: String,
+        requestCode: Int,
+        @AnimRes enterAnim: Int,
+        @AnimRes exitAnim: Int
+    ) {
+        startActivityForResult(
+            fragment, extras, pkg, cls, requestCode, getOptionsBundle(fragment, enterAnim, exitAnim)
+        )
     }
 
     /**
@@ -1100,10 +1181,10 @@ public final class ActivityUtils {
      * @param intent      intent
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      */
-    public static void startActivityForResult(@NonNull final Fragment fragment,
-                                              @NonNull final Intent intent,
-                                              final int requestCode) {
-        startActivityForResult(intent, fragment, requestCode, null);
+    fun startActivityForResult(
+        fragment: Fragment, intent: Intent, requestCode: Int
+    ) {
+        startActivityForResult(intent, fragment, requestCode, null)
     }
 
     /**
@@ -1112,13 +1193,12 @@ public final class ActivityUtils {
      * @param fragment    fragment
      * @param intent      intent
      * @param requestCode 如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
-     * @param options     跳转的动画. 使用{@link ActivityOptionsCompat#toBundle()} 生成所需要的bundle
+     * @param options     跳转的动画. 使用[ActivityOptionsCompat.toBundle] 生成所需要的bundle
      */
-    public static void startActivityForResult(@NonNull final Fragment fragment,
-                                              @NonNull final Intent intent,
-                                              final int requestCode,
-                                              @Nullable final Bundle options) {
-        startActivityForResult(intent, fragment, requestCode, options);
+    fun startActivityForResult(
+        fragment: Fragment, intent: Intent, requestCode: Int, options: Bundle?
+    ) {
+        startActivityForResult(intent, fragment, requestCode, options)
     }
 
     /**
@@ -1129,13 +1209,18 @@ public final class ActivityUtils {
      * @param requestCode    如果 >= 0，则活动退出时将在 onActivityResult() 中返回结果
      * @param sharedElements 和目标的view联动的动画 比如平移啥的
      */
-    public static void startActivityForResult(@NonNull final Fragment fragment,
-                                              @NonNull final Intent intent,
-                                              final int requestCode,
-                                              final View... sharedElements) {
-        startActivityForResult(intent, fragment,
-                requestCode, getOptionsBundle(fragment, sharedElements));
+    fun startActivityForResult(
+        fragment: Fragment, intent: Intent, requestCode: Int, vararg sharedElements: View
+    ) {
+
+
+        startActivityForResult(
+            intent, fragment, requestCode, getOptionsBundle(
+                fragment, sharedElements.toMutableList().toTypedArray()
+            )
+        )
     }
+
 
     /**
      * 前往活动并在活动结束时获取结果
@@ -1146,13 +1231,12 @@ public final class ActivityUtils {
      * @param enterAnim   进入动画 使用r.anim.xxx 的资源
      * @param exitAnim    退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivityForResult(@NonNull final Fragment fragment,
-                                              @NonNull final Intent intent,
-                                              final int requestCode,
-                                              @AnimRes final int enterAnim,
-                                              @AnimRes final int exitAnim) {
-        startActivityForResult(intent, fragment,
-                requestCode, getOptionsBundle(fragment, enterAnim, exitAnim));
+    fun startActivityForResult(
+        fragment: Fragment, intent: Intent, requestCode: Int, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        startActivityForResult(
+            intent, fragment, requestCode, getOptionsBundle(fragment, enterAnim, exitAnim)
+        )
     }
 
     /**
@@ -1160,8 +1244,8 @@ public final class ActivityUtils {
      *
      * @param intents The descriptions of the activities to start.
      */
-    public static void startActivities(@NonNull final Intent[] intents) {
-        startActivities(intents, getTopActivityOrApp(), null);
+    fun startActivities(intents: Array<Intent>) {
+        startActivities(intents, topActivityOrApp, null)
     }
 
     /**
@@ -1170,9 +1254,10 @@ public final class ActivityUtils {
      * @param intents The descriptions of the activities to start.
      * @param options Additional options for how the Activity should be started.
      */
-    public static void startActivities(@NonNull final Intent[] intents,
-                                       @Nullable final Bundle options) {
-        startActivities(intents, getTopActivityOrApp(), options);
+    fun startActivities(
+        intents: Array<Intent>, options: Bundle?
+    ) {
+        startActivities(intents, topActivityOrApp, options)
     }
 
     /**
@@ -1182,11 +1267,11 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivities(@NonNull final Intent[] intents,
-                                       @AnimRes final int enterAnim,
-                                       @AnimRes final int exitAnim) {
-        Context context = getTopActivityOrApp();
-        startActivities(intents, context, getOptionsBundle(context, enterAnim, exitAnim));
+    fun startActivities(
+        intents: Array<Intent>, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        val context = topActivityOrApp
+        startActivities(intents, context, getOptionsBundle(context, enterAnim, exitAnim))
     }
 
     /**
@@ -1195,9 +1280,10 @@ public final class ActivityUtils {
      * @param activity activity.
      * @param intents  The descriptions of the activities to start.
      */
-    public static void startActivities(@NonNull final Activity activity,
-                                       @NonNull final Intent[] intents) {
-        startActivities(intents, activity, null);
+    fun startActivities(
+        activity: Activity, intents: Array<Intent>
+    ) {
+        startActivities(intents, activity, null)
     }
 
     /**
@@ -1207,10 +1293,10 @@ public final class ActivityUtils {
      * @param intents  The descriptions of the activities to start.
      * @param options  Additional options for how the Activity should be started.
      */
-    public static void startActivities(@NonNull final Activity activity,
-                                       @NonNull final Intent[] intents,
-                                       @Nullable final Bundle options) {
-        startActivities(intents, activity, options);
+    fun startActivities(
+        activity: Activity, intents: Array<Intent>, options: Bundle?
+    ) {
+        startActivities(intents, activity, options)
     }
 
     /**
@@ -1221,60 +1307,53 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void startActivities(@NonNull final Activity activity,
-                                       @NonNull final Intent[] intents,
-                                       @AnimRes final int enterAnim,
-                                       @AnimRes final int exitAnim) {
-        startActivities(intents, activity, getOptionsBundle(activity, enterAnim, exitAnim));
+    fun startActivities(
+        activity: Activity, intents: Array<Intent>, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        startActivities(intents, activity, getOptionsBundle(activity, enterAnim, exitAnim))
     }
 
     /**
      * 前往桌面（相当于按了返回桌面按钮）
      */
-    public static void startHomeActivity() {
-        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-        homeIntent.addCategory(Intent.CATEGORY_HOME);
-        homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(homeIntent);
+    @JvmStatic
+    fun startHomeActivity() {
+        val homeIntent = Intent(Intent.ACTION_MAIN)
+        homeIntent.addCategory(Intent.CATEGORY_HOME)
+        homeIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(homeIntent)
     }
-
-    /**
-     * 前往main页面 就是在清单列表设置main的activity
-     */
-    public static void startLauncherActivity() {
-        startLauncherActivity(DawnBridge.getApp().getPackageName());
-    }
-
     /**
      * 前往main页面 就是在清单列表设置main的activity
      *
      * @param pkg 包名
      */
-    public static void startLauncherActivity(@NonNull final String pkg) {
-        String launcherActivity = getLauncherActivity(pkg);
+    /**
+     * 前往main页面 就是在清单列表设置main的activity
+     */
+    @JvmOverloads
+    fun startLauncherActivity(pkg: String = DawnBridge.getApp().packageName) {
+        val launcherActivity = getLauncherActivity(pkg)
         if (TextUtils.isEmpty(launcherActivity)) {
-            return;
+            return
         }
-        startActivity(pkg, launcherActivity);
+        startActivity(pkg, launcherActivity)
     }
 
-    /**
-     * Return  activity 列表
-     *
-     * @return the list of activity
-     */
-    public static List<Activity> getActivityList() {
-        return DawnBridge.getActivityList();
-    }
-
-    /**
-     * Return launcher activity的名字
-     *
-     * @return the name of launcher activity
-     */
-    public static String getLauncherActivity() {
-        return getLauncherActivity(DawnBridge.getApp().getPackageName());
-    }
+    val activityList: List<Activity>
+        /**
+         * Return  activity 列表
+         *
+         * @return the list of activity
+         */
+        get() = DawnBridge.getActivityList()
+    val launcherActivity: String
+        /**
+         * Return launcher activity的名字
+         *
+         * @return the name of launcher activity
+         */
+        get() = getLauncherActivity(DawnBridge.getApp().packageName)
 
     /**
      * Return launcher activity的名字
@@ -1282,29 +1361,28 @@ public final class ActivityUtils {
      * @param pkg The name of the package.
      * @return the name of launcher activity
      */
-    public static String getLauncherActivity(@NonNull final String pkg) {
+    @JvmStatic
+    fun getLauncherActivity(pkg: String): String {
         if (DawnBridge.isSpace(pkg)) {
-            return "";
+            return ""
         }
-        Intent intent = new Intent(Intent.ACTION_MAIN, null);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        intent.setPackage(pkg);
-        PackageManager pm = DawnBridge.getApp().getPackageManager();
-        List<ResolveInfo> info = pm.queryIntentActivities(intent, 0);
-        if (info == null || info.size() == 0) {
-            return "";
-        }
-        return info.get(0).activityInfo.name;
+        val intent = Intent(Intent.ACTION_MAIN, null)
+        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+        intent.setPackage(pkg)
+        val pm = DawnBridge.getApp().packageManager
+        val info = pm.queryIntentActivities(intent, 0)
+        return if (info == null || info.size == 0) {
+            ""
+        } else info[0].activityInfo.name
     }
 
-    /**
-     * Return the list of main activities.
-     *
-     * @return the list of main activities
-     */
-    public static List<String> getMainActivities() {
-        return getMainActivities(DawnBridge.getApp().getPackageName());
-    }
+    val mainActivities: List<String>
+        /**
+         * Return the list of main activities.
+         *
+         * @return the list of main activities
+         */
+        get() = getMainActivities(DawnBridge.getApp().packageName)
 
     /**
      * Return the list of main activities.
@@ -1312,105 +1390,101 @@ public final class ActivityUtils {
      * @param pkg The name of the package.
      * @return the list of main activities
      */
-    public static List<String> getMainActivities(@NonNull final String pkg) {
-        List<String> ret = new ArrayList<>();
-        Intent intent = new Intent(Intent.ACTION_MAIN, null);
-        intent.setPackage(pkg);
-        PackageManager pm = DawnBridge.getApp().getPackageManager();
-        List<ResolveInfo> info = pm.queryIntentActivities(intent, 0);
-        int size = info.size();
+    fun getMainActivities(pkg: String): List<String> {
+        val ret: MutableList<String> = ArrayList()
+        val intent = Intent(Intent.ACTION_MAIN, null)
+        intent.setPackage(pkg)
+        val pm = DawnBridge.getApp().packageManager
+        val info = pm.queryIntentActivities(intent, 0)
+        val size = info.size
         if (size == 0) {
-            return ret;
+            return ret
         }
-        for (int i = 0; i < size; i++) {
-            ResolveInfo ri = info.get(i);
-            if (ri.activityInfo.processName.equals(pkg)) {
-                ret.add(ri.activityInfo.name);
+        for (i in 0 until size) {
+            val ri = info[i]
+            if (ri.activityInfo.processName == pkg) {
+                ret.add(ri.activityInfo.name)
             }
         }
-        return ret;
+        return ret
     }
 
-    /**
-     * Return  栈定的activity
-     *
-     * @return the top activity in activity's stack
-     */
-    public static Activity getTopActivity() {
-        return DawnBridge.getTopActivity();
-    }
+    val topActivity: Activity
+        /**
+         * Return  栈定的activity
+         *
+         * @return the top activity in activity's stack
+         */
+        get() = DawnBridge.getTopActivity()
 
     /**
      * 指定activity是否在活动状态
      *
      * @param context The context.
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean isActivityAlive(final Context context) {
-        return isActivityAlive(getActivityByContext(context));
+    fun isActivityAlive(context: Context?): Boolean {
+        return isActivityAlive(getActivityByContext(context))
     }
 
     /**
      * 指定activity是否在活动状态
      *
      * @param activity The activity.
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean isActivityAlive(final Activity activity) {
-        return activity != null && !activity.isFinishing() && !activity.isDestroyed();
+    @JvmStatic
+    fun isActivityAlive(activity: Activity?): Boolean {
+        return activity != null && !activity.isFinishing && !activity.isDestroyed
     }
 
     /**
      * 返回activity是否存在于活动的堆栈中。
      *
      * @param activity The activity.
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean isActivityExistsInStack(@NonNull final Activity activity) {
-        List<Activity> activities = DawnBridge.getActivityList();
-        for (Activity aActivity : activities) {
-            if (aActivity.equals(activity)) {
-                return true;
+    fun isActivityExistsInStack(activity: Activity): Boolean {
+        val activities = DawnBridge.getActivityList()
+        for (aActivity in activities) {
+            if (aActivity == activity) {
+                return true
             }
         }
-        return false;
+        return false
     }
 
     /**
      * 返回activity是否存在于活动的堆栈中。
      *
      * @param clz The activity class.
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean isActivityExistsInStack(@NonNull final Class<? extends Activity> clz) {
-        List<Activity> activities = DawnBridge.getActivityList();
-        for (Activity aActivity : activities) {
-            if (aActivity.getClass().equals(clz)) {
-                return true;
+    fun isActivityExistsInStack(clz: Class<out Activity?>): Boolean {
+        val activities = DawnBridge.getActivityList()
+        for (aActivity in activities) {
+            if (aActivity.javaClass == clz) {
+                return true
             }
         }
-        return false;
+        return false
     }
-
-    /**
-     * 结束activity
-     *
-     * @param activity The activity.
-     */
-    public static void finishActivity(@NonNull final Activity activity) {
-        finishActivity(activity, false);
-    }
-
     /**
      * 结束activity
      *
      * @param activity   The activity.
      * @param isLoadAnim True 为传出活动使用动画，否则为 false。
      */
-    public static void finishActivity(@NonNull final Activity activity, final boolean isLoadAnim) {
-        activity.finish();
+    /**
+     * 结束activity
+     *
+     * @param activity The activity.
+     */
+    @JvmOverloads
+    fun finishActivity(activity: Activity, isLoadAnim: Boolean = false) {
+        activity.finish()
         if (!isLoadAnim) {
-            activity.overridePendingTransition(0, 0);
+            activity.overridePendingTransition(0, 0)
         }
     }
 
@@ -1421,36 +1495,33 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void finishActivity(@NonNull final Activity activity,
-                                      @AnimRes final int enterAnim,
-                                      @AnimRes final int exitAnim) {
-        activity.finish();
-        activity.overridePendingTransition(enterAnim, exitAnim);
+    fun finishActivity(
+        activity: Activity, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        activity.finish()
+        activity.overridePendingTransition(enterAnim, exitAnim)
     }
-
-    /**
-     * 结束activity
-     *
-     * @param clz The activity class.
-     */
-    public static void finishActivity(@NonNull final Class<? extends Activity> clz) {
-        finishActivity(clz, false);
-    }
-
     /**
      * 结束activity
      *
      * @param clz        The activity class.
      * @param isLoadAnim True to use animation for the outgoing activity, false otherwise.
      */
-    public static void finishActivity(@NonNull final Class<? extends Activity> clz,
-                                      final boolean isLoadAnim) {
-        List<Activity> activities = DawnBridge.getActivityList();
-        for (Activity activity : activities) {
-            if (activity.getClass().equals(clz)) {
-                activity.finish();
+    /**
+     * 结束activity
+     *
+     * @param clz The activity class.
+     */
+    @JvmOverloads
+    fun finishActivity(
+        clz: Class<out Activity?>, isLoadAnim: Boolean = false
+    ) {
+        val activities = DawnBridge.getActivityList()
+        for (activity in activities) {
+            if (activity.javaClass == clz) {
+                activity.finish()
                 if (!isLoadAnim) {
-                    activity.overridePendingTransition(0, 0);
+                    activity.overridePendingTransition(0, 0)
                 }
             }
         }
@@ -1463,29 +1534,17 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void finishActivity(@NonNull final Class<? extends Activity> clz,
-                                      @AnimRes final int enterAnim,
-                                      @AnimRes final int exitAnim) {
-        List<Activity> activities = DawnBridge.getActivityList();
-        for (Activity activity : activities) {
-            if (activity.getClass().equals(clz)) {
-                activity.finish();
-                activity.overridePendingTransition(enterAnim, exitAnim);
+    fun finishActivity(
+        clz: Class<out Activity?>, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        val activities = DawnBridge.getActivityList()
+        for (activity in activities) {
+            if (activity.javaClass == clz) {
+                activity.finish()
+                activity.overridePendingTransition(enterAnim, exitAnim)
             }
         }
     }
-
-    /**
-     * 结束activity
-     *
-     * @param activity      The activity.
-     * @param isIncludeSelf 如果包含活动，则为 true，否则为 false。
-     */
-    public static boolean finishToActivity(@NonNull final Activity activity,
-                                           final boolean isIncludeSelf) {
-        return finishToActivity(activity, isIncludeSelf, false);
-    }
-
     /**
      * 结束activity
      *
@@ -1493,20 +1552,27 @@ public final class ActivityUtils {
      * @param isIncludeSelf 如果包含活动，则为 true，否则为 false。
      * @param isLoadAnim    动画
      */
-    public static boolean finishToActivity(@NonNull final Activity activity,
-                                           final boolean isIncludeSelf,
-                                           final boolean isLoadAnim) {
-        List<Activity> activities = DawnBridge.getActivityList();
-        for (Activity act : activities) {
-            if (act.equals(activity)) {
+    /**
+     * 结束activity
+     *
+     * @param activity      The activity.
+     * @param isIncludeSelf 如果包含活动，则为 true，否则为 false。
+     */
+    @JvmOverloads
+    fun finishToActivity(
+        activity: Activity, isIncludeSelf: Boolean, isLoadAnim: Boolean = false
+    ): Boolean {
+        val activities = DawnBridge.getActivityList()
+        for (act in activities) {
+            if (act == activity) {
                 if (isIncludeSelf) {
-                    finishActivity(act, isLoadAnim);
+                    finishActivity(act, isLoadAnim)
                 }
-                return true;
+                return true
             }
-            finishActivity(act, isLoadAnim);
+            finishActivity(act, isLoadAnim)
         }
-        return false;
+        return false
     }
 
     /**
@@ -1517,34 +1583,21 @@ public final class ActivityUtils {
      * @param enterAnim     进入动画 使用r.anim.xxx 的资源
      * @param exitAnim      退出动画 使用r.anim.xxx 的资源
      */
-    public static boolean finishToActivity(@NonNull final Activity activity,
-                                           final boolean isIncludeSelf,
-                                           @AnimRes final int enterAnim,
-                                           @AnimRes final int exitAnim) {
-        List<Activity> activities = DawnBridge.getActivityList();
-        for (Activity act : activities) {
-            if (act.equals(activity)) {
+    fun finishToActivity(
+        activity: Activity, isIncludeSelf: Boolean, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ): Boolean {
+        val activities = DawnBridge.getActivityList()
+        for (act in activities) {
+            if (act == activity) {
                 if (isIncludeSelf) {
-                    finishActivity(act, enterAnim, exitAnim);
+                    finishActivity(act, enterAnim, exitAnim)
                 }
-                return true;
+                return true
             }
-            finishActivity(act, enterAnim, exitAnim);
+            finishActivity(act, enterAnim, exitAnim)
         }
-        return false;
+        return false
     }
-
-    /**
-     * 结束activity
-     *
-     * @param clz           The activity class.
-     * @param isIncludeSelf 如果包含活动，则为 true，否则为 false。
-     */
-    public static boolean finishToActivity(@NonNull final Class<? extends Activity> clz,
-                                           final boolean isIncludeSelf) {
-        return finishToActivity(clz, isIncludeSelf, false);
-    }
-
     /**
      * 结束activity
      *
@@ -1552,20 +1605,27 @@ public final class ActivityUtils {
      * @param isIncludeSelf 如果包含活动，则为 true，否则为 false。
      * @param isLoadAnim    动画
      */
-    public static boolean finishToActivity(@NonNull final Class<? extends Activity> clz,
-                                           final boolean isIncludeSelf,
-                                           final boolean isLoadAnim) {
-        List<Activity> activities = DawnBridge.getActivityList();
-        for (Activity act : activities) {
-            if (act.getClass().equals(clz)) {
+    /**
+     * 结束activity
+     *
+     * @param clz           The activity class.
+     * @param isIncludeSelf 如果包含活动，则为 true，否则为 false。
+     */
+    @JvmOverloads
+    fun finishToActivity(
+        clz: Class<out Activity?>, isIncludeSelf: Boolean, isLoadAnim: Boolean = false
+    ): Boolean {
+        val activities = DawnBridge.getActivityList()
+        for (act in activities) {
+            if (act.javaClass == clz) {
                 if (isIncludeSelf) {
-                    finishActivity(act, isLoadAnim);
+                    finishActivity(act, isLoadAnim)
                 }
-                return true;
+                return true
             }
-            finishActivity(act, isLoadAnim);
+            finishActivity(act, isLoadAnim)
         }
-        return false;
+        return false
     }
 
     /**
@@ -1576,45 +1636,40 @@ public final class ActivityUtils {
      * @param enterAnim     进入动画 使用r.anim.xxx 的资源
      * @param exitAnim      退出动画 使用r.anim.xxx 的资源
      */
-    public static boolean finishToActivity(@NonNull final Class<? extends Activity> clz,
-                                           final boolean isIncludeSelf,
-                                           @AnimRes final int enterAnim,
-                                           @AnimRes final int exitAnim) {
-        List<Activity> activities = DawnBridge.getActivityList();
-        for (Activity act : activities) {
-            if (act.getClass().equals(clz)) {
+    fun finishToActivity(
+        clz: Class<out Activity?>, isIncludeSelf: Boolean, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ): Boolean {
+        val activities = DawnBridge.getActivityList()
+        for (act in activities) {
+            if (act.javaClass == clz) {
                 if (isIncludeSelf) {
-                    finishActivity(act, enterAnim, exitAnim);
+                    finishActivity(act, enterAnim, exitAnim)
                 }
-                return true;
+                return true
             }
-            finishActivity(act, enterAnim, exitAnim);
+            finishActivity(act, enterAnim, exitAnim)
         }
-        return false;
+        return false
     }
-
-    /**
-     * Finish 类型不等于activity类别的activity
-     *
-     * @param clz The activity class.
-     */
-    public static void finishOtherActivities(@NonNull final Class<? extends Activity> clz) {
-        finishOtherActivities(clz, false);
-    }
-
-
     /**
      * Finish 类型不等于activity类别的activity
      *
      * @param clz        The activity class.
      * @param isLoadAnim 动画
      */
-    public static void finishOtherActivities(@NonNull final Class<? extends Activity> clz,
-                                             final boolean isLoadAnim) {
-        List<Activity> activities = DawnBridge.getActivityList();
-        for (Activity act : activities) {
-            if (!act.getClass().equals(clz)) {
-                finishActivity(act, isLoadAnim);
+    /**
+     * Finish 类型不等于activity类别的activity
+     *
+     * @param clz The activity class.
+     */
+    @JvmOverloads
+    fun finishOtherActivities(
+        clz: Class<out Activity?>, isLoadAnim: Boolean = false
+    ) {
+        val activities = DawnBridge.getActivityList()
+        for (act in activities) {
+            if (act.javaClass != clz) {
+                finishActivity(act, isLoadAnim)
             }
         }
     }
@@ -1626,36 +1681,33 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void finishOtherActivities(@NonNull final Class<? extends Activity> clz,
-                                             @AnimRes final int enterAnim,
-                                             @AnimRes final int exitAnim) {
-        List<Activity> activities = DawnBridge.getActivityList();
-        for (Activity act : activities) {
-            if (!act.getClass().equals(clz)) {
-                finishActivity(act, enterAnim, exitAnim);
+    fun finishOtherActivities(
+        clz: Class<out Activity?>, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        val activities = DawnBridge.getActivityList()
+        for (act in activities) {
+            if (act.javaClass != clz) {
+                finishActivity(act, enterAnim, exitAnim)
             }
         }
     }
-
-    /**
-     * Finish 所有 activities.
-     */
-    public static void finishAllActivities() {
-        finishAllActivities(false);
-    }
-
     /**
      * Finish 所有 activities.
      *
      * @param isLoadAnim 动画
      */
-    public static void finishAllActivities(final boolean isLoadAnim) {
-        List<Activity> activityList = DawnBridge.getActivityList();
-        for (Activity act : activityList) {
+    /**
+     * Finish 所有 activities.
+     */
+    @JvmOverloads
+    @JvmStatic
+    fun finishAllActivities(isLoadAnim: Boolean = false) {
+        val activityList = DawnBridge.getActivityList()
+        for (act in activityList) {
             // sActivityList remove the index activity at onActivityDestroyed
-            act.finish();
+            act.finish()
             if (!isLoadAnim) {
-                act.overridePendingTransition(0, 0);
+                act.overridePendingTransition(0, 0)
             }
         }
     }
@@ -1666,32 +1718,29 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void finishAllActivities(@AnimRes final int enterAnim,
-                                           @AnimRes final int exitAnim) {
-        List<Activity> activityList = DawnBridge.getActivityList();
-        for (Activity act : activityList) {
+    fun finishAllActivities(
+        @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        val activityList = DawnBridge.getActivityList()
+        for (act in activityList) {
             // sActivityList remove the index activity at onActivityDestroyed
-            act.finish();
-            act.overridePendingTransition(enterAnim, exitAnim);
+            act.finish()
+            act.overridePendingTransition(enterAnim, exitAnim)
         }
     }
-
-    /**
-     * finish除栈顶activity外的所有activity
-     */
-    public static void finishAllActivitiesExceptNewest() {
-        finishAllActivitiesExceptNewest(false);
-    }
-
     /**
      * finish除栈顶activity外的所有activity
      *
      * @param isLoadAnim 动画
      */
-    public static void finishAllActivitiesExceptNewest(final boolean isLoadAnim) {
-        List<Activity> activities = DawnBridge.getActivityList();
-        for (int i = 1; i < activities.size(); i++) {
-            finishActivity(activities.get(i), isLoadAnim);
+    /**
+     * finish除栈顶activity外的所有activity
+     */
+    @JvmOverloads
+    fun finishAllActivitiesExceptNewest(isLoadAnim: Boolean = false) {
+        val activities = DawnBridge.getActivityList()
+        for (i in 1 until activities.size) {
+            finishActivity(activities[i], isLoadAnim)
         }
     }
 
@@ -1701,11 +1750,12 @@ public final class ActivityUtils {
      * @param enterAnim 进入动画 使用r.anim.xxx 的资源
      * @param exitAnim  退出动画 使用r.anim.xxx 的资源
      */
-    public static void finishAllActivitiesExceptNewest(@AnimRes final int enterAnim,
-                                                       @AnimRes final int exitAnim) {
-        List<Activity> activities = DawnBridge.getActivityList();
-        for (int i = 1; i < activities.size(); i++) {
-            finishActivity(activities.get(i), enterAnim, exitAnim);
+    fun finishAllActivitiesExceptNewest(
+        @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
+    ) {
+        val activities = DawnBridge.getActivityList()
+        for (i in 1 until activities.size) {
+            finishActivity(activities[i], enterAnim, exitAnim)
         }
     }
 
@@ -1715,9 +1765,8 @@ public final class ActivityUtils {
      * @param activity The activity.
      * @return activity 的icon
      */
-    @Nullable
-    public static Drawable getActivityIcon(@NonNull final Activity activity) {
-        return getActivityIcon(activity.getComponentName());
+    fun getActivityIcon(activity: Activity): Drawable? {
+        return getActivityIcon(activity.componentName)
     }
 
     /**
@@ -1726,9 +1775,8 @@ public final class ActivityUtils {
      * @param clz The activity class.
      * @return activity 的icon
      */
-    @Nullable
-    public static Drawable getActivityIcon(@NonNull final Class<? extends Activity> clz) {
-        return getActivityIcon(new ComponentName(DawnBridge.getApp(), clz));
+    fun getActivityIcon(clz: Class<out Activity?>): Drawable? {
+        return getActivityIcon(ComponentName(DawnBridge.getApp(), clz))
     }
 
     /**
@@ -1737,14 +1785,13 @@ public final class ActivityUtils {
      * @param activityName The name of activity.
      * @return activity 的icon
      */
-    @Nullable
-    public static Drawable getActivityIcon(@NonNull final ComponentName activityName) {
-        PackageManager pm = DawnBridge.getApp().getPackageManager();
-        try {
-            return pm.getActivityIcon(activityName);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-            return null;
+    fun getActivityIcon(activityName: ComponentName): Drawable? {
+        val pm = DawnBridge.getApp().packageManager
+        return try {
+            pm.getActivityIcon(activityName)
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+            null
         }
     }
 
@@ -1754,9 +1801,8 @@ public final class ActivityUtils {
      * @param activity activity.
      * @return activity 的logo
      */
-    @Nullable
-    public static Drawable getActivityLogo(@NonNull final Activity activity) {
-        return getActivityLogo(activity.getComponentName());
+    fun getActivityLogo(activity: Activity): Drawable? {
+        return getActivityLogo(activity.componentName)
     }
 
     /**
@@ -1765,9 +1811,8 @@ public final class ActivityUtils {
      * @param clz activity class.
      * @return activity 的logo
      */
-    @Nullable
-    public static Drawable getActivityLogo(@NonNull final Class<? extends Activity> clz) {
-        return getActivityLogo(new ComponentName(DawnBridge.getApp(), clz));
+    fun getActivityLogo(clz: Class<out Activity?>): Drawable? {
+        return getActivityLogo(ComponentName(DawnBridge.getApp(), clz))
     }
 
     /**
@@ -1776,14 +1821,13 @@ public final class ActivityUtils {
      * @param activityName activity 名称.
      * @return activity 的logo
      */
-    @Nullable
-    public static Drawable getActivityLogo(@NonNull final ComponentName activityName) {
-        PackageManager pm = DawnBridge.getApp().getPackageManager();
-        try {
-            return pm.getActivityLogo(activityName);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-            return null;
+    fun getActivityLogo(activityName: ComponentName): Drawable? {
+        val pm = DawnBridge.getApp().packageManager
+        return try {
+            pm.getActivityLogo(activityName)
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+            null
         }
     }
 
@@ -1793,228 +1837,204 @@ public final class ActivityUtils {
      * @param context context
      * @return 此上下文的activity
      */
-    @Nullable
-    public static Activity getActivityByContext(@Nullable Context context) {
+    @JvmStatic
+    fun getActivityByContext(context: Context?): Activity? {
         if (context == null) {
-            return null;
+            return null
         }
-        Activity activity = getActivityByContextInner(context);
-        if (!isActivityAlive(activity)) {
-            return null;
-        }
-        return activity;
+        val activity = getActivityByContextInner(context)
+        return if (!isActivityAlive(activity)) {
+            null
+        } else activity
     }
 
-    @Nullable
-    private static Activity getActivityByContextInner(@Nullable Context context) {
-        if (context == null) {
-            return null;
-        }
-        List<Context> list = new ArrayList<>();
-        while (context instanceof ContextWrapper) {
-            if (context instanceof Activity) {
-                return (Activity) context;
+    private fun getActivityByContextInner(context: Context?): Activity? {
+        var context: Context? = context ?: return null
+        val list: MutableList<Context> = ArrayList()
+        while (context is ContextWrapper) {
+            if (context is Activity) {
+                return context
             }
-            Activity activity = getActivityFromDecorContext(context);
+            val activity = getActivityFromDecorContext(context)
             if (activity != null) {
-                return activity;
+                return activity
             }
-            list.add(context);
-            context = ((ContextWrapper) context).getBaseContext();
+            list.add(context)
+            context = context.baseContext
             if (context == null) {
-                return null;
+                return null
             }
             if (list.contains(context)) {
                 // loop context
-                return null;
+                return null
             }
         }
-        return null;
+        return null
     }
 
-
-    @Nullable
-    private static Activity getActivityFromDecorContext(@Nullable Context context) {
+    private fun getActivityFromDecorContext(context: Context?): Activity? {
         if (context == null) {
-            return null;
+            return null
         }
-        if ("com.android.internal.policy.DecorContext".equals(context.getClass().getName())) {
+        if ("com.android.internal.policy.DecorContext" == context.javaClass.name) {
             try {
-                Field mActivityContextField = context.getClass().getDeclaredField("mActivityContext");
-                mActivityContextField.setAccessible(true);
-                //noinspection ConstantConditions,unchecked
-                return ((WeakReference<Activity>) mActivityContextField.get(context)).get();
-            } catch (Exception ignore) {
+                val mActivityContextField = context.javaClass.getDeclaredField("mActivityContext")
+                mActivityContextField.isAccessible = true
+                return (mActivityContextField[context] as WeakReference<Activity?>).get()
+            } catch (ignore: Exception) {
             }
         }
-        return null;
+        return null
     }
 
-    private static void startActivity(final Context context,
-                                      final Bundle extras,
-                                      final String pkg,
-                                      final String cls,
-                                      @Nullable final Bundle options) {
-        Intent intent = new Intent();
+    private fun startActivity(
+        context: Context, extras: Bundle?, pkg: String, cls: String, options: Bundle?
+    ) {
+        val intent = Intent()
         if (extras != null) {
-            intent.putExtras(extras);
+            intent.putExtras(extras)
         }
-        intent.setComponent(new ComponentName(pkg, cls));
-        startActivity(intent, context, options);
+        intent.component = ComponentName(pkg, cls)
+        startActivity(intent, context, options)
     }
 
-    private static boolean startActivity(final Intent intent,
-                                         final Context context,
-                                         final Bundle options) {
+    private fun startActivity(
+        intent: Intent, context: Context, options: Bundle?
+    ): Boolean {
         if (!isIntentAvailable(intent)) {
-            Log.e("ActivityUtils", "intent is unavailable");
-            return false;
+            Log.e("ActivityUtils", "intent is unavailable")
+            return false
         }
-        if (!(context instanceof Activity)) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (context !is Activity) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         if (options != null) {
-            context.startActivity(intent, options);
+            context.startActivity(intent, options)
         } else {
-            context.startActivity(intent);
+            context.startActivity(intent)
         }
-        return true;
+        return true
     }
 
-    private static boolean isIntentAvailable(final Intent intent) {
-        return DawnBridge.getApp()
-                .getPackageManager()
-                .queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
-                .size() > 0;
+    private fun isIntentAvailable(intent: Intent): Boolean {
+        return DawnBridge.getApp().packageManager.queryIntentActivities(
+            intent, PackageManager.MATCH_DEFAULT_ONLY
+        ).size > 0
     }
 
-    private static boolean startActivityForResult(final Activity activity,
-                                                  final Bundle extras,
-                                                  final String pkg,
-                                                  final String cls,
-                                                  final int requestCode,
-                                                  @Nullable final Bundle options) {
-        Intent intent = new Intent();
+    private fun startActivityForResult(
+        activity: Activity, extras: Bundle?, pkg: String, cls: String, requestCode: Int, options: Bundle?
+    ): Boolean {
+        val intent = Intent()
         if (extras != null) {
-            intent.putExtras(extras);
+            intent.putExtras(extras)
         }
-        intent.setComponent(new ComponentName(pkg, cls));
-        return startActivityForResult(intent, activity, requestCode, options);
+        intent.component = ComponentName(pkg, cls)
+        return startActivityForResult(intent, activity, requestCode, options)
     }
 
-    private static boolean startActivityForResult(final Intent intent,
-                                                  final Activity activity,
-                                                  final int requestCode,
-                                                  @Nullable final Bundle options) {
+    private fun startActivityForResult(
+        intent: Intent, activity: Activity, requestCode: Int, options: Bundle?
+    ): Boolean {
         if (!isIntentAvailable(intent)) {
-            Log.e("ActivityUtils", "intent is unavailable");
-            return false;
+            Log.e("ActivityUtils", "intent is unavailable")
+            return false
         }
         if (options != null) {
-            activity.startActivityForResult(intent, requestCode, options);
+            activity.startActivityForResult(intent, requestCode, options)
         } else {
-            activity.startActivityForResult(intent, requestCode);
+            activity.startActivityForResult(intent, requestCode)
         }
-        return true;
+        return true
     }
 
-    private static void startActivities(final Intent[] intents,
-                                        final Context context,
-                                        @Nullable final Bundle options) {
-        if (!(context instanceof Activity)) {
-            for (Intent intent : intents) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    private fun startActivities(
+        intents: Array<Intent>, context: Context, options: Bundle?
+    ) {
+        if (context !is Activity) {
+            for (intent in intents) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
         }
         if (options != null) {
-            context.startActivities(intents, options);
+            context.startActivities(intents, options)
         } else {
-            context.startActivities(intents);
+            context.startActivities(intents)
         }
     }
 
-    private static boolean startActivityForResult(final Fragment fragment,
-                                                  final Bundle extras,
-                                                  final String pkg,
-                                                  final String cls,
-                                                  final int requestCode,
-                                                  @Nullable final Bundle options) {
-        Intent intent = new Intent();
+    private fun startActivityForResult(
+        fragment: Fragment, extras: Bundle?, pkg: String, cls: String, requestCode: Int, options: Bundle?
+    ): Boolean {
+        val intent = Intent()
         if (extras != null) {
-            intent.putExtras(extras);
+            intent.putExtras(extras)
         }
-        intent.setComponent(new ComponentName(pkg, cls));
-        return startActivityForResult(intent, fragment, requestCode, options);
+        intent.component = ComponentName(pkg, cls)
+        return startActivityForResult(intent, fragment, requestCode, options)
     }
 
-    private static boolean startActivityForResult(final Intent intent,
-                                                  final Fragment fragment,
-                                                  final int requestCode,
-                                                  @Nullable final Bundle options) {
+    private fun startActivityForResult(
+        intent: Intent, fragment: Fragment, requestCode: Int, options: Bundle?
+    ): Boolean {
         if (!isIntentAvailable(intent)) {
-            Log.e("ActivityUtils", "intent is unavailable");
-            return false;
+            Log.e("ActivityUtils", "intent is unavailable")
+            return false
         }
-        if (fragment.getActivity() == null) {
-            Log.e("ActivityUtils", "Fragment " + fragment + " not attached to Activity");
-            return false;
+        if (fragment.activity == null) {
+            Log.e("ActivityUtils", "Fragment $fragment not attached to Activity")
+            return false
         }
         if (options != null) {
-            fragment.startActivityForResult(intent, requestCode, options);
+            fragment.startActivityForResult(intent, requestCode, options)
         } else {
-            fragment.startActivityForResult(intent, requestCode);
+            fragment.startActivityForResult(intent, requestCode)
         }
-        return true;
+        return true
     }
 
-    private static Bundle getOptionsBundle(final Fragment fragment,
-                                           final int enterAnim,
-                                           final int exitAnim) {
-        Activity activity = fragment.getActivity();
-        if (activity == null) {
-            return null;
-        }
-        return ActivityOptionsCompat.makeCustomAnimation(activity, enterAnim, exitAnim).toBundle();
+    private fun getOptionsBundle(
+        fragment: Fragment, enterAnim: Int, exitAnim: Int
+    ): Bundle? {
+        val activity = fragment.activity ?: return null
+        return ActivityOptionsCompat.makeCustomAnimation(activity, enterAnim, exitAnim).toBundle()
     }
 
-    private static Bundle getOptionsBundle(final Context context,
-                                           final int enterAnim,
-                                           final int exitAnim) {
-        return ActivityOptionsCompat.makeCustomAnimation(context, enterAnim, exitAnim).toBundle();
+    private fun getOptionsBundle(
+        context: Context, enterAnim: Int, exitAnim: Int
+    ): Bundle? {
+        return ActivityOptionsCompat.makeCustomAnimation(context, enterAnim, exitAnim).toBundle()
     }
 
-    private static Bundle getOptionsBundle(final Fragment fragment,
-                                           final View[] sharedElements) {
-        Activity activity = fragment.getActivity();
-        if (activity == null) {
-            return null;
-        }
-        return getOptionsBundle(activity, sharedElements);
+    private fun getOptionsBundle(
+        fragment: Fragment, sharedElements: Array<View>
+    ): Bundle? {
+        val activity = fragment.activity ?: return null
+        return getOptionsBundle(activity, sharedElements)
     }
 
-    private static Bundle getOptionsBundle(final Activity activity,
-                                           final View[] sharedElements) {
+    private fun getOptionsBundle(
+        activity: Activity, sharedElements: Array<View>
+    ): Bundle? {
         if (sharedElements == null) {
-            return null;
+            return null
         }
-        int len = sharedElements.length;
+        val len = sharedElements.size
         if (len <= 0) {
-            return null;
+            return null
         }
-        @SuppressWarnings("unchecked")
-        Pair<View, String>[] pairs = new Pair[len];
-        for (int i = 0; i < len; i++) {
-            pairs[i] = Pair.create(sharedElements[i], sharedElements[i].getTransitionName());
+        val pairs: Array<Pair<View, String>> = mutableListOf<Pair<View, String>>().toTypedArray()
+        for (i in 0 until len) {
+            pairs[i] = Pair.create(sharedElements[i], sharedElements[i].transitionName)
         }
-        return ActivityOptionsCompat.makeSceneTransitionAnimation(activity, pairs).toBundle();
+        return ActivityOptionsCompat.makeSceneTransitionAnimation(activity, *pairs).toBundle()
     }
 
-    private static Context getTopActivityOrApp() {
-        if (DawnBridge.isAppForeground()) {
-            Activity topActivity = getTopActivity();
-            return topActivity == null ? DawnBridge.getApp() : topActivity;
+    private val topActivityOrApp: Context
+        get() = if (DawnBridge.isAppForeground()) {
+            val topActivity = topActivity
+            topActivity
         } else {
-            return DawnBridge.getApp();
+            DawnBridge.getApp()
         }
-    }
 }

@@ -1,17 +1,11 @@
-package com.lzq.dawn.util.metaData;
+package com.lzq.dawn.util.metaData
 
-import android.app.Activity;
-import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ServiceInfo;
-
-import androidx.annotation.NonNull;
-
-import com.lzq.dawn.DawnBridge;
+import android.app.Activity
+import android.app.Service
+import android.content.BroadcastReceiver
+import android.content.ComponentName
+import android.content.pm.PackageManager
+import com.lzq.dawn.DawnBridge
 
 /**
  * @Name :MetaDataUtils
@@ -19,40 +13,37 @@ import com.lzq.dawn.DawnBridge;
  * @Author :  Lzq
  * @Desc : 关于清单文件中 MetaData
  */
-public final class MetaDataUtils {
-    private MetaDataUtils() {
-    }
-
+object MetaDataUtils {
     /**
      * 返回应用程序中 meta-data 的值。
      *
      * @param key meta-data 的 key（name）
      * @return 清单文件中 meta-data 的value
      */
-    public static String getMetaDataInApp(@NonNull final String key) {
-        String value = "";
-        PackageManager pm = DawnBridge.getApp().getPackageManager();
-        String packageName = DawnBridge.getApp().getPackageName();
+    fun getMetaDataInApp(key: String): String {
+        var value = ""
+        val pm = DawnBridge.getApp().packageManager
+        val packageName = DawnBridge.getApp().packageName
         try {
-            ApplicationInfo ai = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-            value = String.valueOf(ai.metaData.get(key));
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            val ai = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+            value = ai.metaData[key].toString()
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
         }
-        return value;
+        return value
     }
 
-
     /**
-     *  返回activity中 meta-data 的值。
+     * 返回activity中 meta-data 的值。
      *
      * @param activity  activity.
      * @param key      meta-data 的 key（name）
      * @return  清单文件中activity的 meta-data 的value
      */
-    public static String getMetaDataInActivity(@NonNull final Activity activity,
-                                               @NonNull final String key) {
-        return getMetaDataInActivity(activity.getClass(), key);
+    fun getMetaDataInActivity(
+        activity: Activity, key: String
+    ): String {
+        return getMetaDataInActivity(activity.javaClass, key)
     }
 
     /**
@@ -62,83 +53,88 @@ public final class MetaDataUtils {
      * @param key  meta-data 的 key（name）
      * @return 清单文件中activity的 meta-data 的value
      */
-    public static String getMetaDataInActivity(@NonNull final Class<? extends Activity> clz,
-                                               @NonNull final String key) {
-        String value = "";
-        PackageManager pm = DawnBridge.getApp().getPackageManager();
-        ComponentName componentName = new ComponentName(DawnBridge.getApp(), clz);
+    fun getMetaDataInActivity(
+        clz: Class<out Activity?>, key: String
+    ): String {
+        var value = ""
+        val pm = DawnBridge.getApp().packageManager
+        val componentName = ComponentName(DawnBridge.getApp(), clz)
         try {
-            ActivityInfo ai = pm.getActivityInfo(componentName, PackageManager.GET_META_DATA);
-            value = String.valueOf(ai.metaData.get(key));
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            val ai = pm.getActivityInfo(componentName, PackageManager.GET_META_DATA)
+            value = ai.metaData[key].toString()
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
         }
-        return value;
+        return value
     }
 
     /**
-     *  返回service中 meta-data 的值。
+     * 返回service中 meta-data 的值。
      *
      * @param service  service.
      * @param key      meta-data 的 key（name）
      * @return  清单文件中service的 meta-data 的value
      */
-    public static String getMetaDataInService(@NonNull final Service service,
-                                              @NonNull final String key) {
-        return getMetaDataInService(service.getClass(), key);
+    fun getMetaDataInService(
+        service: Service, key: String
+    ): String {
+        return getMetaDataInService(service.javaClass, key)
     }
 
     /**
-     *  返回service中 meta-data 的值。
+     * 返回service中 meta-data 的值。
      *
      * @param clz  service class.
      * @param key      meta-data 的 key（name）
      * @return  清单文件中service的 meta-data 的value
      */
-    public static String getMetaDataInService(@NonNull final Class<? extends Service> clz,
-                                              @NonNull final String key) {
-        String value = "";
-        PackageManager pm = DawnBridge.getApp().getPackageManager();
-        ComponentName componentName = new ComponentName(DawnBridge.getApp(), clz);
+    fun getMetaDataInService(
+        clz: Class<out Service?>, key: String
+    ): String {
+        var value = ""
+        val pm = DawnBridge.getApp().packageManager
+        val componentName = ComponentName(DawnBridge.getApp(), clz)
         try {
-            ServiceInfo info = pm.getServiceInfo(componentName, PackageManager.GET_META_DATA);
-            value = String.valueOf(info.metaData.get(key));
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            val info = pm.getServiceInfo(componentName, PackageManager.GET_META_DATA)
+            value = info.metaData[key].toString()
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
         }
-        return value;
+        return value
     }
 
     /**
-     *  返回receiver中 meta-data 的值。
+     * 返回receiver中 meta-data 的值。
      *
      * @param receiver  receiver.
      * @param key      meta-data 的 key（name）
      * @return  清单文件中receiver的 meta-data 的value
      */
-    public static String getMetaDataInReceiver(@NonNull final BroadcastReceiver receiver,
-                                               @NonNull final String key) {
-        return getMetaDataInReceiver(receiver.getClass(), key);
+    fun getMetaDataInReceiver(
+        receiver: BroadcastReceiver, key: String
+    ): String {
+        return getMetaDataInReceiver(receiver.javaClass, key)
     }
 
     /**
-     *  返回receiver中 meta-data 的值。
+     * 返回receiver中 meta-data 的值。
      *
      * @param clz  receiver class.
      * @param key      meta-data 的 key（name）
      * @return  清单文件中receiver的 meta-data 的value
      */
-    public static String getMetaDataInReceiver(@NonNull final Class<? extends BroadcastReceiver> clz,
-                                               @NonNull final String key) {
-        String value = "";
-        PackageManager pm = DawnBridge.getApp().getPackageManager();
-        ComponentName componentName = new ComponentName(DawnBridge.getApp(), clz);
+    fun getMetaDataInReceiver(
+        clz: Class<out BroadcastReceiver?>, key: String
+    ): String {
+        var value = ""
+        val pm = DawnBridge.getApp().packageManager
+        val componentName = ComponentName(DawnBridge.getApp(), clz)
         try {
-            ActivityInfo info = pm.getReceiverInfo(componentName, PackageManager.GET_META_DATA);
-            value = String.valueOf(info.metaData.get(key));
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            val info = pm.getReceiverInfo(componentName, PackageManager.GET_META_DATA)
+            value = info.metaData[key].toString()
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
         }
-        return value;
+        return value
     }
 }

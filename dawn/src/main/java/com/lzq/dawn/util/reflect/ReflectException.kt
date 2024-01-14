@@ -1,4 +1,4 @@
-package com.lzq.dawn.util.reflect;
+package com.lzq.dawn.util.reflect
 
 /**
  * @Name :ReflectException
@@ -6,19 +6,12 @@ package com.lzq.dawn.util.reflect;
  * @Author :  Lzq
  * @Desc : 反射异常
  */
-public class ReflectException extends RuntimeException  {
+class ReflectException : RuntimeException {
+    constructor(message: String?) : super(message)
+    constructor(message: String?, cause: Throwable?) : super(message, cause)
+    constructor(cause: Throwable?) : super(cause)
 
-    private static final long serialVersionUID = 858774075258496016L;
-
-    public ReflectException(String message) {
-        super(message);
-    }
-
-    public ReflectException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ReflectException(Throwable cause) {
-        super(cause);
+    companion object {
+        private const val serialVersionUID = 858774075258496016L
     }
 }

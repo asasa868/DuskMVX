@@ -1,10 +1,6 @@
-package com.lzq.dawn.util.crash;
+package com.lzq.dawn.util.crash
 
-import androidx.annotation.NonNull;
-
-import com.lzq.dawn.DawnBridge;
-
-import java.util.Map;
+import com.lzq.dawn.DawnBridge
 
 /**
  * @Name :CrashInfo
@@ -12,31 +8,22 @@ import java.util.Map;
  * @Author :  Lzq
  * @Desc :
  */
-public final class CrashInfo {
-    private final DawnBridge.FileHead mFileHeadProvider;
-    private final Throwable mThrowable;
+class CrashInfo internal constructor(time: String?, val throwable: Throwable?) {
+    private val mFileHeadProvider: DawnBridge.FileHead = DawnBridge.FileHead("Crash")
 
-    CrashInfo(String time, Throwable throwable) {
-        mThrowable = throwable;
-        mFileHeadProvider = new DawnBridge.FileHead("Crash");
-        mFileHeadProvider.addFirst("Time Of Crash", time);
+    init {
+        mFileHeadProvider.addFirst("Time Of Crash", time)
     }
 
-    public final void addExtraHead(Map<String, String> extraHead) {
-        mFileHeadProvider.append(extraHead);
+    fun addExtraHead(extraHead: Map<String?, String?>?) {
+        mFileHeadProvider.append(extraHead)
     }
 
-    public final void addExtraHead(String key, String value) {
-        mFileHeadProvider.append(key, value);
+    fun addExtraHead(key: String?, value: String?) {
+        mFileHeadProvider.append(key, value)
     }
 
-    public final Throwable getThrowable() {
-        return mThrowable;
-    }
-
-    @NonNull
-    @Override
-    public String toString() {
-        return mFileHeadProvider.toString() + DawnBridge.getFullStackTrace(mThrowable);
+    override fun toString(): String {
+        return mFileHeadProvider.toString() + DawnBridge.getFullStackTrace(throwable)
     }
 }

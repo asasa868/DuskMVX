@@ -1,4 +1,4 @@
-package com.lzq.dawn.util.rom;
+package com.lzq.dawn.util.rom
 
 /**
  * @Name :RomInfo
@@ -6,29 +6,10 @@ package com.lzq.dawn.util.rom;
  * @Author :  Lzq
  * @Desc :
  */
-public final class RomInfo {
-    private String name;
-    private String version;
-
-    public String getName() {
-        return name;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    @Override
-    public String toString() {
-        return "RomInfo{name=" + name +
-                ", version=" + version + "}";
+class RomInfo {
+    var name: String? = null
+    var version: String? = null
+    override fun toString(): String {
+        return "RomInfo{name=$name, version=$version}"
     }
 }

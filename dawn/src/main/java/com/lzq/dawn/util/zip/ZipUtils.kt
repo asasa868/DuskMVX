@@ -1,24 +1,19 @@
-package com.lzq.dawn.util.zip;
+package com.lzq.dawn.util.zip
 
-import android.util.Log;
-
-import com.lzq.dawn.DawnBridge;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
+import android.util.Log
+import com.lzq.dawn.DawnBridge
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.Enumeration
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 
 /**
  * @Name : ZipUtils
@@ -26,26 +21,22 @@ import java.util.zip.ZipOutputStream;
  * @Author :  Lzq
  * @Desc : zip
  */
-public class ZipUtils {
-
-    private static final int BUFFER_LEN = 8192;
-
-    private ZipUtils() {
-    }
-
+object ZipUtils {
+    private const val BUFFER_LEN = 8192
 
     /**
      * 压缩文件
      *
      * @param srcFiles    文件的来源。
      * @param zipFilePath 压缩后文件的路径。
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      * @throws IOException 如果发生 IO 错误
      */
-    public static boolean zipFiles(final Collection<String> srcFiles,
-                                   final String zipFilePath)
-            throws IOException {
-        return zipFiles(srcFiles, zipFilePath, null);
+    @Throws(IOException::class)
+    fun zipFiles(
+        srcFiles: Collection<String?>?, zipFilePath: String?
+    ): Boolean {
+        return zipFiles(srcFiles, zipFilePath, null)
     }
 
     /**
@@ -54,75 +45,62 @@ public class ZipUtils {
      * @param srcFilePaths 源文件的路径。
      * @param zipFilePath  压缩后文件的路径。
      * @param comment      评论
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      * @throws IOException 如果发生 IO 错误
      */
-    public static boolean zipFiles(final Collection<String> srcFilePaths,
-                                   final String zipFilePath,
-                                   final String comment)
-            throws IOException {
+    @Throws(IOException::class)
+    fun zipFiles(
+        srcFilePaths: Collection<String?>?, zipFilePath: String?, comment: String?
+    ): Boolean {
         if (srcFilePaths == null || zipFilePath == null) {
-            return false;
+            return false
         }
-        ZipOutputStream zos = null;
-        try {
-            zos = new ZipOutputStream(new FileOutputStream(zipFilePath));
-            for (String srcFile : srcFilePaths) {
+        var zos: ZipOutputStream? = null
+        return try {
+            zos = ZipOutputStream(FileOutputStream(zipFilePath))
+            for (srcFile in srcFilePaths) {
                 if (!zipFile(DawnBridge.getFileByPath(srcFile), "", zos, comment)) {
-                    return false;
+                    return false
                 }
             }
-            return true;
+            true
         } finally {
             if (zos != null) {
-                zos.finish();
-                zos.close();
+                zos.finish()
+                zos.close()
             }
         }
     }
-
-    /**
-     * 压缩文件
-     *
-     * @param srcFiles 文件的来源。
-     * @param zipFile  压缩后文件的路径。
-     * @return {@code true}: success<br>{@code false}: fail
-     * @throws IOException 如果发生 IO 错误
-     */
-    public static boolean zipFiles(final Collection<File> srcFiles, final File zipFile)
-            throws IOException {
-        return zipFiles(srcFiles, zipFile, null);
-    }
-
     /**
      * 压缩文件
      *
      * @param srcFiles 文件的来源。
      * @param zipFile  压缩后文件的路径。
      * @param comment  评论
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      * @throws IOException 如果发生 IO 错误
      */
-    public static boolean zipFiles(final Collection<File> srcFiles,
-                                   final File zipFile,
-                                   final String comment)
-            throws IOException {
+    @JvmOverloads
+    @Throws(IOException::class)
+    fun zipFiles(
+        srcFiles: Collection<File>?, zipFile: File?, comment: String? = null
+    ): Boolean {
         if (srcFiles == null || zipFile == null) {
-            return false;
+            return false
         }
-        ZipOutputStream zos = null;
-        try {
-            zos = new ZipOutputStream(new FileOutputStream(zipFile));
-            for (File srcFile : srcFiles) {
+        var zos: ZipOutputStream? = null
+        return try {
+            zos = ZipOutputStream(FileOutputStream(zipFile))
+            for (srcFile in srcFiles) {
                 if (!zipFile(srcFile, "", zos, comment)) {
-                    return false;
+                    return false
                 }
             }
-            return true;
+            true
         } finally {
             if (zos != null) {
-                zos.finish();
-                zos.close();
+                zos.finish()
+                zos.close()
             }
         }
     }
@@ -132,13 +110,14 @@ public class ZipUtils {
      *
      * @param srcFilePath 源文件的路径。
      * @param zipFilePath 压缩后文件的路径
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      * @throws IOException 如果发生 IO 错误
      */
-    public static boolean zipFile(final String srcFilePath,
-                                  final String zipFilePath)
-            throws IOException {
-        return zipFile(DawnBridge.getFileByPath(srcFilePath), DawnBridge.getFileByPath(zipFilePath), null);
+    @Throws(IOException::class)
+    fun zipFile(
+        srcFilePath: String?, zipFilePath: String?
+    ): Boolean {
+        return zipFile(DawnBridge.getFileByPath(srcFilePath), DawnBridge.getFileByPath(zipFilePath), null)
     }
 
     /**
@@ -147,14 +126,14 @@ public class ZipUtils {
      * @param srcFilePath 源文件的路径。
      * @param zipFilePath 压缩后文件的路径
      * @param comment  评论
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      * @throws IOException 如果发生 IO 错误
      */
-    public static boolean zipFile(final String srcFilePath,
-                                  final String zipFilePath,
-                                  final String comment)
-            throws IOException {
-        return zipFile(DawnBridge.getFileByPath(srcFilePath), DawnBridge.getFileByPath(zipFilePath), comment);
+    @Throws(IOException::class)
+    fun zipFile(
+        srcFilePath: String?, zipFilePath: String?, comment: String?
+    ): Boolean {
+        return zipFile(DawnBridge.getFileByPath(srcFilePath), DawnBridge.getFileByPath(zipFilePath), comment)
     }
 
     /**
@@ -162,85 +141,65 @@ public class ZipUtils {
      *
      * @param srcFile 源文件的路径。
      * @param zipFile 压缩后文件的路径
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      * @throws IOException 如果发生 IO 错误
      */
-    public static boolean zipFile(final File srcFile,
-                                  final File zipFile)
-            throws IOException {
-        return zipFile(srcFile, zipFile, null);
-    }
-
-    /**
-     * 压缩文件
-     *
-     * @param srcFile 源文件的路径。
-     * @param zipFile 压缩后文件的路径
-     * @param comment  评论
-     * @return {@code true}: success<br>{@code false}: fail
-     * @throws IOException 如果发生 IO 错误
-     */
-    public static boolean zipFile(final File srcFile,
-                                  final File zipFile,
-                                  final String comment)
-            throws IOException {
+    @JvmOverloads
+    @Throws(IOException::class)
+    fun zipFile(
+        srcFile: File?, zipFile: File?, comment: String? = null
+    ): Boolean {
         if (srcFile == null || zipFile == null) {
-            return false;
+            return false
         }
-        ZipOutputStream zos = null;
-        try {
-            zos = new ZipOutputStream(new FileOutputStream(zipFile));
-            return zipFile(srcFile, "", zos, comment);
+        var zos: ZipOutputStream? = null
+        return try {
+            zos = ZipOutputStream(FileOutputStream(zipFile))
+            zipFile(srcFile, "", zos, comment)
         } finally {
-            if (zos != null) {
-                zos.close();
-            }
+            zos?.close()
         }
     }
 
-    private static boolean zipFile(final File srcFile,
-                                   String rootPath,
-                                   final ZipOutputStream zos,
-                                   final String comment)
-            throws IOException {
-        rootPath = rootPath + (DawnBridge.isSpace(rootPath) ? "" : File.separator) + srcFile.getName();
-        if (srcFile.isDirectory()) {
-            File[] fileList = srcFile.listFiles();
-            if (fileList == null || fileList.length <= 0) {
-                ZipEntry entry = new ZipEntry(rootPath + '/');
-                entry.setComment(comment);
-                zos.putNextEntry(entry);
-                zos.closeEntry();
+    @Throws(IOException::class)
+    private fun zipFile(
+        srcFile: File, rootPath: String, zos: ZipOutputStream, comment: String?
+    ): Boolean {
+        var rootPath = rootPath
+        rootPath = rootPath + (if (DawnBridge.isSpace(rootPath)) "" else File.separator) + srcFile.name
+        if (srcFile.isDirectory) {
+            val fileList = srcFile.listFiles()
+            if (fileList == null || fileList.isEmpty()) {
+                val entry = ZipEntry("$rootPath/")
+                entry.comment = comment
+                zos.putNextEntry(entry)
+                zos.closeEntry()
             } else {
-                for (File file : fileList) {
+                for (file in fileList) {
                     if (!zipFile(file, rootPath, zos, comment)) {
-                        return false;
+                        return false
                     }
                 }
             }
         } else {
-            InputStream is = null;
+            var `is`: InputStream? = null
             try {
-                is = new BufferedInputStream(new FileInputStream(srcFile));
-                ZipEntry entry = new ZipEntry(rootPath);
-                entry.setComment(comment);
-                zos.putNextEntry(entry);
-                byte buffer[] = new byte[BUFFER_LEN];
-                int len;
-                while ((len = is.read(buffer, 0, BUFFER_LEN)) != -1) {
-                    zos.write(buffer, 0, len);
+                `is` = BufferedInputStream(FileInputStream(srcFile))
+                val entry = ZipEntry(rootPath)
+                entry.comment = comment
+                zos.putNextEntry(entry)
+                val buffer = ByteArray(BUFFER_LEN)
+                var len: Int
+                while (`is`.read(buffer, 0, BUFFER_LEN).also { len = it } != -1) {
+                    zos.write(buffer, 0, len)
                 }
-                zos.closeEntry();
+                zos.closeEntry()
             } finally {
-                if (is != null) {
-                    is.close();
-                }
+                `is`?.close()
             }
         }
-        return true;
+        return true
     }
-
-
 
     /**
      * 解压缩文件。
@@ -250,10 +209,11 @@ public class ZipUtils {
      * @return 解压缩的文件
      * @throws IOException 如果解压缩不成功
      */
-    public static List<File> unzipFile(final String zipFilePath,
-                                       final String destDirPath)
-            throws IOException {
-        return unzipFileByKeyword(zipFilePath, destDirPath, null);
+    @Throws(IOException::class)
+    fun unzipFile(
+        zipFilePath: String?, destDirPath: String?
+    ): List<File>? {
+        return unzipFileByKeyword(zipFilePath, destDirPath, null)
     }
 
     /**
@@ -264,10 +224,11 @@ public class ZipUtils {
      * @return 解压缩的文件
      * @throws IOException 如果解压缩不成功
      */
-    public static List<File> unzipFile(final File zipFile,
-                                       final File destDir)
-            throws IOException {
-        return unzipFileByKeyword(zipFile, destDir, null);
+    @Throws(IOException::class)
+    fun unzipFile(
+        zipFile: File?, destDir: File?
+    ): List<File>? {
+        return unzipFileByKeyword(zipFile, destDir, null)
     }
 
     /**
@@ -279,11 +240,15 @@ public class ZipUtils {
      * @return 解压缩的文件
      * @throws IOException 如果解压缩不成功
      */
-    public static List<File> unzipFileByKeyword(final String zipFilePath,
-                                                final String destDirPath,
-                                                final String keyword)
-            throws IOException {
-        return unzipFileByKeyword(DawnBridge.getFileByPath(zipFilePath), DawnBridge.getFileByPath(destDirPath), keyword);
+    @Throws(IOException::class)
+    fun unzipFileByKeyword(
+        zipFilePath: String?, destDirPath: String?, keyword: String?
+    ): List<File>? {
+        return unzipFileByKeyword(
+            DawnBridge.getFileByPath(zipFilePath),
+            DawnBridge.getFileByPath(destDirPath),
+            keyword
+        )
     }
 
     /**
@@ -295,83 +260,76 @@ public class ZipUtils {
      * @return 解压缩的文件
      * @throws IOException 如果解压缩不成功
      */
-    public static List<File> unzipFileByKeyword(final File zipFile,
-                                                final File destDir,
-                                                final String keyword)
-            throws IOException {
+    @Throws(IOException::class)
+    fun unzipFileByKeyword(
+        zipFile: File?, destDir: File?, keyword: String?
+    ): List<File>? {
         if (zipFile == null || destDir == null) {
-            return null;
+            return null
         }
-        List<File> files = new ArrayList<>();
-        ZipFile zip = new ZipFile(zipFile);
-        Enumeration<?> entries = zip.entries();
-        try {
+        val files: MutableList<File> = ArrayList()
+        val zip = ZipFile(zipFile)
+        val entries: Enumeration<*> = zip.entries()
+        zip.use { zip ->
             if (DawnBridge.isSpace(keyword)) {
                 while (entries.hasMoreElements()) {
-                    ZipEntry entry = ((ZipEntry) entries.nextElement());
-                    String entryName = entry.getName().replace("\\", "/");
+                    val entry = entries.nextElement() as ZipEntry
+                    val entryName = entry.name.replace("\\", "/")
                     if (entryName.contains("../")) {
-                        Log.e("ZipUtils", "entryName: " + entryName + " is dangerous!");
-                        continue;
+                        Log.e("ZipUtils", "entryName: $entryName is dangerous!")
+                        continue
                     }
                     if (!unzipChildFile(destDir, files, zip, entry, entryName)) {
-                        return files;
+                        return files
                     }
                 }
             } else {
                 while (entries.hasMoreElements()) {
-                    ZipEntry entry = ((ZipEntry) entries.nextElement());
-                    String entryName = entry.getName().replace("\\", "/");
+                    val entry = entries.nextElement() as ZipEntry
+                    val entryName = entry.name.replace("\\", "/")
                     if (entryName.contains("../")) {
-                        Log.e("ZipUtils", "entryName: " + entryName + " is dangerous!");
-                        continue;
+                        Log.e("ZipUtils", "entryName: $entryName is dangerous!")
+                        continue
                     }
-                    if (entryName.contains(keyword)) {
+                    if (entryName.contains(keyword!!)) {
                         if (!unzipChildFile(destDir, files, zip, entry, entryName)) {
-                            return files;
+                            return files
                         }
                     }
                 }
             }
-        } finally {
-            zip.close();
         }
-        return files;
+        return files
     }
 
-    private static boolean unzipChildFile(final File destDir,
-                                          final List<File> files,
-                                          final ZipFile zip,
-                                          final ZipEntry entry,
-                                          final String name) throws IOException {
-        File file = new File(destDir, name);
-        files.add(file);
-        if (entry.isDirectory()) {
-            return DawnBridge.createOrExistsDir(file);
+    @Throws(IOException::class)
+    private fun unzipChildFile(
+        destDir: File, files: MutableList<File>, zip: ZipFile, entry: ZipEntry, name: String
+    ): Boolean {
+        val file = File(destDir, name)
+        files.add(file)
+        if (entry.isDirectory) {
+            return DawnBridge.createOrExistsDir(file)
         } else {
             if (!DawnBridge.createOrExistsFile(file)) {
-                return false;
+                return false
             }
-            InputStream in = null;
-            OutputStream out = null;
+            var `in`: InputStream? = null
+            var out: OutputStream? = null
             try {
-                in = new BufferedInputStream(zip.getInputStream(entry));
-                out = new BufferedOutputStream(new FileOutputStream(file));
-                byte buffer[] = new byte[BUFFER_LEN];
-                int len;
-                while ((len = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, len);
+                `in` = BufferedInputStream(zip.getInputStream(entry))
+                out = BufferedOutputStream(FileOutputStream(file))
+                val buffer = ByteArray(BUFFER_LEN)
+                var len: Int
+                while (`in`.read(buffer).also { len = it } != -1) {
+                    out.write(buffer, 0, len)
                 }
             } finally {
-                if (in != null) {
-                    in.close();
-                }
-                if (out != null) {
-                    out.close();
-                }
+                `in`?.close()
+                out?.close()
             }
         }
-        return true;
+        return true
     }
 
     /**
@@ -381,9 +339,9 @@ public class ZipUtils {
      * @return ZIP 文件中的文件路径
      * @throws IOException 如果发生 IO 错误
      */
-    public static List<String> getFilesPath(final String zipFilePath)
-            throws IOException {
-        return getFilesPath(DawnBridge.getFileByPath(zipFilePath));
+    @Throws(IOException::class)
+    fun getFilesPath(zipFilePath: String?): List<String>? {
+        return getFilesPath(DawnBridge.getFileByPath(zipFilePath))
     }
 
     /**
@@ -393,25 +351,25 @@ public class ZipUtils {
      * @return ZIP 文件中的文件路径
      * @throws IOException 如果发生 IO 错误
      */
-    public static List<String> getFilesPath(final File zipFile)
-            throws IOException {
+    @Throws(IOException::class)
+    fun getFilesPath(zipFile: File?): List<String>? {
         if (zipFile == null) {
-            return null;
+            return null
         }
-        List<String> paths = new ArrayList<>();
-        ZipFile zip = new ZipFile(zipFile);
-        Enumeration<?> entries = zip.entries();
+        val paths: MutableList<String> = ArrayList()
+        val zip = ZipFile(zipFile)
+        val entries: Enumeration<*> = zip.entries()
         while (entries.hasMoreElements()) {
-            String entryName = ((ZipEntry) entries.nextElement()).getName().replace("\\", "/");
+            val entryName = (entries.nextElement() as ZipEntry).name.replace("\\", "/")
             if (entryName.contains("../")) {
-                Log.e("ZipUtils", "entryName: " + entryName + " is dangerous!");
-                paths.add(entryName);
+                Log.e("ZipUtils", "entryName: $entryName is dangerous!")
+                paths.add(entryName)
             } else {
-                paths.add(entryName);
+                paths.add(entryName)
             }
         }
-        zip.close();
-        return paths;
+        zip.close()
+        return paths
     }
 
     /**
@@ -421,32 +379,31 @@ public class ZipUtils {
      * @return ZIP 文件中的文件注释
      * @throws IOException 如果发生 IO 错误
      */
-    public static List<String> getComments(final String zipFilePath)
-            throws IOException {
-        return getComments(DawnBridge.getFileByPath(zipFilePath));
+    @Throws(IOException::class)
+    fun getComments(zipFilePath: String?): List<String>? {
+        return getComments(DawnBridge.getFileByPath(zipFilePath))
     }
 
     /**
-     *返回文件的注释。
+     * 返回文件的注释。
      *
      * @param zipFile 压缩文件。
      * @return 文件的注释
      * @throws IOException 如果发生 IO 错误
      */
-    public static List<String> getComments(final File zipFile)
-            throws IOException {
+    @Throws(IOException::class)
+    fun getComments(zipFile: File?): List<String>? {
         if (zipFile == null) {
-            return null;
+            return null
         }
-        List<String> comments = new ArrayList<>();
-        ZipFile zip = new ZipFile(zipFile);
-        Enumeration<?> entries = zip.entries();
+        val comments: MutableList<String> = ArrayList()
+        val zip = ZipFile(zipFile)
+        val entries: Enumeration<*> = zip.entries()
         while (entries.hasMoreElements()) {
-            ZipEntry entry = ((ZipEntry) entries.nextElement());
-            comments.add(entry.getComment());
+            val entry = entries.nextElement() as ZipEntry
+            comments.add(entry.comment)
         }
-        zip.close();
-        return comments;
+        zip.close()
+        return comments
     }
-
 }

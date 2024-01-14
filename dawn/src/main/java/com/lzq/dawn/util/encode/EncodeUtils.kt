@@ -1,12 +1,11 @@
-package com.lzq.dawn.util.encode;
+package com.lzq.dawn.util.encode
 
-import android.os.Build;
-import android.text.Html;
-import android.util.Base64;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import android.os.Build
+import android.text.Html
+import android.util.Base64
+import java.io.UnsupportedEncodingException
+import java.net.URLDecoder
+import java.net.URLEncoder
 
 /**
  * @Name :EncodeUtils
@@ -14,21 +13,7 @@ import java.net.URLEncoder;
  * @Author :  Lzq
  * @Desc : 编码
  */
-public final class EncodeUtils {
-    private EncodeUtils() {
-    }
-
-    /**
-     * 返回 url 编码 字符串。
-     *
-     * @param input input.
-     * @return url 编码 字符串。
-     */
-    public static String urlEncode(final String input) {
-        return urlEncode(input, "UTF-8");
-    }
-
-
+object EncodeUtils {
     /**
      * 返回 url 编码 字符串。
      *
@@ -36,27 +21,22 @@ public final class EncodeUtils {
      * @param charsetName 字符集的名称。
      * @return url 编码 字符串。
      */
-    public static String urlEncode(final String input, final String charsetName) {
-        if (input == null || input.length() == 0) {
-            return "";
-        }
-        try {
-            return URLEncoder.encode(input, charsetName);
-        } catch (UnsupportedEncodingException e) {
-            throw new AssertionError(e);
-        }
-    }
-
     /**
-     * 返回解码 url encoded 字符串的字符串。
+     * 返回 url 编码 字符串。
      *
      * @param input input.
-     * @return 解码 url encoded 字符串的字符串。
+     * @return url 编码 字符串。
      */
-    public static String urlDecode(final String input) {
-        return urlDecode(input, "UTF-8");
+    @JvmOverloads
+    fun urlEncode(input: String?, charsetName: String? = "UTF-8"): String {
+        return if (input == null || input.length == 0) {
+            ""
+        } else try {
+            URLEncoder.encode(input, charsetName)
+        } catch (e: UnsupportedEncodingException) {
+            throw AssertionError(e)
+        }
     }
-
     /**
      * 返回解码 url encoded 字符串的字符串。
      *
@@ -64,15 +44,22 @@ public final class EncodeUtils {
      * @param charsetName 字符集的名称。
      * @return 解码 url encoded 字符串的字符串。
      */
-    public static String urlDecode(final String input, final String charsetName) {
-        if (input == null || input.length() == 0) {
-            return "";
-        }
-        try {
-            String safeInput = input.replaceAll("%(?![0-9a-fA-F]{2})", "%25").replaceAll("\\+", "%2B");
-            return URLDecoder.decode(safeInput, charsetName);
-        } catch (UnsupportedEncodingException e) {
-            throw new AssertionError(e);
+    /**
+     * 返回解码 url encoded 字符串的字符串。
+     *
+     * @param input input.
+     * @return 解码 url encoded 字符串的字符串。
+     */
+    @JvmOverloads
+    fun urlDecode(input: String?, charsetName: String? = "UTF-8"): String {
+        return if (input == null || input.length == 0) {
+            ""
+        } else try {
+            val safeInput =
+                input.replace("%(?![0-9a-fA-F]{2})".toRegex(), "%25").replace("\\+".toRegex(), "%2B")
+            URLDecoder.decode(safeInput, charsetName)
+        } catch (e: UnsupportedEncodingException) {
+            throw AssertionError(e)
         }
     }
 
@@ -82,8 +69,8 @@ public final class EncodeUtils {
      * @param input input.
      * @return Base64 编码字节。
      */
-    public static byte[] base64Encode(final String input) {
-        return base64Encode(input.getBytes());
+    fun base64Encode(input: String): ByteArray {
+        return base64Encode(input.toByteArray())
     }
 
     /**
@@ -92,11 +79,11 @@ public final class EncodeUtils {
      * @param input input.
      * @return Base64 编码字节。
      */
-    public static byte[] base64Encode(final byte[] input) {
-        if (input == null || input.length == 0) {
-            return new byte[0];
-        }
-        return Base64.encode(input, Base64.NO_WRAP);
+    @JvmStatic
+    fun base64Encode(input: ByteArray?): ByteArray {
+        return if (input == null || input.size == 0) {
+            ByteArray(0)
+        } else Base64.encode(input, Base64.NO_WRAP)
     }
 
     /**
@@ -105,11 +92,10 @@ public final class EncodeUtils {
      * @param input input.
      * @return Base64 编码字符串。
      */
-    public static String base64Encode2String(final byte[] input) {
-        if (input == null || input.length == 0) {
-            return "";
-        }
-        return Base64.encodeToString(input, Base64.NO_WRAP);
+    fun base64Encode2String(input: ByteArray?): String {
+        return if (input == null || input.size == 0) {
+            ""
+        } else Base64.encodeToString(input, Base64.NO_WRAP)
     }
 
     /**
@@ -118,13 +104,11 @@ public final class EncodeUtils {
      * @param input input.
      * @return 解码 Base64 编码字符串的字节。
      */
-    public static byte[] base64Decode(final String input) {
-        if (input == null || input.length() == 0) {
-            return new byte[0];
-        }
-        return Base64.decode(input, Base64.NO_WRAP);
+    fun base64Decode(input: String?): ByteArray {
+        return if (input == null || input.length == 0) {
+            ByteArray(0)
+        } else Base64.decode(input, Base64.NO_WRAP)
     }
-
 
     /**
      * 返回解码 Base64 编码字节的字节。
@@ -132,11 +116,11 @@ public final class EncodeUtils {
      * @param input input.
      * @return 解码 Base64 编码字节的字节。
      */
-    public static byte[] base64Decode(final byte[] input) {
-        if (input == null || input.length == 0) {
-            return new byte[0];
-        }
-        return Base64.decode(input, Base64.NO_WRAP);
+    @JvmStatic
+    fun base64Decode(input: ByteArray?): ByteArray {
+        return if (input == null || input.size == 0) {
+            ByteArray(0)
+        } else Base64.decode(input, Base64.NO_WRAP)
     }
 
     /**
@@ -145,40 +129,32 @@ public final class EncodeUtils {
      * @param input input.
      * @return html 编码字符串。
      */
-    public static String htmlEncode(final CharSequence input) {
-        if (input == null || input.length() == 0) {
-            return "";
+    fun htmlEncode(input: CharSequence?): String {
+        if (input == null || input.length == 0) {
+            return ""
         }
-        StringBuilder sb = new StringBuilder();
-        char c;
-        for (int i = 0, len = input.length(); i < len; i++) {
-            c = input.charAt(i);
-            switch (c) {
-                case '<':
-                    sb.append("&lt;"); //$NON-NLS-1$
-                    break;
-                case '>':
-                    sb.append("&gt;"); //$NON-NLS-1$
-                    break;
-                case '&':
-                    sb.append("&amp;"); //$NON-NLS-1$
-                    break;
-                case '\'':
-                    //http://www.w3.org/TR/xhtml1
+        val sb = StringBuilder()
+        var c: Char
+        var i = 0
+        val len = input.length
+        while (i < len) {
+            c = input[i]
+            when (c) {
+                '<' -> sb.append("&lt;") //$NON-NLS-1$
+                '>' -> sb.append("&gt;") //$NON-NLS-1$
+                '&' -> sb.append("&amp;") //$NON-NLS-1$
+                '\'' ->                     //http://www.w3.org/TR/xhtml1
                     // The named character reference &apos; (the apostrophe, U+0027) was
                     // introduced in XML 1.0 but does not appear in HTML. Authors should
                     // therefore use &#39; instead of &apos; to work as expected in HTML 4
                     // user agents.
-                    sb.append("&#39;"); //$NON-NLS-1$
-                    break;
-                case '"':
-                    sb.append("&quot;"); //$NON-NLS-1$
-                    break;
-                default:
-                    sb.append(c);
+                    sb.append("&#39;") //$NON-NLS-1$
+                '"' -> sb.append("&quot;") //$NON-NLS-1$
+                else -> sb.append(c)
             }
+            i++
         }
-        return sb.toString();
+        return sb.toString()
     }
 
     /**
@@ -187,14 +163,14 @@ public final class EncodeUtils {
      * @param input input.
      * @return 解码 html-编码 字符串的字符串。
      */
-    public static CharSequence htmlDecode(final String input) {
-        if (input == null || input.length() == 0) {
-            return "";
+    fun htmlDecode(input: String?): CharSequence {
+        if (input == null || input.length == 0) {
+            return ""
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            return Html.fromHtml(input, Html.FROM_HTML_MODE_LEGACY);
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(input, Html.FROM_HTML_MODE_LEGACY)
         } else {
-            return Html.fromHtml(input);
+            Html.fromHtml(input)
         }
     }
 
@@ -204,15 +180,15 @@ public final class EncodeUtils {
      * @param input input.
      * @return 二进制字符串
      */
-    public static String binaryEncode(final String input) {
-        if (input == null || input.length() == 0) {
-            return "";
+    fun binaryEncode(input: String?): String {
+        if (input == null || input.length == 0) {
+            return ""
         }
-        StringBuilder sb = new StringBuilder();
-        for (char i : input.toCharArray()) {
-            sb.append(Integer.toBinaryString(i)).append(" ");
+        val sb = StringBuilder()
+        for (i in input.toCharArray()) {
+            sb.append(Integer.toBinaryString(i.code)).append(" ")
         }
-        return sb.deleteCharAt(sb.length() - 1).toString();
+        return sb.deleteCharAt(sb.length - 1).toString()
     }
 
     /**
@@ -221,15 +197,15 @@ public final class EncodeUtils {
      * @param input 二进制字符串
      * @return UTF-8 字符串
      */
-    public static String binaryDecode(final String input) {
-        if (input == null || input.length() == 0) {
-            return "";
+    fun binaryDecode(input: String?): String {
+        if (input == null || input.length == 0) {
+            return ""
         }
-        String[] splits = input.split(" ");
-        StringBuilder sb = new StringBuilder();
-        for (String split : splits) {
-            sb.append(((char) Integer.parseInt(split, 2)));
+        val splits = input.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        val sb = StringBuilder()
+        for (split in splits) {
+            sb.append(split.toInt(2).toChar())
         }
-        return sb.toString();
+        return sb.toString()
     }
 }

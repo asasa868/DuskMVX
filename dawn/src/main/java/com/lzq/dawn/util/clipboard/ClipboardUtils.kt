@@ -1,11 +1,10 @@
-package com.lzq.dawn.util.clipboard;
+package com.lzq.dawn.util.clipboard
 
-import android.content.ClipData;
-import android.content.ClipDescription;
-import android.content.ClipboardManager;
-import android.content.Context;
-
-import com.lzq.dawn.DawnBridge;
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.ClipboardManager.OnPrimaryClipChangedListener
+import android.content.Context
+import com.lzq.dawn.DawnBridge
 
 /**
  * @Name :ClipboardUtils
@@ -13,19 +12,16 @@ import com.lzq.dawn.DawnBridge;
  * @Author :  Lzq
  * @Desc : 粘贴板
  */
-public final  class ClipboardUtils {
-    private ClipboardUtils() {
-    }
-
-
+object ClipboardUtils {
     /**
      * 将文本复制到剪贴板
-     * <p>label 等于 包名.</p>
+     *
+     * label 等于 包名.
      *
      * @param text text.
      */
-    public static void copyText(final CharSequence text) {
-        copyText(DawnBridge.getApp().getPackageName(), text);
+    fun copyText(text: CharSequence?) {
+        copyText(DawnBridge.getApp().packageName, text)
     }
 
     /**
@@ -34,71 +30,60 @@ public final  class ClipboardUtils {
      * @param label label.
      * @param text  text.
      */
-    public static void copyText(final CharSequence label, final CharSequence text) {
-        ClipboardManager cm = (ClipboardManager) DawnBridge.getApp().getSystemService(Context.CLIPBOARD_SERVICE);
-        //noinspection ConstantConditions
-        cm.setPrimaryClip(ClipData.newPlainText(label, text));
+    fun copyText(label: CharSequence?, text: CharSequence?) {
+        val cm = DawnBridge.getApp().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        cm.setPrimaryClip(ClipData.newPlainText(label, text))
     }
 
     /**
      * 清除剪贴板
      */
-    public static void clear() {
-        copyText(null, "");
+    fun clear() {
+        copyText(null, "")
     }
 
-    /**
-     * 返回剪贴板的标签。
-     *
-     * @return 返回剪贴板的标签。
-     */
-    public static CharSequence getLabel() {
-        ClipboardManager cm = (ClipboardManager) DawnBridge.getApp().getSystemService(Context.CLIPBOARD_SERVICE);
-        //noinspection ConstantConditions
-        ClipDescription des = cm.getPrimaryClipDescription();
-        if (des == null) {
-            return "";
+    val label: CharSequence
+        /**
+         * 返回剪贴板的标签。
+         *
+         * @return 返回剪贴板的标签。
+         */
+        get() {
+            val cm = DawnBridge.getApp().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val des = cm.primaryClipDescription ?: return ""
+            return des.label ?: return ""
         }
-        CharSequence label = des.getLabel();
-        if (label == null) {
-            return "";
-        }
-        return label;
-    }
-
-    /**
-     * 返回剪贴板的文本。
-     *
-     * @return 返回剪贴板的文本。
-     */
-    public static CharSequence getText() {
-        ClipboardManager cm = (ClipboardManager) DawnBridge.getApp().getSystemService(Context.CLIPBOARD_SERVICE);
-        //noinspection ConstantConditions
-        ClipData clip = cm.getPrimaryClip();
-        if (clip != null && clip.getItemCount() > 0) {
-            CharSequence text = clip.getItemAt(0).coerceToText(DawnBridge.getApp());
-            if (text != null) {
-                return text;
+    val text: CharSequence
+        /**
+         * 返回剪贴板的文本。
+         *
+         * @return 返回剪贴板的文本。
+         */
+        get() {
+            val cm = DawnBridge.getApp().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = cm.primaryClip
+            if (clip != null && clip.itemCount > 0) {
+                val text = clip.getItemAt(0).coerceToText(DawnBridge.getApp())
+                if (text != null) {
+                    return text
+                }
             }
+            return ""
         }
-        return "";
-    }
 
     /**
      * 添加剪贴板更改的listener.
      */
-    public static void addChangedListener(final ClipboardManager.OnPrimaryClipChangedListener listener) {
-        ClipboardManager cm = (ClipboardManager) DawnBridge.getApp().getSystemService(Context.CLIPBOARD_SERVICE);
-        //noinspection ConstantConditions
-        cm.addPrimaryClipChangedListener(listener);
+    fun addChangedListener(listener: OnPrimaryClipChangedListener?) {
+        val cm = DawnBridge.getApp().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        cm.addPrimaryClipChangedListener(listener)
     }
 
     /**
      * 删除剪贴板更改的listener.
      */
-    public static void removeChangedListener(final ClipboardManager.OnPrimaryClipChangedListener listener) {
-        ClipboardManager cm = (ClipboardManager) DawnBridge.getApp().getSystemService(Context.CLIPBOARD_SERVICE);
-        //noinspection ConstantConditions
-        cm.removePrimaryClipChangedListener(listener);
+    fun removeChangedListener(listener: OnPrimaryClipChangedListener?) {
+        val cm = DawnBridge.getApp().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        cm.removePrimaryClipChangedListener(listener)
     }
 }

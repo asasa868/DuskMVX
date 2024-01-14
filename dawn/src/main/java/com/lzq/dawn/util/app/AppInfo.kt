@@ -1,8 +1,6 @@
-package com.lzq.dawn.util.app;
+package com.lzq.dawn.util.app
 
-import android.graphics.drawable.Drawable;
-
-import androidx.annotation.NonNull;
+import android.graphics.drawable.Drawable
 
 /**
  * @Name :AppInfo
@@ -10,94 +8,42 @@ import androidx.annotation.NonNull;
  * @Author :  Lzq
  * @Desc : app 信息
  */
-public class AppInfo {
+class AppInfo(
+    packageName: String?,
+    name: String?,
+    icon: Drawable?,
+    packagePath: String?,
+    versionName: String?,
+    versionCode: Int,
+    isSystem: Boolean
+) {
+    var packageName: String? = null
+    var name: String? = null
+    var icon: Drawable? = null
+    var packagePath: String? = null
+    var versionName: String? = null
+    var versionCode = 0
+    var isSystem = false
 
-    private String packageName;
-    private String name;
-    private Drawable icon;
-    private String packagePath;
-    private String versionName;
-    private int versionCode;
-    private boolean isSystem;
-
-    public Drawable getIcon() {
-        return icon;
+    init {
+        this.name = name
+        this.icon = icon
+        this.packageName = packageName
+        this.packagePath = packagePath
+        this.versionName = versionName
+        this.versionCode = versionCode
+        this.isSystem = isSystem
     }
 
-    public void setIcon(final Drawable icon) {
-        this.icon = icon;
-    }
-
-    public boolean isSystem() {
-        return isSystem;
-    }
-
-    public void setSystem(final boolean isSystem) {
-        this.isSystem = isSystem;
-    }
-
-    public String getPackageName() {
-        return packageName;
-    }
-
-    public void setPackageName(final String packageName) {
-        this.packageName = packageName;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public String getPackagePath() {
-        return packagePath;
-    }
-
-    public void setPackagePath(final String packagePath) {
-        this.packagePath = packagePath;
-    }
-
-    public int getVersionCode() {
-        return versionCode;
-    }
-
-    public void setVersionCode(final int versionCode) {
-        this.versionCode = versionCode;
-    }
-
-    public String getVersionName() {
-        return versionName;
-    }
-
-    public void setVersionName(final String versionName) {
-        this.versionName = versionName;
-    }
-
-    public AppInfo(String packageName, String name, Drawable icon, String packagePath,
-                   String versionName, int versionCode, boolean isSystem) {
-        this.setName(name);
-        this.setIcon(icon);
-        this.setPackageName(packageName);
-        this.setPackagePath(packagePath);
-        this.setVersionName(versionName);
-        this.setVersionCode(versionCode);
-        this.setSystem(isSystem);
-    }
-
-    @Override
-    @NonNull
-    public String toString() {
-        return "{" +
-                "\n    pkg name: " + getPackageName() +
-                "\n    app icon: " + getIcon() +
-                "\n    app name: " + getName() +
-                "\n    app path: " + getPackagePath() +
-                "\n    app version name: " + getVersionName() +
-                "\n    app version code: " + getVersionCode() +
-                "\n    is system: " + isSystem() +
-                "\n}";
+    override fun toString(): String {
+        return """{
+    pkg name: ${packageName}
+    app icon: ${icon}
+    app name: ${name}
+    app path: ${packagePath}
+    app version name: ${versionName}
+    app version code: ${versionCode}
+    is system: ${isSystem}
+}"""
     }
 }

@@ -1,19 +1,16 @@
-package com.lzq.dawn.util.reflect;
+package com.lzq.dawn.util.reflect
 
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.AccessibleObject
+import java.lang.reflect.Constructor
+import java.lang.reflect.Field
+import java.lang.reflect.InvocationHandler
+import java.lang.reflect.Member
+import java.lang.reflect.Method
+import java.lang.reflect.Modifier
+import java.lang.reflect.Proxy
+import java.util.Arrays
+import java.util.Collections
+import java.util.Locale
 
 /**
  * @Name :ReflectUtils
@@ -21,191 +18,97 @@ import java.util.Map;
  * @Author :  Lzq
  * @Desc : 反射
  */
-public final class ReflectUtils {
-
-    private final Class<?> type;
-
-    private final Object object;
-
-    private ReflectUtils(final Class<?> type) {
-        this(type, type);
-    }
-
-    private ReflectUtils(final Class<?> type, Object object) {
-        this.type = type;
-        this.object = object;
-    }
-
-
-    ///////////////////////////////////////////////////////////////////////////
-    // reflect
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 反射class
-     *
-     * @param className class
-     * @return {@link ReflectUtils} 实例
-     * @throws ReflectException 如果反射不成功
-     */
-    public static ReflectUtils reflect(final String className)
-            throws ReflectException {
-        return reflect(forName(className));
-    }
-
-    /**
-     * 反射class
-     *
-     * @param className   class
-     * @param classLoader 类的加载器。
-     * @return {@link ReflectUtils} 实例
-     * @throws ReflectException 如果反射不成功
-     */
-    public static ReflectUtils reflect(final String className, final ClassLoader classLoader)
-            throws ReflectException {
-        return reflect(forName(className, classLoader));
-    }
-
-    /**
-     * 反射class
-     *
-     * @param clazz class.
-     * @return {@link ReflectUtils} 实例
-     * @throws ReflectException 如果反射不成功
-     */
-    public static ReflectUtils reflect(final Class<?> clazz)
-            throws ReflectException {
-        return new ReflectUtils(clazz);
-    }
-
-    /**
-     * 反射class
-     *
-     * @param object object.
-     * @return {@link ReflectUtils} 实例
-     * @throws ReflectException 如果反射不成功
-     */
-    public static ReflectUtils reflect(final Object object)
-            throws ReflectException {
-        return new ReflectUtils(object == null ? Object.class : object.getClass(), object);
-    }
-
-    private static Class<?> forName(String className) {
-        try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            throw new ReflectException(e);
-        }
-    }
-
-    private static Class<?> forName(String name, ClassLoader classLoader) {
-        try {
-            return Class.forName(name, true, classLoader);
-        } catch (ClassNotFoundException e) {
-            throw new ReflectException(e);
-        }
-    }
-
+class ReflectUtils private constructor(private val type: Class<*>, private val objects: Any? = type) {
     ///////////////////////////////////////////////////////////////////////////
     // newInstance
     ///////////////////////////////////////////////////////////////////////////
-
     /**
      * 创建并初始化一个新实例
      *
-     * @return {@link ReflectUtils} 实例
+     * @return [ReflectUtils] 实例
      */
-    public ReflectUtils newInstance() {
-        return newInstance(new Object[0]);
+    fun newInstance(): ReflectUtils {
+        return newInstance(*arrayOfNulls<Any>(0))
     }
 
     /**
      * 创建并初始化一个新实例
      *
      * @param args args.
-     * @return {@link ReflectUtils} 实例
+     * @return [ReflectUtils] 实例
      */
-    public ReflectUtils newInstance(Object... args) {
-        Class<?>[] types = getArgsType(args);
-        try {
-            Constructor<?> constructor = type().getDeclaredConstructor(types);
-            return newInstance(constructor, args);
-        } catch (NoSuchMethodException e) {
-            List<Constructor<?>> list = new ArrayList<>();
-            for (Constructor<?> constructor : type().getDeclaredConstructors()) {
-                if (match(constructor.getParameterTypes(), types)) {
-                    list.add(constructor);
+    fun newInstance(vararg args: Any?): ReflectUtils {
+        val types = getArgsType(*args)
+        return try {
+            val constructor = type().getDeclaredConstructor(*types)
+            newInstance(constructor, *args)
+        } catch (e: NoSuchMethodException) {
+            val list: MutableList<Constructor<*>> = ArrayList()
+            for (constructor in type().declaredConstructors) {
+                if (match(constructor.parameterTypes, types)) {
+                    list.add(constructor)
                 }
             }
             if (list.isEmpty()) {
-                throw new ReflectException(e);
+                throw ReflectException(e)
             } else {
-                sortConstructors(list);
-                return newInstance(list.get(0), args);
+                sortConstructors(list)
+                newInstance(list[0], *args)
             }
         }
     }
 
-    private Class<?>[] getArgsType(final Object... args) {
-        if (args == null) {
-            return new Class[0];
+    private fun getArgsType(vararg args: Any?): Array<Class<*>?> {
+        val result: Array<Class<*>?> = arrayOfNulls(args.size)
+        for (i in args.indices) {
+            val value = args[i]
+            result[i] = value?.javaClass ?: NULL::class.java
         }
-        Class<?>[] result = new Class[args.length];
-        for (int i = 0; i < args.length; i++) {
-            Object value = args[i];
-            result[i] = value == null ? NULL.class : value.getClass();
-        }
-        return result;
+        return result
     }
 
-    private void sortConstructors(List<Constructor<?>> list) {
-        Collections.sort(list, new Comparator<Constructor<?>>() {
-            @Override
-            public int compare(Constructor<?> o1, Constructor<?> o2) {
-                Class<?>[] types1 = o1.getParameterTypes();
-                Class<?>[] types2 = o2.getParameterTypes();
-                int len = types1.length;
-                for (int i = 0; i < len; i++) {
-                    if (!types1[i].equals(types2[i])) {
-                        if (wrapper(types1[i]).isAssignableFrom(wrapper(types2[i]))) {
-                            return 1;
-                        } else {
-                            return -1;
-                        }
+    private fun sortConstructors(list: List<Constructor<*>>) {
+        Collections.sort(list, java.util.Comparator { o1, o2 ->
+            val types1 = o1.parameterTypes
+            val types2 = o2.parameterTypes
+            val len = types1.size
+            for (i in 0 until len) {
+                if (types1[i] != types2[i]) {
+                    return@Comparator if (wrapper(types1[i])!!.isAssignableFrom(wrapper(types2[i]))) {
+                        1
+                    } else {
+                        -1
                     }
                 }
-                return 0;
             }
-        });
+            0
+        })
     }
 
-    private ReflectUtils newInstance(final Constructor<?> constructor, final Object... args) {
-        try {
-            return new ReflectUtils(
-                    constructor.getDeclaringClass(),
-                    accessible(constructor).newInstance(args)
-            );
-        } catch (Exception e) {
-            throw new ReflectException(e);
+    private fun newInstance(constructor: Constructor<*>, vararg args: Any): ReflectUtils {
+        return try {
+            ReflectUtils(
+                constructor.declaringClass, accessible(constructor)!!.newInstance(*args)
+            )
+        } catch (e: Exception) {
+            throw ReflectException(e)
         }
     }
-
     ///////////////////////////////////////////////////////////////////////////
     // field
     ///////////////////////////////////////////////////////////////////////////
-
     /**
      * 获得字段。
      *
      * @param name 字段的名称。
-     * @return {@link ReflectUtils} 实例
+     * @return [ReflectUtils] 实例
      */
-    public ReflectUtils field(final String name) {
-        try {
-            Field field = getField(name);
-            return new ReflectUtils(field.getType(), field.get(object));
-        } catch (IllegalAccessException e) {
-            throw new ReflectException(e);
+    fun field(name: String): ReflectUtils {
+        return try {
+            val field = getField(name)
+            ReflectUtils(field.type, field[objects])
+        } catch (e: IllegalAccessException) {
+            throw ReflectException(e)
         }
     }
 
@@ -214,69 +117,68 @@ public final class ReflectUtils {
      *
      * @param name  字段的名称。
      * @param value value.
-     * @return {@link ReflectUtils} 实例
+     * @return [ReflectUtils] 实例
      */
-    public ReflectUtils field(String name, Object value) {
-        try {
-            Field field = getField(name);
-            field.set(object, unwrap(value));
-            return this;
-        } catch (Exception e) {
-            throw new ReflectException(e);
+    fun field(name: String, value: Any): ReflectUtils {
+        return try {
+            val field = getField(name)
+            field[objects] = unwrap(value)
+            this
+        } catch (e: Exception) {
+            throw ReflectException(e)
         }
     }
 
-    private Field getField(String name) throws IllegalAccessException {
-        Field field = getAccessibleField(name);
-        if ((field.getModifiers() & Modifier.FINAL) == Modifier.FINAL) {
+    @Throws(IllegalAccessException::class)
+    private fun getField(name: String): Field {
+        val field = getAccessibleField(name)
+        if (field.modifiers and Modifier.FINAL == Modifier.FINAL) {
             try {
-                Field modifiersField = Field.class.getDeclaredField("modifiers");
-                modifiersField.setAccessible(true);
-                modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            } catch (NoSuchFieldException ignore) {
+                val modifiersField = Field::class.java.getDeclaredField("modifiers")
+                modifiersField.isAccessible = true
+                modifiersField.setInt(field, field.modifiers and Modifier.FINAL.inv())
+            } catch (ignore: NoSuchFieldException) {
                 // runs in android will happen
-                field.setAccessible(true);
+                field.isAccessible = true
             }
         }
-        return field;
+        return field
     }
 
-    private Field getAccessibleField(String name) {
-        Class<?> type = type();
-        try {
-            return accessible(type.getField(name));
-        } catch (NoSuchFieldException e) {
+    private fun getAccessibleField(name: String): Field {
+        var type: Class<*>? = type()
+        return try {
+            accessible(type!!.getField(name))!!
+        } catch (e: NoSuchFieldException) {
             do {
                 try {
-                    return accessible(type.getDeclaredField(name));
-                } catch (NoSuchFieldException ignore) {
+                    return accessible(type!!.getDeclaredField(name))!!
+                } catch (ignore: NoSuchFieldException) {
                 }
-                type = type.getSuperclass();
-            } while (type != null);
-            throw new ReflectException(e);
+                type = type!!.superclass
+            } while (type != null)
+            throw ReflectException(e)
         }
     }
 
-    private Object unwrap(Object object) {
-        if (object instanceof ReflectUtils) {
-            return ((ReflectUtils) object).get();
-        }
-        return object;
+    private fun unwrap(`object`: Any): Any {
+        return if (`object` is ReflectUtils) {
+            `object`.get<Any>()!!
+        } else `object`
     }
-
     ///////////////////////////////////////////////////////////////////////////
     // method
     ///////////////////////////////////////////////////////////////////////////
-
     /**
      * 调用方法
      *
      * @param name 方法的名称。
-     * @return {@link ReflectUtils} 实例
+     * @return [ReflectUtils] 实例
      * @throws ReflectException 如果反射不成功
      */
-    public ReflectUtils method(final String name) throws ReflectException {
-        return method(name, new Object[0]);
+    @Throws(ReflectException::class)
+    fun method(name: String): ReflectUtils {
+        return method(name, *arrayOfNulls<Any>(0))
     }
 
     /**
@@ -284,234 +186,211 @@ public final class ReflectUtils {
      *
      * @param name 方法的名称。
      * @param args args.
-     * @return {@link ReflectUtils} 实例
+     * @return [ReflectUtils] 实例
      * @throws ReflectException 如果反射不成功
      */
-    public ReflectUtils method(final String name, final Object... args) throws ReflectException {
-        Class<?>[] types = getArgsType(args);
+    @Throws(ReflectException::class)
+    fun method(name: String, vararg args: Any?): ReflectUtils {
+        val types = getArgsType(*args)
+
         try {
-            Method method = exactMethod(name, types);
-            return method(method, object, args);
-        } catch (NoSuchMethodException e) {
+            val method = exactMethod(name, types)
+            return methods(method, objects, *args)
+        } catch (e: NoSuchMethodException) {
             try {
-                Method method = similarMethod(name, types);
-                return method(method, object, args);
-            } catch (NoSuchMethodException e1) {
-                throw new ReflectException(e1);
+                val method = similarMethod(name, types)
+                return methods(method, objects, *args)
+            } catch (e1: NoSuchMethodException) {
+                throw ReflectException(e1)
             }
         }
+
     }
 
-    private ReflectUtils method(final Method method, final Object obj, final Object... args) {
-        try {
-            accessible(method);
-            if (method.getReturnType() == void.class) {
-                method.invoke(obj, args);
-                return reflect(obj);
+    private fun methods(method: Method, obj: Any?, vararg args: Any?): ReflectUtils {
+        return try {
+            accessible(method)
+            if (method.returnType == Void.TYPE) {
+                method.invoke(obj, *args)
+                reflect(obj)
             } else {
-                return reflect(method.invoke(obj, args));
+                reflect(method.invoke(obj, *args))
             }
-        } catch (Exception e) {
-            throw new ReflectException(e);
+        } catch (e: Exception) {
+            throw ReflectException(e)
         }
     }
 
-    private Method exactMethod(final String name, final Class<?>[] types)
-            throws NoSuchMethodException {
-        Class<?> type = type();
-        try {
-            return type.getMethod(name, types);
-        } catch (NoSuchMethodException e) {
+    @Throws(NoSuchMethodException::class)
+    private fun exactMethod(name: String, types: Array<Class<*>?>): Method {
+        var type: Class<*>? = type()
+        return try {
+            type!!.getMethod(name, *types)
+        } catch (e: NoSuchMethodException) {
             do {
                 try {
-                    return type.getDeclaredMethod(name, types);
-                } catch (NoSuchMethodException ignore) {
+                    return type!!.getDeclaredMethod(name, *types)
+                } catch (ignore: NoSuchMethodException) {
                 }
-                type = type.getSuperclass();
-            } while (type != null);
-            throw new NoSuchMethodException();
+                type = type!!.superclass
+            } while (type != null)
+            throw NoSuchMethodException()
         }
     }
 
-    private Method similarMethod(final String name, final Class<?>[] types)
-            throws NoSuchMethodException {
-        Class<?> type = type();
-        List<Method> methods = new ArrayList<>();
-        for (Method method : type.getMethods()) {
+    @Throws(NoSuchMethodException::class)
+    private fun similarMethod(name: String, types: Array<Class<*>?>): Method {
+        var type: Class<*>? = type()
+        val methods: MutableList<Method> = ArrayList()
+        for (method in type!!.methods) {
             if (isSimilarSignature(method, name, types)) {
-                methods.add(method);
+                methods.add(method)
             }
         }
         if (!methods.isEmpty()) {
-            sortMethods(methods);
-            return methods.get(0);
+            sortMethods(methods)
+            return methods[0]
         }
         do {
-            for (Method method : type.getDeclaredMethods()) {
+            for (method in type!!.declaredMethods) {
                 if (isSimilarSignature(method, name, types)) {
-                    methods.add(method);
+                    methods.add(method)
                 }
             }
             if (!methods.isEmpty()) {
-                sortMethods(methods);
-                return methods.get(0);
+                sortMethods(methods)
+                return methods[0]
             }
-            type = type.getSuperclass();
-        } while (type != null);
-
-        throw new NoSuchMethodException("No similar method " + name + " with params "
-                + Arrays.toString(types) + " could be found on type " + type() + ".");
+            type = type.superclass
+        } while (type != null)
+        throw NoSuchMethodException(
+            "No similar method " + name + " with params " + Arrays.toString(types) + " could be found on type " + type() + "."
+        )
     }
 
-    private void sortMethods(final List<Method> methods) {
-        Collections.sort(methods, new Comparator<Method>() {
-            @Override
-            public int compare(Method o1, Method o2) {
-                Class<?>[] types1 = o1.getParameterTypes();
-                Class<?>[] types2 = o2.getParameterTypes();
-                int len = types1.length;
-                for (int i = 0; i < len; i++) {
-                    if (!types1[i].equals(types2[i])) {
-                        if (wrapper(types1[i]).isAssignableFrom(wrapper(types2[i]))) {
-                            return 1;
-                        } else {
-                            return -1;
-                        }
+    private fun sortMethods(methods: List<Method>) {
+        Collections.sort(methods, java.util.Comparator { o1, o2 ->
+            val types1 = o1.parameterTypes
+            val types2 = o2.parameterTypes
+            val len = types1.size
+            for (i in 0 until len) {
+                if (types1[i] != types2[i]) {
+                    return@Comparator if (wrapper(types1[i])!!.isAssignableFrom(wrapper(types2[i]))) {
+                        1
+                    } else {
+                        -1
                     }
                 }
-                return 0;
             }
-        });
+            0
+        })
     }
 
-    private boolean isSimilarSignature(final Method possiblyMatchingMethod,
-                                       final String desiredMethodName,
-                                       final Class<?>[] desiredParamTypes) {
-        return possiblyMatchingMethod.getName().equals(desiredMethodName)
-                && match(possiblyMatchingMethod.getParameterTypes(), desiredParamTypes);
+    private fun isSimilarSignature(
+        possiblyMatchingMethod: Method, desiredMethodName: String, desiredParamTypes: Array<Class<*>?>
+    ): Boolean {
+        return possiblyMatchingMethod.name == desiredMethodName && match(
+            possiblyMatchingMethod.parameterTypes, desiredParamTypes
+        )
     }
 
-    private boolean match(final Class<?>[] declaredTypes, final Class<?>[] actualTypes) {
-        if (declaredTypes.length == actualTypes.length) {
-            for (int i = 0; i < actualTypes.length; i++) {
-                if (actualTypes[i] == NULL.class
-                        || wrapper(declaredTypes[i]).isAssignableFrom(wrapper(actualTypes[i]))) {
-                    continue;
+    private fun match(declaredTypes: Array<Class<*>>, actualTypes: Array<Class<*>?>): Boolean {
+        return if (declaredTypes.size == actualTypes.size) {
+            for (i in actualTypes.indices) {
+                if (actualTypes[i] == NULL::class.java || wrapper(declaredTypes[i])!!.isAssignableFrom(
+                        wrapper(actualTypes[i])
+                    )
+                ) {
+                    continue
                 }
-                return false;
+                return false
             }
-            return true;
+            true
         } else {
-            return false;
+            false
         }
     }
 
-    private <T extends AccessibleObject> T accessible(T accessible) {
+    private fun <T : AccessibleObject?> accessible(accessible: T?): T? {
         if (accessible == null) {
-            return null;
+            return null
         }
-        if (accessible instanceof Member) {
-            Member member = (Member) accessible;
-            if (Modifier.isPublic(member.getModifiers())
-                    && Modifier.isPublic(member.getDeclaringClass().getModifiers())) {
-                return accessible;
+        if (accessible is Member) {
+            val member = accessible as Member
+            if (Modifier.isPublic(member.modifiers) && Modifier.isPublic(member.declaringClass.modifiers)) {
+                return accessible
             }
         }
-        if (!accessible.isAccessible()) {
-            accessible.setAccessible(true);
+        if (!accessible.isAccessible) {
+            accessible.isAccessible = true
         }
-        return accessible;
+        return accessible
     }
-
-
     ///////////////////////////////////////////////////////////////////////////
     // proxy
     ///////////////////////////////////////////////////////////////////////////
-
     /**
      * 为包装对象创建一个代理，允许使用自定义接口在其上安全地调用方法。
      *
      * @param proxyType 代理实现的接口类型。
      * @return 包装对象的代理
      */
-    @SuppressWarnings("unchecked")
-    public <P> P proxy(final Class<P> proxyType) {
-        final boolean isMap = (object instanceof Map);
-        final InvocationHandler handler = new InvocationHandler() {
-            @Override
-            @SuppressWarnings("null")
-            public Object invoke(Object proxy, Method method, Object[] args) {
-                String name = method.getName();
-                try {
-                    return reflect(object).method(name, args).get();
-                } catch (ReflectException e) {
-                    if (isMap) {
-                        Map<String, Object> map = (Map<String, Object>) object;
-                        int length = (args == null ? 0 : args.length);
-
-                        if (length == 0 && name.startsWith("get")) {
-                            return map.get(property(name.substring(3)));
-                        } else if (length == 0 && name.startsWith("is")) {
-                            return map.get(property(name.substring(2)));
-                        } else if (length == 1 && name.startsWith("set")) {
-                            map.put(property(name.substring(3)), args[0]);
-                            return null;
-                        }
+    fun <P> proxy(proxyType: Class<P>): P {
+        val isMap = objects is Map<*, *>
+        val handler = InvocationHandler { proxy, method, args ->
+            val name = method.name
+            try {
+                return@InvocationHandler reflect(objects).method(name, *args).get<Any>()!!
+            } catch (e: ReflectException) {
+                if (isMap) {
+                    val map = objects as MutableMap<String, Any>?
+                    val length = args?.size ?: 0
+                    if (length == 0 && name.startsWith("get")) {
+                        return@InvocationHandler map!![property(name.substring(3))]!!
+                    } else if (length == 0 && name.startsWith("is")) {
+                        return@InvocationHandler map!![property(name.substring(2))]!!
+                    } else if (length == 1 && name.startsWith("set")) {
+                        map!![property(name.substring(3))] = args[0]
+                        return@InvocationHandler null
                     }
-                    throw e;
                 }
+                throw e
             }
-        };
-        return (P) Proxy.newProxyInstance(proxyType.getClassLoader(),
-                new Class[]{proxyType},
-                handler);
-    }
-
-    /**
-     * 获取 getter/setter 的 POJO 属性名称
-     */
-    private static String property(String string) {
-        int length = string.length();
-
-        if (length == 0) {
-            return "";
-        } else if (length == 1) {
-            return string.toLowerCase();
-        } else {
-            return string.substring(0, 1).toLowerCase() + string.substring(1);
         }
+        return Proxy.newProxyInstance(
+            proxyType.classLoader, arrayOf<Class<*>>(proxyType), handler
+        ) as P
     }
 
-
-    private Class<?> type() {
-        return type;
+    private fun type(): Class<*> {
+        return type
     }
 
-    private Class<?> wrapper(final Class<?> type) {
+    private fun wrapper(type: Class<*>?): Class<*>? {
         if (type == null) {
-            return null;
-        } else if (type.isPrimitive()) {
-            if (boolean.class == type) {
-                return Boolean.class;
-            } else if (int.class == type) {
-                return Integer.class;
-            } else if (long.class == type) {
-                return Long.class;
-            } else if (short.class == type) {
-                return Short.class;
-            } else if (byte.class == type) {
-                return Byte.class;
-            } else if (double.class == type) {
-                return Double.class;
-            } else if (float.class == type) {
-                return Float.class;
-            } else if (char.class == type) {
-                return Character.class;
-            } else if (void.class == type) {
-                return Void.class;
+            return null
+        } else if (type.isPrimitive) {
+            if (Boolean::class.javaPrimitiveType == type) {
+                return Boolean::class.java
+            } else if (Int::class.javaPrimitiveType == type) {
+                return Int::class.java
+            } else if (Long::class.javaPrimitiveType == type) {
+                return Long::class.java
+            } else if (Short::class.javaPrimitiveType == type) {
+                return Short::class.java
+            } else if (Byte::class.javaPrimitiveType == type) {
+                return Byte::class.java
+            } else if (Double::class.javaPrimitiveType == type) {
+                return Double::class.java
+            } else if (Float::class.javaPrimitiveType == type) {
+                return Float::class.java
+            } else if (Char::class.javaPrimitiveType == type) {
+                return Char::class.java
+            } else if (Void.TYPE == type) {
+                return Void::class.java
             }
         }
-        return type;
+        return type
     }
 
     /**
@@ -519,28 +398,105 @@ public final class ReflectUtils {
      *
      * @param <T> 值类型
      * @return result
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T get() {
-        return (T) object;
+    </T> */
+    fun <T> get(): T? {
+        return objects as T?
     }
 
-    @Override
-    public int hashCode() {
-        return object.hashCode();
+    override fun hashCode(): Int {
+        return objects.hashCode()
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof ReflectUtils && object.equals(((ReflectUtils) obj).get());
+    override fun equals(obj: Any?): Boolean {
+        return obj is ReflectUtils && objects == obj.get<Any>()
     }
 
-    @Override
-    public String toString() {
-        return object.toString();
+    override fun toString(): String {
+        return objects.toString()
     }
 
+    private class NULL
+    companion object {
+        ///////////////////////////////////////////////////////////////////////////
+        // reflect
+        ///////////////////////////////////////////////////////////////////////////
+        /**
+         * 反射class
+         *
+         * @param className class
+         * @return [ReflectUtils] 实例
+         * @throws ReflectException 如果反射不成功
+         */
+        @Throws(ReflectException::class)
+        fun reflect(className: String): ReflectUtils {
+            return reflect(forName(className))
+        }
 
-    private static class NULL {
+        /**
+         * 反射class
+         *
+         * @param className   class
+         * @param classLoader 类的加载器。
+         * @return [ReflectUtils] 实例
+         * @throws ReflectException 如果反射不成功
+         */
+        @Throws(ReflectException::class)
+        fun reflect(className: String, classLoader: ClassLoader): ReflectUtils {
+            return reflect(forName(className, classLoader))
+        }
+
+        /**
+         * 反射class
+         *
+         * @param clazz class.
+         * @return [ReflectUtils] 实例
+         * @throws ReflectException 如果反射不成功
+         */
+        @Throws(ReflectException::class)
+        fun reflect(clazz: Class<*>): ReflectUtils {
+            return ReflectUtils(clazz)
+        }
+
+        /**
+         * 反射class
+         *
+         * @param object object.
+         * @return [ReflectUtils] 实例
+         * @throws ReflectException 如果反射不成功
+         */
+        @Throws(ReflectException::class)
+        fun reflect(objects: Any?): ReflectUtils {
+            return ReflectUtils(objects?.javaClass ?: Any::class.java, objects)
+        }
+
+        private fun forName(className: String): Class<*> {
+            return try {
+                Class.forName(className)
+            } catch (e: ClassNotFoundException) {
+                throw ReflectException(e)
+            }
+        }
+
+        private fun forName(name: String, classLoader: ClassLoader): Class<*> {
+            return try {
+                Class.forName(name, true, classLoader)
+            } catch (e: ClassNotFoundException) {
+                throw ReflectException(e)
+            }
+        }
+
+        /**
+         * 获取 getter/setter 的 POJO 属性名称
+         */
+        private fun property(string: String): String {
+            val length = string.length
+            return if (length == 0) {
+                ""
+            } else if (length == 1) {
+                string.lowercase(Locale.getDefault())
+            } else {
+                string.substring(0, 1).lowercase(Locale.getDefault()) + string.substring(1)
+            }
+        }
     }
 }
