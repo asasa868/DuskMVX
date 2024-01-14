@@ -1,17 +1,16 @@
-package com.lzq.dawn.util.rom;
+package com.lzq.dawn.util.rom
 
-import android.annotation.SuppressLint;
-import android.os.Build;
-import android.os.Environment;
-import android.text.TextUtils;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Method;
-import java.util.Properties;
+import android.annotation.SuppressLint
+import android.os.Build
+import android.os.Environment
+import android.text.TextUtils
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.io.InputStreamReader
+import java.util.Locale
+import java.util.Properties
 
 /**
  * @Name :RomUtils
@@ -19,422 +18,383 @@ import java.util.Properties;
  * @Author :  Lzq
  * @Desc : rom
  */
-public final class RomUtils {
-    private static final String[] ROM_HUAWEI = {"huawei"};
-    private static final String[] ROM_VIVO = {"vivo"};
-    private static final String[] ROM_XIAOMI = {"xiaomi"};
-    private static final String[] ROM_OPPO = {"oppo"};
-    private static final String[] ROM_LEECO = {"leeco", "letv"};
-    private static final String[] ROM_360 = {"360", "qiku"};
-    private static final String[] ROM_ZTE = {"zte"};
-    private static final String[] ROM_ONEPLUS = {"oneplus"};
-    private static final String[] ROM_NUBIA = {"nubia"};
-    private static final String[] ROM_COOLPAD = {"coolpad", "yulong"};
-    private static final String[] ROM_LG = {"lg", "lge"};
-    private static final String[] ROM_GOOGLE = {"google"};
-    private static final String[] ROM_SAMSUNG = {"samsung"};
-    private static final String[] ROM_MEIZU = {"meizu"};
-    private static final String[] ROM_LENOVO = {"lenovo"};
-    private static final String[] ROM_SMARTISAN = {"smartisan", "deltainno"};
-    private static final String[] ROM_HTC = {"htc"};
-    private static final String[] ROM_SONY = {"sony"};
-    private static final String[] ROM_GIONEE = {"gionee", "amigo"};
-    private static final String[] ROM_MOTOROLA = {"motorola"};
-
-    private static final String VERSION_PROPERTY_HUAWEI = "ro.build.version.emui";
-    private static final String VERSION_PROPERTY_VIVO = "ro.vivo.os.build.display.id";
-    private static final String VERSION_PROPERTY_XIAOMI = "ro.build.version.incremental";
-    private static final String VERSION_PROPERTY_OPPO = "ro.build.version.opporom";
-    private static final String VERSION_PROPERTY_LEECO = "ro.letv.release.version";
-    private static final String VERSION_PROPERTY_360 = "ro.build.uiversion";
-    private static final String VERSION_PROPERTY_ZTE = "ro.build.MiFavor_version";
-    private static final String VERSION_PROPERTY_ONEPLUS = "ro.rom.version";
-    private static final String VERSION_PROPERTY_NUBIA = "ro.build.rom.id";
-    private final static String UNKNOWN = "unknown";
-
-    private static RomInfo bean = null;
-
-    private RomUtils() {
-    }
-
-    /**
-     * 返回rom是否为华为制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isHuawei() {
-        return ROM_HUAWEI[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为vivo制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isVivo() {
-        return ROM_VIVO[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为小米制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isXiaomi() {
-        return ROM_XIAOMI[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为oppo制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isOppo() {
-        return ROM_OPPO[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为leeco制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isLeeco() {
-        return ROM_LEECO[0].equals(getRomInfo().getName());
-    }
+object RomUtils {
+    private val ROM_HUAWEI = arrayOf("huawei")
+    private val ROM_VIVO = arrayOf("vivo")
+    private val ROM_XIAOMI = arrayOf("xiaomi")
+    private val ROM_OPPO = arrayOf("oppo")
+    private val ROM_LEECO = arrayOf("leeco", "letv")
+    private val ROM_360 = arrayOf("360", "qiku")
+    private val ROM_ZTE = arrayOf("zte")
+    private val ROM_ONEPLUS = arrayOf("oneplus")
+    private val ROM_NUBIA = arrayOf("nubia")
+    private val ROM_COOLPAD = arrayOf("coolpad", "yulong")
+    private val ROM_LG = arrayOf("lg", "lge")
+    private val ROM_GOOGLE = arrayOf("google")
+    private val ROM_SAMSUNG = arrayOf("samsung")
+    private val ROM_MEIZU = arrayOf("meizu")
+    private val ROM_LENOVO = arrayOf("lenovo")
+    private val ROM_SMARTISAN = arrayOf("smartisan", "deltainno")
+    private val ROM_HTC = arrayOf("htc")
+    private val ROM_SONY = arrayOf("sony")
+    private val ROM_GIONEE = arrayOf("gionee", "amigo")
+    private val ROM_MOTOROLA = arrayOf("motorola")
+    private const val VERSION_PROPERTY_HUAWEI = "ro.build.version.emui"
+    private const val VERSION_PROPERTY_VIVO = "ro.vivo.os.build.display.id"
+    private const val VERSION_PROPERTY_XIAOMI = "ro.build.version.incremental"
+    private const val VERSION_PROPERTY_OPPO = "ro.build.version.opporom"
+    private const val VERSION_PROPERTY_LEECO = "ro.letv.release.version"
+    private const val VERSION_PROPERTY_360 = "ro.build.uiversion"
+    private const val VERSION_PROPERTY_ZTE = "ro.build.MiFavor_version"
+    private const val VERSION_PROPERTY_ONEPLUS = "ro.rom.version"
+    private const val VERSION_PROPERTY_NUBIA = "ro.build.rom.id"
+    private const val UNKNOWN = "unknown"
+    private var bean: RomInfo? = null
+    val isHuawei: Boolean
+        /**
+         * 返回rom是否为华为制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_HUAWEI[0] == romInfo!!.name
+    val isVivo: Boolean
+        /**
+         * 返回rom是否为vivo制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_VIVO[0] == romInfo!!.name
+    val isXiaomi: Boolean
+        /**
+         * 返回rom是否为小米制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_XIAOMI[0] == romInfo!!.name
+    val isOppo: Boolean
+        /**
+         * 返回rom是否为oppo制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_OPPO[0] == romInfo!!.name
+    val isLeeco: Boolean
+        /**
+         * 返回rom是否为leeco制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_LEECO[0] == romInfo!!.name
 
     /**
      * 返回rom是否为360制造。
      *
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean is360() {
-        return ROM_360[0].equals(getRomInfo().getName());
+    fun is360(): Boolean {
+        return ROM_360[0] == romInfo!!.name
     }
 
-    /**
-     * 返回rom是否为zte制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isZte() {
-        return ROM_ZTE[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为Oneplus制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isOneplus() {
-        return ROM_ONEPLUS[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为Nubia制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isNubia() {
-        return ROM_NUBIA[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为Coolpad制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isCoolpad() {
-        return ROM_COOLPAD[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为Lg制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isLg() {
-        return ROM_LG[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为Google制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isGoogle() {
-        return ROM_GOOGLE[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为Samsung制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isSamsung() {
-        return ROM_SAMSUNG[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为Meizu制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isMeizu() {
-        return ROM_MEIZU[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为Lenovo制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isLenovo() {
-        return ROM_LENOVO[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为Smartisan制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isSmartisan() {
-        return ROM_SMARTISAN[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为Htc制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isHtc() {
-        return ROM_HTC[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为Sony制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isSony() {
-        return ROM_SONY[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为Gionee制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isGionee() {
-        return ROM_GIONEE[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom是否为Motorola制造。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isMotorola() {
-        return ROM_MOTOROLA[0].equals(getRomInfo().getName());
-    }
-
-    /**
-     * 返回rom的信息。
-     *
-     * @return rom的信息。
-     */
-    public static RomInfo getRomInfo() {
-        if (bean != null) {
-            return bean;
-        }
-        bean = new RomInfo();
-        final String brand = getBrand();
-        final String manufacturer = getManufacturer();
-        if (isRightRom(brand, manufacturer, ROM_HUAWEI)) {
-            bean.setName(ROM_HUAWEI[0]);
-            String version = getRomVersion(VERSION_PROPERTY_HUAWEI);
-            String[] temp = version.split("_");
-            if (temp.length > 1) {
-                bean.setVersion(temp[1]);
-            } else {
-                bean.setVersion(version);
+    val isZte: Boolean
+        /**
+         * 返回rom是否为zte制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_ZTE[0] == romInfo!!.name
+    val isOneplus: Boolean
+        /**
+         * 返回rom是否为Oneplus制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_ONEPLUS[0] == romInfo!!.name
+    val isNubia: Boolean
+        /**
+         * 返回rom是否为Nubia制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_NUBIA[0] == romInfo!!.name
+    val isCoolpad: Boolean
+        /**
+         * 返回rom是否为Coolpad制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_COOLPAD[0] == romInfo!!.name
+    val isLg: Boolean
+        /**
+         * 返回rom是否为Lg制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_LG[0] == romInfo!!.name
+    val isGoogle: Boolean
+        /**
+         * 返回rom是否为Google制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_GOOGLE[0] == romInfo!!.name
+    @JvmStatic
+    val isSamsung: Boolean
+        /**
+         * 返回rom是否为Samsung制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_SAMSUNG[0] == romInfo!!.name
+    val isMeizu: Boolean
+        /**
+         * 返回rom是否为Meizu制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_MEIZU[0] == romInfo!!.name
+    val isLenovo: Boolean
+        /**
+         * 返回rom是否为Lenovo制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_LENOVO[0] == romInfo!!.name
+    val isSmartisan: Boolean
+        /**
+         * 返回rom是否为Smartisan制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_SMARTISAN[0] == romInfo!!.name
+    val isHtc: Boolean
+        /**
+         * 返回rom是否为Htc制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_HTC[0] == romInfo!!.name
+    val isSony: Boolean
+        /**
+         * 返回rom是否为Sony制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_SONY[0] == romInfo!!.name
+    val isGionee: Boolean
+        /**
+         * 返回rom是否为Gionee制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_GIONEE[0] == romInfo!!.name
+    val isMotorola: Boolean
+        /**
+         * 返回rom是否为Motorola制造。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = ROM_MOTOROLA[0] == romInfo!!.name
+    @JvmStatic
+    val romInfo: RomInfo?
+        /**
+         * 返回rom的信息。
+         *
+         * @return rom的信息。
+         */
+        get() {
+            if (bean != null) {
+                return bean
             }
-            return bean;
-        }
-        if (isRightRom(brand, manufacturer, ROM_VIVO)) {
-            bean.setName(ROM_VIVO[0]); 
-            bean.setVersion(getRomVersion(VERSION_PROPERTY_VIVO));
-            return bean;
-        }
-        if (isRightRom(brand, manufacturer, ROM_XIAOMI)) {
-            bean.setName( ROM_XIAOMI[0]);
-            bean.setVersion( getRomVersion(VERSION_PROPERTY_XIAOMI));
-            return bean;
-        }
-        if (isRightRom(brand, manufacturer, ROM_OPPO)) {
-            bean.setName(ROM_OPPO[0]);
-            bean.setVersion( getRomVersion(VERSION_PROPERTY_OPPO));
-            return bean;
-        }
-        if (isRightRom(brand, manufacturer, ROM_LEECO)) {
-            bean.setName(ROM_LEECO[0]);
-            bean.setVersion( getRomVersion(VERSION_PROPERTY_LEECO));
-            return bean;
-        }
-
-        if (isRightRom(brand, manufacturer, ROM_360)) {
-            bean.setName(ROM_360[0]);
-            bean.setVersion( getRomVersion(VERSION_PROPERTY_360));
-            return bean;
-        }
-        if (isRightRom(brand, manufacturer, ROM_ZTE)) {
-            bean.setName( ROM_ZTE[0]);
-            bean.setVersion( getRomVersion(VERSION_PROPERTY_ZTE));
-            return bean;
-        }
-        if (isRightRom(brand, manufacturer, ROM_ONEPLUS)) {
-            bean.setName( ROM_ONEPLUS[0]);
-            bean.setVersion( getRomVersion(VERSION_PROPERTY_ONEPLUS));
-            return bean;
-        }
-        if (isRightRom(brand, manufacturer, ROM_NUBIA)) {
-            bean.setName( ROM_NUBIA[0]);
-            bean.setVersion( getRomVersion(VERSION_PROPERTY_NUBIA));
-            return bean;
-        }
-
-        if (isRightRom(brand, manufacturer, ROM_COOLPAD)) {
-            bean.setName( ROM_COOLPAD[0]);
-        } else if (isRightRom(brand, manufacturer, ROM_LG)) {
-            bean.setName( ROM_LG[0]);
-        } else if (isRightRom(brand, manufacturer, ROM_GOOGLE)) {
-            bean.setName( ROM_GOOGLE[0]);
-        } else if (isRightRom(brand, manufacturer, ROM_SAMSUNG)) {
-            bean.setName( ROM_SAMSUNG[0]);
-        } else if (isRightRom(brand, manufacturer, ROM_MEIZU)) {
-            bean.setName( ROM_MEIZU[0]);
-        } else if (isRightRom(brand, manufacturer, ROM_LENOVO)) {
-            bean.setName( ROM_LENOVO[0]);
-        } else if (isRightRom(brand, manufacturer, ROM_SMARTISAN)) {
-            bean.setName( ROM_SMARTISAN[0]);
-        } else if (isRightRom(brand, manufacturer, ROM_HTC)) {
-            bean.setName( ROM_HTC[0]);
-        } else if (isRightRom(brand, manufacturer, ROM_SONY)) {
-            bean.setName( ROM_SONY[0]);
-        } else if (isRightRom(brand, manufacturer, ROM_GIONEE)) {
-            bean.setName( ROM_GIONEE[0]);
-        } else if (isRightRom(brand, manufacturer, ROM_MOTOROLA)) {
-            bean.setName( ROM_MOTOROLA[0]);
-        } else {
-            bean.setName( manufacturer);
-        }
-        bean.setVersion( getRomVersion(""));
-        return bean;
-    }
-
-
-    private static boolean isRightRom(final String brand, final String manufacturer, final String... names) {
-        for (String name : names) {
-            if (brand.contains(name) || manufacturer.contains(name)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static String getManufacturer() {
-        try {
-            String manufacturer = Build.MANUFACTURER;
-            if (!TextUtils.isEmpty(manufacturer)) {
-                return manufacturer.toLowerCase();
-            }
-        } catch (Throwable ignore) {/**/}
-        return UNKNOWN;
-    }
-
-    private static String getBrand() {
-        try {
-            String brand = Build.BRAND;
-            if (!TextUtils.isEmpty(brand)) {
-                return brand.toLowerCase();
-            }
-        } catch (Throwable ignore) {/**/}
-        return UNKNOWN;
-    }
-
-    private static String getRomVersion(final String propertyName) {
-        String ret = "";
-        if (!TextUtils.isEmpty(propertyName)) {
-            ret = getSystemProperty(propertyName);
-        }
-        if (TextUtils.isEmpty(ret) || ret.equals(UNKNOWN)) {
-            try {
-                String display = Build.DISPLAY;
-                if (!TextUtils.isEmpty(display)) {
-                    ret = display.toLowerCase();
+            bean = RomInfo()
+            val brand = brand
+            val manufacturer = manufacturer
+            if (isRightRom(brand, manufacturer, *ROM_HUAWEI)) {
+                bean!!.name = ROM_HUAWEI[0]
+                val version = getRomVersion(VERSION_PROPERTY_HUAWEI)
+                val temp = version.split("_".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                if (temp.size > 1) {
+                    bean!!.version = temp[1]
+                } else {
+                    bean!!.version = version
                 }
-            } catch (Throwable ignore) {/**/}
-        }
-        if (TextUtils.isEmpty(ret)) {
-            return UNKNOWN;
-        }
-        return ret;
-    }
-
-    private static String getSystemProperty(final String name) {
-        String prop = getSystemPropertyByShell(name);
-        if (!TextUtils.isEmpty(prop)) {
-            return prop;
-        }
-        prop = getSystemPropertyByStream(name);
-        if (!TextUtils.isEmpty(prop)) {
-            return prop;
-        }
-        if (Build.VERSION.SDK_INT < 28) {
-            return getSystemPropertyByReflect(name);
-        }
-        return prop;
-    }
-
-    private static String getSystemPropertyByShell(final String propName) {
-        String line;
-        BufferedReader input = null;
-        try {
-            Process p = Runtime.getRuntime().exec("getprop " + propName);
-            input = new BufferedReader(new InputStreamReader(p.getInputStream()), 1024);
-            String ret = input.readLine();
-            if (ret != null) {
-                return ret;
+                return bean
             }
-        } catch (IOException ignore) {
+            if (isRightRom(brand, manufacturer, *ROM_VIVO)) {
+                bean!!.name = ROM_VIVO[0]
+                bean!!.version = getRomVersion(VERSION_PROPERTY_VIVO)
+                return bean
+            }
+            if (isRightRom(brand, manufacturer, *ROM_XIAOMI)) {
+                bean!!.name = ROM_XIAOMI[0]
+                bean!!.version = getRomVersion(VERSION_PROPERTY_XIAOMI)
+                return bean
+            }
+            if (isRightRom(brand, manufacturer, *ROM_OPPO)) {
+                bean!!.name = ROM_OPPO[0]
+                bean!!.version = getRomVersion(VERSION_PROPERTY_OPPO)
+                return bean
+            }
+            if (isRightRom(brand, manufacturer, *ROM_LEECO)) {
+                bean!!.name = ROM_LEECO[0]
+                bean!!.version = getRomVersion(VERSION_PROPERTY_LEECO)
+                return bean
+            }
+            if (isRightRom(brand, manufacturer, *ROM_360)) {
+                bean!!.name = ROM_360[0]
+                bean!!.version = getRomVersion(VERSION_PROPERTY_360)
+                return bean
+            }
+            if (isRightRom(brand, manufacturer, *ROM_ZTE)) {
+                bean!!.name = ROM_ZTE[0]
+                bean!!.version = getRomVersion(VERSION_PROPERTY_ZTE)
+                return bean
+            }
+            if (isRightRom(brand, manufacturer, *ROM_ONEPLUS)) {
+                bean!!.name = ROM_ONEPLUS[0]
+                bean!!.version = getRomVersion(VERSION_PROPERTY_ONEPLUS)
+                return bean
+            }
+            if (isRightRom(brand, manufacturer, *ROM_NUBIA)) {
+                bean!!.name = ROM_NUBIA[0]
+                bean!!.version = getRomVersion(VERSION_PROPERTY_NUBIA)
+                return bean
+            }
+            if (isRightRom(brand, manufacturer, *ROM_COOLPAD)) {
+                bean!!.name = ROM_COOLPAD[0]
+            } else if (isRightRom(brand, manufacturer, *ROM_LG)) {
+                bean!!.name = ROM_LG[0]
+            } else if (isRightRom(brand, manufacturer, *ROM_GOOGLE)) {
+                bean!!.name = ROM_GOOGLE[0]
+            } else if (isRightRom(brand, manufacturer, *ROM_SAMSUNG)) {
+                bean!!.name = ROM_SAMSUNG[0]
+            } else if (isRightRom(brand, manufacturer, *ROM_MEIZU)) {
+                bean!!.name = ROM_MEIZU[0]
+            } else if (isRightRom(brand, manufacturer, *ROM_LENOVO)) {
+                bean!!.name = ROM_LENOVO[0]
+            } else if (isRightRom(brand, manufacturer, *ROM_SMARTISAN)) {
+                bean!!.name = ROM_SMARTISAN[0]
+            } else if (isRightRom(brand, manufacturer, *ROM_HTC)) {
+                bean!!.name = ROM_HTC[0]
+            } else if (isRightRom(brand, manufacturer, *ROM_SONY)) {
+                bean!!.name = ROM_SONY[0]
+            } else if (isRightRom(brand, manufacturer, *ROM_GIONEE)) {
+                bean!!.name = ROM_GIONEE[0]
+            } else if (isRightRom(brand, manufacturer, *ROM_MOTOROLA)) {
+                bean!!.name = ROM_MOTOROLA[0]
+            } else {
+                bean!!.name = manufacturer
+            }
+            bean!!.version = getRomVersion("")
+            return bean
+        }
+
+    private fun isRightRom(brand: String, manufacturer: String, vararg names: String): Boolean {
+        for (name in names) {
+            if (brand.contains(name) || manufacturer.contains(name)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private val manufacturer: String
+        get() {
+            try {
+                val manufacturer = Build.MANUFACTURER
+                if (!TextUtils.isEmpty(manufacturer)) {
+                    return manufacturer.lowercase(Locale.getDefault())
+                }
+            } catch (ignore: Throwable) { /**/
+            }
+            return UNKNOWN
+        }
+    private val brand: String
+        get() {
+            try {
+                val brand = Build.BRAND
+                if (!TextUtils.isEmpty(brand)) {
+                    return brand.lowercase(Locale.getDefault())
+                }
+            } catch (ignore: Throwable) { /**/
+            }
+            return UNKNOWN
+        }
+
+    private fun getRomVersion(propertyName: String): String {
+        var ret = ""
+        if (!TextUtils.isEmpty(propertyName)) {
+            ret = getSystemProperty(propertyName)
+        }
+        if (TextUtils.isEmpty(ret) || ret == UNKNOWN) {
+            try {
+                val display = Build.DISPLAY
+                if (!TextUtils.isEmpty(display)) {
+                    ret = display.lowercase(Locale.getDefault())
+                }
+            } catch (ignore: Throwable) { /**/
+            }
+        }
+        return if (TextUtils.isEmpty(ret)) {
+            UNKNOWN
+        } else ret
+    }
+
+    private fun getSystemProperty(name: String): String {
+        var prop = getSystemPropertyByShell(name)
+        if (!TextUtils.isEmpty(prop)) {
+            return prop
+        }
+        prop = getSystemPropertyByStream(name)
+        if (!TextUtils.isEmpty(prop)) {
+            return prop
+        }
+        return if (Build.VERSION.SDK_INT < 28) {
+            getSystemPropertyByReflect(name)
+        } else prop
+    }
+
+    private fun getSystemPropertyByShell(propName: String): String {
+        var line: String
+        var input: BufferedReader? = null
+        try {
+            val p = Runtime.getRuntime().exec("getprop $propName")
+            input = BufferedReader(InputStreamReader(p.inputStream), 1024)
+            val ret = input.readLine()
+            if (ret != null) {
+                return ret
+            }
+        } catch (ignore: IOException) {
         } finally {
             if (input != null) {
                 try {
-                    input.close();
-                } catch (IOException ignore) {/**/}
+                    input.close()
+                } catch (ignore: IOException) { /**/
+                }
             }
         }
-        return "";
+        return ""
     }
 
-    private static String getSystemPropertyByStream(final String key) {
+    private fun getSystemPropertyByStream(key: String): String {
         try {
-            Properties prop = new Properties();
-            FileInputStream is = new FileInputStream(
-                    new File(Environment.getRootDirectory(), "build.prop")
-            );
-            prop.load(is);
-            return prop.getProperty(key, "");
-        } catch (Exception ignore) {/**/}
-        return "";
+            val prop = Properties()
+            val `is` = FileInputStream(
+                File(Environment.getRootDirectory(), "build.prop")
+            )
+            prop.load(`is`)
+            return prop.getProperty(key, "")
+        } catch (ignore: Exception) { /**/
+        }
+        return ""
     }
 
-    private static String getSystemPropertyByReflect(String key) {
+    private fun getSystemPropertyByReflect(key: String): String {
         try {
-            @SuppressLint("PrivateApi")
-            Class<?> clz = Class.forName("android.os.SystemProperties");
-            Method getMethod = clz.getMethod("get", String.class, String.class);
-            return (String) getMethod.invoke(clz, key, "");
-        } catch (Exception e) {/**/}
-        return "";
+            @SuppressLint("PrivateApi") val clz = Class.forName("android.os.SystemProperties")
+            val getMethod = clz.getMethod("get", String::class.java, String::class.java)
+            return getMethod.invoke(clz, key, "") as String
+        } catch (e: Exception) { /**/
+        }
+        return ""
     }
 }

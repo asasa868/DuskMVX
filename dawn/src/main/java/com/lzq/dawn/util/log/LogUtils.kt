@@ -1,33 +1,27 @@
-package com.lzq.dawn.util.log;
+package com.lzq.dawn.util.log
 
-import android.util.Log;
-
-import androidx.annotation.IntDef;
-import androidx.annotation.IntRange;
-import androidx.collection.SimpleArrayMap;
-
-import com.lzq.dawn.DawnBridge;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Formatter;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import android.util.Log
+import androidx.annotation.IntDef
+import androidx.annotation.IntRange
+import androidx.collection.SimpleArrayMap
+import com.lzq.dawn.DawnBridge
+import com.lzq.dawn.util.log.LogClass.IFileWriter
+import com.lzq.dawn.util.log.LogClass.IFormatter
+import com.lzq.dawn.util.log.LogClass.OnConsoleOutputListener
+import com.lzq.dawn.util.log.LogClass.OnFileOutputListener
+import com.lzq.dawn.util.log.LogFormatter.object2String
+import java.io.File
+import java.io.IOException
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Collections
+import java.util.Date
+import java.util.Formatter
+import java.util.Locale
+import java.util.concurrent.Executors
+import java.util.regex.Pattern
 
 /**
  * @Name :LogUtils
@@ -35,931 +29,844 @@ import java.util.regex.Pattern;
  * @Author :  Lzq
  * @Desc : log
  */
-public final class LogUtils {
-    private LogUtils() {
-    }
+object LogUtils {
+    const val V = Log.VERBOSE
+    const val D = Log.DEBUG
+    const val I = Log.INFO
+    const val W = Log.WARN
+    const val E = Log.ERROR
+    const val A = Log.ASSERT
+    private val T = charArrayOf('V', 'D', 'I', 'W', 'E', 'A')
+    const val FILE = 0x10
+    const val JSON = 0x20
+    const val XML = 0x30
+    private val FILE_SEP = System.getProperty("file.separator")
+    val LINE_SEP = System.getProperty("line.separator")
+    private const val TOP_CORNER = "┌"
+    private const val MIDDLE_CORNER = "├"
+    private const val LEFT_BORDER = "│ "
+    private const val BOTTOM_CORNER = "└"
+    private const val SIDE_DIVIDER = "────────────────────────────────────────────────────────"
+    private const val MIDDLE_DIVIDER = "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄"
+    private const val TOP_BORDER = TOP_CORNER + SIDE_DIVIDER + SIDE_DIVIDER
+    private const val MIDDLE_BORDER = MIDDLE_CORNER + MIDDLE_DIVIDER + MIDDLE_DIVIDER
+    private const val BOTTOM_BORDER = BOTTOM_CORNER + SIDE_DIVIDER + SIDE_DIVIDER
 
-    public static final int V = Log.VERBOSE;
-    public static final int D = Log.DEBUG;
-    public static final int I = Log.INFO;
-    public static final int W = Log.WARN;
-    public static final int E = Log.ERROR;
-    public static final int A = Log.ASSERT;
-
-    @IntDef({V, D, I, W, E, A})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface TYPE {
-    }
-
-    private static final char[] T = new char[]{'V', 'D', 'I', 'W', 'E', 'A'};
-
-    public static final int FILE = 0x10;
-    public static final int JSON = 0x20;
-    public static final int XML = 0x30;
-
-    private static final String FILE_SEP = System.getProperty("file.separator");
-    public static final String LINE_SEP = System.getProperty("line.separator");
-    private static final String TOP_CORNER = "┌";
-    private static final String MIDDLE_CORNER = "├";
-    private static final String LEFT_BORDER = "│ ";
-    private static final String BOTTOM_CORNER = "└";
-    private static final String SIDE_DIVIDER = "────────────────────────────────────────────────────────";
-    private static final String MIDDLE_DIVIDER = "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄";
-
-    private static final String TOP_BORDER = TOP_CORNER + SIDE_DIVIDER + SIDE_DIVIDER;
-    private static final String MIDDLE_BORDER = MIDDLE_CORNER + MIDDLE_DIVIDER + MIDDLE_DIVIDER;
-    private static final String BOTTOM_BORDER = BOTTOM_CORNER + SIDE_DIVIDER + SIDE_DIVIDER;
     // fit for Chinese character
-    private static final int MAX_LEN = 1100;
-    private static final String NOTHING = "log nothing";
-    private static final String NULL = "null";
-    private static final String ARGS = "args";
-    private static final String PLACEHOLDER = " ";
-    private static final Config CONFIG = new Config();
-
-    private static SimpleDateFormat simpleDateFormat;
-
-    private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
-
-    private static final SimpleArrayMap<Class, LogClass.IFormatter> I_FORMATTER_MAP = new SimpleArrayMap<>();
-
-    public static Config getConfig() {
-        return CONFIG;
+    private const val MAX_LEN = 1100
+    private const val NOTHING = "log nothing"
+    private const val NULL = "null"
+    private const val ARGS = "args"
+    private const val PLACEHOLDER = " "
+    val config = Config()
+    private var simpleDateFormat: SimpleDateFormat? = null
+    private val EXECUTOR = Executors.newSingleThreadExecutor()
+    private val I_FORMATTER_MAP = SimpleArrayMap<Class<*>?, IFormatter<*>>()
+    fun v(vararg contents: Any?) {
+        log(V, config.globalTag, *contents)
     }
 
-    public static void v(final Object... contents) {
-        log(V, CONFIG.getGlobalTag(), contents);
+    fun vTag(tag: String?, vararg contents: Any?) {
+        log(V, tag, *contents)
     }
 
-    public static void vTag(final String tag, final Object... contents) {
-        log(V, tag, contents);
+    fun d(vararg contents: Any?) {
+        log(D, config.globalTag, *contents)
     }
 
-    public static void d(final Object... contents) {
-        log(D, CONFIG.getGlobalTag(), contents);
+    fun dTag(tag: String?, vararg contents: Any?) {
+        log(D, tag, *contents)
     }
 
-    public static void dTag(final String tag, final Object... contents) {
-        log(D, tag, contents);
+    fun i(vararg contents: Any?) {
+        log(I, config.globalTag, *contents)
     }
 
-    public static void i(final Object... contents) {
-        log(I, CONFIG.getGlobalTag(), contents);
+    fun iTag(tag: String?, vararg contents: Any?) {
+        log(I, tag, *contents)
     }
 
-    public static void iTag(final String tag, final Object... contents) {
-        log(I, tag, contents);
+    fun w(vararg contents: Any?) {
+        log(W, config.globalTag, *contents)
     }
 
-    public static void w(final Object... contents) {
-        log(W, CONFIG.getGlobalTag(), contents);
+    fun wTag(tag: String?, vararg contents: Any?) {
+        log(W, tag, *contents)
     }
 
-    public static void wTag(final String tag, final Object... contents) {
-        log(W, tag, contents);
+    fun e(vararg contents: Any?) {
+        log(E, config.globalTag, *contents)
     }
 
-    public static void e(final Object... contents) {
-        log(E, CONFIG.getGlobalTag(), contents);
+    fun eTag(tag: String?, vararg contents: Any?) {
+        log(E, tag, *contents)
     }
 
-    public static void eTag(final String tag, final Object... contents) {
-        log(E, tag, contents);
+    fun a(vararg contents: Any?) {
+        log(A, config.globalTag, *contents)
     }
 
-    public static void a(final Object... contents) {
-        log(A, CONFIG.getGlobalTag(), contents);
+    fun aTag(tag: String?, vararg contents: Any?) {
+        log(A, tag, *contents)
     }
 
-    public static void aTag(final String tag, final Object... contents) {
-        log(A, tag, contents);
+    fun file(content: Any?) {
+        log(FILE or D, config.globalTag, content)
     }
 
-    public static void file(final Object content) {
-        log(FILE | D, CONFIG.getGlobalTag(), content);
+    fun file(@TYPE type: Int, content: Any?) {
+        log(FILE or type, config.globalTag, content)
     }
 
-    public static void file(@TYPE final int type, final Object content) {
-        log(FILE | type, CONFIG.getGlobalTag(), content);
+    fun file(tag: String?, content: Any?) {
+        log(FILE or D, tag, content)
     }
 
-    public static void file(final String tag, final Object content) {
-        log(FILE | D, tag, content);
+    fun file(@TYPE type: Int, tag: String?, content: Any?) {
+        log(FILE or type, tag, content)
     }
 
-    public static void file(@TYPE final int type, final String tag, final Object content) {
-        log(FILE | type, tag, content);
+    fun json(content: Any?) {
+        log(JSON or D, config.globalTag, content)
     }
 
-    public static void json(final Object content) {
-        log(JSON | D, CONFIG.getGlobalTag(), content);
+    fun json(@TYPE type: Int, content: Any?) {
+        log(JSON or type, config.globalTag, content)
     }
 
-    public static void json(@TYPE final int type, final Object content) {
-        log(JSON | type, CONFIG.getGlobalTag(), content);
+    fun json(tag: String?, content: Any?) {
+        log(JSON or D, tag, content)
     }
 
-    public static void json(final String tag, final Object content) {
-        log(JSON | D, tag, content);
+    fun json(@TYPE type: Int, tag: String?, content: Any?) {
+        log(JSON or type, tag, content)
     }
 
-    public static void json(@TYPE final int type, final String tag, final Object content) {
-        log(JSON | type, tag, content);
+    fun xml(content: String?) {
+        log(XML or D, config.globalTag, content)
     }
 
-    public static void xml(final String content) {
-        log(XML | D, CONFIG.getGlobalTag(), content);
+    fun xml(@TYPE type: Int, content: String?) {
+        log(XML or type, config.globalTag, content)
     }
 
-    public static void xml(@TYPE final int type, final String content) {
-        log(XML | type, CONFIG.getGlobalTag(), content);
+    fun xml(tag: String?, content: String?) {
+        log(XML or D, tag, content)
     }
 
-    public static void xml(final String tag, final String content) {
-        log(XML | D, tag, content);
+    fun xml(@TYPE type: Int, tag: String?, content: String?) {
+        log(XML or type, tag, content)
     }
 
-    public static void xml(@TYPE final int type, final String tag, final String content) {
-        log(XML | type, tag, content);
-    }
-
-    public static void log(final int type, final String tag, final Object... contents) {
-        if (!CONFIG.isLogSwitch()) {
-            return;
+    fun log(type: Int, tag: String?, vararg contents: Any?) {
+        if (!config.isLogSwitch) {
+            return
         }
-        final int type_low = type & 0x0f, type_high = type & 0xf0;
-        if (CONFIG.isLog2ConsoleSwitch() || CONFIG.isLog2FileSwitch() || type_high == FILE) {
-            if (type_low < CONFIG.mConsoleFilter && type_low < CONFIG.mFileFilter) {
-                return;
+        val type_low = type and 0x0f
+        val type_high = type and 0xf0
+        if (config.isLog2ConsoleSwitch || config.isLog2FileSwitch || type_high == FILE) {
+            if (type_low < config.mConsoleFilter && type_low < config.mFileFilter) {
+                return
             }
-            final TagHead tagHead = processTagAndHead(tag);
-            final String body = processBody(type_high, contents);
-            if (CONFIG.isLog2ConsoleSwitch() && type_high != FILE && type_low >= CONFIG.mConsoleFilter) {
-                print2Console(type_low, tagHead.tag, tagHead.consoleHead, body);
+            val tagHead = processTagAndHead(tag)
+            val body = processBody(type_high, *contents)
+            if (config.isLog2ConsoleSwitch && type_high != FILE && type_low >= config.mConsoleFilter) {
+                print2Console(type_low, tagHead.tag, tagHead.consoleHead, body)
             }
-            if ((CONFIG.isLog2FileSwitch() || type_high == FILE) && type_low >= CONFIG.mFileFilter) {
-                EXECUTOR.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        print2File(type_low, tagHead.tag, tagHead.fileHead + body);
-                    }
-                });
+            if ((config.isLog2FileSwitch || type_high == FILE) && type_low >= config.mFileFilter) {
+                EXECUTOR.execute { print2File(type_low, tagHead.tag, tagHead.fileHead + body) }
             }
         }
     }
 
-    public static String getCurrentLogFilePath() {
-        return getCurrentLogFilePath(new Date());
-    }
-
-    public static List<File> getLogFiles() {
-        String dir = CONFIG.getDir();
-        File logDir = new File(dir);
-        if (!logDir.exists()) {
-            return new ArrayList<>();
-        }
-        File[] files = logDir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return isMatchLogFileName(name);
+    val currentLogFilePath: String
+        get() = getCurrentLogFilePath(Date())
+    val logFiles: List<File>
+        get() {
+            val dir = config.dir
+            val logDir = File(dir)
+            if (!logDir.exists()) {
+                return ArrayList()
             }
-        });
-        List<File> list = new ArrayList<>();
-        Collections.addAll(list, files);
-        return list;
-    }
+            val files = logDir.listFiles { dir, name -> isMatchLogFileName(name) }
+            val list: MutableList<File> = mutableListOf()
+            Collections.addAll(list, *files)
+            return list
+        }
 
-    private static TagHead processTagAndHead(String tag) {
-        if (!CONFIG.mTagIsSpace && !CONFIG.isLogHeadSwitch()) {
-            tag = CONFIG.getGlobalTag();
+    private fun processTagAndHead(tag: String?): TagHead {
+        var tag = tag
+        if (!config.mTagIsSpace && !config.isLogHeadSwitch) {
+            tag = config.globalTag
         } else {
-            final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-            final int stackIndex = 3 + CONFIG.getStackOffset();
-            if (stackIndex >= stackTrace.length) {
-                StackTraceElement targetElement = stackTrace[3];
-                final String fileName = getFileName(targetElement);
-                if (CONFIG.mTagIsSpace && DawnBridge.isSpace(tag)) {
-                    int index = fileName.indexOf('.');// Use proguard may not find '.'.
-                    tag = index == -1 ? fileName : fileName.substring(0, index);
+            val stackTrace = Throwable().stackTrace
+            val stackIndex = 3 + config.stackOffset
+            if (stackIndex >= stackTrace.size) {
+                val targetElement = stackTrace[3]
+                val fileName = getFileName(targetElement)
+                if (config.mTagIsSpace && DawnBridge.isSpace(tag)) {
+                    val index = fileName.indexOf('.') // Use proguard may not find '.'.
+                    tag = if (index == -1) fileName else fileName.substring(0, index)
                 }
-                return new TagHead(tag, null, ": ");
+                return TagHead(tag!!, null, ": ")
             }
-            StackTraceElement targetElement = stackTrace[stackIndex];
-            final String fileName = getFileName(targetElement);
-            if (CONFIG.mTagIsSpace && DawnBridge.isSpace(tag)) {
-                int index = fileName.indexOf('.');// Use proguard may not find '.'.
-                tag = index == -1 ? fileName : fileName.substring(0, index);
+            var targetElement = stackTrace[stackIndex]
+            val fileName = getFileName(targetElement)
+            if (config.mTagIsSpace && DawnBridge.isSpace(tag)) {
+                val index = fileName.indexOf('.') // Use proguard may not find '.'.
+                tag = if (index == -1) fileName else fileName.substring(0, index)
             }
-            if (CONFIG.isLogHeadSwitch()) {
-                String tName = Thread.currentThread().getName();
-                final String head = new Formatter()
-                        .format("%s, %s.%s(%s:%d)",
-                                tName,
-                                targetElement.getClassName(),
-                                targetElement.getMethodName(),
-                                fileName,
-                                targetElement.getLineNumber())
-                        .toString();
-                final String fileHead = " [" + head + "]: ";
-                if (CONFIG.getStackDeep() <= 1) {
-                    return new TagHead(tag, new String[]{head}, fileHead);
+            if (config.isLogHeadSwitch) {
+                val tName = Thread.currentThread().name
+                val head = Formatter().format(
+                        "%s, %s.%s(%s:%d)",
+                        tName,
+                        targetElement.className,
+                        targetElement.methodName,
+                        fileName,
+                        targetElement.lineNumber
+                    ).toString()
+                val fileHead = " [$head]: "
+                return if (config.stackDeep <= 1) {
+                    TagHead(tag!!, arrayOf(head), fileHead)
                 } else {
-                    final String[] consoleHead =
-                            new String[Math.min(
-                                    CONFIG.getStackDeep(),
-                                    stackTrace.length - stackIndex
-                            )];
-                    consoleHead[0] = head;
-                    int spaceLen = tName.length() + 2;
-                    String space = new Formatter().format("%" + spaceLen + "s", "").toString();
-                    for (int i = 1, len = consoleHead.length; i < len; ++i) {
-                        targetElement = stackTrace[i + stackIndex];
-                        consoleHead[i] = new Formatter()
-                                .format("%s%s.%s(%s:%d)",
-                                        space,
-                                        targetElement.getClassName(),
-                                        targetElement.getMethodName(),
-                                        getFileName(targetElement),
-                                        targetElement.getLineNumber())
-                                .toString();
+                    val consoleHead = arrayOfNulls<String>(
+                        config.stackDeep.coerceAtMost(stackTrace.size - stackIndex)
+                    )
+                    consoleHead[0] = head
+                    val spaceLen = tName.length + 2
+                    val space = Formatter().format("%" + spaceLen + "s", "").toString()
+                    var i = 1
+                    val len = consoleHead.size
+                    while (i < len) {
+                        targetElement = stackTrace[i + stackIndex]
+                        consoleHead[i] = Formatter().format(
+                                "%s%s.%s(%s:%d)",
+                                space,
+                                targetElement.className,
+                                targetElement.methodName,
+                                getFileName(targetElement),
+                                targetElement.lineNumber
+                            ).toString()
+                        ++i
                     }
-                    return new TagHead(tag, consoleHead, fileHead);
+                    TagHead(tag!!, consoleHead, fileHead)
                 }
             }
         }
-        return new TagHead(tag, null, ": ");
+        return TagHead(tag!!, null, ": ")
     }
 
-    private static String getFileName(final StackTraceElement targetElement) {
-        String fileName = targetElement.getFileName();
+    private fun getFileName(targetElement: StackTraceElement): String {
+        val fileName = targetElement.fileName
         if (fileName != null) {
-            return fileName;
+            return fileName
         }
         // If name of file is null, should add
         // "-keepattributes SourceFile,LineNumberTable" in proguard file.
-        String className = targetElement.getClassName();
-        String[] classNameInfo = className.split("\\.");
-        if (classNameInfo.length > 0) {
-            className = classNameInfo[classNameInfo.length - 1];
+        var className = targetElement.className
+        val classNameInfo = className.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        if (classNameInfo.size > 0) {
+            className = classNameInfo[classNameInfo.size - 1]
         }
-        int index = className.indexOf('$');
+        val index = className.indexOf('$')
         if (index != -1) {
-            className = className.substring(0, index);
+            className = className.substring(0, index)
         }
-        return className + ".java";
+        return "$className.java"
     }
 
-    private static String processBody(final int type, final Object... contents) {
-        String body = NULL;
+    private fun processBody(type: Int, vararg contents: Any?): String {
+        var body: String? = NULL
         if (contents != null) {
-            if (contents.length == 1) {
-                body = formatObject(type, contents[0]);
+            body = if (contents.size == 1) {
+                formatObject(type, contents[0])
             } else {
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0, len = contents.length; i < len; ++i) {
-                    Object content = contents[i];
-                    sb.append(ARGS)
-                            .append("[")
-                            .append(i)
-                            .append("]")
-                            .append(" = ")
-                            .append(formatObject(content))
-                            .append(LINE_SEP);
+                val sb = StringBuilder()
+                var i = 0
+                val len = contents.size
+                while (i < len) {
+                    val content = contents[i]
+                    sb.append(ARGS).append("[").append(i).append("]").append(" = ")
+                        .append(formatObject(content)).append(LINE_SEP)
+                    ++i
                 }
-                body = sb.toString();
+                sb.toString()
             }
         }
-        return body.length() == 0 ? NOTHING : body;
+        return if (body!!.length == 0) NOTHING else body
     }
 
-    private static String formatObject(int type, Object object) {
-        if (object == null) {
-            return NULL;
+    private fun formatObject(type: Int, `object`: Any?): String? {
+        if (`object` == null) {
+            return NULL
         }
         if (type == JSON) {
-            return LogFormatter.object2String(object, JSON);
+            return object2String(`object`, JSON)
         }
-        if (type == XML) {
-            return LogFormatter.object2String(object, XML);
-        }
-        return formatObject(object);
+        return if (type == XML) {
+            object2String(`object`, XML)
+        } else formatObject(`object`)
     }
 
-    public static String formatObject(Object object) {
-        if (object == null) {
-            return NULL;
+    fun formatObject(`object`: Any?): String? {
+        if (`object` == null) {
+            return NULL
         }
         if (!I_FORMATTER_MAP.isEmpty()) {
-            LogClass.IFormatter iFormatter = I_FORMATTER_MAP.get(getClassFromObject(object));
+            val iFormatter = I_FORMATTER_MAP[getClassFromObject(`object`)]
             if (iFormatter != null) {
-                //noinspection unchecked
-                return iFormatter.format(object);
+                return iFormatter.format(`object` as Nothing)
             }
         }
-        return LogFormatter.object2String(object);
+        return object2String(`object`)
     }
 
-    private static void print2Console(final int type,
-                                      final String tag,
-                                      final String[] head,
-                                      final String msg) {
-        if (CONFIG.isSingleTagSwitch()) {
-            printSingleTagMsg(type, tag, processSingleTagMsg(type, tag, head, msg));
+    private fun print2Console(
+        type: Int, tag: String, head: Array<String>?, msg: String
+    ) {
+        if (config.isSingleTagSwitch) {
+            printSingleTagMsg(type, tag, processSingleTagMsg(type, tag, head, msg))
         } else {
-            printBorder(type, tag, true);
-            printHead(type, tag, head);
-            printMsg(type, tag, msg);
-            printBorder(type, tag, false);
+            printBorder(type, tag, true)
+            printHead(type, tag, head)
+            printMsg(type, tag, msg)
+            printBorder(type, tag, false)
         }
     }
 
-    private static void printBorder(final int type, final String tag, boolean isTop) {
-        if (CONFIG.isLogBorderSwitch()) {
-            print2Console(type, tag, isTop ? TOP_BORDER : BOTTOM_BORDER);
+    private fun printBorder(type: Int, tag: String, isTop: Boolean) {
+        if (config.isLogBorderSwitch) {
+            print2Console(type, tag, if (isTop) TOP_BORDER else BOTTOM_BORDER)
         }
     }
 
-    private static void printHead(final int type, final String tag, final String[] head) {
+    private fun printHead(type: Int, tag: String, head: Array<String>?) {
         if (head != null) {
-            for (String aHead : head) {
-                print2Console(type, tag, CONFIG.isLogBorderSwitch() ? LEFT_BORDER + aHead : aHead);
+            for (aHead in head) {
+                print2Console(type, tag, if (config.isLogBorderSwitch) LEFT_BORDER + aHead else aHead)
             }
-            if (CONFIG.isLogBorderSwitch()) {
-                print2Console(type, tag, MIDDLE_BORDER);
+            if (config.isLogBorderSwitch) {
+                print2Console(type, tag, MIDDLE_BORDER)
             }
         }
     }
 
-    private static void printMsg(final int type, final String tag, final String msg) {
-        int len = msg.length();
-        int countOfSub = len / MAX_LEN;
+    private fun printMsg(type: Int, tag: String, msg: String) {
+        val len = msg.length
+        val countOfSub = len / MAX_LEN
         if (countOfSub > 0) {
-            int index = 0;
-            for (int i = 0; i < countOfSub; i++) {
-                printSubMsg(type, tag, msg.substring(index, index + MAX_LEN));
-                index += MAX_LEN;
+            var index = 0
+            for (i in 0 until countOfSub) {
+                printSubMsg(type, tag, msg.substring(index, index + MAX_LEN))
+                index += MAX_LEN
             }
             if (index != len) {
-                printSubMsg(type, tag, msg.substring(index, len));
+                printSubMsg(type, tag, msg.substring(index, len))
             }
         } else {
-            printSubMsg(type, tag, msg);
+            printSubMsg(type, tag, msg)
         }
     }
 
-    private static void printSubMsg(final int type, final String tag, final String msg) {
-        if (!CONFIG.isLogBorderSwitch()) {
-            print2Console(type, tag, msg);
-            return;
+    private fun printSubMsg(type: Int, tag: String, msg: String) {
+        if (!config.isLogBorderSwitch) {
+            print2Console(type, tag, msg)
+            return
         }
-        StringBuilder sb = new StringBuilder();
-        String[] lines = msg.split(LINE_SEP);
-        for (String line : lines) {
-            print2Console(type, tag, LEFT_BORDER + line);
+        val sb = StringBuilder()
+        val lines = msg.split(LINE_SEP.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        for (line in lines) {
+            print2Console(type, tag, LEFT_BORDER + line)
         }
     }
 
-    private static String processSingleTagMsg(final int type,
-                                              final String tag,
-                                              final String[] head,
-                                              final String msg) {
-        StringBuilder sb = new StringBuilder();
-        if (CONFIG.isLogBorderSwitch()) {
-            sb.append(PLACEHOLDER).append(LINE_SEP);
-            sb.append(TOP_BORDER).append(LINE_SEP);
+    private fun processSingleTagMsg(
+        type: Int, tag: String, head: Array<String>?, msg: String
+    ): String {
+        val sb = StringBuilder()
+        if (config.isLogBorderSwitch) {
+            sb.append(PLACEHOLDER).append(LINE_SEP)
+            sb.append(TOP_BORDER).append(LINE_SEP)
             if (head != null) {
-                for (String aHead : head) {
-                    sb.append(LEFT_BORDER).append(aHead).append(LINE_SEP);
+                for (aHead in head) {
+                    sb.append(LEFT_BORDER).append(aHead).append(LINE_SEP)
                 }
-                sb.append(MIDDLE_BORDER).append(LINE_SEP);
+                sb.append(MIDDLE_BORDER).append(LINE_SEP)
             }
-            for (String line : msg.split(LINE_SEP)) {
-                sb.append(LEFT_BORDER).append(line).append(LINE_SEP);
+            for (line in msg.split(LINE_SEP.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
+                sb.append(LEFT_BORDER).append(line).append(LINE_SEP)
             }
-            sb.append(BOTTOM_BORDER);
+            sb.append(BOTTOM_BORDER)
         } else {
             if (head != null) {
-                sb.append(PLACEHOLDER).append(LINE_SEP);
-                for (String aHead : head) {
-                    sb.append(aHead).append(LINE_SEP);
+                sb.append(PLACEHOLDER).append(LINE_SEP)
+                for (aHead in head) {
+                    sb.append(aHead).append(LINE_SEP)
                 }
             }
-            sb.append(msg);
+            sb.append(msg)
         }
-        return sb.toString();
+        return sb.toString()
     }
 
-    private static void printSingleTagMsg(final int type, final String tag, final String msg) {
-        int len = msg.length();
-        int countOfSub = CONFIG.isLogBorderSwitch() ? (len - BOTTOM_BORDER.length()) / MAX_LEN : len / MAX_LEN;
+    private fun printSingleTagMsg(type: Int, tag: String, msg: String) {
+        val len = msg.length
+        val countOfSub =
+            if (config.isLogBorderSwitch) (len - BOTTOM_BORDER.length) / MAX_LEN else len / MAX_LEN
         if (countOfSub > 0) {
-            if (CONFIG.isLogBorderSwitch()) {
-                print2Console(type, tag, msg.substring(0, MAX_LEN) + LINE_SEP + BOTTOM_BORDER);
-                int index = MAX_LEN;
-                for (int i = 1; i < countOfSub; i++) {
-                    print2Console(type, tag, PLACEHOLDER + LINE_SEP + TOP_BORDER + LINE_SEP
-                            + LEFT_BORDER + msg.substring(index, index + MAX_LEN)
-                            + LINE_SEP + BOTTOM_BORDER);
-                    index += MAX_LEN;
+            if (config.isLogBorderSwitch) {
+                print2Console(type, tag, msg.substring(0, MAX_LEN) + LINE_SEP + BOTTOM_BORDER)
+                var index = MAX_LEN
+                for (i in 1 until countOfSub) {
+                    print2Console(
+                        type,
+                        tag,
+                        PLACEHOLDER + LINE_SEP + TOP_BORDER + LINE_SEP + LEFT_BORDER + msg.substring(
+                            index,
+                            index + MAX_LEN
+                        ) + LINE_SEP + BOTTOM_BORDER
+                    )
+                    index += MAX_LEN
                 }
-                if (index != len - BOTTOM_BORDER.length()) {
-                    print2Console(type, tag, PLACEHOLDER + LINE_SEP + TOP_BORDER + LINE_SEP
-                            + LEFT_BORDER + msg.substring(index, len));
+                if (index != len - BOTTOM_BORDER.length) {
+                    print2Console(
+                        type,
+                        tag,
+                        PLACEHOLDER + LINE_SEP + TOP_BORDER + LINE_SEP + LEFT_BORDER + msg.substring(
+                            index,
+                            len
+                        )
+                    )
                 }
             } else {
-                print2Console(type, tag, msg.substring(0, MAX_LEN));
-                int index = MAX_LEN;
-                for (int i = 1; i < countOfSub; i++) {
-                    print2Console(type, tag,
-                            PLACEHOLDER + LINE_SEP + msg.substring(index, index + MAX_LEN));
-                    index += MAX_LEN;
+                print2Console(type, tag, msg.substring(0, MAX_LEN))
+                var index = MAX_LEN
+                for (i in 1 until countOfSub) {
+                    print2Console(
+                        type, tag, PLACEHOLDER + LINE_SEP + msg.substring(index, index + MAX_LEN)
+                    )
+                    index += MAX_LEN
                 }
                 if (index != len) {
-                    print2Console(type, tag, PLACEHOLDER + LINE_SEP + msg.substring(index, len));
+                    print2Console(type, tag, PLACEHOLDER + LINE_SEP + msg.substring(index, len))
                 }
             }
         } else {
-            print2Console(type, tag, msg);
+            print2Console(type, tag, msg)
         }
     }
 
-    private static void print2Console(int type, String tag, String msg) {
-        Log.println(type, tag, msg);
-        if (CONFIG.mOnConsoleOutputListener != null) {
-            CONFIG.mOnConsoleOutputListener.onConsoleOutput(type, tag, msg);
+    private fun print2Console(type: Int, tag: String, msg: String) {
+        Log.println(type, tag, msg)
+        if (config.mOnConsoleOutputListener != null) {
+            config.mOnConsoleOutputListener!!.onConsoleOutput(type, tag, msg)
         }
     }
 
-    private static void print2File(final int type, final String tag, final String msg) {
-        Date d = new Date();
-        String format = getSdf().format(d);
-        String date = format.substring(0, 10);
-        String currentLogFilePath = getCurrentLogFilePath(d);
+    private fun print2File(type: Int, tag: String, msg: String) {
+        val d = Date()
+        val format = sdf!!.format(d)
+        val date = format.substring(0, 10)
+        val currentLogFilePath = getCurrentLogFilePath(d)
         if (!createOrExistsFile(currentLogFilePath, date)) {
-            Log.e("LogUtils", "create " + currentLogFilePath + " failed!");
-            return;
+            Log.e("LogUtils", "create $currentLogFilePath failed!")
+            return
         }
-        String time = format.substring(11);
-        final String content = time +
-                T[type - V] +
-                "/" +
-                tag +
-                msg +
-                LINE_SEP;
-        input2File(currentLogFilePath, content);
+        val time = format.substring(11)
+        val content = time + T[type - V] + "/" + tag + msg + LINE_SEP
+        input2File(currentLogFilePath, content)
     }
 
-    private static String getCurrentLogFilePath(Date d) {
-        String format = getSdf().format(d);
-        String date = format.substring(0, 10);
-        return CONFIG.getDir() + CONFIG.getFilePrefix() + "_"
-                + date + "_" +
-                CONFIG.getProcessName() + CONFIG.getFileExtension();
+    private fun getCurrentLogFilePath(d: Date): String {
+        val format = sdf!!.format(d)
+        val date = format.substring(0, 10)
+        return (config.dir + config.filePrefix + "_" + date + "_" + config.processName + config.fileExtension)
     }
 
-    private static SimpleDateFormat getSdf() {
-        if (simpleDateFormat == null) {
-            simpleDateFormat = new SimpleDateFormat("yyyy_MM_dd HH:mm:ss.SSS ", Locale.getDefault());
+    private val sdf: SimpleDateFormat?
+        get() {
+            if (simpleDateFormat == null) {
+                simpleDateFormat = SimpleDateFormat("yyyy_MM_dd HH:mm:ss.SSS ", Locale.getDefault())
+            }
+            return simpleDateFormat
         }
-        return simpleDateFormat;
-    }
 
-    private static boolean createOrExistsFile(final String filePath, final String date) {
-        File file = new File(filePath);
+    private fun createOrExistsFile(filePath: String, date: String): Boolean {
+        val file = File(filePath)
         if (file.exists()) {
-            return file.isFile();
+            return file.isFile
         }
-        if (!DawnBridge.createOrExistsDir(file.getParentFile())) {
-            return false;
-        }
-        try {
-            deleteDueLogs(filePath, date);
-            boolean isCreate = file.createNewFile();
+        return if (!DawnBridge.createOrExistsDir(file.parentFile)) {
+            false
+        } else try {
+            deleteDueLogs(filePath, date)
+            val isCreate = file.createNewFile()
             if (isCreate) {
-                printDeviceInfo(filePath, date);
+                printDeviceInfo(filePath, date)
             }
-            return isCreate;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+            isCreate
+        } catch (e: IOException) {
+            e.printStackTrace()
+            false
         }
     }
 
-    private static void deleteDueLogs(final String filePath, final String date) {
-        if (CONFIG.getSaveDays() <= 0) {
-            return;
+    private fun deleteDueLogs(filePath: String, date: String) {
+        if (config.saveDays <= 0) {
+            return
         }
-        File file = new File(filePath);
-        File parentFile = file.getParentFile();
-        File[] files = parentFile.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return isMatchLogFileName(name);
-            }
-        });
-        if (files == null || files.length <= 0) {
-            return;
+        val file = File(filePath)
+        val parentFile = file.parentFile
+        val files = parentFile?.listFiles { dir, name -> isMatchLogFileName(name) }
+        if (files.isNullOrEmpty()) {
+            return
         }
-        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd", Locale.getDefault());
+        val sdf = SimpleDateFormat("yyyy_MM_dd", Locale.getDefault())
         try {
-            long dueMillis = sdf.parse(date).getTime() - CONFIG.getSaveDays() * 86400000L;
-            for (final File aFile : files) {
-                String name = aFile.getName();
-                int l = name.length();
-                String logDay = findDate(name);
-                if (sdf.parse(logDay).getTime() <= dueMillis) {
-                    EXECUTOR.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            boolean delete = aFile.delete();
-                            if (!delete) {
-                                Log.e("LogUtils", "delete " + aFile + " failed!");
-                            }
+            val dueMillis = sdf.parse(date).time - config.saveDays * 86400000L
+            for (aFile in files) {
+                val name = aFile.name
+                val l = name.length
+                val logDay = findDate(name)
+                if (sdf.parse(logDay).time <= dueMillis) {
+                    EXECUTOR.execute {
+                        val delete = aFile.delete()
+                        if (!delete) {
+                            Log.e("LogUtils", "delete $aFile failed!")
                         }
-                    });
+                    }
                 }
             }
-        } catch (ParseException e) {
-            e.printStackTrace();
+        } catch (e: ParseException) {
+            e.printStackTrace()
         }
     }
 
-    private static boolean isMatchLogFileName(String name) {
-        return name.matches("^" + CONFIG.getFilePrefix() + "_[0-9]{4}_[0-9]{2}_[0-9]{2}_.*$");
+    private fun isMatchLogFileName(name: String): Boolean {
+        return name.matches(("^" + config.filePrefix + "_[0-9]{4}_[0-9]{2}_[0-9]{2}_.*$").toRegex())
     }
 
-    private static String findDate(String str) {
-        Pattern pattern = Pattern.compile("[0-9]{4}_[0-9]{2}_[0-9]{2}");
-        Matcher matcher = pattern.matcher(str);
-        if (matcher.find()) {
-            return matcher.group();
-        }
-        return "";
+    private fun findDate(str: String): String {
+        val pattern = Pattern.compile("[0-9]{4}_[0-9]{2}_[0-9]{2}")
+        val matcher = pattern.matcher(str)
+        return if (matcher.find()) {
+            matcher.group()
+        } else ""
     }
 
-    private static void printDeviceInfo(final String filePath, final String date) {
-        CONFIG.mFileHead.addFirst("Date of Log", date);
-        input2File(filePath, CONFIG.mFileHead.toString());
+    private fun printDeviceInfo(filePath: String, date: String) {
+        config.mFileHead.addFirst("Date of Log", date)
+        input2File(filePath, config.mFileHead.toString())
     }
 
-    private static void input2File(final String filePath, final String input) {
-        if (CONFIG.mFileWriter == null) {
-            DawnBridge.writeFileFromString(filePath, input, true);
+    private fun input2File(filePath: String, input: String) {
+        if (config.mFileWriter == null) {
+            DawnBridge.writeFileFromString(filePath, input, true)
         } else {
-            CONFIG.mFileWriter.write(filePath, input);
+            config.mFileWriter!!.write(filePath, input)
         }
-        if (CONFIG.mOnFileOutputListener != null) {
-            CONFIG.mOnFileOutputListener.onFileOutput(filePath, input);
+        if (config.mOnFileOutputListener != null) {
+            config.mOnFileOutputListener!!.onFileOutput(filePath, input)
         }
     }
 
-    private static <T> Class getTypeClassFromParadigm(final LogClass.IFormatter<T> formatter) {
-        Type[] genericInterfaces = formatter.getClass().getGenericInterfaces();
-        Type type;
-        if (genericInterfaces.length == 1) {
-            type = genericInterfaces[0];
+    private fun <T> getTypeClassFromParadigm(formatter: IFormatter<T>): Class<*>? {
+        val genericInterfaces = formatter.javaClass.genericInterfaces
+        var type: Type
+        type = if (genericInterfaces.size == 1) {
+            genericInterfaces[0]
         } else {
-            type = formatter.getClass().getGenericSuperclass();
+            formatter.javaClass.genericSuperclass
         }
-        type = ((ParameterizedType) type).getActualTypeArguments()[0];
-        while (type instanceof ParameterizedType) {
-            type = ((ParameterizedType) type).getRawType();
+        type = (type as ParameterizedType).actualTypeArguments[0]
+        while (type is ParameterizedType) {
+            type = type.rawType
         }
-        String className = type.toString();
+        var className = type.toString()
         if (className.startsWith("class ")) {
-            className = className.substring(6);
+            className = className.substring(6)
         } else if (className.startsWith("interface ")) {
-            className = className.substring(10);
+            className = className.substring(10)
         }
         try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            return Class.forName(className)
+        } catch (e: ClassNotFoundException) {
+            e.printStackTrace()
         }
-        return null;
+        return null
     }
 
-    private static Class getClassFromObject(final Object obj) {
-        Class objClass = obj.getClass();
-        if (objClass.isAnonymousClass() || objClass.isSynthetic()) {
-            Type[] genericInterfaces = objClass.getGenericInterfaces();
-            String className;
-            if (genericInterfaces.length == 1) {// interface
-                Type type = genericInterfaces[0];
-                while (type instanceof ParameterizedType) {
-                    type = ((ParameterizedType) type).getRawType();
+    private fun getClassFromObject(obj: Any): Class<*> {
+        val objClass: Class<*> = obj.javaClass
+        if (objClass.isAnonymousClass || objClass.isSynthetic) {
+            val genericInterfaces = objClass.genericInterfaces
+            var className: String
+            if (genericInterfaces.size == 1) { // interface
+                var type = genericInterfaces[0]
+                while (type is ParameterizedType) {
+                    type = type.rawType
                 }
-                className = type.toString();
-            } else {// abstract class or lambda
-                Type type = objClass.getGenericSuperclass();
-                while (type instanceof ParameterizedType) {
-                    type = ((ParameterizedType) type).getRawType();
+                className = type.toString()
+            } else { // abstract class or lambda
+                var type = objClass.genericSuperclass
+                while (type is ParameterizedType) {
+                    type = type.rawType
                 }
-                className = type.toString();
+                className = type.toString()
             }
-
             if (className.startsWith("class ")) {
-                className = className.substring(6);
+                className = className.substring(6)
             } else if (className.startsWith("interface ")) {
-                className = className.substring(10);
+                className = className.substring(10)
             }
             try {
-                return Class.forName(className);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                return Class.forName(className)
+            } catch (e: ClassNotFoundException) {
+                e.printStackTrace()
             }
         }
-        return objClass;
+        return objClass
     }
 
-    public static final class Config {
+    @IntDef(V, D, I, W, E, A)
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class TYPE
+     class Config {
         // 日志的默认存储目录
-        private String                  mDefaultDir;
+        var defaultDir: String? = null
+
         // 日志的存放目录。
-        private String                  mDir;
+        private var mDir: String? = null
+
         // 日志的文件前缀。
-        private String                  mFilePrefix        = "DawnBridge";
+        var filePrefix = "DawnBridge"
+            private set
+
         // 日志的文件扩展名。
-        private String                  mFileExtension     = ".txt";
+        var fileExtension = ".txt"
+            private set
+
         // 日志的切换。
-        private boolean                 mLogSwitch         = true;
+        var isLogSwitch = true
+            private set
+
         // logcat 的日志开关。
-        private boolean                 mLog2ConsoleSwitch = true;
+        var isLog2ConsoleSwitch = true
+            private set
+
         // 日志的全局标签。
-        private String                  mGlobalTag         = "";
+        private var mGlobalTag = ""
+
         // 全局标签是空格。
-        private boolean                 mTagIsSpace        = true;
+        var mTagIsSpace = true
+
         // 日志的头部开关。
-        private boolean                 mLogHeadSwitch     = true;
+        var isLogHeadSwitch = true
+            private set
+
         // 文件的日志切换。
-        private boolean                 mLog2FileSwitch    = false;
+        var isLog2FileSwitch = false
+            private set
+
         // 日志的边界开关。
-        private boolean                 mLogBorderSwitch   = true;
+        var isLogBorderSwitch = true
+            private set
+
         // 日志的单个标签。
-        private boolean                 mSingleTagSwitch   = true;
+        var isSingleTagSwitch = true
+            private set
+
         // 控制台的日志过滤器。
-        private int                     mConsoleFilter     = LogUtils.V;
+        var mConsoleFilter = V
+
         // 文件的日志过滤器。
-        private int                     mFileFilter        = LogUtils.V;
+        var mFileFilter = V
+
         // 堆栈的深度日志。
-        private int                     mStackDeep         = 1;
+        var stackDeep = 1
+            private set
+
         // 堆栈的日志偏移量。
-        private int                     mStackOffset       = 0;
+        var stackOffset = 0
+            private set
+
         // 日志的保存天数。
-        private int                     mSaveDays          = -1;
-        private String                  mProcessName       = DawnBridge.getCurrentProcessName();
-        private LogClass.IFileWriter mFileWriter;
-        private LogClass.OnConsoleOutputListener mOnConsoleOutputListener;
-        private LogClass.OnFileOutputListener mOnFileOutputListener;
-        private DawnBridge.FileHead    mFileHead          = new DawnBridge.FileHead("Log");
+        var saveDays = -1
+            private set
+        private val mProcessName = DawnBridge.getCurrentProcessName()
+        var mFileWriter: IFileWriter? = null
+        var mOnConsoleOutputListener: OnConsoleOutputListener? = null
+        var mOnFileOutputListener: OnFileOutputListener? = null
+        val mFileHead = DawnBridge.FileHead("Log")
 
-        private Config() {
-            if (DawnBridge.isSDCardEnableByEnvironment()
-                    && DawnBridge.getApp().getExternalFilesDir(null) != null) {
-                mDefaultDir = DawnBridge.getApp().getExternalFilesDir(null) + FILE_SEP + "log" + FILE_SEP;
+        init {
+            defaultDir = if (DawnBridge.isSDCardEnableByEnvironment() && DawnBridge.getApp()
+                    .getExternalFilesDir(null) != null
+            ) {
+                DawnBridge.getApp().getExternalFilesDir(null).toString() + FILE_SEP + "log" + FILE_SEP
             } else {
-                mDefaultDir = DawnBridge.getApp().getFilesDir() + FILE_SEP + "log" + FILE_SEP;
+                DawnBridge.getApp().filesDir.toString() + FILE_SEP + "log" + FILE_SEP
             }
         }
 
-        public final Config setLogSwitch(final boolean logSwitch) {
-            mLogSwitch = logSwitch;
-            return this;
+        fun setLogSwitch(logSwitch: Boolean): Config {
+            isLogSwitch = logSwitch
+            return this
         }
 
-        public final Config setConsoleSwitch(final boolean consoleSwitch) {
-            mLog2ConsoleSwitch = consoleSwitch;
-            return this;
+        fun setConsoleSwitch(consoleSwitch: Boolean): Config {
+            isLog2ConsoleSwitch = consoleSwitch
+            return this
         }
 
-        public final Config setGlobalTag(final String tag) {
+        fun setGlobalTag(tag: String): Config {
             if (DawnBridge.isSpace(tag)) {
-                mGlobalTag = "";
-                mTagIsSpace = true;
+                mGlobalTag = ""
+                mTagIsSpace = true
             } else {
-                mGlobalTag = tag;
-                mTagIsSpace = false;
+                mGlobalTag = tag
+                mTagIsSpace = false
             }
-            return this;
+            return this
         }
 
-        public final Config setLogHeadSwitch(final boolean logHeadSwitch) {
-            mLogHeadSwitch = logHeadSwitch;
-            return this;
+        fun setLogHeadSwitch(logHeadSwitch: Boolean): Config {
+            isLogHeadSwitch = logHeadSwitch
+            return this
         }
 
-        public final Config setLog2FileSwitch(final boolean log2FileSwitch) {
-            mLog2FileSwitch = log2FileSwitch;
-            return this;
+        fun setLog2FileSwitch(log2FileSwitch: Boolean): Config {
+            isLog2FileSwitch = log2FileSwitch
+            return this
         }
 
-        public final Config setDir(final String dir) {
-            if (DawnBridge.isSpace(dir)) {
-                mDir = null;
+        fun setDir(dir: String): Config {
+            mDir = if (DawnBridge.isSpace(dir)) {
+                null
             } else {
-                mDir = dir.endsWith(FILE_SEP) ? dir : dir + FILE_SEP;
+                if (dir.endsWith(FILE_SEP)) dir else dir + FILE_SEP
             }
-            return this;
+            return this
         }
 
-        public final Config setDir(final File dir) {
-            mDir = dir == null ? null : (dir.getAbsolutePath() + FILE_SEP);
-            return this;
+        fun setDir(dir: File?): Config {
+            mDir = if (dir == null) null else dir.absolutePath + FILE_SEP
+            return this
         }
 
-        public final Config setFilePrefix(final String filePrefix) {
+        fun setFilePrefix(filePrefix: String): Config {
             if (DawnBridge.isSpace(filePrefix)) {
-                mFilePrefix = "util";
+                this.filePrefix = "util"
             } else {
-                mFilePrefix = filePrefix;
+                this.filePrefix = filePrefix
             }
-            return this;
+            return this
         }
 
-        public final Config setFileExtension(final String fileExtension) {
+        fun setFileExtension(fileExtension: String): Config {
             if (DawnBridge.isSpace(fileExtension)) {
-                mFileExtension = ".txt";
+                this.fileExtension = ".txt"
             } else {
                 if (fileExtension.startsWith(".")) {
-                    mFileExtension = fileExtension;
+                    this.fileExtension = fileExtension
                 } else {
-                    mFileExtension = "." + fileExtension;
+                    this.fileExtension = ".$fileExtension"
                 }
             }
-            return this;
+            return this
         }
 
-        public final Config setBorderSwitch(final boolean borderSwitch) {
-            mLogBorderSwitch = borderSwitch;
-            return this;
+        fun setBorderSwitch(borderSwitch: Boolean): Config {
+            isLogBorderSwitch = borderSwitch
+            return this
         }
 
-        public final Config setSingleTagSwitch(final boolean singleTagSwitch) {
-            mSingleTagSwitch = singleTagSwitch;
-            return this;
+        fun setSingleTagSwitch(singleTagSwitch: Boolean): Config {
+            isSingleTagSwitch = singleTagSwitch
+            return this
         }
 
-        public final Config setConsoleFilter(@TYPE final int consoleFilter) {
-            mConsoleFilter = consoleFilter;
-            return this;
+        fun setConsoleFilter(@TYPE consoleFilter: Int): Config {
+            mConsoleFilter = consoleFilter
+            return this
         }
 
-        public final Config setFileFilter(@TYPE final int fileFilter) {
-            mFileFilter = fileFilter;
-            return this;
+        fun setFileFilter(@TYPE fileFilter: Int): Config {
+            mFileFilter = fileFilter
+            return this
         }
 
-        public final Config setStackDeep(@IntRange(from = 1) final int stackDeep) {
-            mStackDeep = stackDeep;
-            return this;
+        fun setStackDeep(@IntRange(from = 1) stackDeep: Int): Config {
+            this.stackDeep = stackDeep
+            return this
         }
 
-        public final Config setStackOffset(@IntRange(from = 0) final int stackOffset) {
-            mStackOffset = stackOffset;
-            return this;
+        fun setStackOffset(@IntRange(from = 0) stackOffset: Int): Config {
+            this.stackOffset = stackOffset
+            return this
         }
 
-        public final Config setSaveDays(@IntRange(from = 1) final int saveDays) {
-            mSaveDays = saveDays;
-            return this;
+        fun setSaveDays(@IntRange(from = 1) saveDays: Int): Config {
+            this.saveDays = saveDays
+            return this
         }
 
-        public final <T> Config addFormatter(final LogClass.IFormatter<T> iFormatter) {
+        fun <T> addFormatter(iFormatter: IFormatter<T>?): Config {
             if (iFormatter != null) {
-                I_FORMATTER_MAP.put(getTypeClassFromParadigm(iFormatter), iFormatter);
+                I_FORMATTER_MAP.put(getTypeClassFromParadigm(iFormatter), iFormatter)
             }
-            return this;
+            return this
         }
 
-        public final Config setFileWriter(final LogClass.IFileWriter fileWriter) {
-            mFileWriter = fileWriter;
-            return this;
+        fun setFileWriter(fileWriter: IFileWriter?): Config {
+            mFileWriter = fileWriter
+            return this
         }
 
-        public final Config setOnConsoleOutputListener(final LogClass.OnConsoleOutputListener listener) {
-            mOnConsoleOutputListener = listener;
-            return this;
+        fun setOnConsoleOutputListener(listener: OnConsoleOutputListener?): Config {
+            mOnConsoleOutputListener = listener
+            return this
         }
 
-        public final Config setOnFileOutputListener(final LogClass.OnFileOutputListener listener) {
-            mOnFileOutputListener = listener;
-            return this;
+        fun setOnFileOutputListener(listener: OnFileOutputListener?): Config {
+            mOnFileOutputListener = listener
+            return this
         }
 
-        public final Config addFileExtraHead(final Map<String, String> fileExtraHead) {
-            mFileHead.append(fileExtraHead);
-            return this;
+        fun addFileExtraHead(fileExtraHead: Map<String?, String?>?): Config {
+            mFileHead.append(fileExtraHead)
+            return this
         }
 
-        public final Config addFileExtraHead(final String key, final String value) {
-            mFileHead.append(key, value);
-            return this;
+        fun addFileExtraHead(key: String?, value: String?): Config {
+            mFileHead.append(key, value)
+            return this
         }
 
-        public final String getProcessName() {
-            if (mProcessName == null) {
-                return "";
-            }
-            return mProcessName.replace(":", "_");
+        val processName: String
+            get() = mProcessName?.replace(":", "_") ?: ""
+        val dir: String?
+            get() = if (mDir == null) defaultDir else mDir
+        val globalTag: String
+            get() = if (DawnBridge.isSpace(mGlobalTag)) {
+                ""
+            } else mGlobalTag
+        val consoleFilter: Char
+            get() = T[mConsoleFilter - V]
+        val fileFilter: Char
+            get() = T[mFileFilter - V]
+
+        fun haveSetOnConsoleOutputListener(): Boolean {
+            return mOnConsoleOutputListener != null
         }
 
-        public final String getDefaultDir() {
-            return mDefaultDir;
+        fun haveSetOnFileOutputListener(): Boolean {
+            return mOnFileOutputListener != null
         }
 
-        public final String getDir() {
-            return mDir == null ? mDefaultDir : mDir;
-        }
-
-        public final String getFilePrefix() {
-            return mFilePrefix;
-        }
-
-        public final String getFileExtension() {
-            return mFileExtension;
-        }
-
-        public final boolean isLogSwitch() {
-            return mLogSwitch;
-        }
-
-        public final boolean isLog2ConsoleSwitch() {
-            return mLog2ConsoleSwitch;
-        }
-
-        public final String getGlobalTag() {
-            if (DawnBridge.isSpace(mGlobalTag)) {
-                return "";
-            }
-            return mGlobalTag;
-        }
-
-        public final boolean isLogHeadSwitch() {
-            return mLogHeadSwitch;
-        }
-
-        public final boolean isLog2FileSwitch() {
-            return mLog2FileSwitch;
-        }
-
-        public final boolean isLogBorderSwitch() {
-            return mLogBorderSwitch;
-        }
-
-        public final boolean isSingleTagSwitch() {
-            return mSingleTagSwitch;
-        }
-
-        public final char getConsoleFilter() {
-            return T[mConsoleFilter - V];
-        }
-
-        public final char getFileFilter() {
-            return T[mFileFilter - V];
-        }
-
-        public final int getStackDeep() {
-            return mStackDeep;
-        }
-
-        public final int getStackOffset() {
-            return mStackOffset;
-        }
-
-        public final int getSaveDays() {
-            return mSaveDays;
-        }
-
-        public final boolean haveSetOnConsoleOutputListener() {
-            return mOnConsoleOutputListener != null;
-        }
-
-        public final boolean haveSetOnFileOutputListener() {
-            return mOnFileOutputListener != null;
-        }
-
-        @Override
-        public String toString() {
-            return "process: " + getProcessName()
-                    + LINE_SEP + "logSwitch: " + isLogSwitch()
-                    + LINE_SEP + "consoleSwitch: " + isLog2ConsoleSwitch()
-                    + LINE_SEP + "tag: " + (getGlobalTag().equals("") ? "null" : getGlobalTag())
-                    + LINE_SEP + "headSwitch: " + isLogHeadSwitch()
-                    + LINE_SEP + "fileSwitch: " + isLog2FileSwitch()
-                    + LINE_SEP + "dir: " + getDir()
-                    + LINE_SEP + "filePrefix: " + getFilePrefix()
-                    + LINE_SEP + "borderSwitch: " + isLogBorderSwitch()
-                    + LINE_SEP + "singleTagSwitch: " + isSingleTagSwitch()
-                    + LINE_SEP + "consoleFilter: " + getConsoleFilter()
-                    + LINE_SEP + "fileFilter: " + getFileFilter()
-                    + LINE_SEP + "stackDeep: " + getStackDeep()
-                    + LINE_SEP + "stackOffset: " + getStackOffset()
-                    + LINE_SEP + "saveDays: " + getSaveDays()
-                    + LINE_SEP + "formatter: " + I_FORMATTER_MAP
-                    + LINE_SEP + "fileWriter: " + mFileWriter
-                    + LINE_SEP + "onConsoleOutputListener: " + mOnConsoleOutputListener
-                    + LINE_SEP + "onFileOutputListener: " + mOnFileOutputListener
-                    + LINE_SEP + "fileExtraHeader: " + mFileHead.getAppended();
+        override fun toString(): String {
+            return ("process: " + processName + LINE_SEP + "logSwitch: " + isLogSwitch + LINE_SEP + "consoleSwitch: " + isLog2ConsoleSwitch + LINE_SEP + "tag: " + (if (globalTag == "") "null" else globalTag) + LINE_SEP + "headSwitch: " + isLogHeadSwitch + LINE_SEP + "fileSwitch: " + isLog2FileSwitch + LINE_SEP + "dir: " + dir + LINE_SEP + "filePrefix: " + filePrefix + LINE_SEP + "borderSwitch: " + isLogBorderSwitch + LINE_SEP + "singleTagSwitch: " + isSingleTagSwitch + LINE_SEP + "consoleFilter: " + consoleFilter + LINE_SEP + "fileFilter: " + fileFilter + LINE_SEP + "stackDeep: " + stackDeep + LINE_SEP + "stackOffset: " + stackOffset + LINE_SEP + "saveDays: " + saveDays + LINE_SEP + "formatter: " + I_FORMATTER_MAP + LINE_SEP + "fileWriter: " + mFileWriter + LINE_SEP + "onConsoleOutputListener: " + mOnConsoleOutputListener + LINE_SEP + "onFileOutputListener: " + mOnFileOutputListener + LINE_SEP + "fileExtraHeader: " + mFileHead.appended)
         }
     }
 }

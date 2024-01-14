@@ -1,32 +1,24 @@
-package com.lzq.dawn.util.file;
+package com.lzq.dawn.util.file
 
-import android.content.ContentResolver;
-import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
-import android.net.Uri;
-import android.os.Build;
-import android.os.StatFs;
-import android.text.TextUtils;
-
-import com.lzq.dawn.DawnBridge;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.os.StatFs
+import android.text.TextUtils
+import com.lzq.dawn.DawnBridge
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileFilter
+import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.io.InputStream
+import java.net.URL
+import java.security.DigestInputStream
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+import java.util.Collections
+import javax.net.ssl.HttpsURLConnection
 
 /**
  * @Name :FileUtils
@@ -34,12 +26,8 @@ import javax.net.ssl.HttpsURLConnection;
  * @Author :  Lzq
  * @Desc : 文件操作
  */
-public final class FileUtils {
-
-    private FileUtils() {
-    }
-
-    private static final String LINE_SEP = System.getProperty("line.separator");
+object FileUtils {
+    private val LINE_SEP = System.getProperty("line.separator")
 
     /**
      * 按路径返回文件。
@@ -47,62 +35,56 @@ public final class FileUtils {
      * @param filePath 文件的路径。
      * @return file
      */
-    public static File getFileByPath(final String filePath) {
-        return DawnBridge.isSpace(filePath) ? null : new File(filePath);
+    @JvmStatic
+    fun getFileByPath(filePath: String?): File? {
+        return if (DawnBridge.isSpace(filePath)) null else File(filePath)
     }
 
     /**
      * 返回文件是否存在。
      *
      * @param file file.
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean isFileExists(final File file) {
+    @JvmStatic
+    fun isFileExists(file: File?): Boolean {
         if (file == null) {
-            return false;
+            return false
         }
-        if (file.exists()) {
-            return true;
-        }
-        return isFileExists(file.getAbsolutePath());
+        return if (file.exists()) {
+            true
+        } else isFileExists(file.absolutePath)
     }
 
     /**
      * 返回文件是否存在。
      *
      * @param filePath 文件的路径
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean isFileExists(final String filePath) {
-        File file = getFileByPath(filePath);
-        if (file == null) {
-            return false;
-        }
-        if (file.exists()) {
-            return true;
-        }
-        return isFileExistsApi29(filePath);
+    fun isFileExists(filePath: String?): Boolean {
+        val file = getFileByPath(filePath) ?: return false
+        return if (file.exists()) {
+            true
+        } else isFileExistsApi29(filePath)
     }
 
-    private static boolean isFileExistsApi29(String filePath) {
+    private fun isFileExistsApi29(filePath: String?): Boolean {
         if (Build.VERSION.SDK_INT >= 29) {
             try {
-                Uri uri = Uri.parse(filePath);
-                ContentResolver cr = DawnBridge.getApp().getContentResolver();
-                AssetFileDescriptor afd = cr.openAssetFileDescriptor(uri, "r");
-                if (afd == null) {
-                    return false;
-                }
+                val uri = Uri.parse(filePath)
+                val cr = DawnBridge.getApp().contentResolver
+                val afd = cr.openAssetFileDescriptor(uri, "r") ?: return false
                 try {
-                    afd.close();
-                } catch (IOException ignore) {
+                    afd.close()
+                } catch (ignore: IOException) {
                 }
-            } catch (FileNotFoundException e) {
-                return false;
+            } catch (e: FileNotFoundException) {
+                return false
             }
-            return true;
+            return true
         }
-        return false;
+        return false
     }
 
     /**
@@ -110,10 +92,10 @@ public final class FileUtils {
      *
      * @param filePath 文件的路径
      * @param newName  文件的新名称
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean rename(final String filePath, final String newName) {
-        return rename(getFileByPath(filePath), newName);
+    fun rename(filePath: String?, newName: String): Boolean {
+        return rename(getFileByPath(filePath), newName)
     }
 
     /**
@@ -121,158 +103,157 @@ public final class FileUtils {
      *
      * @param file    file.
      * @param newName 文件的新名称
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean rename(final File file, final String newName) {
+    fun rename(file: File?, newName: String): Boolean {
         // file is null then return false
         if (file == null) {
-            return false;
+            return false
         }
         // file doesn't exist then return false
         if (!file.exists()) {
-            return false;
+            return false
         }
         // the new name is space then return false
         if (DawnBridge.isSpace(newName)) {
-            return false;
+            return false
         }
         // the new name equals old name then return true
-        if (newName.equals(file.getName())) {
-            return true;
+        if (newName == file.name) {
+            return true
         }
-        File newFile = new File(file.getParent() + File.separator + newName);
+        val newFile = File(file.parent + File.separator + newName)
         // the new name of file exists then return false
-        return !newFile.exists()
-                && file.renameTo(newFile);
+        return (!newFile.exists() && file.renameTo(newFile))
     }
 
     /**
      * 返回是否为目录。
      *
      * @param dirPath 目录的路径
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean isDir(final String dirPath) {
-        return isDir(getFileByPath(dirPath));
+    fun isDir(dirPath: String?): Boolean {
+        return isDir(getFileByPath(dirPath))
     }
 
     /**
      * 返回是否为目录
      *
      * @param file file.
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean isDir(final File file) {
-        return file != null && file.exists() && file.isDirectory();
+    fun isDir(file: File?): Boolean {
+        return file != null && file.exists() && file.isDirectory
     }
 
     /**
      * 返回是否为文件。
      *
      * @param filePath 返回是否为文件。
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean isFile(final String filePath) {
-        return isFile(getFileByPath(filePath));
+    fun isFile(filePath: String?): Boolean {
+        return isFile(getFileByPath(filePath))
     }
 
     /**
      * 返回是否为文件
      *
      * @param file file.
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean isFile(final File file) {
-        return file != null && file.exists() && file.isFile();
+    fun isFile(file: File?): Boolean {
+        return file != null && file.exists() && file.isFile
     }
 
     /**
      * 如果目录不存在，请创建一个目录，否则什么也不做。
      *
      * @param dirPath 目录的路径。
-     * @return {@code true}: exists or creates successfully<br>{@code false}: otherwise
+     * @return `true`: exists or creates successfully<br></br>`false`: otherwise
      */
-    public static boolean createOrExistsDir(final String dirPath) {
-        return createOrExistsDir(getFileByPath(dirPath));
+    fun createOrExistsDir(dirPath: String?): Boolean {
+        return createOrExistsDir(getFileByPath(dirPath))
     }
 
     /**
      * 如果目录不存在，请创建一个目录，否则什么也不做。
      *
      * @param file file.
-     * @return {@code true}: exists or creates successfully<br>{@code false}: otherwise
+     * @return `true`: exists or creates successfully<br></br>`false`: otherwise
      */
-    public static boolean createOrExistsDir(final File file) {
-        return file != null && (file.exists() ? file.isDirectory() : file.mkdirs());
+    @JvmStatic
+    fun createOrExistsDir(file: File?): Boolean {
+        return file != null && if (file.exists()) file.isDirectory else file.mkdirs()
     }
 
     /**
      * 如果文件不存在，请创建一个文件，否则什么也不做。
      *
      * @param filePath 文件的路径。
-     * @return {@code true}: exists or creates successfully<br>{@code false}: otherwise
+     * @return `true`: exists or creates successfully<br></br>`false`: otherwise
      */
-    public static boolean createOrExistsFile(final String filePath) {
-        return createOrExistsFile(getFileByPath(filePath));
+    fun createOrExistsFile(filePath: String?): Boolean {
+        return createOrExistsFile(getFileByPath(filePath))
     }
 
     /**
      * 如果文件不存在，请创建一个文件，否则什么也不做。
      *
      * @param file file.
-     * @return {@code true}: exists or creates successfully<br>{@code false}: otherwise
+     * @return `true`: exists or creates successfully<br></br>`false`: otherwise
      */
-    public static boolean createOrExistsFile(final File file) {
+    @JvmStatic
+    fun createOrExistsFile(file: File?): Boolean {
         if (file == null) {
-            return false;
+            return false
         }
         if (file.exists()) {
-            return file.isFile();
+            return file.isFile
         }
-        if (!createOrExistsDir(file.getParentFile())) {
-            return false;
-        }
-        try {
-            return file.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+        return if (!createOrExistsDir(file.parentFile)) {
+            false
+        } else try {
+            file.createNewFile()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            false
         }
     }
-
 
     /**
      * 如果文件不存在，请创建一个文件，否则请在创建之前删除旧文件。
      *
      * @param filePath 文件的路径
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean createFileByDeleteOldFile(final String filePath) {
-        return createFileByDeleteOldFile(getFileByPath(filePath));
+    fun createFileByDeleteOldFile(filePath: String?): Boolean {
+        return createFileByDeleteOldFile(getFileByPath(filePath))
     }
 
     /**
      * 如果文件不存在，请创建一个文件，否则请在创建之前删除旧文件。
      *
      * @param file file.
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean createFileByDeleteOldFile(final File file) {
+    @JvmStatic
+    fun createFileByDeleteOldFile(file: File?): Boolean {
         if (file == null) {
-            return false;
+            return false
         }
         // file exists and unsuccessfully delete then return false
         if (file.exists() && !file.delete()) {
-            return false;
+            return false
         }
-        if (!createOrExistsDir(file.getParentFile())) {
-            return false;
-        }
-        try {
-            return file.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+        return if (!createOrExistsDir(file.parentFile)) {
+            false
+        } else try {
+            file.createNewFile()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            false
         }
     }
 
@@ -281,11 +262,12 @@ public final class FileUtils {
      *
      * @param srcPath  源路径。
      * @param destPath 目的地路径。
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean copy(final String srcPath,
-                               final String destPath) {
-        return copy(getFileByPath(srcPath), getFileByPath(destPath), null);
+    fun copy(
+        srcPath: String?, destPath: String?
+    ): Boolean {
+        return copy(getFileByPath(srcPath), getFileByPath(destPath), null)
     }
 
     /**
@@ -294,44 +276,38 @@ public final class FileUtils {
      * @param srcPath  源路径。
      * @param destPath 目的地路径。
      * @param listener 替换侦听器。
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean copy(final String srcPath,
-                               final String destPath,
-                               final OnReplaceListener listener) {
-        return copy(getFileByPath(srcPath), getFileByPath(destPath), listener);
+    fun copy(
+        srcPath: String?, destPath: String?, listener: OnReplaceListener?
+    ): Boolean {
+        return copy(getFileByPath(srcPath), getFileByPath(destPath), listener)
     }
-
-    /**
-     * 复制目录或文件
-     *
-     * @param src  源。
-     * @param dest 目的地。
-     * @return {@code true}: success<br>{@code false}: fail
-     */
-    public static boolean copy(final File src,
-                               final File dest) {
-        return copy(src, dest, null);
-    }
-
     /**
      * 复制目录或文件
      *
      * @param src      源。
      * @param dest     目的地。
      * @param listener 替换侦听器
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean copy(final File src,
-                               final File dest,
-                               final OnReplaceListener listener) {
+    /**
+     * 复制目录或文件
+     *
+     * @param src  源。
+     * @param dest 目的地。
+     * @return `true`: success<br></br>`false`: fail
+     */
+    @JvmOverloads
+    fun copy(
+        src: File?, dest: File?, listener: OnReplaceListener? = null
+    ): Boolean {
         if (src == null) {
-            return false;
+            return false
         }
-        if (src.isDirectory()) {
-            return copyDir(src, dest, listener);
-        }
-        return copyFile(src, dest, listener);
+        return if (src.isDirectory) {
+            copyDir(src, dest, listener)
+        } else copyFile(src, dest, listener)
     }
 
     /**
@@ -340,12 +316,12 @@ public final class FileUtils {
      * @param srcDir   源目录
      * @param destDir  c目录
      * @param listener 替换侦听器.
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    private static boolean copyDir(final File srcDir,
-                                   final File destDir,
-                                   final OnReplaceListener listener) {
-        return copyOrMoveDir(srcDir, destDir, listener, false);
+    private fun copyDir(
+        srcDir: File, destDir: File?, listener: OnReplaceListener?
+    ): Boolean {
+        return copyOrMoveDir(srcDir, destDir, listener, false)
     }
 
     /**
@@ -354,12 +330,12 @@ public final class FileUtils {
      * @param srcFile  源 file.
      * @param destFile 源 file.
      * @param listener 替换侦听器
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    private static boolean copyFile(final File srcFile,
-                                    final File destFile,
-                                    final OnReplaceListener listener) {
-        return copyOrMoveFile(srcFile, destFile, listener, false);
+    private fun copyFile(
+        srcFile: File, destFile: File?, listener: OnReplaceListener?
+    ): Boolean {
+        return copyOrMoveFile(srcFile, destFile, listener, false)
     }
 
     /**
@@ -367,11 +343,12 @@ public final class FileUtils {
      *
      * @param srcPath  源的路径。
      * @param destPath 目的地的路径。
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean move(final String srcPath,
-                               final String destPath) {
-        return move(getFileByPath(srcPath), getFileByPath(destPath), null);
+    fun move(
+        srcPath: String?, destPath: String?
+    ): Boolean {
+        return move(getFileByPath(srcPath), getFileByPath(destPath), null)
     }
 
     /**
@@ -380,44 +357,38 @@ public final class FileUtils {
      * @param srcPath  源的路径。
      * @param destPath 目的地的路径。
      * @param listener 替换侦听器
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean move(final String srcPath,
-                               final String destPath,
-                               final OnReplaceListener listener) {
-        return move(getFileByPath(srcPath), getFileByPath(destPath), listener);
+    fun move(
+        srcPath: String?, destPath: String?, listener: OnReplaceListener?
+    ): Boolean {
+        return move(getFileByPath(srcPath), getFileByPath(destPath), listener)
     }
-
-    /**
-     * 移动目录或文件
-     *
-     * @param src  源
-     * @param dest 目的
-     * @return {@code true}: success<br>{@code false}: fail
-     */
-    public static boolean move(final File src,
-                               final File dest) {
-        return move(src, dest, null);
-    }
-
     /**
      * 移动目录或文件
      *
      * @param src      源
      * @param dest     目的
      * @param listener 替换侦听器
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean move(final File src,
-                               final File dest,
-                               final OnReplaceListener listener) {
+    /**
+     * 移动目录或文件
+     *
+     * @param src  源
+     * @param dest 目的
+     * @return `true`: success<br></br>`false`: fail
+     */
+    @JvmOverloads
+    fun move(
+        src: File?, dest: File?, listener: OnReplaceListener? = null
+    ): Boolean {
         if (src == null) {
-            return false;
+            return false
         }
-        if (src.isDirectory()) {
-            return moveDir(src, dest, listener);
-        }
-        return moveFile(src, dest, listener);
+        return if (src.isDirectory) {
+            moveDir(src, dest, listener)
+        } else moveFile(src, dest, listener)
     }
 
     /**
@@ -426,12 +397,12 @@ public final class FileUtils {
      * @param srcDir   源目录.
      * @param destDir  目标目录
      * @param listener 替换侦听器
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean moveDir(final File srcDir,
-                                  final File destDir,
-                                  final OnReplaceListener listener) {
-        return copyOrMoveDir(srcDir, destDir, listener, true);
+    fun moveDir(
+        srcDir: File?, destDir: File?, listener: OnReplaceListener?
+    ): Boolean {
+        return copyOrMoveDir(srcDir, destDir, listener, true)
     }
 
     /**
@@ -440,207 +411,195 @@ public final class FileUtils {
      * @param srcFile  源文件
      * @param destFile 目标文件
      * @param listener 替换侦听器
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean moveFile(final File srcFile,
-                                   final File destFile,
-                                   final OnReplaceListener listener) {
-        return copyOrMoveFile(srcFile, destFile, listener, true);
+    fun moveFile(
+        srcFile: File?, destFile: File?, listener: OnReplaceListener?
+    ): Boolean {
+        return copyOrMoveFile(srcFile, destFile, listener, true)
     }
 
-    private static boolean copyOrMoveDir(final File srcDir,
-                                         final File destDir,
-                                         final OnReplaceListener listener,
-                                         final boolean isMove) {
+    private fun copyOrMoveDir(
+        srcDir: File?, destDir: File?, listener: OnReplaceListener?, isMove: Boolean
+    ): Boolean {
         if (srcDir == null || destDir == null) {
-            return false;
+            return false
         }
         // destDir's path locate in srcDir's path then return false
-        String srcPath = srcDir.getPath() + File.separator;
-        String destPath = destDir.getPath() + File.separator;
+        val srcPath = srcDir.path + File.separator
+        val destPath = destDir.path + File.separator
         if (destPath.contains(srcPath)) {
-            return false;
+            return false
         }
-        if (!srcDir.exists() || !srcDir.isDirectory()) {
-            return false;
+        if (!srcDir.exists() || !srcDir.isDirectory) {
+            return false
         }
         if (!createOrExistsDir(destDir)) {
-            return false;
+            return false
         }
-        File[] files = srcDir.listFiles();
-        if (files != null && files.length > 0) {
-            for (File file : files) {
-                File oneDestFile = new File(destPath + file.getName());
-                if (file.isFile()) {
+        val files = srcDir.listFiles()
+        if (files != null && files.size > 0) {
+            for (file in files) {
+                val oneDestFile = File(destPath + file.name)
+                if (file.isFile) {
                     if (!copyOrMoveFile(file, oneDestFile, listener, isMove)) {
-                        return false;
+                        return false
                     }
-                } else if (file.isDirectory()) {
+                } else if (file.isDirectory) {
                     if (!copyOrMoveDir(file, oneDestFile, listener, isMove)) {
-                        return false;
+                        return false
                     }
                 }
             }
         }
-        return !isMove || deleteDir(srcDir);
+        return !isMove || deleteDir(srcDir)
     }
 
-    private static boolean copyOrMoveFile(final File srcFile,
-                                          final File destFile,
-                                          final OnReplaceListener listener,
-                                          final boolean isMove) {
+    private fun copyOrMoveFile(
+        srcFile: File?, destFile: File?, listener: OnReplaceListener?, isMove: Boolean
+    ): Boolean {
         if (srcFile == null || destFile == null) {
-            return false;
+            return false
         }
         // srcFile equals destFile then return false
-        if (srcFile.equals(destFile)) {
-            return false;
+        if (srcFile == destFile) {
+            return false
         }
         // srcFile doesn't exist or isn't a file then return false
-        if (!srcFile.exists() || !srcFile.isFile()) {
-            return false;
+        if (!srcFile.exists() || !srcFile.isFile) {
+            return false
         }
         if (destFile.exists()) {
-            if (listener == null || listener.onReplace(srcFile, destFile)) {// require delete the old file
-                if (!destFile.delete()) {// unsuccessfully delete then return false
-                    return false;
+            if (listener == null || listener.onReplace(srcFile, destFile)) { // require delete the old file
+                if (!destFile.delete()) { // unsuccessfully delete then return false
+                    return false
                 }
             } else {
-                return true;
+                return true
             }
         }
-        if (!createOrExistsDir(destFile.getParentFile())) {
-            return false;
-        }
-        try {
-            return DawnBridge.writeFileFromIS(destFile.getAbsolutePath(), new FileInputStream(srcFile))
-                    && !(isMove && !deleteFile(srcFile));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return false;
+        return if (!createOrExistsDir(destFile.parentFile)) {
+            false
+        } else try {
+            (DawnBridge.writeFileFromIS(
+                destFile.absolutePath,
+                FileInputStream(srcFile)
+            ) && !(isMove && !deleteFile(srcFile)))
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+            false
         }
     }
-
 
     /**
      * 删除目录。
      *
      * @param filePath 文件的路径。
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean delete(final String filePath) {
-        return delete(getFileByPath(filePath));
+    fun delete(filePath: String?): Boolean {
+        return delete(getFileByPath(filePath))
     }
 
     /**
      * 删除目录.
      *
      * @param file file.
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean delete(final File file) {
+    fun delete(file: File?): Boolean {
         if (file == null) {
-            return false;
+            return false
         }
-        if (file.isDirectory()) {
-            return deleteDir(file);
-        }
-        return deleteFile(file);
+        return if (file.isDirectory) {
+            deleteDir(file)
+        } else deleteFile(file)
     }
 
     /**
      * 删除目录
      *
      * @param dir 目录
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    private static boolean deleteDir(final File dir) {
+    private fun deleteDir(dir: File?): Boolean {
         if (dir == null) {
-            return false;
+            return false
         }
         // dir doesn't exist then return true
         if (!dir.exists()) {
-            return true;
+            return true
         }
         // dir isn't a directory then return false
-        if (!dir.isDirectory()) {
-            return false;
+        if (!dir.isDirectory) {
+            return false
         }
-        File[] files = dir.listFiles();
-        if (files != null && files.length > 0) {
-            for (File file : files) {
-                if (file.isFile()) {
+        val files = dir.listFiles()
+        if (files != null && files.size > 0) {
+            for (file in files) {
+                if (file.isFile) {
                     if (!file.delete()) {
-                        return false;
+                        return false
                     }
-                } else if (file.isDirectory()) {
+                } else if (file.isDirectory) {
                     if (!deleteDir(file)) {
-                        return false;
+                        return false
                     }
                 }
             }
         }
-        return dir.delete();
+        return dir.delete()
     }
 
     /**
      * 删除文件
      *
      * @param file file.
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    private static boolean deleteFile(final File file) {
-        return file != null && (!file.exists() || file.isFile() && file.delete());
+    private fun deleteFile(file: File?): Boolean {
+        return file != null && (!file.exists() || file.isFile && file.delete())
     }
 
     /**
      * 删除all-in目录。
      *
      * @param dirPath 目录的路径。
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean deleteAllInDir(final String dirPath) {
-        return deleteAllInDir(getFileByPath(dirPath));
+    fun deleteAllInDir(dirPath: String?): Boolean {
+        return deleteAllInDir(getFileByPath(dirPath))
     }
 
     /**
      * 删除all-in目录。
      *
      * @param dir 目录
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean deleteAllInDir(final File dir) {
-        return deleteFilesInDirWithFilter(dir, new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                return true;
-            }
-        });
+    @JvmStatic
+    fun deleteAllInDir(dir: File?): Boolean {
+        return deleteFilesInDirWithFilter(dir) { true }
     }
 
     /**
      * 删除目录中的所有文件。
      *
      * @param dirPath 目录的路径。
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean deleteFilesInDir(final String dirPath) {
-        return deleteFilesInDir(getFileByPath(dirPath));
+    fun deleteFilesInDir(dirPath: String?): Boolean {
+        return deleteFilesInDir(getFileByPath(dirPath))
     }
 
     /**
      * 删除目录中的所有文件
      *
      * @param dir 目录的路径。
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean deleteFilesInDir(final File dir) {
-        return deleteFilesInDirWithFilter(dir, new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                return pathname.isFile();
-            }
-        });
+    fun deleteFilesInDir(dir: File?): Boolean {
+        return deleteFilesInDirWithFilter(dir) { pathname -> pathname.isFile }
     }
 
     /**
@@ -648,11 +607,12 @@ public final class FileUtils {
      *
      * @param dirPath 目录的路径。
      * @param filter  过滤器
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean deleteFilesInDirWithFilter(final String dirPath,
-                                                     final FileFilter filter) {
-        return deleteFilesInDirWithFilter(getFileByPath(dirPath), filter);
+    fun deleteFilesInDirWithFilter(
+        dirPath: String?, filter: FileFilter?
+    ): Boolean {
+        return deleteFilesInDirWithFilter(getFileByPath(dirPath), filter)
     }
 
     /**
@@ -660,84 +620,79 @@ public final class FileUtils {
      *
      * @param dir    目录。
      * @param filter 过滤器
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean deleteFilesInDirWithFilter(final File dir, final FileFilter filter) {
+    fun deleteFilesInDirWithFilter(dir: File?, filter: FileFilter?): Boolean {
         if (dir == null || filter == null) {
-            return false;
+            return false
         }
         // dir doesn't exist then return true
         if (!dir.exists()) {
-            return true;
+            return true
         }
         // dir isn't a directory then return false
-        if (!dir.isDirectory()) {
-            return false;
+        if (!dir.isDirectory) {
+            return false
         }
-        File[] files = dir.listFiles();
-        if (files != null && files.length != 0) {
-            for (File file : files) {
+        val files = dir.listFiles()
+        if (files != null && files.size != 0) {
+            for (file in files) {
                 if (filter.accept(file)) {
-                    if (file.isFile()) {
+                    if (file.isFile) {
                         if (!file.delete()) {
-                            return false;
+                            return false
                         }
-                    } else if (file.isDirectory()) {
+                    } else if (file.isDirectory) {
                         if (!deleteDir(file)) {
-                            return false;
+                            return false
                         }
                     }
                 }
             }
         }
-        return true;
+        return true
     }
-
-
     /**
      * 返回目录中的文件。
-     * <p>不遍历子目录</p>
      *
-     * @param dirPath 目录的路径。
-     * @return 目录中的文件
-     */
-    public static List<File> listFilesInDir(final String dirPath) {
-        return listFilesInDir(dirPath, null);
-    }
-
-    /**
-     * 返回目录中的文件。
-     * <p>不遍历子目录</p>
-     *
-     * @param dir 目录.
-     * @return 目录中的文件
-     */
-    public static List<File> listFilesInDir(final File dir) {
-        return listFilesInDir(dir, null);
-    }
-
-    /**
-     * 返回目录中的文件。
-     * <p>不遍历子目录</p>
+     * 不遍历子目录
      *
      * @param dirPath    目录的路径
      * @param comparator 用于确定列表顺序的比较器。
      * @return 目录中的文件
      */
-    public static List<File> listFilesInDir(final String dirPath, Comparator<File> comparator) {
-        return listFilesInDir(getFileByPath(dirPath), false, comparator);
-    }
-
     /**
      * 返回目录中的文件。
-     * <p>不遍历子目录</p>
+     *
+     * 不遍历子目录
+     *
+     * @param dirPath 目录的路径。
+     * @return 目录中的文件
+     */
+    @JvmOverloads
+    fun listFilesInDir(dirPath: String?, comparator: Comparator<File?>? = null): List<File?> {
+        return listFilesInDir(getFileByPath(dirPath), false, comparator)
+    }
+    /**
+     * 返回目录中的文件。
+     *
+     * 不遍历子目录
      *
      * @param dir        目录
      * @param comparator 用于确定列表顺序的比较器。
      * @return 目录中的文件
      */
-    public static List<File> listFilesInDir(final File dir, Comparator<File> comparator) {
-        return listFilesInDir(dir, false, comparator);
+    /**
+     * 返回目录中的文件。
+     *
+     * 不遍历子目录
+     *
+     * @param dir 目录.
+     * @return 目录中的文件
+     */
+    @JvmOverloads
+    fun listFilesInDir(dir: File?, comparator: Comparator<File?>? = null): List<File?> {
+        return listFilesInDir(dir, false, comparator)
     }
 
     /**
@@ -747,19 +702,8 @@ public final class FileUtils {
      * @param isRecursive True遍历子目录，否则为false。
      * @return 目录中的文件
      */
-    public static List<File> listFilesInDir(final String dirPath, final boolean isRecursive) {
-        return listFilesInDir(getFileByPath(dirPath), isRecursive);
-    }
-
-    /**
-     * 返回目录中的文件。
-     *
-     * @param dir         目录
-     * @param isRecursive True遍历子目录，否则为false。
-     * @return 目录中的文件
-     */
-    public static List<File> listFilesInDir(final File dir, final boolean isRecursive) {
-        return listFilesInDir(dir, isRecursive, null);
+    fun listFilesInDir(dirPath: String?, isRecursive: Boolean): List<File?> {
+        return listFilesInDir(getFileByPath(dirPath), isRecursive)
     }
 
     /**
@@ -770,12 +714,11 @@ public final class FileUtils {
      * @param comparator  用于确定列表顺序的比较器。
      * @return 目录中的文件
      */
-    public static List<File> listFilesInDir(final String dirPath,
-                                            final boolean isRecursive,
-                                            final Comparator<File> comparator) {
-        return listFilesInDir(getFileByPath(dirPath), isRecursive, comparator);
+    fun listFilesInDir(
+        dirPath: String?, isRecursive: Boolean, comparator: Comparator<File?>?
+    ): List<File?> {
+        return listFilesInDir(getFileByPath(dirPath), isRecursive, comparator)
     }
-
     /**
      * 返回目录中的文件。
      *
@@ -784,67 +727,65 @@ public final class FileUtils {
      * @param comparator  用于确定列表顺序的比较器。
      * @return 目录中的文件
      */
-    public static List<File> listFilesInDir(final File dir,
-                                            final boolean isRecursive,
-                                            final Comparator<File> comparator) {
-        return listFilesInDirWithFilter(dir, new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                return true;
-            }
-        }, isRecursive, comparator);
+    /**
+     * 返回目录中的文件。
+     *
+     * @param dir         目录
+     * @param isRecursive True遍历子目录，否则为false。
+     * @return 目录中的文件
+     */
+    @JvmOverloads
+    fun listFilesInDir(
+        dir: File?, isRecursive: Boolean, comparator: Comparator<File?>? = null
+    ): List<File?> {
+        return listFilesInDirWithFilter(dir, { true }, isRecursive, comparator)
     }
 
     /**
-     * 返回目录中满足筛选器的文件<p> 不遍历子目录
+     * 返回目录中满足筛选器的文件
+     *
+     * 不遍历子目录
      *
      * @param dirPath 目录的路径
      * @param filter  过滤器
      * @return 目录中满足筛选器的文件
      */
-    public static List<File> listFilesInDirWithFilter(final String dirPath,
-                                                      final FileFilter filter) {
-        return listFilesInDirWithFilter(getFileByPath(dirPath), filter);
+    fun listFilesInDirWithFilter(
+        dirPath: String?, filter: FileFilter
+    ): List<File?> {
+        return listFilesInDirWithFilter(getFileByPath(dirPath), filter)
     }
 
     /**
-     * 返回目录中满足筛选器的文件<p> 不遍历子目录
+     * 返回目录中满足筛选器的文件
      *
-     * @param dir    目录
-     * @param filter 过滤器
-     * @return 目录中满足筛选器的文件
-     */
-    public static List<File> listFilesInDirWithFilter(final File dir,
-                                                      final FileFilter filter) {
-        return listFilesInDirWithFilter(dir, filter, false, null);
-    }
-
-    /**
-     * 返回目录中满足筛选器的文件<p> 不遍历子目录
+     * 不遍历子目录
      *
      * @param dirPath    目录的路径
      * @param filter     过滤器
      * @param comparator 用于确定列表顺序的比较器
      * @return 目录中满足筛选器的文件
      */
-    public static List<File> listFilesInDirWithFilter(final String dirPath,
-                                                      final FileFilter filter,
-                                                      final Comparator<File> comparator) {
-        return listFilesInDirWithFilter(getFileByPath(dirPath), filter, comparator);
+    fun listFilesInDirWithFilter(
+        dirPath: String?, filter: FileFilter, comparator: Comparator<File?>?
+    ): List<File?> {
+        return listFilesInDirWithFilter(getFileByPath(dirPath), filter, comparator)
     }
 
     /**
-     * 返回目录中满足筛选器的文件<p> 不遍历子目录
+     * 返回目录中满足筛选器的文件
+     *
+     * 不遍历子目录
      *
      * @param dir        目录
      * @param filter     过滤器
      * @param comparator 用于确定列表顺序的比较器
      * @return 目录中满足筛选器的文件
      */
-    public static List<File> listFilesInDirWithFilter(final File dir,
-                                                      final FileFilter filter,
-                                                      final Comparator<File> comparator) {
-        return listFilesInDirWithFilter(dir, filter, false, comparator);
+    fun listFilesInDirWithFilter(
+        dir: File?, filter: FileFilter, comparator: Comparator<File?>?
+    ): List<File?> {
+        return listFilesInDirWithFilter(dir, filter, false, comparator)
     }
 
     /**
@@ -855,26 +796,11 @@ public final class FileUtils {
      * @param isRecursive True遍历子目录，否则为false。
      * @return 目录中满足筛选器的文件
      */
-    public static List<File> listFilesInDirWithFilter(final String dirPath,
-                                                      final FileFilter filter,
-                                                      final boolean isRecursive) {
-        return listFilesInDirWithFilter(getFileByPath(dirPath), filter, isRecursive);
+    fun listFilesInDirWithFilter(
+        dirPath: String?, filter: FileFilter, isRecursive: Boolean
+    ): List<File?> {
+        return listFilesInDirWithFilter(getFileByPath(dirPath), filter, isRecursive)
     }
-
-    /**
-     * 返回目录中满足筛选器的文件。
-     *
-     * @param dir         目录
-     * @param filter      过滤器
-     * @param isRecursive True遍历子目录，否则为false。
-     * @return 目录中满足筛选器的文件
-     */
-    public static List<File> listFilesInDirWithFilter(final File dir,
-                                                      final FileFilter filter,
-                                                      final boolean isRecursive) {
-        return listFilesInDirWithFilter(dir, filter, isRecursive, null);
-    }
-
 
     /**
      * 返回目录中满足筛选器的文件。
@@ -885,13 +811,11 @@ public final class FileUtils {
      * @param comparator  用于确定列表顺序的比较器
      * @return 目录中满足筛选器的文件
      */
-    public static List<File> listFilesInDirWithFilter(final String dirPath,
-                                                      final FileFilter filter,
-                                                      final boolean isRecursive,
-                                                      final Comparator<File> comparator) {
-        return listFilesInDirWithFilter(getFileByPath(dirPath), filter, isRecursive, comparator);
+    fun listFilesInDirWithFilter(
+        dirPath: String?, filter: FileFilter, isRecursive: Boolean, comparator: Comparator<File?>?
+    ): List<File?> {
+        return listFilesInDirWithFilter(getFileByPath(dirPath), filter, isRecursive, comparator)
     }
-
     /**
      * 返回目录中满足筛选器的文件。
      *
@@ -901,36 +825,53 @@ public final class FileUtils {
      * @param comparator  用于确定列表顺序的比较器
      * @return 目录中满足筛选器的文件
      */
-    public static List<File> listFilesInDirWithFilter(final File dir,
-                                                      final FileFilter filter,
-                                                      final boolean isRecursive,
-                                                      final Comparator<File> comparator) {
-        List<File> files = listFilesInDirWithFilterInner(dir, filter, isRecursive);
+    /**
+     * 返回目录中满足筛选器的文件
+     *
+     * 不遍历子目录
+     *
+     * @param dir    目录
+     * @param filter 过滤器
+     * @return 目录中满足筛选器的文件
+     */
+    /**
+     * 返回目录中满足筛选器的文件。
+     *
+     * @param dir         目录
+     * @param filter      过滤器
+     * @param isRecursive True遍历子目录，否则为false。
+     * @return 目录中满足筛选器的文件
+     */
+    @JvmOverloads
+    fun listFilesInDirWithFilter(
+        dir: File?, filter: FileFilter, isRecursive: Boolean = false, comparator: Comparator<File?>? = null
+    ): List<File?> {
+        val files = listFilesInDirWithFilterInner(dir, filter, isRecursive)
         if (comparator != null) {
-            Collections.sort(files, comparator);
+            Collections.sort(files, comparator)
         }
-        return files;
+        return files
     }
 
-    private static List<File> listFilesInDirWithFilterInner(final File dir,
-                                                            final FileFilter filter,
-                                                            final boolean isRecursive) {
-        List<File> list = new ArrayList<>();
+    private fun listFilesInDirWithFilterInner(
+        dir: File?, filter: FileFilter, isRecursive: Boolean
+    ): List<File?> {
+        val list: MutableList<File?> = ArrayList()
         if (!isDir(dir)) {
-            return list;
+            return list
         }
-        File[] files = dir.listFiles();
-        if (files != null && files.length > 0) {
-            for (File file : files) {
+        val files = dir!!.listFiles()
+        if (files != null && files.size > 0) {
+            for (file in files) {
                 if (filter.accept(file)) {
-                    list.add(file);
+                    list.add(file)
                 }
-                if (isRecursive && file.isDirectory()) {
-                    list.addAll(listFilesInDirWithFilterInner(file, filter, true));
+                if (isRecursive && file.isDirectory) {
+                    list.addAll(listFilesInDirWithFilterInner(file, filter, true))
                 }
             }
         }
-        return list;
+        return list
     }
 
     /**
@@ -939,9 +880,8 @@ public final class FileUtils {
      * @param filePath 文件路径。
      * @return 返回上次修改文件的时间。
      */
-
-    public static long getFileLastModified(final String filePath) {
-        return getFileLastModified(getFileByPath(filePath));
+    fun getFileLastModified(filePath: String?): Long {
+        return getFileLastModified(getFileByPath(filePath))
     }
 
     /**
@@ -950,11 +890,8 @@ public final class FileUtils {
      * @param file file.
      * @return 返回上次修改文件的时间。
      */
-    public static long getFileLastModified(final File file) {
-        if (file == null) {
-            return -1;
-        }
-        return file.lastModified();
+    fun getFileLastModified(file: File?): Long {
+        return file?.lastModified() ?: -1
     }
 
     /**
@@ -963,8 +900,8 @@ public final class FileUtils {
      * @param filePath 文件路径。
      * @return 简单返回文件的字符集。
      */
-    public static String getFileCharsetSimple(final String filePath) {
-        return getFileCharsetSimple(getFileByPath(filePath));
+    fun getFileCharsetSimple(filePath: String?): String {
+        return getFileCharsetSimple(getFileByPath(filePath))
     }
 
     /**
@@ -973,36 +910,31 @@ public final class FileUtils {
      * @param file file.
      * @return 简单返回文件的字符集。
      */
-    public static String getFileCharsetSimple(final File file) {
+    fun getFileCharsetSimple(file: File?): String {
         if (file == null) {
-            return "";
+            return ""
         }
         if (isUtf8(file)) {
-            return "UTF-8";
+            return "UTF-8"
         }
-        int p = 0;
-        InputStream is = null;
+        var p = 0
+        var `is`: InputStream? = null
         try {
-            is = new BufferedInputStream(new FileInputStream(file));
-            p = (is.read() << 8) + is.read();
-        } catch (IOException e) {
-            e.printStackTrace();
+            `is` = BufferedInputStream(FileInputStream(file))
+            p = (`is`.read() shl 8) + `is`.read()
+        } catch (e: IOException) {
+            e.printStackTrace()
         } finally {
             try {
-                if (is != null) {
-                    is.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                `is`?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
-        switch (p) {
-            case 0xfffe:
-                return "Unicode";
-            case 0xfeff:
-                return "UTF-16BE";
-            default:
-                return "GBK";
+        return when (p) {
+            0xfffe -> "Unicode"
+            0xfeff -> "UTF-16BE"
+            else -> "GBK"
         }
     }
 
@@ -1010,46 +942,44 @@ public final class FileUtils {
      * 返回文件的字符集是否为utf8。
      *
      * @param filePath 文件路径。
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean isUtf8(final String filePath) {
-        return isUtf8(getFileByPath(filePath));
+    fun isUtf8(filePath: String?): Boolean {
+        return isUtf8(getFileByPath(filePath))
     }
 
     /**
      * 返回文件的字符集是否为utf8。
      *
      * @param file file.
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    public static boolean isUtf8(final File file) {
+    fun isUtf8(file: File?): Boolean {
         if (file == null) {
-            return false;
+            return false
         }
-        InputStream is = null;
+        var `is`: InputStream? = null
         try {
-            byte[] bytes = new byte[24];
-            is = new BufferedInputStream(new FileInputStream(file));
-            int read = is.read(bytes);
-            if (read != -1) {
-                byte[] readArr = new byte[read];
-                System.arraycopy(bytes, 0, readArr, 0, read);
-                return isUtf8(readArr) == 100;
+            val bytes = ByteArray(24)
+            `is` = BufferedInputStream(FileInputStream(file))
+            val read = `is`.read(bytes)
+            return if (read != -1) {
+                val readArr = ByteArray(read)
+                System.arraycopy(bytes, 0, readArr, 0, read)
+                isUtf8(readArr) == 100
             } else {
-                return false;
+                false
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (e: IOException) {
+            e.printStackTrace()
         } finally {
             try {
-                if (is != null) {
-                    is.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                `is`?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
-        return false;
+        return false
     }
 
     /**
@@ -1060,65 +990,75 @@ public final class FileUtils {
      * 1110xxxx 10xxxxxx 10xxxxxx
      * 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
      */
-    private static int isUtf8(byte[] raw) {
-        int i, len;
-        int utf8 = 0, ascii = 0;
-        if (raw.length > 3) {
-            if ((raw[0] == (byte) 0xEF) && (raw[1] == (byte) 0xBB) && (raw[2] == (byte) 0xBF)) {
-                return 100;
+    private fun isUtf8(raw: ByteArray): Int {
+        var i: Int
+        val len: Int
+        var utf8 = 0
+        var ascii = 0
+        if (raw.size > 3) {
+            if (raw[0] == 0xEF.toByte() && raw[1] == 0xBB.toByte() && raw[2] == 0xBF.toByte()) {
+                return 100
             }
         }
-        len = raw.length;
-        int child = 0;
-        for (i = 0; i < len; ) {
+        len = raw.size
+        var child = 0
+        i = 0
+        while (i < len) {
+
             // UTF-8 byte shouldn't be FF and FE
-            if ((raw[i] & (byte) 0xFF) == (byte) 0xFF || (raw[i] & (byte) 0xFE) == (byte) 0xFE) {
-                return 0;
+            if (raw[i].toInt() and 0xFF.toByte().toInt() == 0xFF.toByte()
+                    .toInt() || raw[i].toInt() and 0xFE.toByte().toInt() == 0xFE.toByte().toInt()
+            ) {
+                return 0
             }
             if (child == 0) {
                 // ASCII format is 0x0*******
-                if ((raw[i] & (byte) 0x7F) == raw[i] && raw[i] != 0) {
-                    ascii++;
-                } else if ((raw[i] & (byte) 0xC0) == (byte) 0xC0) {
+                if (raw[i].toInt() and 0x7F.toByte().toInt() == raw[i].toInt() && raw[i].toInt() != 0) {
+                    ascii++
+                } else if (raw[i].toInt() and 0xC0.toByte().toInt() == 0xC0.toByte().toInt()) {
                     // 0x11****** maybe is UTF-8
-                    for (int bit = 0; bit < 8; bit++) {
-                        if ((((byte) (0x80 >> bit)) & raw[i]) == ((byte) (0x80 >> bit))) {
-                            child = bit;
-                        } else {
-                            break;
-                        }
+                    for (bit in 0..7) {
+                        child =
+                            if ((0x80 shr bit).toByte().toInt() and raw[i].toInt() == (0x80 shr bit).toByte()
+                                    .toInt()
+                            ) {
+                                bit
+                            } else {
+                                break
+                            }
                     }
-                    utf8++;
+                    utf8++
                 }
-                i++;
+                i++
             } else {
-                child = (raw.length - i > child) ? child : (raw.length - i);
-                boolean currentNotUtf8 = false;
-                for (int children = 0; children < child; children++) {
+                child = if (raw.size - i > child) child else raw.size - i
+                var currentNotUtf8 = false
+                for (children in 0 until child) {
                     // format must is 0x10******
-                    if ((raw[i + children] & ((byte) 0x80)) != ((byte) 0x80)) {
-                        if ((raw[i + children] & (byte) 0x7F) == raw[i + children] && raw[i] != 0) {
+                    if (raw[i + children].toInt() and 0x80.toByte().toInt() != 0x80.toByte().toInt()) {
+                        if (raw[i + children].toInt() and 0x7F.toByte()
+                                .toInt() == raw[i + children].toInt() && raw[i].toInt() != 0
+                        ) {
                             // ASCII format is 0x0*******
-                            ascii++;
+                            ascii++
                         }
-                        currentNotUtf8 = true;
+                        currentNotUtf8 = true
                     }
                 }
                 if (currentNotUtf8) {
-                    utf8--;
-                    i++;
+                    utf8--
+                    i++
                 } else {
-                    utf8 += child;
-                    i += child;
+                    utf8 += child
+                    i += child
                 }
-                child = 0;
+                child = 0
             }
         }
         // UTF-8 contains ASCII
-        if (ascii == len) {
-            return 100;
-        }
-        return (int) (100 * ((float) (utf8 + ascii) / (float) len));
+        return if (ascii == len) {
+            100
+        } else (100 * ((utf8 + ascii).toFloat() / len.toFloat())).toInt()
     }
 
     /**
@@ -1127,8 +1067,8 @@ public final class FileUtils {
      * @param filePath 文件的路径
      * @return 返回文件的行数。
      */
-    public static int getFileLines(final String filePath) {
-        return getFileLines(getFileByPath(filePath));
+    fun getFileLines(filePath: String?): Int {
+        return getFileLines(getFileByPath(filePath))
     }
 
     /**
@@ -1137,42 +1077,40 @@ public final class FileUtils {
      * @param file file.
      * @return 返回文件的行数。
      */
-    public static int getFileLines(final File file) {
-        int count = 1;
-        InputStream is = null;
+    fun getFileLines(file: File?): Int {
+        var count = 1
+        var `is`: InputStream? = null
         try {
-            is = new BufferedInputStream(new FileInputStream(file));
-            byte[] buffer = new byte[1024];
-            int readChars;
+            `is` = BufferedInputStream(FileInputStream(file))
+            val buffer = ByteArray(1024)
+            var readChars: Int
             if (LINE_SEP.endsWith("\n")) {
-                while ((readChars = is.read(buffer, 0, 1024)) != -1) {
-                    for (int i = 0; i < readChars; ++i) {
-                        if (buffer[i] == '\n') {
-                            ++count;
+                while (`is`.read(buffer, 0, 1024).also { readChars = it } != -1) {
+                    for (i in 0 until readChars) {
+                        if (buffer[i] == '\n'.code.toByte()) {
+                            ++count
                         }
                     }
                 }
             } else {
-                while ((readChars = is.read(buffer, 0, 1024)) != -1) {
-                    for (int i = 0; i < readChars; ++i) {
-                        if (buffer[i] == '\r') {
-                            ++count;
+                while (`is`.read(buffer, 0, 1024).also { readChars = it } != -1) {
+                    for (i in 0 until readChars) {
+                        if (buffer[i] == '\r'.code.toByte()) {
+                            ++count
                         }
                     }
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (e: IOException) {
+            e.printStackTrace()
         } finally {
             try {
-                if (is != null) {
-                    is.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                `is`?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
-        return count;
+        return count
     }
 
     /**
@@ -1181,8 +1119,8 @@ public final class FileUtils {
      * @param filePath 文件的路径。
      * @return 返回大小。
      */
-    public static String getSize(final String filePath) {
-        return getSize(getFileByPath(filePath));
+    fun getSize(filePath: String?): String {
+        return getSize(getFileByPath(filePath))
     }
 
     /**
@@ -1191,14 +1129,13 @@ public final class FileUtils {
      * @param file 目录
      * @return 返回大小。
      */
-    public static String getSize(final File file) {
+    fun getSize(file: File?): String {
         if (file == null) {
-            return "";
+            return ""
         }
-        if (file.isDirectory()) {
-            return getDirSize(file);
-        }
-        return getFileSize(file);
+        return if (file.isDirectory) {
+            getDirSize(file)
+        } else getFileSize(file)
     }
 
     /**
@@ -1207,9 +1144,9 @@ public final class FileUtils {
      * @param dir 目录
      * @return 返回目录的大小。
      */
-    private static String getDirSize(final File dir) {
-        long len = getDirLength(dir);
-        return len == -1 ? "" : DawnBridge.byte2FitMemorySize(len);
+    private fun getDirSize(dir: File): String {
+        val len = getDirLength(dir)
+        return if (len == -1L) "" else DawnBridge.byte2FitMemorySize(len)
     }
 
     /**
@@ -1218,9 +1155,9 @@ public final class FileUtils {
      * @param file file.
      * @return 返回文件大小。
      */
-    private static String getFileSize(final File file) {
-        long len = getFileLength(file);
-        return len == -1 ? "" : DawnBridge.byte2FitMemorySize(len);
+    private fun getFileSize(file: File): String {
+        val len = getFileLength(file)
+        return if (len == -1L) "" else DawnBridge.byte2FitMemorySize(len)
     }
 
     /**
@@ -1229,8 +1166,8 @@ public final class FileUtils {
      * @param filePath 文件的路径。
      * @return 返回长度。
      */
-    public static long getLength(final String filePath) {
-        return getLength(getFileByPath(filePath));
+    fun getLength(filePath: String?): Long {
+        return getLength(getFileByPath(filePath))
     }
 
     /**
@@ -1239,14 +1176,13 @@ public final class FileUtils {
      * @param file file.
      * @return 返回长度。
      */
-    public static long getLength(final File file) {
+    fun getLength(file: File?): Long {
         if (file == null) {
-            return 0;
+            return 0
         }
-        if (file.isDirectory()) {
-            return getDirLength(file);
-        }
-        return getFileLength(file);
+        return if (file.isDirectory) {
+            getDirLength(file)
+        } else getFileLength(file)
     }
 
     /**
@@ -1255,22 +1191,22 @@ public final class FileUtils {
      * @param dir 目录
      * @return 返回目录的长度。
      */
-    private static long getDirLength(final File dir) {
+    private fun getDirLength(dir: File): Long {
         if (!isDir(dir)) {
-            return 0;
+            return 0
         }
-        long len = 0;
-        File[] files = dir.listFiles();
-        if (files != null && files.length > 0) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    len += getDirLength(file);
+        var len: Long = 0
+        val files = dir.listFiles()
+        if (files != null && files.size > 0) {
+            for (file in files) {
+                len += if (file.isDirectory) {
+                    getDirLength(file)
                 } else {
-                    len += file.length();
+                    file.length()
                 }
             }
         }
-        return len;
+        return len
     }
 
     /**
@@ -1279,22 +1215,21 @@ public final class FileUtils {
      * @param filePath 文件的路径。
      * @return 返回文件的长度。
      */
-    public static long getFileLength(final String filePath) {
-        boolean isURL = filePath.matches("[a-zA-z]+://[^\\s]*");
+    fun getFileLength(filePath: String): Long {
+        val isURL = filePath.matches("[a-zA-z]+://[^\\s]*".toRegex())
         if (isURL) {
             try {
-                HttpsURLConnection conn = (HttpsURLConnection) new URL(filePath).openConnection();
-                conn.setRequestProperty("Accept-Encoding", "identity");
-                conn.connect();
-                if (conn.getResponseCode() == 200) {
-                    return conn.getContentLength();
-                }
-                return -1;
-            } catch (IOException e) {
-                e.printStackTrace();
+                val conn = URL(filePath).openConnection() as HttpsURLConnection
+                conn.setRequestProperty("Accept-Encoding", "identity")
+                conn.connect()
+                return if (conn.responseCode == 200) {
+                    conn.contentLength.toLong()
+                } else -1
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
-        return getFileLength(getFileByPath(filePath));
+        return getFileLength(getFileByPath(filePath))
     }
 
     /**
@@ -1303,11 +1238,10 @@ public final class FileUtils {
      * @param file file.
      * @return 返回文件的长度。
      */
-    private static long getFileLength(final File file) {
-        if (!isFile(file)) {
-            return -1;
-        }
-        return file.length();
+    private fun getFileLength(file: File?): Long {
+        return if (!isFile(file)) {
+            -1
+        } else file!!.length()
     }
 
     /**
@@ -1316,9 +1250,9 @@ public final class FileUtils {
      * @param filePath 文件路径
      * @return 返回文件的 MD5
      */
-    public static String getFileMD5ToString(final String filePath) {
-        File file = DawnBridge.isSpace(filePath) ? null : new File(filePath);
-        return getFileMD5ToString(file);
+    fun getFileMD5ToString(filePath: String?): String {
+        val file = if (DawnBridge.isSpace(filePath)) null else File(filePath)
+        return getFileMD5ToString(file)
     }
 
     /**
@@ -1327,18 +1261,18 @@ public final class FileUtils {
      * @param file 文件
      * @return  返回文件的 MD5
      */
-    public static String getFileMD5ToString(final File file) {
-        return DawnBridge.bytes2HexString(getFileMD5(file));
+    fun getFileMD5ToString(file: File?): String {
+        return DawnBridge.bytes2HexString(getFileMD5(file))
     }
 
     /**
-     *返回文件的 MD5
+     * 返回文件的 MD5
      *
      * @param filePath 文件路径
      * @return 返回文件的 MD5
      */
-    public static byte[] getFileMD5(final String filePath) {
-        return getFileMD5(getFileByPath(filePath));
+    fun getFileMD5(filePath: String?): ByteArray? {
+        return getFileMD5(getFileByPath(filePath))
     }
 
     /**
@@ -1347,35 +1281,35 @@ public final class FileUtils {
      * @param file 文件
      * @return 返回文件的 MD5
      */
-    public static byte[] getFileMD5(final File file) {
+    fun getFileMD5(file: File?): ByteArray? {
         if (file == null) {
-            return null;
+            return null
         }
-        DigestInputStream dis = null;
+        var dis: DigestInputStream? = null
         try {
-            FileInputStream fis = new FileInputStream(file);
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            dis = new DigestInputStream(fis, md);
-            byte[] buffer = new byte[1024 * 256];
+            val fis = FileInputStream(file)
+            var md = MessageDigest.getInstance("MD5")
+            dis = DigestInputStream(fis, md)
+            val buffer = ByteArray(1024 * 256)
             while (true) {
-                if (!(dis.read(buffer) > 0)) {
-                    break;
+                if (dis.read(buffer) <= 0) {
+                    break
                 }
             }
-            md = dis.getMessageDigest();
-            return md.digest();
-        } catch (NoSuchAlgorithmException | IOException e) {
-            e.printStackTrace();
+            md = dis.messageDigest
+            return md.digest()
+        } catch (e: NoSuchAlgorithmException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
         } finally {
             try {
-                if (dis != null) {
-                    dis.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                dis?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
-        return null;
+        return null
     }
 
     /**
@@ -1384,11 +1318,10 @@ public final class FileUtils {
      * @param file  file.
      * @return 返回文件的目录路径。
      */
-    public static String getDirName(final File file) {
-        if (file == null) {
-            return "";
-        }
-        return getDirName(file.getAbsolutePath());
+    fun getDirName(file: File?): String {
+        return if (file == null) {
+            ""
+        } else getDirName(file.absolutePath)
     }
 
     /**
@@ -1397,12 +1330,12 @@ public final class FileUtils {
      * @param filePath 文件路径
      * @return 返回文件的目录路径。
      */
-    public static String getDirName(final String filePath) {
+    fun getDirName(filePath: String): String {
         if (DawnBridge.isSpace(filePath)) {
-            return "";
+            return ""
         }
-        int lastSep = filePath.lastIndexOf(File.separator);
-        return lastSep == -1 ? "" : filePath.substring(0, lastSep + 1);
+        val lastSep = filePath.lastIndexOf(File.separator)
+        return if (lastSep == -1) "" else filePath.substring(0, lastSep + 1)
     }
 
     /**
@@ -1411,11 +1344,10 @@ public final class FileUtils {
      * @param file  file.
      * @return 返回文件名。
      */
-    public static String getFileName(final File file) {
-        if (file == null) {
-            return "";
-        }
-        return getFileName(file.getAbsolutePath());
+    fun getFileName(file: File?): String {
+        return if (file == null) {
+            ""
+        } else getFileName(file.absolutePath)
     }
 
     /**
@@ -1424,12 +1356,12 @@ public final class FileUtils {
      * @param filePath 文件路径
      * @return 返回文件名。
      */
-    public static String getFileName(final String filePath) {
+    fun getFileName(filePath: String): String {
         if (DawnBridge.isSpace(filePath)) {
-            return "";
+            return ""
         }
-        int lastSep = filePath.lastIndexOf(File.separator);
-        return lastSep == -1 ? filePath : filePath.substring(lastSep + 1);
+        val lastSep = filePath.lastIndexOf(File.separator)
+        return if (lastSep == -1) filePath else filePath.substring(lastSep + 1)
     }
 
     /**
@@ -1438,11 +1370,10 @@ public final class FileUtils {
      * @param file  file.
      * @return 返回不带扩展名的文件名。
      */
-    public static String getFileNameNoExtension(final File file) {
-        if (file == null) {
-            return "";
-        }
-        return getFileNameNoExtension(file.getPath());
+    fun getFileNameNoExtension(file: File?): String {
+        return if (file == null) {
+            ""
+        } else getFileNameNoExtension(file.path)
     }
 
     /**
@@ -1451,19 +1382,18 @@ public final class FileUtils {
      * @param filePath 文件路径
      * @return 返回不带扩展名的文件名。
      */
-    public static String getFileNameNoExtension(final String filePath) {
+    fun getFileNameNoExtension(filePath: String): String {
         if (DawnBridge.isSpace(filePath)) {
-            return "";
+            return ""
         }
-        int lastPoi = filePath.lastIndexOf('.');
-        int lastSep = filePath.lastIndexOf(File.separator);
+        val lastPoi = filePath.lastIndexOf('.')
+        val lastSep = filePath.lastIndexOf(File.separator)
         if (lastSep == -1) {
-            return (lastPoi == -1 ? filePath : filePath.substring(0, lastPoi));
+            return if (lastPoi == -1) filePath else filePath.substring(0, lastPoi)
         }
-        if (lastPoi == -1 || lastSep > lastPoi) {
-            return filePath.substring(lastSep + 1);
-        }
-        return filePath.substring(lastSep + 1, lastPoi);
+        return if (lastPoi == -1 || lastSep > lastPoi) {
+            filePath.substring(lastSep + 1)
+        } else filePath.substring(lastSep + 1, lastPoi)
     }
 
     /**
@@ -1472,11 +1402,10 @@ public final class FileUtils {
      * @param file  file.
      * @return 返回文件的扩展名
      */
-    public static String getFileExtension(final File file) {
-        if (file == null) {
-            return "";
-        }
-        return getFileExtension(file.getPath());
+    fun getFileExtension(file: File?): String {
+        return if (file == null) {
+            ""
+        } else getFileExtension(file.path)
     }
 
     /**
@@ -1485,16 +1414,15 @@ public final class FileUtils {
      * @param filePath 文件路径
      * @return 返回文件的扩展名
      */
-    public static String getFileExtension(final String filePath) {
+    fun getFileExtension(filePath: String): String {
         if (DawnBridge.isSpace(filePath)) {
-            return "";
+            return ""
         }
-        int lastPoi = filePath.lastIndexOf('.');
-        int lastSep = filePath.lastIndexOf(File.separator);
-        if (lastPoi == -1 || lastSep >= lastPoi) {
-            return "";
-        }
-        return filePath.substring(lastPoi + 1);
+        val lastPoi = filePath.lastIndexOf('.')
+        val lastSep = filePath.lastIndexOf(File.separator)
+        return if (lastPoi == -1 || lastSep >= lastPoi) {
+            ""
+        } else filePath.substring(lastPoi + 1)
     }
 
     /**
@@ -1502,8 +1430,8 @@ public final class FileUtils {
      *
      * @param filePath 文件路径
      */
-    public static void notifySystemToScan(final String filePath) {
-        notifySystemToScan(getFileByPath(filePath));
+    fun notifySystemToScan(filePath: String?) {
+        notifySystemToScan(getFileByPath(filePath))
     }
 
     /**
@@ -1511,15 +1439,15 @@ public final class FileUtils {
      *
      * @param file  file.
      */
-    public static void notifySystemToScan(final File file) {
+    @JvmStatic
+    fun notifySystemToScan(file: File?) {
         if (file == null || !file.exists()) {
-            return;
+            return
         }
-        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        intent.setData(Uri.parse("file://" + file.getAbsolutePath()));
-        DawnBridge.getApp().sendBroadcast(intent);
-
-     }
+        val intent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+        intent.data = Uri.parse("file://" + file.absolutePath)
+        DawnBridge.getApp().sendBroadcast(intent)
+    }
 
     /**
      * 返回文件系统的总大小。
@@ -1527,16 +1455,17 @@ public final class FileUtils {
      * @param anyPathInFs 文件系统中的任何路径。
      * @return 返回文件系统的总大小
      */
-    public static long getFsTotalSize(String anyPathInFs) {
+    @JvmStatic
+    fun getFsTotalSize(anyPathInFs: String?): Long {
         if (TextUtils.isEmpty(anyPathInFs)) {
-            return 0;
+            return 0
         }
-        StatFs statFs = new StatFs(anyPathInFs);
-        long blockSize;
-        long totalSize;
-        blockSize = statFs.getBlockSizeLong();
-        totalSize = statFs.getBlockCountLong();
-        return blockSize * totalSize;
+        val statFs = StatFs(anyPathInFs)
+        val blockSize: Long
+        val totalSize: Long
+        blockSize = statFs.blockSizeLong
+        totalSize = statFs.blockCountLong
+        return blockSize * totalSize
     }
 
     /**
@@ -1545,15 +1474,16 @@ public final class FileUtils {
      * @param anyPathInFs 文件系统中的任何路径
      * @return 返回文件系统的可用大小。
      */
-    public static long getFsAvailableSize(final String anyPathInFs) {
+    @JvmStatic
+    fun getFsAvailableSize(anyPathInFs: String?): Long {
         if (TextUtils.isEmpty(anyPathInFs)) {
-            return 0;
+            return 0
         }
-        StatFs statFs = new StatFs(anyPathInFs);
-        long blockSize;
-        long availableSize;
-        blockSize = statFs.getBlockSizeLong();
-        availableSize = statFs.getAvailableBlocksLong();
-        return blockSize * availableSize;
+        val statFs = StatFs(anyPathInFs)
+        val blockSize: Long
+        val availableSize: Long
+        blockSize = statFs.blockSizeLong
+        availableSize = statFs.availableBlocksLong
+        return blockSize * availableSize
     }
 }

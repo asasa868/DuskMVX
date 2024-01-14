@@ -1,27 +1,18 @@
-package com.lzq.dawn.util.activity;
+package com.lzq.dawn.util.activity
 
-import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.Application;
-import android.os.Build;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Window;
-import android.view.WindowManager;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.Lifecycle;
-
-import com.lzq.dawn.DawnBridge;
-
-import java.lang.reflect.Field;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import android.animation.ValueAnimator
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.Application
+import android.os.Build
+import android.os.Bundle
+import android.util.Log
+import android.view.WindowManager
+import androidx.lifecycle.Lifecycle
+import com.lzq.dawn.DawnBridge
+import java.util.LinkedList
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * className :ActivityLifecycleImpl
@@ -29,456 +20,427 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @Author :  Lzq
  */
-public final class ActivityLifecycleImpl implements Application.ActivityLifecycleCallbacks {
-
-    /**
-     * 单例
-     */
-    public static final ActivityLifecycleImpl INSTANCE = new ActivityLifecycleImpl();
-
+class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
     /**
      * activity 的对象
      */
-    private final LinkedList<Activity> mActivityList = new LinkedList<>();
+    private val mActivityList = LinkedList<Activity>()
 
     /**
      * 监听事件 的对象
      */
-    private final List<OnAppStatusChangedListener> mStatusListeners = new CopyOnWriteArrayList<>();
+    private val mStatusListeners: MutableList<OnAppStatusChangedListener> = CopyOnWriteArrayList()
+
     /**
      * activity 和监听对象的map
      */
-    private final Map<Activity, List<ActivityLifecycleCallbacks>> mActivityLifecycleCallbacksMap = new ConcurrentHashMap<>();
+    private val mActivityLifecycleCallbacksMap: MutableMap<Activity, MutableList<ActivityLifecycleCallbacks>> =
+        ConcurrentHashMap()
 
     /**
      * 前台计数
      */
-    private int mForegroundCount = 0;
+    private var mForegroundCount = 0
 
     /**
      * 后台计数
      */
-    private int mConfigCount = 0;
+    private var mConfigCount = 0
 
     /**
      * 是否在后台
      */
-    private boolean mIsBackground = false;
-
-    private static final Activity STUB = new Activity();
+    private var mIsBackground = false
 
     /**
      * 初始化
      *
      * @param app Application
      */
-    public void init(Application app) {
-        app.registerActivityLifecycleCallbacks(this);
+    fun init(app: Application) {
+        app.registerActivityLifecycleCallbacks(this)
     }
 
-    public void unInit(Application app) {
-        mActivityList.clear();
-        app.unregisterActivityLifecycleCallbacks(this);
+    fun unInit(app: Application) {
+        mActivityList.clear()
+        app.unregisterActivityLifecycleCallbacks(this)
     }
 
-    public Activity getTopActivity() {
-        List<Activity> activityList = getActivityList();
-        for (Activity activity : activityList) {
-            if (!DawnBridge.isActivityAlive(activity)) {
-                continue;
+    val topActivity: Activity?
+        get() {
+            val activityList = activityList
+            for (activity in activityList) {
+                if (!DawnBridge.isActivityAlive(activity)) {
+                    continue
+                }
+                return activity
             }
-            return activity;
+            return null
         }
-        return null;
-    }
-
-    public List<Activity> getActivityList() {
-        if (!mActivityList.isEmpty()) {
-            return new LinkedList<>(mActivityList);
+    val activityList: List<Activity>
+        get() {
+            if (!mActivityList.isEmpty()) {
+                return LinkedList(mActivityList)
+            }
+            val reflectActivities = activitiesByReflect
+            mActivityList.addAll(reflectActivities)
+            return LinkedList(mActivityList)
         }
-        List<Activity> reflectActivities = getActivitiesByReflect();
-        mActivityList.addAll(reflectActivities);
-        return new LinkedList<>(mActivityList);
+
+    fun addOnAppStatusChangedListener(listener: OnAppStatusChangedListener) {
+        mStatusListeners.add(listener)
     }
 
-    public void addOnAppStatusChangedListener(final OnAppStatusChangedListener listener) {
-        mStatusListeners.add(listener);
+    fun removeOnAppStatusChangedListener(listener: OnAppStatusChangedListener) {
+        mStatusListeners.remove(listener)
     }
 
-    public void removeOnAppStatusChangedListener(final OnAppStatusChangedListener listener) {
-        mStatusListeners.remove(listener);
+    fun addActivityLifecycleCallbacks(listener: ActivityLifecycleCallbacks?) {
+        addActivityLifecycleCallbacks(STUB, listener)
     }
 
-    public void addActivityLifecycleCallbacks(final ActivityLifecycleCallbacks listener) {
-        addActivityLifecycleCallbacks(STUB, listener);
-    }
-
-    public void addActivityLifecycleCallbacks(final Activity activity,
-                                              final ActivityLifecycleCallbacks listener) {
+    fun addActivityLifecycleCallbacks(
+        activity: Activity?, listener: ActivityLifecycleCallbacks?
+    ) {
         if (activity == null || listener == null) {
-            return;
+            return
         }
-        DawnBridge.runOnUiThread(() -> addActivityLifecycleCallbacksInner(activity, listener));
+        DawnBridge.runOnUiThread { addActivityLifecycleCallbacksInner(activity, listener) }
     }
 
-    public boolean isAppForeground() {
-        return !mIsBackground;
-    }
+    val isAppForeground: Boolean
+        get() = !mIsBackground
 
-    private void addActivityLifecycleCallbacksInner(final Activity activity,
-                                                    final ActivityLifecycleCallbacks callbacks) {
-        List<ActivityLifecycleCallbacks> callbacksList = mActivityLifecycleCallbacksMap.get(activity);
+    private fun addActivityLifecycleCallbacksInner(
+        activity: Activity, callbacks: ActivityLifecycleCallbacks
+    ) {
+        var callbacksList = mActivityLifecycleCallbacksMap[activity]
         if (callbacksList == null) {
-            callbacksList = new CopyOnWriteArrayList<>();
-            mActivityLifecycleCallbacksMap.put(activity, callbacksList);
+            callbacksList = CopyOnWriteArrayList()
+            mActivityLifecycleCallbacksMap[activity] = callbacksList
         } else {
             if (callbacksList.contains(callbacks)) {
-                return;
+                return
             }
         }
-        callbacksList.add(callbacks);
+        callbacksList.add(callbacks)
     }
 
-    public void removeActivityLifecycleCallbacks(final ActivityLifecycleCallbacks callbacks) {
-        removeActivityLifecycleCallbacks(STUB, callbacks);
+    fun removeActivityLifecycleCallbacks(callbacks: ActivityLifecycleCallbacks?) {
+        removeActivityLifecycleCallbacks(STUB, callbacks)
     }
 
-    public void removeActivityLifecycleCallbacks(final Activity activity) {
+    fun removeActivityLifecycleCallbacks(activity: Activity?) {
         if (activity == null) {
-            return;
+            return
         }
-        DawnBridge.runOnUiThread(() -> mActivityLifecycleCallbacksMap.remove(activity));
+        DawnBridge.runOnUiThread { mActivityLifecycleCallbacksMap.remove(activity) }
     }
 
-    public void removeActivityLifecycleCallbacks(final Activity activity,
-                                                 final ActivityLifecycleCallbacks callbacks) {
+    fun removeActivityLifecycleCallbacks(
+        activity: Activity?, callbacks: ActivityLifecycleCallbacks?
+    ) {
         if (activity == null || callbacks == null) {
-            return;
+            return
         }
-        DawnBridge.runOnUiThread(() -> removeActivityLifecycleCallbacksInner(activity, callbacks));
+        DawnBridge.runOnUiThread { removeActivityLifecycleCallbacksInner(activity, callbacks) }
     }
 
-    private void removeActivityLifecycleCallbacksInner(final Activity activity,
-                                                       final ActivityLifecycleCallbacks callbacks) {
-        List<ActivityLifecycleCallbacks> callbacksList = mActivityLifecycleCallbacksMap.get(activity);
+    private fun removeActivityLifecycleCallbacksInner(
+        activity: Activity, callbacks: ActivityLifecycleCallbacks
+    ) {
+        val callbacksList = mActivityLifecycleCallbacksMap[activity]
         if (callbacksList != null && !callbacksList.isEmpty()) {
-            callbacksList.remove(callbacks);
+            callbacksList.remove(callbacks)
         }
     }
 
-    private void consumeActivityLifecycleCallbacks(Activity activity, Lifecycle.Event event) {
-        consumeLifecycle(activity, event, mActivityLifecycleCallbacksMap.get(activity));
-        consumeLifecycle(activity, event, mActivityLifecycleCallbacksMap.get(STUB));
+    private fun consumeActivityLifecycleCallbacks(activity: Activity, event: Lifecycle.Event) {
+        consumeLifecycle(activity, event, mActivityLifecycleCallbacksMap[activity])
+        consumeLifecycle(activity, event, mActivityLifecycleCallbacksMap[STUB])
     }
 
-    private void consumeLifecycle(Activity activity, Lifecycle.Event event, List<ActivityLifecycleCallbacks> listeners) {
+    private fun consumeLifecycle(
+        activity: Activity,
+        event: Lifecycle.Event,
+        listeners: List<ActivityLifecycleCallbacks>?
+    ) {
         if (listeners == null) {
-            return;
+            return
         }
-        for (ActivityLifecycleCallbacks listener : listeners) {
-            listener.onLifecycleChanged(activity, event);
-            if (event.equals(Lifecycle.Event.ON_CREATE)) {
-                listener.onActivityCreated(activity);
-            } else if (event.equals(Lifecycle.Event.ON_START)) {
-                listener.onActivityStarted(activity);
-            } else if (event.equals(Lifecycle.Event.ON_RESUME)) {
-                listener.onActivityResumed(activity);
-            } else if (event.equals(Lifecycle.Event.ON_PAUSE)) {
-                listener.onActivityPaused(activity);
-            } else if (event.equals(Lifecycle.Event.ON_STOP)) {
-                listener.onActivityStopped(activity);
-            } else if (event.equals(Lifecycle.Event.ON_DESTROY)) {
-                listener.onActivityDestroyed(activity);
+        for (listener in listeners) {
+            listener.onLifecycleChanged(activity, event)
+            if (event == Lifecycle.Event.ON_CREATE) {
+                listener.onActivityCreated(activity)
+            } else if (event == Lifecycle.Event.ON_START) {
+                listener.onActivityStarted(activity)
+            } else if (event == Lifecycle.Event.ON_RESUME) {
+                listener.onActivityResumed(activity)
+            } else if (event == Lifecycle.Event.ON_PAUSE) {
+                listener.onActivityPaused(activity)
+            } else if (event == Lifecycle.Event.ON_STOP) {
+                listener.onActivityStopped(activity)
+            } else if (event == Lifecycle.Event.ON_DESTROY) {
+                listener.onActivityDestroyed(activity)
             }
         }
-        if (event.equals(Lifecycle.Event.ON_DESTROY)) {
-            mActivityLifecycleCallbacksMap.remove(activity);
+        if (event == Lifecycle.Event.ON_DESTROY) {
+            mActivityLifecycleCallbacksMap.remove(activity)
         }
     }
 
-    public Application getApplicationByReflect() {
-        try {
-            Class activityThreadClass = Class.forName("android.app.ActivityThread");
-            Object thread = getActivityThread();
-            if (thread == null) {
-                return null;
+    val applicationByReflect: Application?
+        get() {
+            try {
+                val activityThreadClass = Class.forName("android.app.ActivityThread")
+                val thread = activityThread ?: return null
+                val app = activityThreadClass.getMethod("getApplication").invoke(thread) ?: return null
+                return app as Application
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-            Object app = activityThreadClass.getMethod("getApplication").invoke(thread);
-            if (app == null) {
-                return null;
-            }
-            return (Application) app;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
-    public void onActivityPreCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
-
-    }
-
-    @Override
-    public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
-        if (mActivityList.size() == 0) {
-            postStatus(activity, true);
+            return null
         }
 
-        setAnimatorsEnabled();
-        setTopActivity(activity);
-        consumeActivityLifecycleCallbacks(activity, Lifecycle.Event.ON_CREATE);
+    override fun onActivityPreCreated(activity: Activity, savedInstanceState: Bundle?) {}
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+        if (mActivityList.size == 0) {
+            postStatus(activity, true)
+        }
+        setAnimatorsEnabled()
+        setTopActivity(activity)
+        consumeActivityLifecycleCallbacks(activity, Lifecycle.Event.ON_CREATE)
     }
 
-    @Override
-    public void onActivityPostCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {/**/}
+    override fun onActivityPostCreated(activity: Activity, savedInstanceState: Bundle?) { /**/
+    }
 
-    @Override
-    public void onActivityPreStarted(@NonNull Activity activity) {/**/}
+    override fun onActivityPreStarted(activity: Activity) { /**/
+    }
 
-    @Override
-    public void onActivityStarted(@NonNull Activity activity) {
+    override fun onActivityStarted(activity: Activity) {
         if (!mIsBackground) {
-            setTopActivity(activity);
+            setTopActivity(activity)
         }
         if (mConfigCount < 0) {
-            ++mConfigCount;
+            ++mConfigCount
         } else {
-            ++mForegroundCount;
+            ++mForegroundCount
         }
-        consumeActivityLifecycleCallbacks(activity, Lifecycle.Event.ON_START);
+        consumeActivityLifecycleCallbacks(activity, Lifecycle.Event.ON_START)
     }
 
-    @Override
-    public void onActivityPostStarted(@NonNull Activity activity) {/**/}
+    override fun onActivityPostStarted(activity: Activity) { /**/
+    }
 
-    @Override
-    public void onActivityPreResumed(@NonNull Activity activity) {/**/}
+    override fun onActivityPreResumed(activity: Activity) { /**/
+    }
 
-    @Override
-    public void onActivityResumed(@NonNull Activity activity) {
-        setTopActivity(activity);
+    override fun onActivityResumed(activity: Activity) {
+        setTopActivity(activity)
         if (mIsBackground) {
-            mIsBackground = false;
-            postStatus(activity, true);
+            mIsBackground = false
+            postStatus(activity, true)
         }
-        processHideSoftInputOnActivityDestroy(activity, false);
-        consumeActivityLifecycleCallbacks(activity, Lifecycle.Event.ON_RESUME);
+        processHideSoftInputOnActivityDestroy(activity, false)
+        consumeActivityLifecycleCallbacks(activity, Lifecycle.Event.ON_RESUME)
     }
 
-    @Override
-    public void onActivityPostResumed(@NonNull Activity activity) {/**/}
-
-    @Override
-    public void onActivityPrePaused(@NonNull Activity activity) {/**/}
-
-    @Override
-    public void onActivityPaused(@NonNull Activity activity) {
-        consumeActivityLifecycleCallbacks(activity, Lifecycle.Event.ON_PAUSE);
+    override fun onActivityPostResumed(activity: Activity) { /**/
     }
 
-    @Override
-    public void onActivityPostPaused(@NonNull Activity activity) {/**/}
+    override fun onActivityPrePaused(activity: Activity) { /**/
+    }
 
-    @Override
-    public void onActivityPreStopped(@NonNull Activity activity) {/**/}
+    override fun onActivityPaused(activity: Activity) {
+        consumeActivityLifecycleCallbacks(activity, Lifecycle.Event.ON_PAUSE)
+    }
 
-    @Override
-    public void onActivityStopped(@NonNull Activity activity) {
-        if (activity.isChangingConfigurations()) {
-            --mConfigCount;
+    override fun onActivityPostPaused(activity: Activity) { /**/
+    }
+
+    override fun onActivityPreStopped(activity: Activity) { /**/
+    }
+
+    override fun onActivityStopped(activity: Activity) {
+        if (activity.isChangingConfigurations) {
+            --mConfigCount
         } else {
-            --mForegroundCount;
+            --mForegroundCount
             if (mForegroundCount <= 0) {
-                mIsBackground = true;
-                postStatus(activity, false);
+                mIsBackground = true
+                postStatus(activity, false)
             }
         }
-        processHideSoftInputOnActivityDestroy(activity, true);
-        consumeActivityLifecycleCallbacks(activity, Lifecycle.Event.ON_STOP);
+        processHideSoftInputOnActivityDestroy(activity, true)
+        consumeActivityLifecycleCallbacks(activity, Lifecycle.Event.ON_STOP)
     }
 
-    @Override
-    public void onActivityPostStopped(@NonNull Activity activity) {/**/}
-
-    @Override
-    public void onActivityPreSaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {/**/}
-
-
-    @Override
-    public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {
-
+    override fun onActivityPostStopped(activity: Activity) { /**/
     }
 
-    @Override
-    public void onActivityPostSaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {/**/}
-
-    @Override
-    public void onActivityPreDestroyed(@NonNull Activity activity) {/**/}
-
-    @Override
-    public void onActivityDestroyed(@NonNull Activity activity) {
-        mActivityList.remove(activity);
-        consumeActivityLifecycleCallbacks(activity, Lifecycle.Event.ON_DESTROY);
+    override fun onActivityPreSaveInstanceState(activity: Activity, outState: Bundle) { /**/
     }
 
-    @Override
-    public void onActivityPostDestroyed(@NonNull Activity activity) {/**/}
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+    override fun onActivityPostSaveInstanceState(activity: Activity, outState: Bundle) { /**/
+    }
 
+    override fun onActivityPreDestroyed(activity: Activity) { /**/
+    }
+
+    override fun onActivityDestroyed(activity: Activity) {
+        mActivityList.remove(activity)
+        consumeActivityLifecycleCallbacks(activity, Lifecycle.Event.ON_DESTROY)
+    }
+
+    override fun onActivityPostDestroyed(activity: Activity) { /**/
+    }
 
     /**
      * 解决关闭键盘时的活动破坏。preActivity set windowSoftInputMode 将阻止键盘在 curActivity onDestroy 时关闭。
      */
-    private void processHideSoftInputOnActivityDestroy(final Activity activity, boolean isSave) {
+    private fun processHideSoftInputOnActivityDestroy(activity: Activity, isSave: Boolean) {
         try {
             if (isSave) {
-                Window window = activity.getWindow();
-                final WindowManager.LayoutParams attrs = window.getAttributes();
-                final int softInputMode = attrs.softInputMode;
-                window.getDecorView().setTag(-123, softInputMode);
-                window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+                val window = activity.window
+                val attrs = window.attributes
+                val softInputMode = attrs.softInputMode
+                window.decorView.setTag(-123, softInputMode)
+                window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
             } else {
-                final Object tag = activity.getWindow().getDecorView().getTag(-123);
-                if (!(tag instanceof Integer)) {
-                    return;
-                }
-                DawnBridge.runOnUiThreadDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Window window = activity.getWindow();
-                            if (window != null) {
-                                window.setSoftInputMode(((Integer) tag));
-                            }
-                        } catch (Exception ignore) {
-                        }
+                val tag = activity.window.decorView.getTag(-123) as? Int ?: return
+                DawnBridge.runOnUiThreadDelayed({
+                    try {
+                        val window = activity.window
+                        window?.setSoftInputMode(tag)
+                    } catch (ignore: Exception) {
                     }
-                }, 100);
+                }, 100)
             }
-        } catch (Exception ignore) {
+        } catch (ignore: Exception) {
         }
     }
 
-    private void postStatus(final Activity activity, final boolean isForeground) {
+    private fun postStatus(activity: Activity, isForeground: Boolean) {
         if (mStatusListeners.isEmpty()) {
-            return;
+            return
         }
-        for (OnAppStatusChangedListener statusListener : mStatusListeners) {
+        for (statusListener in mStatusListeners) {
             if (isForeground) {
-                statusListener.onForeground(activity);
+                statusListener.onForeground(activity)
             } else {
-                statusListener.onBackground(activity);
+                statusListener.onBackground(activity)
             }
         }
     }
 
-    private void setTopActivity(final Activity activity) {
+    private fun setTopActivity(activity: Activity) {
         if (mActivityList.contains(activity)) {
-            if (!mActivityList.getFirst().equals(activity)) {
-                mActivityList.remove(activity);
-                mActivityList.addFirst(activity);
+            if (mActivityList.first != activity) {
+                mActivityList.remove(activity)
+                mActivityList.addFirst(activity)
             }
         } else {
-            mActivityList.addFirst(activity);
+            mActivityList.addFirst(activity)
         }
     }
 
-    /**
-     * @return 排名靠前的活动
-     */
-    private List<Activity> getActivitiesByReflect() {
-        LinkedList<Activity> list = new LinkedList<>();
-        Activity topActivity = null;
-        try {
-            Object activityThread = getActivityThread();
-            if (activityThread == null) {
-                return list;
-            }
-            Field mActivitiesField = activityThread.getClass().getDeclaredField("mActivities");
-            mActivitiesField.setAccessible(true);
-            Object mActivities = mActivitiesField.get(activityThread);
-            if (!(mActivities instanceof Map)) {
-                return list;
-            }
-            Map<Object, Object> binder_activityClientRecord_map = (Map<Object, Object>) mActivities;
-            for (Object activityRecord : binder_activityClientRecord_map.values()) {
-                Class<? extends Object> activityClientRecordClass = activityRecord.getClass();
-                Field activityField = activityClientRecordClass.getDeclaredField("activity");
-                activityField.setAccessible(true);
-                Activity activity = (Activity) activityField.get(activityRecord);
-                if (topActivity == null) {
-                    Field pausedField = activityClientRecordClass.getDeclaredField("paused");
-                    pausedField.setAccessible(true);
-                    if (!pausedField.getBoolean(activityRecord)) {
-                        topActivity = activity;
+    private val activitiesByReflect: List<Activity>
+        /**
+         * @return 排名靠前的活动
+         */
+        private get() {
+            val list = LinkedList<Activity>()
+            var topActivity: Activity? = null
+            try {
+                val activityThread = activityThread ?: return list
+                val mActivitiesField = activityThread.javaClass.getDeclaredField("mActivities")
+                mActivitiesField.isAccessible = true
+                val mActivities = mActivitiesField[activityThread] as? Map<*, *> ?: return list
+                val binder_activityClientRecord_map = mActivities as Map<Any, Any>
+                for (activityRecord in binder_activityClientRecord_map.values) {
+                    val activityClientRecordClass: Class<out Any> = activityRecord.javaClass
+                    val activityField = activityClientRecordClass.getDeclaredField("activity")
+                    activityField.isAccessible = true
+                    val activity = activityField[activityRecord] as Activity
+                    if (topActivity == null) {
+                        val pausedField = activityClientRecordClass.getDeclaredField("paused")
+                        pausedField.isAccessible = true
+                        if (!pausedField.getBoolean(activityRecord)) {
+                            topActivity = activity
+                        } else {
+                            list.addFirst(activity)
+                        }
                     } else {
-                        list.addFirst(activity);
+                        list.addFirst(activity)
                     }
-                } else {
-                    list.addFirst(activity);
                 }
+            } catch (e: Exception) {
+                Log.e("UtilsActivityLifecycle", "getActivitiesByReflect: " + e.message)
             }
-        } catch (Exception e) {
-            Log.e("UtilsActivityLifecycle", "getActivitiesByReflect: " + e.getMessage());
-        }
-        if (topActivity != null) {
-            list.addFirst(topActivity);
-        }
-        return list;
-    }
-
-    private Object getActivityThread() {
-        Object activityThread = getActivityThreadInActivityThreadStaticField();
-        if (activityThread != null) {
-            return activityThread;
-        }
-        return getActivityThreadInActivityThreadStaticMethod();
-    }
-
-    @SuppressLint({"PrivateApi", "DiscouragedPrivateApi"})
-    private Object getActivityThreadInActivityThreadStaticField() {
-        try {
-            Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
-            Field sCurrentActivityThreadField = activityThreadClass.getDeclaredField("sCurrentActivityThread");
-            sCurrentActivityThreadField.setAccessible(true);
-            return sCurrentActivityThreadField.get(null);
-        } catch (Exception e) {
-            Log.e("UtilsActivityLifecycle", "getActivityThreadInActivityThreadStaticField: " + e.getMessage());
-            return null;
-        }
-    }
-
-    @SuppressLint({"PrivateApi", "DiscouragedPrivateApi"})
-    private Object getActivityThreadInActivityThreadStaticMethod() {
-        try {
-            Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
-            return activityThreadClass.getMethod("currentActivityThread").invoke(null);
-        } catch (Exception e) {
-            Log.e("UtilsActivityLifecycle", "getActivityThreadInActivityThreadStaticMethod: " + e.getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * 设置启用动画器。
-     */
-    @SuppressLint("SoonBlockedPrivateApi")
-    private static void setAnimatorsEnabled() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && ValueAnimator.areAnimatorsEnabled()) {
-            return;
-        }
-        try {
-            //noinspection JavaReflectionMemberAccess
-            Field sDurationScaleField = ValueAnimator.class.getDeclaredField("sDurationScale");
-            sDurationScaleField.setAccessible(true);
-            //noinspection ConstantConditions
-            float sDurationScale = (Float) sDurationScaleField.get(null);
-            if (sDurationScale == 0f) {
-                sDurationScaleField.set(null, 1f);
-                Log.i("UtilsActivityLifecycle", "setAnimatorsEnabled: Animators are enabled now!");
+            if (topActivity != null) {
+                list.addFirst(topActivity)
             }
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
+            return list
+        }
+    private val activityThread: Any?
+        private get() {
+            val activityThread = activityThreadInActivityThreadStaticField
+            return activityThread ?: activityThreadInActivityThreadStaticMethod
+        }
+
+    @get:SuppressLint("PrivateApi", "DiscouragedPrivateApi")
+    private val activityThreadInActivityThreadStaticField: Any?
+        private get() = try {
+            val activityThreadClass = Class.forName("android.app.ActivityThread")
+            val sCurrentActivityThreadField = activityThreadClass.getDeclaredField("sCurrentActivityThread")
+            sCurrentActivityThreadField.isAccessible = true
+            sCurrentActivityThreadField[null]
+        } catch (e: Exception) {
+            Log.e("UtilsActivityLifecycle", "getActivityThreadInActivityThreadStaticField: " + e.message)
+            null
+        }
+
+    @get:SuppressLint("PrivateApi", "DiscouragedPrivateApi")
+    private val activityThreadInActivityThreadStaticMethod: Any?
+        private get() = try {
+            val activityThreadClass = Class.forName("android.app.ActivityThread")
+            activityThreadClass.getMethod("currentActivityThread").invoke(null)
+        } catch (e: Exception) {
+            Log.e("UtilsActivityLifecycle", "getActivityThreadInActivityThreadStaticMethod: " + e.message)
+            null
+        }
+
+    companion object {
+        /**
+         * 单例
+         */
+        @JvmField
+        val INSTANCE = ActivityLifecycleImpl()
+        private val STUB = Activity()
+
+        /**
+         * 设置启用动画器。
+         */
+        @SuppressLint("SoonBlockedPrivateApi")
+        private fun setAnimatorsEnabled() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && ValueAnimator.areAnimatorsEnabled()) {
+                return
+            }
+            try {
+                val sDurationScaleField = ValueAnimator::class.java.getDeclaredField("sDurationScale")
+                sDurationScaleField.isAccessible = true
+                val sDurationScale = sDurationScaleField[null] as Float
+                if (sDurationScale == 0f) {
+                    sDurationScaleField[null] = 1f
+                    Log.i("UtilsActivityLifecycle", "setAnimatorsEnabled: Animators are enabled now!")
+                }
+            } catch (e: NoSuchFieldException) {
+                e.printStackTrace()
+            } catch (e: IllegalAccessException) {
+                e.printStackTrace()
+            }
         }
     }
 }

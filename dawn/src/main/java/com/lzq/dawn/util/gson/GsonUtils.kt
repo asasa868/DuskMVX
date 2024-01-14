@@ -1,19 +1,12 @@
-package com.lzq.dawn.util.gson;
+package com.lzq.dawn.util.gson
 
-import android.text.TextUtils;
-
-import androidx.annotation.NonNull;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-
-import java.io.Reader;
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import android.text.TextUtils
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
+import java.io.Reader
+import java.lang.reflect.Type
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * @Name :GsonUtils
@@ -21,65 +14,60 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Author :  Lzq
  * @Desc : gson
  */
-public final class GsonUtils {
-
-    private static final String KEY_DEFAULT = "defaultGson";
-    private static final String KEY_DELEGATE = "delegateGson";
-    private static final String KEY_LOG_UTILS = "logUtilsGson";
-
-    private static final Map<String, Gson> GSONS = new ConcurrentHashMap<>();
-
-    private GsonUtils() {
-    }
-
+object GsonUtils {
+    private const val KEY_DEFAULT = "defaultGson"
+    private const val KEY_DELEGATE = "delegateGson"
+    private const val KEY_LOG_UTILS = "logUtilsGson"
+    private val GSONS: MutableMap<String, Gson?> = ConcurrentHashMap()
 
     /**
-     * 设置 {@link Gson} 的委托。
+     * 设置 [Gson] 的委托。
      *
-     * @param delegate {@link Gson} 的代表。
+     * @param delegate [Gson] 的代表。
      */
-    public static void setGsonDelegate(Gson delegate) {
+    fun setGsonDelegate(delegate: Gson?) {
         if (delegate == null) {
-            return;
+            return
         }
-        setGson(KEY_DELEGATE, delegate);
+        setGson(KEY_DELEGATE, delegate)
     }
 
     /**
-     * 用键设置 {@link Gson}。
+     * 用键设置 [Gson]。
      *
      * @param key  key.
-     * @param gson {@link Gson}.
+     * @param gson [Gson].
      */
-    public static void setGson(final String key, final Gson gson) {
+    fun setGson(key: String, gson: Gson?) {
         if (TextUtils.isEmpty(key) || gson == null) {
-            return;
+            return
         }
-        GSONS.put(key, gson);
+        GSONS[key] = gson
     }
 
     /**
-     * 使用键返回 {@link Gson}。
+     * 使用键返回 [Gson]。
      *
      * @param key key.
-     * @return 带键的 {@link Gson}
+     * @return 带键的 [Gson]
      */
-    public static Gson getGson(final String key) {
-        return GSONS.get(key);
+    fun getGson(key: String): Gson? {
+        return GSONS[key]
     }
 
-    public static Gson getGson() {
-        Gson gsonDelegate = GSONS.get(KEY_DELEGATE);
-        if (gsonDelegate != null) {
-            return gsonDelegate;
+    val gson: Gson?
+        get() {
+            val gsonDelegate = GSONS[KEY_DELEGATE]
+            if (gsonDelegate != null) {
+                return gsonDelegate
+            }
+            var gsonDefault = GSONS[KEY_DEFAULT]
+            if (gsonDefault == null) {
+                gsonDefault = createGson()
+                GSONS[KEY_DEFAULT] = gsonDefault
+            }
+            return gsonDefault
         }
-        Gson gsonDefault = GSONS.get(KEY_DEFAULT);
-        if (gsonDefault == null) {
-            gsonDefault = createGson();
-            GSONS.put(KEY_DEFAULT, gsonDefault);
-        }
-        return gsonDefault;
-    }
 
     /**
      * 将对象序列化为 json。
@@ -87,8 +75,9 @@ public final class GsonUtils {
      * @param object 要序列化的对象。
      * @return 对象序列化为 json。
      */
-    public static String toJson(final Object object) {
-        return toJson(getGson(), object);
+    @JvmStatic
+    fun toJson(`object`: Any?): String {
+        return toJson(gson!!, `object`)
     }
 
     /**
@@ -98,8 +87,8 @@ public final class GsonUtils {
      * @param typeOfSrc src 的具体泛化类型。
      * @return 对象序列化为 json。
      */
-    public static String toJson(final Object src, @NonNull final Type typeOfSrc) {
-        return toJson(getGson(), src, typeOfSrc);
+    fun toJson(src: Any?, typeOfSrc: Type): String {
+        return toJson(gson!!, src, typeOfSrc)
     }
 
     /**
@@ -109,8 +98,8 @@ public final class GsonUtils {
      * @param object 要序列化的对象。
      * @return 对象序列化为 json。
      */
-    public static String toJson(@NonNull final Gson gson, final Object object) {
-        return gson.toJson(object);
+    fun toJson(gson: Gson, `object`: Any?): String {
+        return gson.toJson(`object`)
     }
 
     /**
@@ -121,165 +110,167 @@ public final class GsonUtils {
      * @param typeOfSrc src 的具体泛化类型。
      * @return 对象序列化为 json。
      */
-    public static String toJson(@NonNull final Gson gson, final Object src, @NonNull final Type typeOfSrc) {
-        return gson.toJson(src, typeOfSrc);
+    fun toJson(gson: Gson, src: Any?, typeOfSrc: Type): String {
+        return gson.toJson(src, typeOfSrc)
     }
 
     /**
-     * 将 {@link String} 转换为给定类型。
+     * 将 [String] 转换为给定类型。
      *
      * @param json 要转换的 json。
      * @param type 类型 json 将被转换为。
      * @return 类型的实例
      */
-    public static <T> T fromJson(final String json, @NonNull final Class<T> type) {
-        return fromJson(getGson(), json, type);
+    fun <T> fromJson(json: String?, type: Class<T>): T {
+        return fromJson(gson!!, json, type)
     }
 
     /**
-     * 将 {@link String} 转换为给定类型。
+     * 将 [String] 转换为给定类型。
      *
      * @param json 要转换的 json。
      * @param type 类型 json 将被转换为。
      * @return 类型的实例
      */
-    public static <T> T fromJson(final String json, @NonNull final Type type) {
-        return fromJson(getGson(), json, type);
+    @JvmStatic
+    fun <T> fromJson(json: String?, type: Type): T {
+        return fromJson(gson!!, json, type)
     }
 
     /**
-     * 将 {@link Reader} 转换为给定类型。
+     * 将 [Reader] 转换为给定类型。
      *
      * @param reader 要转换的reader
      * @param type   类型 json 将被转换为。
      * @return 类型的实例
      */
-    public static <T> T fromJson(@NonNull final Reader reader, @NonNull final Class<T> type) {
-        return fromJson(getGson(), reader, type);
+    fun <T> fromJson(reader: Reader, type: Class<T>): T {
+        return fromJson(gson!!, reader, type)
     }
 
     /**
-     * 将 {@link Reader} 转换为给定类型。
+     * 将 [Reader] 转换为给定类型。
      *
      * @param reader 要转换的reader
      * @param type   类型 json 将被转换为。
      * @return 类型的实例
      */
-    public static <T> T fromJson(@NonNull final Reader reader, @NonNull final Type type) {
-        return fromJson(getGson(), reader, type);
+    fun <T> fromJson(reader: Reader, type: Type): T {
+        return fromJson(gson!!, reader, type)
     }
 
     /**
-     * 将 {@link String} 转换为给定类型。
+     * 将 [String] 转换为给定类型。
      *
      * @param gson gson.
      * @param json 要转换的 json。
      * @param type 类型 json 将被转换为。
      * @return 类型的实例
      */
-    public static <T> T fromJson(@NonNull final Gson gson, final String json, @NonNull final Class<T> type) {
-        return gson.fromJson(json, type);
+    fun <T> fromJson(gson: Gson, json: String?, type: Class<T>): T {
+        return gson.fromJson(json, type)
     }
 
     /**
-     * 将 {@link String} 转换为给定类型。
+     * 将 [String] 转换为给定类型。
      *
      * @param gson The gson.
      * @param json 要转换的 json。
      * @param type 类型 json 将被转换为。
      * @return 类型的实例
      */
-    public static <T> T fromJson(@NonNull final Gson gson, final String json, @NonNull final Type type) {
-        return gson.fromJson(json, type);
+    fun <T> fromJson(gson: Gson, json: String?, type: Type): T {
+        return gson.fromJson(json, type)
     }
 
     /**
-     * 将 {@link Reader} 转换为给定类型。
+     * 将 [Reader] 转换为给定类型。
      *
      * @param gson   gson.
      * @param reader 要转换的reader
      * @param type   类型 json 将被转换为。
      * @return 类型的实例
      */
-    public static <T> T fromJson(@NonNull final Gson gson, final Reader reader, @NonNull final Class<T> type) {
-        return gson.fromJson(reader, type);
+    fun <T> fromJson(gson: Gson, reader: Reader?, type: Class<T>): T {
+        return gson.fromJson(reader, type)
     }
 
     /**
-     * 将 {@link Reader} 转换为给定类型。
+     * 将 [Reader] 转换为给定类型。
      *
      * @param gson   gson.
      * @param reader 要转换的reader
      * @param type   类型 json 将被转换为。
      * @return 类型的实例
      */
-    public static <T> T fromJson(@NonNull final Gson gson, final Reader reader, @NonNull final Type type) {
-        return gson.fromJson(reader, type);
+    fun <T> fromJson(gson: Gson, reader: Reader?, type: Type): T {
+        return gson.fromJson(reader, type)
     }
 
     /**
-     * 使用 {@code type} 返回 {@link List} 的类型。
+     * 使用 `type` 返回 [List] 的类型。
      *
      * @param type type.
-     * @return {@link List} 的类型与 {@code type}
+     * @return [List] 的类型与 `type`
      */
-    public static Type getListType(@NonNull final Type type) {
-        return TypeToken.getParameterized(List.class, type).getType();
+    fun getListType(type: Type): Type {
+        return TypeToken.getParameterized(MutableList::class.java, type).type
     }
 
     /**
-     * 使用 {@code type} 返回 {@link Set} 的类型。
+     * 使用 `type` 返回 [Set] 的类型。
      *
      * @param type type.
-     * @return 具有 {@code 类型} 的 {@link Set} 的类型
+     * @return 具有 `类型` 的 [Set] 的类型
      */
-    public static Type getSetType(@NonNull final Type type) {
-        return TypeToken.getParameterized(Set.class, type).getType();
+    fun getSetType(type: Type): Type {
+        return TypeToken.getParameterized(MutableSet::class.java, type).type
     }
 
     /**
-     * 使用 {@code keyType} 和 {@code valueType} 返回map类型。
+     * 使用 `keyType` 和 `valueType` 返回map类型。
      *
      * @param keyType   key的类型
      * @param valueType value的类型
-     * @return {@code keyType} 和 {@code valueType} 的映射类型
+     * @return `keyType` 和 `valueType` 的映射类型
      */
-    public static Type getMapType(@NonNull final Type keyType, @NonNull final Type valueType) {
-        return TypeToken.getParameterized(Map.class, keyType, valueType).getType();
+    fun getMapType(keyType: Type, valueType: Type): Type {
+        return TypeToken.getParameterized(MutableMap::class.java, keyType, valueType).type
     }
 
     /**
-     * 返回具有 {@code type} 的数组类型。
+     * 返回具有 `type` 的数组类型。
      *
      * @param type type.
-     * @return {@code type} 的map类型
+     * @return `type` 的map类型
      */
-    public static Type getArrayType(@NonNull final Type type) {
-        return TypeToken.getArray(type).getType();
+    fun getArrayType(type: Type): Type {
+        return TypeToken.getArray(type).type
     }
 
     /**
-     * 使用 {@code typeArguments} 返回 {@code rawType} 的类型。
+     * 使用 `typeArguments` 返回 `rawType` 的类型。
      *
      * @param rawType       原始类型。
      * @param typeArguments 参数的类型。
-     * @return {@code type} 的map类型
+     * @return `type` 的map类型
      */
-    public static Type getType(@NonNull final Type rawType, @NonNull final Type... typeArguments) {
-        return TypeToken.getParameterized(rawType, typeArguments).getType();
+    fun getType(rawType: Type, vararg typeArguments: Type): Type {
+        return TypeToken.getParameterized(rawType, *typeArguments).type
     }
 
-
-    public static Gson getGson4LogUtils() {
-        Gson gson4LogUtils = GSONS.get(KEY_LOG_UTILS);
-        if (gson4LogUtils == null) {
-            gson4LogUtils = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
-            GSONS.put(KEY_LOG_UTILS, gson4LogUtils);
+    @JvmStatic
+    val gson4LogUtils: Gson?
+        get() {
+            var gson4LogUtils = GSONS[KEY_LOG_UTILS]
+            if (gson4LogUtils == null) {
+                gson4LogUtils = GsonBuilder().setPrettyPrinting().serializeNulls().create()
+                GSONS[KEY_LOG_UTILS] = gson4LogUtils
+            }
+            return gson4LogUtils
         }
-        return gson4LogUtils;
-    }
 
-    private static Gson createGson() {
-        return new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
+    private fun createGson(): Gson {
+        return GsonBuilder().serializeNulls().disableHtmlEscaping().create()
     }
 }

@@ -1,10 +1,9 @@
-package com.lzq.dawn.util.volume;
+package com.lzq.dawn.util.volume
 
-import android.content.Context;
-import android.media.AudioManager;
-import android.os.Build;
-
-import com.lzq.dawn.DawnBridge;
+import android.content.Context
+import android.media.AudioManager
+import android.os.Build
+import com.lzq.dawn.DawnBridge
 
 /**
  * @Name : VolumeUtils
@@ -12,61 +11,58 @@ import com.lzq.dawn.DawnBridge;
  * @Author :  Lzq
  * @Desc : 关于音量
  */
-public final class VolumeUtils {
-
+object VolumeUtils {
     /**
      * 返回音量
      *
      * @param streamType 音量类型
-     *                   <ul>
-     *                   <li>{@link AudioManager#STREAM_VOICE_CALL}</li>
-     *                   <li>{@link AudioManager#STREAM_SYSTEM}</li>
-     *                   <li>{@link AudioManager#STREAM_RING}</li>
-     *                   <li>{@link AudioManager#STREAM_MUSIC}</li>
-     *                   <li>{@link AudioManager#STREAM_ALARM}</li>
-     *                   <li>{@link AudioManager#STREAM_NOTIFICATION}</li>
-     *                   <li>{@link AudioManager#STREAM_DTMF}</li>
-     *                   <li>{@link AudioManager#STREAM_ACCESSIBILITY}</li>
-     *                   </ul>
+     *
+     *  * [AudioManager.STREAM_VOICE_CALL]
+     *  * [AudioManager.STREAM_SYSTEM]
+     *  * [AudioManager.STREAM_RING]
+     *  * [AudioManager.STREAM_MUSIC]
+     *  * [AudioManager.STREAM_ALARM]
+     *  * [AudioManager.STREAM_NOTIFICATION]
+     *  * [AudioManager.STREAM_DTMF]
+     *  * [AudioManager.STREAM_ACCESSIBILITY]
+     *
      * @return 音量
      */
-    public static int getVolume(int streamType) {
-        AudioManager am = (AudioManager) DawnBridge.getApp().getSystemService(Context.AUDIO_SERVICE);
-        //noinspection ConstantConditions
-        return am.getStreamVolume(streamType);
+    fun getVolume(streamType: Int): Int {
+        val am = DawnBridge.getApp().getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        return am.getStreamVolume(streamType)
     }
 
     /**
      * 设置媒体音量
-     * 当将参数“volume”的值设置为大于媒体音量的最大值时，不会导致错误或抛出异常，而是最大化媒体音量。<br> 将音量值设置为小于 0 将最小化媒体音量。
+     * 当将参数“volume”的值设置为大于媒体音量的最大值时，不会导致错误或抛出异常，而是最大化媒体音量。<br></br> 将音量值设置为小于 0 将最小化媒体音量。
      *
      * @param streamType 音量类型
-     *                   <ul>
-     *                   <li>{@link AudioManager#STREAM_VOICE_CALL}</li>
-     *                   <li>{@link AudioManager#STREAM_SYSTEM}</li>
-     *                   <li>{@link AudioManager#STREAM_RING}</li>
-     *                   <li>{@link AudioManager#STREAM_MUSIC}</li>
-     *                   <li>{@link AudioManager#STREAM_ALARM}</li>
-     *                   <li>{@link AudioManager#STREAM_NOTIFICATION}</li>
-     *                   <li>{@link AudioManager#STREAM_DTMF}</li>
-     *                   <li>{@link AudioManager#STREAM_ACCESSIBILITY}</li>
-     *                   </ul>
+     *
+     *  * [AudioManager.STREAM_VOICE_CALL]
+     *  * [AudioManager.STREAM_SYSTEM]
+     *  * [AudioManager.STREAM_RING]
+     *  * [AudioManager.STREAM_MUSIC]
+     *  * [AudioManager.STREAM_ALARM]
+     *  * [AudioManager.STREAM_NOTIFICATION]
+     *  * [AudioManager.STREAM_DTMF]
+     *  * [AudioManager.STREAM_ACCESSIBILITY]
+     *
      * @param volume     音量
      * @param flags       flags.
-     *                   <ul>
-     *                   <li>{@link AudioManager#FLAG_SHOW_UI}</li>
-     *                   <li>{@link AudioManager#FLAG_ALLOW_RINGER_MODES}</li>
-     *                   <li>{@link AudioManager#FLAG_PLAY_SOUND}</li>
-     *                   <li>{@link AudioManager#FLAG_REMOVE_SOUND_AND_VIBRATE}</li>
-     *                   <li>{@link AudioManager#FLAG_VIBRATE}</li>
-     *                   </ul>
+     *
+     *  * [AudioManager.FLAG_SHOW_UI]
+     *  * [AudioManager.FLAG_ALLOW_RINGER_MODES]
+     *  * [AudioManager.FLAG_PLAY_SOUND]
+     *  * [AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE]
+     *  * [AudioManager.FLAG_VIBRATE]
+     *
      */
-    public static void setVolume(int streamType, int volume, int flags) {
-        AudioManager am = (AudioManager) DawnBridge.getApp().getSystemService(Context.AUDIO_SERVICE);
+    fun setVolume(streamType: Int, volume: Int, flags: Int) {
+        val am = DawnBridge.getApp().getSystemService(Context.AUDIO_SERVICE) as AudioManager
         try {
-            //noinspection ConstantConditions
-            am.setStreamVolume(streamType, volume, flags);
-        } catch (SecurityException ignore) {
+            am.setStreamVolume(streamType, volume, flags)
+        } catch (ignore: SecurityException) {
         }
     }
 
@@ -74,46 +70,43 @@ public final class VolumeUtils {
      * 返回最大音量。
      *
      * @param streamType 音量类型
-     *                   <ul>
-     *                   <li>{@link AudioManager#STREAM_VOICE_CALL}</li>
-     *                   <li>{@link AudioManager#STREAM_SYSTEM}</li>
-     *                   <li>{@link AudioManager#STREAM_RING}</li>
-     *                   <li>{@link AudioManager#STREAM_MUSIC}</li>
-     *                   <li>{@link AudioManager#STREAM_ALARM}</li>
-     *                   <li>{@link AudioManager#STREAM_NOTIFICATION}</li>
-     *                   <li>{@link AudioManager#STREAM_DTMF}</li>
-     *                   <li>{@link AudioManager#STREAM_ACCESSIBILITY}</li>
-     *                   </ul>
+     *
+     *  * [AudioManager.STREAM_VOICE_CALL]
+     *  * [AudioManager.STREAM_SYSTEM]
+     *  * [AudioManager.STREAM_RING]
+     *  * [AudioManager.STREAM_MUSIC]
+     *  * [AudioManager.STREAM_ALARM]
+     *  * [AudioManager.STREAM_NOTIFICATION]
+     *  * [AudioManager.STREAM_DTMF]
+     *  * [AudioManager.STREAM_ACCESSIBILITY]
+     *
      * @return 最大音量
      */
-    public static int getMaxVolume(int streamType) {
-        AudioManager am = (AudioManager) DawnBridge.getApp().getSystemService(Context.AUDIO_SERVICE);
-        //noinspection ConstantConditions
-        return am.getStreamMaxVolume(streamType);
+    fun getMaxVolume(streamType: Int): Int {
+        val am = DawnBridge.getApp().getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        return am.getStreamMaxVolume(streamType)
     }
 
     /**
      * 返回最小音量。
      *
      * @param streamType 音量类型
-     *                   <ul>
-     *                   <li>{@link AudioManager#STREAM_VOICE_CALL}</li>
-     *                   <li>{@link AudioManager#STREAM_SYSTEM}</li>
-     *                   <li>{@link AudioManager#STREAM_RING}</li>
-     *                   <li>{@link AudioManager#STREAM_MUSIC}</li>
-     *                   <li>{@link AudioManager#STREAM_ALARM}</li>
-     *                   <li>{@link AudioManager#STREAM_NOTIFICATION}</li>
-     *                   <li>{@link AudioManager#STREAM_DTMF}</li>
-     *                   <li>{@link AudioManager#STREAM_ACCESSIBILITY}</li>
-     *                   </ul>
+     *
+     *  * [AudioManager.STREAM_VOICE_CALL]
+     *  * [AudioManager.STREAM_SYSTEM]
+     *  * [AudioManager.STREAM_RING]
+     *  * [AudioManager.STREAM_MUSIC]
+     *  * [AudioManager.STREAM_ALARM]
+     *  * [AudioManager.STREAM_NOTIFICATION]
+     *  * [AudioManager.STREAM_DTMF]
+     *  * [AudioManager.STREAM_ACCESSIBILITY]
+     *
      * @return 最小音量。
      */
-    public static int getMinVolume(int streamType) {
-        AudioManager am = (AudioManager) DawnBridge.getApp().getSystemService(Context.AUDIO_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            //noinspection ConstantConditions
-            return am.getStreamMinVolume(streamType);
-        }
-        return 0;
+    fun getMinVolume(streamType: Int): Int {
+        val am = DawnBridge.getApp().getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            am.getStreamMinVolume(streamType)
+        } else 0
     }
 }

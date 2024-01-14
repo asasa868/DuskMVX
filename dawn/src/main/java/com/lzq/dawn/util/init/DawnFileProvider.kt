@@ -1,10 +1,8 @@
-package com.lzq.dawn.util.init;
+package com.lzq.dawn.util.init
 
-import android.app.Application;
-
-import androidx.core.content.FileProvider;
-
-import com.lzq.dawn.DawnBridge;
+import android.app.Application
+import androidx.core.content.FileProvider
+import com.lzq.dawn.DawnBridge
 
 /**
  * className :DawnFileProvider
@@ -12,12 +10,9 @@ import com.lzq.dawn.DawnBridge;
  *
  * @Author :  Lzq
  */
-public class DawnFileProvider extends FileProvider {
-
-
-    @Override
-    public boolean onCreate() {
-        DawnBridge.init((Application) getContext().getApplicationContext());
-        return true;
+class DawnFileProvider : FileProvider() {
+    override fun onCreate(): Boolean {
+        DawnBridge.init(context!!.applicationContext as Application)
+        return true
     }
 }

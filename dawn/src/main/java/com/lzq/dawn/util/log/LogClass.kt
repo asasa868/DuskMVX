@@ -1,4 +1,4 @@
-package com.lzq.dawn.util.log;
+package com.lzq.dawn.util.log
 
 /**
  * @Name :LogClass
@@ -6,20 +6,20 @@ package com.lzq.dawn.util.log;
  * @Author :  Lzq
  * @Desc :
  */
-public final class LogClass {
-    public abstract static class IFormatter<T> {
-        public abstract String format(T t);
+class LogClass {
+    abstract class IFormatter<T> {
+        abstract fun format(t: T): String?
     }
 
-    public interface IFileWriter {
-        void write(String file, String content);
+    interface IFileWriter {
+        fun write(file: String?, content: String?)
     }
 
-    public interface OnConsoleOutputListener {
-        void onConsoleOutput(@LogUtils.TYPE int type, String tag, String content);
+    interface OnConsoleOutputListener {
+        fun onConsoleOutput(@LogUtils.TYPE type: Int, tag: String?, content: String?)
     }
 
-    public interface OnFileOutputListener {
-        void onFileOutput(String filePath, String content);
+    interface OnFileOutputListener {
+        fun onFileOutput(filePath: String?, content: String?)
     }
 }

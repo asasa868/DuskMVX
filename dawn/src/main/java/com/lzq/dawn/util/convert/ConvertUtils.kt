@@ -1,32 +1,29 @@
-package com.lzq.dawn.util.convert;
+package com.lzq.dawn.util.convert
 
-import android.annotation.SuppressLint;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.view.View;
-
-import com.lzq.dawn.DawnBridge;
-import com.lzq.dawn.DawnConstants;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
+import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.graphics.Bitmap.CompressFormat
+import android.graphics.drawable.Drawable
+import android.os.Parcel
+import android.os.Parcelable
+import com.lzq.dawn.DawnBridge
+import com.lzq.dawn.DawnConstants
+import com.lzq.dawn.DawnConstants.MemoryConstants
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
+import java.io.OutputStream
+import java.io.Serializable
+import java.io.UnsupportedEncodingException
+import java.nio.charset.Charset
+import java.util.Locale
 
 /**
  * @Name :ConvertUtils
@@ -34,16 +31,12 @@ import java.util.List;
  * @Author :  Lzq
  * @Desc : 转换
  */
-public final  class ConvertUtils {
-
-    private static final int BUFFER_SIZE = 8192;
-    private static final char[] HEX_DIGITS_UPPER =
-            {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-    private static final char[] HEX_DIGITS_LOWER =
-            {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-
-    private ConvertUtils() {
-    }
+object ConvertUtils {
+    private const val BUFFER_SIZE = 8192
+    private val HEX_DIGITS_UPPER =
+        charArrayOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
+    private val HEX_DIGITS_LOWER =
+        charArrayOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
 
     /**
      * Int 转十六进制字符串
@@ -51,8 +44,8 @@ public final  class ConvertUtils {
      * @param num int
      * @return 十六进制字符串
      */
-    public static String int2HexString(int num) {
-        return Integer.toHexString(num);
+    fun int2HexString(num: Int): String {
+        return Integer.toHexString(num)
     }
 
     /**
@@ -61,8 +54,8 @@ public final  class ConvertUtils {
      * @param hexString 十六进制字符
      * @return int
      */
-    public static int hexString2Int(String hexString) {
-        return Integer.parseInt(hexString, 16);
+    fun hexString2Int(hexString: String): Int {
+        return hexString.toInt(16)
     }
 
     /**
@@ -71,17 +64,17 @@ public final  class ConvertUtils {
      * @param bytes bytes.
      * @return bits
      */
-    public static String bytes2Bits(final byte[] bytes) {
-        if (bytes == null || bytes.length == 0) {
-            return "";
+    fun bytes2Bits(bytes: ByteArray?): String {
+        if (bytes == null || bytes.size == 0) {
+            return ""
         }
-        StringBuilder sb = new StringBuilder();
-        for (byte aByte : bytes) {
-            for (int j = 7; j >= 0; --j) {
-                sb.append(((aByte >> j) & 0x01) == 0 ? '0' : '1');
+        val sb = StringBuilder()
+        for (aByte in bytes) {
+            for (j in 7 downTo 0) {
+                sb.append(if (aByte.toInt() shr j and 0x01 == 0) '0' else '1')
             }
         }
-        return sb.toString();
+        return sb.toString()
     }
 
     /**
@@ -90,24 +83,25 @@ public final  class ConvertUtils {
      * @param bits bits.
      * @return bytes
      */
-    public static byte[] bits2Bytes(String bits) {
-        int lenMod = bits.length() % 8;
-        int byteLen = bits.length() / 8;
+    fun bits2Bytes(bits: String): ByteArray {
+        var bits = bits
+        val lenMod = bits.length % 8
+        var byteLen = bits.length / 8
         // add "0" until length to 8 times
         if (lenMod != 0) {
-            for (int i = lenMod; i < 8; i++) {
-                bits = "0" + bits;
+            for (i in lenMod..7) {
+                bits = "0$bits"
             }
-            byteLen++;
+            byteLen++
         }
-        byte[] bytes = new byte[byteLen];
-        for (int i = 0; i < byteLen; ++i) {
-            for (int j = 0; j < 8; ++j) {
-                bytes[i] <<= 1;
-                bytes[i] |= bits.charAt(i * 8 + j) - '0';
+        val bytes = ByteArray(byteLen)
+        for (i in 0 until byteLen) {
+            for (j in 0..7) {
+                bytes[i] = (bytes[i].toInt() shl 1).toByte()
+                bytes[i] = (bytes[i].toInt() or bits[i * 8 + j].code - '0'.code).toByte()
             }
         }
-        return bytes;
+        return bytes
     }
 
     /**
@@ -116,19 +110,19 @@ public final  class ConvertUtils {
      * @param bytes The bytes.
      * @return chars
      */
-    public static char[] bytes2Chars(final byte[] bytes) {
+    fun bytes2Chars(bytes: ByteArray?): CharArray? {
         if (bytes == null) {
-            return null;
+            return null
         }
-        int len = bytes.length;
+        val len = bytes.size
         if (len <= 0) {
-            return null;
+            return null
         }
-        char[] chars = new char[len];
-        for (int i = 0; i < len; i++) {
-            chars[i] = (char) (bytes[i] & 0xff);
+        val chars = CharArray(len)
+        for (i in 0 until len) {
+            chars[i] = (bytes[i].toInt() and 0xff).toChar()
         }
-        return chars;
+        return chars
     }
 
     /**
@@ -137,235 +131,227 @@ public final  class ConvertUtils {
      * @param chars The chars.
      * @return bytes
      */
-    public static byte[] chars2Bytes(final char[] chars) {
-        if (chars == null || chars.length <= 0) {
-            return null;
+    fun chars2Bytes(chars: CharArray?): ByteArray? {
+        if (chars == null || chars.size <= 0) {
+            return null
         }
-        int len = chars.length;
-        byte[] bytes = new byte[len];
-        for (int i = 0; i < len; i++) {
-            bytes[i] = (byte) (chars[i]);
+        val len = chars.size
+        val bytes = ByteArray(len)
+        for (i in 0 until len) {
+            bytes[i] = chars[i].code.toByte()
         }
-        return bytes;
+        return bytes
     }
-
     /**
      * Bytes 转 16进制string.
-     * <p>e.g. bytes2HexString(new byte[] { 0, (byte) 0xa8 }) returns "00A8"</p>
      *
-     * @param bytes The bytes.
-     * @return 16进制string.
-     */
-    public static String bytes2HexString(final byte[] bytes) {
-        return bytes2HexString(bytes, true);
-    }
-
-    /**
-     * Bytes 转 16进制string.
-     * <p>e.g. bytes2HexString(new byte[] { 0, (byte) 0xa8 }, true) returns "00A8"</p>
+     * e.g. bytes2HexString(new byte[] { 0, (byte) 0xa8 }, true) returns "00A8"
      *
      * @param bytes       bytes.
      * @param isUpperCase True 使用大写，否则为 false。
      * @return 16进制string.
      */
-    public static String bytes2HexString(final byte[] bytes, boolean isUpperCase) {
+    /**
+     * Bytes 转 16进制string.
+     *
+     * e.g. bytes2HexString(new byte[] { 0, (byte) 0xa8 }) returns "00A8"
+     *
+     * @param bytes The bytes.
+     * @return 16进制string.
+     */
+    @JvmOverloads
+    @JvmStatic
+    fun bytes2HexString(bytes: ByteArray?, isUpperCase: Boolean = true): String {
         if (bytes == null) {
-            return "";
+            return ""
         }
-        char[] hexDigits = isUpperCase ? HEX_DIGITS_UPPER : HEX_DIGITS_LOWER;
-        int len = bytes.length;
+        val hexDigits = if (isUpperCase) HEX_DIGITS_UPPER else HEX_DIGITS_LOWER
+        val len = bytes.size
         if (len <= 0) {
-            return "";
+            return ""
         }
-        char[] ret = new char[len << 1];
-        for (int i = 0, j = 0; i < len; i++) {
-            ret[j++] = hexDigits[bytes[i] >> 4 & 0x0f];
-            ret[j++] = hexDigits[bytes[i] & 0x0f];
+        val ret = CharArray(len shl 1)
+        var i = 0
+        var j = 0
+        while (i < len) {
+            ret[j++] = hexDigits[bytes[i].toInt() shr 4 and 0x0f]
+            ret[j++] = hexDigits[bytes[i].toInt() and 0x0f]
+            i++
         }
-        return new String(ret);
+        return String(ret)
     }
 
     /**
      * 16进制string转bytes
-     * <p>e.g. hexString2Bytes("00A8") returns { 0, (byte) 0xA8 }</p>
+     *
+     * e.g. hexString2Bytes("00A8") returns { 0, (byte) 0xA8 }
      *
      * @param hexString 16进制string
      * @return bytes
      */
-    public static byte[] hexString2Bytes(String hexString) {
+    @JvmStatic
+    fun hexString2Bytes(hexString: String): ByteArray {
+        var hexString = hexString
         if (DawnBridge.isSpace(hexString)) {
-            return new byte[0];
+            return ByteArray(0)
         }
-        int len = hexString.length();
+        var len = hexString.length
         if (len % 2 != 0) {
-            hexString = "0" + hexString;
-            len = len + 1;
+            hexString = "0$hexString"
+            len += 1
         }
-        char[] hexBytes = hexString.toUpperCase().toCharArray();
-        byte[] ret = new byte[len >> 1];
-        for (int i = 0; i < len; i += 2) {
-            ret[i >> 1] = (byte) (hex2Dec(hexBytes[i]) << 4 | hex2Dec(hexBytes[i + 1]));
+        val hexBytes = hexString.uppercase(Locale.getDefault()).toCharArray()
+        val ret = ByteArray(len shr 1)
+        var i = 0
+        while (i < len) {
+            ret[i shr 1] = (hex2Dec(hexBytes[i]) shl 4 or hex2Dec(hexBytes[i + 1])).toByte()
+            i += 2
         }
-        return ret;
+        return ret
     }
 
-    private static int hex2Dec(final char hexChar) {
-        if (hexChar >= '0' && hexChar <= '9') {
-            return hexChar - '0';
-        } else if (hexChar >= 'A' && hexChar <= 'F') {
-            return hexChar - 'A' + 10;
+    private fun hex2Dec(hexChar: Char): Int {
+        return if (hexChar in '0'..'9') {
+            hexChar.code - '0'.code
+        } else if (hexChar in 'A'..'F') {
+            hexChar.code - 'A'.code + 10
         } else {
-            throw new IllegalArgumentException();
+            throw IllegalArgumentException()
         }
     }
-
     /**
      * Bytes 转 string.
      */
-    public static String bytes2String(final byte[] bytes) {
-        return bytes2String(bytes, "");
-    }
-
     /**
      * Bytes 转 string.
      */
-    public static String bytes2String(final byte[] bytes, final String charsetName) {
-        if (bytes == null) {
-            return null;
-        }
-        try {
-            return new String(bytes, getSafeCharset(charsetName));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return new String(bytes);
+    @JvmStatic
+    fun bytes2String(bytes: ByteArray, charsetName: String = ""): String? {
+        return try {
+            String(bytes, getSafeCharset(charsetName) as Charset)
+        } catch (e: UnsupportedEncodingException) {
+            e.printStackTrace()
+            String(bytes)
         }
     }
-
     /**
      * String 转 bytes.
      */
-    public static byte[] string2Bytes(final String string) {
-        return string2Bytes(string, "");
-    }
-
     /**
      * String 转 bytes.
      */
-    public static byte[] string2Bytes(final String string, final String charsetName) {
-        if (string == null) {
-            return null;
-        }
-        try {
-            return string.getBytes(getSafeCharset(charsetName));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return string.getBytes();
+    @JvmOverloads
+    @JvmStatic
+    fun string2Bytes(string: String?, charsetName: String = ""): ByteArray? {
+        return if (string == null) {
+            null
+        } else try {
+            string.toByteArray(charset(getSafeCharset(charsetName)))
+        } catch (e: UnsupportedEncodingException) {
+            e.printStackTrace()
+            string.toByteArray()
         }
     }
 
     /**
      * Bytes 转 JSONObject.
      */
-    public static JSONObject bytes2JSONObject(final byte[] bytes) {
-        if (bytes == null) {
-            return null;
-        }
-        try {
-            return new JSONObject(new String(bytes));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+    @JvmStatic
+    fun bytes2JSONObject(bytes: ByteArray?): JSONObject? {
+        return if (bytes == null) {
+            null
+        } else try {
+            JSONObject(String(bytes))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 
     /**
      * JSONObject 转 bytes.
      */
-    public static byte[] jsonObject2Bytes(final JSONObject jsonObject) {
-        if (jsonObject == null) {
-            return null;
-        }
-        return jsonObject.toString().getBytes();
+    @JvmStatic
+    fun jsonObject2Bytes(jsonObject: JSONObject?): ByteArray? {
+        return jsonObject?.toString()?.toByteArray()
     }
-
 
     /**
      * Bytes 转 JSONArray.
      */
-    public static JSONArray bytes2JSONArray(final byte[] bytes) {
-        if (bytes == null) {
-            return null;
-        }
-        try {
-            return new JSONArray(new String(bytes));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+    @JvmStatic
+    fun bytes2JSONArray(bytes: ByteArray?): JSONArray? {
+        return if (bytes == null) {
+            null
+        } else try {
+            JSONArray(String(bytes))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 
     /**
      * JSONArray 转 bytes.
      */
-    public static byte[] jsonArray2Bytes(final JSONArray jsonArray) {
-        if (jsonArray == null) {
-            return null;
-        }
-        return jsonArray.toString().getBytes();
+    @JvmStatic
+    fun jsonArray2Bytes(jsonArray: JSONArray?): ByteArray? {
+        return jsonArray?.toString()?.toByteArray()
     }
-
 
     /**
      * Bytes 转 Parcelable
      */
-    public static <T> T bytes2Parcelable(final byte[] bytes,
-                                         final Parcelable.Creator<T> creator) {
+    @JvmStatic
+    fun <T> bytes2Parcelable(
+        bytes: ByteArray?, creator: Parcelable.Creator<T>
+    ): T? {
         if (bytes == null) {
-            return null;
+            return null
         }
-        Parcel parcel = Parcel.obtain();
-        parcel.unmarshall(bytes, 0, bytes.length);
-        parcel.setDataPosition(0);
-        T result = creator.createFromParcel(parcel);
-        parcel.recycle();
-        return result;
+        val parcel = Parcel.obtain()
+        parcel.unmarshall(bytes, 0, bytes.size)
+        parcel.setDataPosition(0)
+        val result = creator.createFromParcel(parcel)
+        parcel.recycle()
+        return result
     }
 
     /**
      * Parcelable 转 bytes.
      */
-    public static byte[] parcelable2Bytes(final Parcelable parcelable) {
+    @JvmStatic
+    fun parcelable2Bytes(parcelable: Parcelable?): ByteArray? {
         if (parcelable == null) {
-            return null;
+            return null
         }
-        Parcel parcel = Parcel.obtain();
-        parcelable.writeToParcel(parcel, 0);
-        byte[] bytes = parcel.marshall();
-        parcel.recycle();
-        return bytes;
+        val parcel = Parcel.obtain()
+        parcelable.writeToParcel(parcel, 0)
+        val bytes = parcel.marshall()
+        parcel.recycle()
+        return bytes
     }
 
     /**
      * Bytes 转 Serializable.
      */
-    public static Object bytes2Object(final byte[] bytes) {
+    @JvmStatic
+    fun bytes2Object(bytes: ByteArray?): Any? {
         if (bytes == null) {
-            return null;
+            return null
         }
-        ObjectInputStream ois = null;
-        try {
-            ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
-            return ois.readObject();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+        var ois: ObjectInputStream? = null
+        return try {
+            ois = ObjectInputStream(ByteArrayInputStream(bytes))
+            ois.readObject()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         } finally {
             try {
-                if (ois != null) {
-                    ois.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                ois?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
     }
@@ -373,26 +359,25 @@ public final  class ConvertUtils {
     /**
      * Serializable 转 bytes.
      */
-    public static byte[] serializable2Bytes(final Serializable serializable) {
+    @JvmStatic
+    fun serializable2Bytes(serializable: Serializable?): ByteArray? {
         if (serializable == null) {
-            return null;
+            return null
         }
-        ByteArrayOutputStream baos;
-        ObjectOutputStream oos = null;
-        try {
-            oos = new ObjectOutputStream(baos = new ByteArrayOutputStream());
-            oos.writeObject(serializable);
-            return baos.toByteArray();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+        var baos: ByteArrayOutputStream
+        var oos: ObjectOutputStream? = null
+        return try {
+            oos = ObjectOutputStream(ByteArrayOutputStream().also { baos = it })
+            oos.writeObject(serializable)
+            baos.toByteArray()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         } finally {
             try {
-                if (oos != null) {
-                    oos.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                oos?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
     }
@@ -400,44 +385,43 @@ public final  class ConvertUtils {
     /**
      * Bytes 转 bitmap.
      */
-    public static Bitmap bytes2Bitmap(final byte[] bytes) {
-        return DawnBridge.bytes2Bitmap(bytes);
+    fun bytes2Bitmap(bytes: ByteArray?): Bitmap {
+        return DawnBridge.bytes2Bitmap(bytes)
     }
 
     /**
      * Bitmap 转 bytes.
      */
-    public static byte[] bitmap2Bytes(final Bitmap bitmap, final Bitmap.CompressFormat format, int quality) {
-        return DawnBridge.bitmap2Bytes(bitmap, format, quality);
+    fun bitmap2Bytes(bitmap: Bitmap?, format: CompressFormat?, quality: Int): ByteArray {
+        return DawnBridge.bitmap2Bytes(bitmap, format, quality)
     }
 
     /**
      * Bitmap 转 bytes.
      */
-    public static byte[] bitmap2Bytes(final Bitmap bitmap) {
-        return DawnBridge.bitmap2Bytes(bitmap);
+    fun bitmap2Bytes(bitmap: Bitmap?): ByteArray {
+        return DawnBridge.bitmap2Bytes(bitmap)
     }
-
 
     /**
      * Bytes 转 drawable.
      */
-    public static Drawable bytes2Drawable(final byte[] bytes) {
-        return DawnBridge.bytes2Drawable(bytes);
+    fun bytes2Drawable(bytes: ByteArray?): Drawable {
+        return DawnBridge.bytes2Drawable(bytes)
     }
 
     /**
      * Drawable 转 bytes.
      */
-    public static byte[] drawable2Bytes(final Drawable drawable) {
-        return DawnBridge.drawable2Bytes(drawable);
+    fun drawable2Bytes(drawable: Drawable?): ByteArray {
+        return DawnBridge.drawable2Bytes(drawable)
     }
 
     /**
      * Drawable 转 bytes.
      */
-    public static byte[] drawable2Bytes(final Drawable drawable, final Bitmap.CompressFormat format, int quality) {
-        return DawnBridge.drawable2Bytes(drawable, format, quality);
+    fun drawable2Bytes(drawable: Drawable?, format: CompressFormat?, quality: Int): ByteArray {
+        return DawnBridge.drawable2Bytes(drawable, format, quality)
     }
 
     /**
@@ -445,20 +429,20 @@ public final  class ConvertUtils {
      *
      * @param memorySize 内存大小
      * @param unit       内存大小的单位
-     *                   <ul>
-     *                   <li>{@link DawnConstants.MemoryConstants#BYTE}</li>
-     *                   <li>{@link DawnConstants.MemoryConstants#KB}</li>
-     *                   <li>{@link DawnConstants.MemoryConstants#MB}</li>
-     *                   <li>{@link DawnConstants.MemoryConstants#GB}</li>
-     *                   </ul>
+     *
+     *  * [DawnConstants.MemoryConstants.BYTE]
+     *  * [DawnConstants.MemoryConstants.KB]
+     *  * [DawnConstants.MemoryConstants.MB]
+     *  * [DawnConstants.MemoryConstants.GB]
+     *
      * @return 字节大小
      */
-    public static long memorySize2Byte(final long memorySize,
-                                       @DawnConstants.MemoryConstants.Unit final int unit) {
-        if (memorySize < 0) {
-            return -1;
-        }
-        return memorySize * unit;
+    fun memorySize2Byte(
+        memorySize: Long, @MemoryConstants.Unit unit: Int
+    ): Long {
+        return if (memorySize < 0) {
+            -1
+        } else memorySize * unit
     }
 
     /**
@@ -466,55 +450,62 @@ public final  class ConvertUtils {
      *
      * @param byteSize 字节大小
      * @param unit     内存大小的单位。
-     *                 <ul>
-     *                 <li>{@link DawnConstants.MemoryConstants#BYTE}</li>
-     *                 <li>{@link DawnConstants.MemoryConstants#KB}</li>
-     *                 <li>{@link DawnConstants.MemoryConstants#MB}</li>
-     *                 <li>{@link DawnConstants.MemoryConstants#GB}</li>
-     *                 </ul>
+     *
+     *  * [DawnConstants.MemoryConstants.BYTE]
+     *  * [DawnConstants.MemoryConstants.KB]
+     *  * [DawnConstants.MemoryConstants.MB]
+     *  * [DawnConstants.MemoryConstants.GB]
+     *
      * @return size of memory in unit
      */
-    public static double byte2MemorySize(final long byteSize,
-                                         @DawnConstants.MemoryConstants.Unit final int unit) {
-        if (byteSize < 0) {
-            return -1;
-        }
-        return (double) byteSize / unit;
+    fun byte2MemorySize(
+        byteSize: Long, @MemoryConstants.Unit unit: Int
+    ): Double {
+        return if (byteSize < 0) {
+            (-1).toDouble()
+        } else byteSize.toDouble() / unit
     }
 
     /**
-     * 字节大小以适应内存大小。 <p>保留三位小数<p>
+     * 字节大小以适应内存大小。
+     *
+     *保留三位小数
+     *
+     *
      *
      * @param byteSize 字节大小
      * @return 内存大小
      */
+    @JvmStatic
     @SuppressLint("DefaultLocale")
-    public static String byte2FitMemorySize(final long byteSize) {
-        return byte2FitMemorySize(byteSize, 3);
+    fun byte2FitMemorySize(byteSize: Long): String {
+        return byte2FitMemorySize(byteSize, 3)
     }
 
     /**
-     * 字节大小以适应内存大小。 <p>保留三位小数<p>
+     * 字节大小以适应内存大小。
+     *
+     *保留三位小数
+     *
+     *
      *
      * @param byteSize  字节大小。
      * @param precision 精度
      * @return 内存大小。
      */
     @SuppressLint("DefaultLocale")
-    public static String byte2FitMemorySize(final long byteSize, int precision) {
-        if (precision < 0) {
-            throw new IllegalArgumentException("precision shouldn't be less than zero!");
-        }
-        if (byteSize < 0) {
-            throw new IllegalArgumentException("byteSize shouldn't be less than zero!");
-        } else if (byteSize < DawnConstants.MemoryConstants.KB) {
-            return String.format("%." + precision + "fB", (double) byteSize);
-        } else if (byteSize < DawnConstants.MemoryConstants.MB) {
-            return String.format("%." + precision + "fKB", (double) byteSize / DawnConstants.MemoryConstants.KB);
-        } else if (byteSize < DawnConstants.MemoryConstants.GB) {
-            return String.format("%." + precision + "fMB", (double) byteSize / DawnConstants.MemoryConstants.MB);
+    fun byte2FitMemorySize(byteSize: Long, precision: Int): String {
+        require(precision >= 0) { "precision shouldn't be less than zero!" }
+        return if (byteSize < 0) {
+            throw IllegalArgumentException("byteSize shouldn't be less than zero!")
+        } else if (byteSize < MemoryConstants.KB) {
+            String.format("%." + precision + "fB", byteSize.toDouble())
+        } else if (byteSize < MemoryConstants.MB) {
+            String.format("%." + precision + "fKB", byteSize.toDouble() / MemoryConstants.KB)
+        } else if (byteSize < MemoryConstants.GB) {
+            String.format("%." + precision + "fMB", byteSize.toDouble() / MemoryConstants.MB)
         } else {
-            return String.format("%." + precision + "fGB", (double) byteSize / DawnConstants.MemoryConstants.GB);
+            String.format("%." + precision + "fGB", byteSize.toDouble() / MemoryConstants.GB)
         }
     }
 
@@ -523,17 +514,17 @@ public final  class ConvertUtils {
      *
      * @param timeSpan 时间跨度
      * @param unit     单位
-     *                 <ul>
-     *                 <li>{@link DawnConstants.TimeConstants#MSEC}</li>
-     *                 <li>{@link DawnConstants.TimeConstants#SEC }</li>
-     *                 <li>{@link DawnConstants.TimeConstants#MIN }</li>
-     *                 <li>{@link DawnConstants.TimeConstants#HOUR}</li>
-     *                 <li>{@link DawnConstants.TimeConstants#DAY }</li>
-     *                 </ul>
+     *
+     *  * [DawnConstants.TimeConstants.MSEC]
+     *  * [DawnConstants.TimeConstants.SEC]
+     *  * [DawnConstants.TimeConstants.MIN]
+     *  * [DawnConstants.TimeConstants.HOUR]
+     *  * [DawnConstants.TimeConstants.DAY]
+     *
      * @return 毫秒
      */
-    public static long timeSpan2Millis(final long timeSpan, @DawnConstants.TimeConstants.Unit final int unit) {
-        return timeSpan * unit;
+    fun timeSpan2Millis(timeSpan: Long, @DawnConstants.TimeConstants.Unit unit: Int): Long {
+        return timeSpan * unit
     }
 
     /**
@@ -541,130 +532,122 @@ public final  class ConvertUtils {
      *
      * @param millis 毫秒。
      * @param unit   单位
-     *               <ul>
-     *               <li>{@link DawnConstants.TimeConstants#MSEC}</li>
-     *               <li>{@link DawnConstants.TimeConstants#SEC }</li>
-     *               <li>{@link DawnConstants.TimeConstants#MIN }</li>
-     *               <li>{@link DawnConstants.TimeConstants#HOUR}</li>
-     *               <li>{@link DawnConstants.TimeConstants#DAY }</li>
-     *               </ul>
+     *
+     *  * [DawnConstants.TimeConstants.MSEC]
+     *  * [DawnConstants.TimeConstants.SEC]
+     *  * [DawnConstants.TimeConstants.MIN]
+     *  * [DawnConstants.TimeConstants.HOUR]
+     *  * [DawnConstants.TimeConstants.DAY]
+     *
      * @return time span in unit
      */
-    public static long millis2TimeSpan(final long millis, @DawnConstants.TimeConstants.Unit final int unit) {
-        return millis / unit;
+    fun millis2TimeSpan(millis: Long, @DawnConstants.TimeConstants.Unit unit: Int): Long {
+        return millis / unit
     }
 
     /**
      * 毫秒以适应时间跨度
      *
      * @param millis    毫秒
-     *                  <p>millis &lt;= 0, return null</p>
+     *
+     * millis &lt;= 0, return null
      * @param precision 时间跨度的精度
-     *                  <ul>
-     *                  <li>precision = 0, return null</li>
-     *                  <li>precision = 1, return 天</li>
-     *                  <li>precision = 2, return 天, 小时</li>
-     *                  <li>precision = 3, return 天, 小时, 分钟</li>
-     *                  <li>precision = 4, return 天, 小时, 分钟, 秒</li>
-     *                  <li>precision &gt;= 5，return 天, 小时, 分钟, 秒, 毫秒</li>
-     *                  </ul>
+     *
+     *  * precision = 0, return null
+     *  * precision = 1, return 天
+     *  * precision = 2, return 天, 小时
+     *  * precision = 3, return 天, 小时, 分钟
+     *  * precision = 4, return 天, 小时, 分钟, 秒
+     *  * precision &gt;= 5，return 天, 小时, 分钟, 秒, 毫秒
+     *
      * @return fit time span
      */
-    public static String millis2FitTimeSpan(long millis, int precision) {
-        return DawnBridge.millis2FitTimeSpan(millis, precision);
+    fun millis2FitTimeSpan(millis: Long, precision: Int): String {
+        return DawnBridge.millis2FitTimeSpan(millis, precision)
     }
 
     /**
      * Input stream 转 output stream.
      */
-    public static ByteArrayOutputStream input2OutputStream(final InputStream is) {
-        if (is == null) {
-            return null;
-        }
-        try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            byte[] b = new byte[BUFFER_SIZE];
-            int len;
-            while ((len = is.read(b, 0, BUFFER_SIZE)) != -1) {
-                os.write(b, 0, len);
+    @JvmStatic
+    fun input2OutputStream(`is`: InputStream?): ByteArrayOutputStream? {
+        return if (`is` == null) {
+            null
+        } else try {
+            val os = ByteArrayOutputStream()
+            val b = ByteArray(BUFFER_SIZE)
+            var len: Int
+            while (`is`.read(b, 0, BUFFER_SIZE).also { len = it } != -1) {
+                os.write(b, 0, len)
             }
-            return os;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            os
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
         } finally {
             try {
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+                `is`.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
     }
 
-
     /**
      * Output stream 转 input stream.
      */
-    public static ByteArrayInputStream output2InputStream(final OutputStream out) {
-        if (out == null) {
-            return null;
-        }
-        return new ByteArrayInputStream(((ByteArrayOutputStream) out).toByteArray());
+    fun output2InputStream(out: OutputStream?): ByteArrayInputStream? {
+        return if (out == null) {
+            null
+        } else ByteArrayInputStream((out as ByteArrayOutputStream).toByteArray())
     }
 
     /**
      * Input stream 转 bytes.
      */
-    public static byte[] inputStream2Bytes(final InputStream is) {
-        if (is == null) {
-            return null;
-        }
-        return input2OutputStream(is).toByteArray();
+    @JvmStatic
+    fun inputStream2Bytes(`is`: InputStream?): ByteArray? {
+        return if (`is` == null) {
+            null
+        } else input2OutputStream(`is`)!!.toByteArray()
     }
-
 
     /**
      * Bytes 转 input stream.
      */
-    public static InputStream bytes2InputStream(final byte[] bytes) {
-        if (bytes == null || bytes.length <= 0) {
-            return null;
-        }
-        return new ByteArrayInputStream(bytes);
+    fun bytes2InputStream(bytes: ByteArray?): InputStream? {
+        return if (bytes == null || bytes.isEmpty()) {
+            null
+        } else ByteArrayInputStream(bytes)
     }
 
     /**
      * Output stream 转 bytes.
      */
-    public static byte[] outputStream2Bytes(final OutputStream out) {
-        if (out == null) {
-            return null;
-        }
-        return ((ByteArrayOutputStream) out).toByteArray();
+    fun outputStream2Bytes(out: OutputStream?): ByteArray {
+        return (out as ByteArrayOutputStream).toByteArray()
     }
 
     /**
      * Bytes 转 output stream.
      */
-    public static OutputStream bytes2OutputStream(final byte[] bytes) {
-        if (bytes == null || bytes.length <= 0) {
-            return null;
+    fun bytes2OutputStream(bytes: ByteArray?): OutputStream? {
+        if (bytes == null || bytes.isEmpty()) {
+            return null
         }
-        ByteArrayOutputStream os = null;
-        try {
-            os = new ByteArrayOutputStream();
-            os.write(bytes);
-            return os;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+        var os: ByteArrayOutputStream? = null
+        return try {
+            os = ByteArrayOutputStream()
+            os.write(bytes)
+            os
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
         } finally {
             try {
-                if (os != null) {
-                    os.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                os?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
     }
@@ -672,93 +655,80 @@ public final  class ConvertUtils {
     /**
      * Input stream 转 string.
      */
-    public static String inputStream2String(final InputStream is, final String charsetName) {
-        if (is == null) {
-            return "";
-        }
-        try {
-            ByteArrayOutputStream baos = input2OutputStream(is);
-            if (baos == null) {
-                return "";
-            }
-            return baos.toString(getSafeCharset(charsetName));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return "";
+    fun inputStream2String(`is`: InputStream?, charsetName: String): String {
+        return if (`is` == null) {
+            ""
+        } else try {
+            val baos = input2OutputStream(`is`) ?: return ""
+            baos.toString(getSafeCharset(charsetName))
+        } catch (e: UnsupportedEncodingException) {
+            e.printStackTrace()
+            ""
         }
     }
 
     /**
      * String to input stream.
      */
-    public static InputStream string2InputStream(final String string, final String charsetName) {
-        if (string == null) {
-            return null;
-        }
-        try {
-            return new ByteArrayInputStream(string.getBytes(getSafeCharset(charsetName)));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return null;
+    fun string2InputStream(string: String?, charsetName: String): InputStream? {
+        return if (string == null) {
+            null
+        } else try {
+            ByteArrayInputStream(string.toByteArray(charset(getSafeCharset(charsetName))))
+        } catch (e: UnsupportedEncodingException) {
+            e.printStackTrace()
+            null
         }
     }
 
     /**
      * Output stream to string.
      */
-    public static String outputStream2String(final OutputStream out, final String charsetName) {
-        if (out == null) {
-            return "";
-        }
-        try {
-            return new String(outputStream2Bytes(out), getSafeCharset(charsetName));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return "";
+    fun outputStream2String(out: OutputStream?, charsetName: String): String {
+        return try {
+            String(outputStream2Bytes(out), getSafeCharset(charsetName) as Charset)
+        } catch (e: UnsupportedEncodingException) {
+            e.printStackTrace()
+            ""
         }
     }
 
     /**
      * String to output stream.
      */
-    public static OutputStream string2OutputStream(final String string, final String charsetName) {
-        if (string == null) {
-            return null;
-        }
-        try {
-            return bytes2OutputStream(string.getBytes(getSafeCharset(charsetName)));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return null;
+    fun string2OutputStream(string: String?, charsetName: String): OutputStream? {
+        return if (string == null) {
+            null
+        } else try {
+            bytes2OutputStream(string.toByteArray(charset(getSafeCharset(charsetName))))
+        } catch (e: UnsupportedEncodingException) {
+            e.printStackTrace()
+            null
         }
     }
 
-
-    public static List<String> inputStream2Lines(final InputStream is) {
-        return inputStream2Lines(is, "");
-    }
-
-    public static List<String> inputStream2Lines(final InputStream is,
-                                                 final String charsetName) {
-        BufferedReader reader = null;
-        try {
-            List<String> list = new ArrayList<>();
-            reader = new BufferedReader(new InputStreamReader(is, getSafeCharset(charsetName)));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                list.add(line);
+    @JvmStatic
+    @JvmOverloads
+    fun inputStream2Lines(
+        `is`: InputStream?, charsetName: String = ""
+    ): List<String>? {
+        var reader: BufferedReader? = null
+        return try {
+            val list: MutableList<String> = ArrayList()
+            reader = BufferedReader(InputStreamReader(`is`, getSafeCharset(charsetName)))
+            var line: String
+            while (reader.readLine().also { line = it } != null) {
+                list.add(line)
             }
-            return list;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            list
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
         } finally {
             try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                reader?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
     }
@@ -766,57 +736,50 @@ public final  class ConvertUtils {
     /**
      * Drawable 转 bitmap.
      */
-    public static Bitmap drawable2Bitmap(final Drawable drawable) {
-        return DawnBridge.drawable2Bitmap(drawable);
+    fun drawable2Bitmap(drawable: Drawable?): Bitmap {
+        return DawnBridge.drawable2Bitmap(drawable)
     }
 
     /**
      * Bitmap 转 drawable.
      */
-    public static Drawable bitmap2Drawable(final Bitmap bitmap) {
-        return DawnBridge.bitmap2Drawable(bitmap);
-    }
-
-    /**
-     * View 转 bitmap.
-     */
-    public static Bitmap view2Bitmap(final View view) {
-        return DawnBridge.view2Bitmap(view);
+    fun bitmap2Drawable(bitmap: Bitmap?): Drawable {
+        return DawnBridge.bitmap2Drawable(bitmap)
     }
 
     /**
      * dp 的值到 px 的值
      */
-    public static int dp2px(final float dpValue) {
-        return DawnBridge.dp2px(dpValue);
+    fun dp2px(dpValue: Float): Int {
+        return DawnBridge.dp2px(dpValue)
     }
 
     /**
      * px 的值到 dp 的值
      */
-    public static int px2dp(final float pxValue) {
-        return DawnBridge.px2dp(pxValue);
+    fun px2dp(pxValue: Float): Int {
+        return DawnBridge.px2dp(pxValue)
     }
 
     /**
      * sp 的值到 px 的值
      */
-    public static int sp2px(final float spValue) {
-        return DawnBridge.sp2px(spValue);
+    fun sp2px(spValue: Float): Int {
+        return DawnBridge.sp2px(spValue)
     }
 
     /**
      * px 的值到 sp 的值
      */
-    public static int px2sp(final float pxValue) {
-        return DawnBridge.px2sp(pxValue);
+    fun px2sp(pxValue: Float): Int {
+        return DawnBridge.px2sp(pxValue)
     }
 
-    private static String getSafeCharset(String charsetName) {
-        String cn = charsetName;
+    private fun getSafeCharset(charsetName: String): String {
+        var cn = charsetName
         if (DawnBridge.isSpace(charsetName) || !Charset.isSupported(charsetName)) {
-            cn = "UTF-8";
+            cn = "UTF-8"
         }
-        return cn;
+        return cn
     }
 }

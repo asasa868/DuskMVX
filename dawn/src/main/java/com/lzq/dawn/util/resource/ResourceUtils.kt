@@ -1,18 +1,13 @@
-package com.lzq.dawn.util.resource;
+package com.lzq.dawn.util.resource
 
-import android.graphics.drawable.Drawable;
-
-import androidx.annotation.DrawableRes;
-import androidx.annotation.RawRes;
-import androidx.core.content.ContextCompat;
-
-import com.lzq.dawn.DawnBridge;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.Collections;
-import java.util.List;
+import android.graphics.drawable.Drawable
+import androidx.annotation.DrawableRes
+import androidx.annotation.RawRes
+import androidx.core.content.ContextCompat
+import com.lzq.dawn.DawnBridge
+import java.io.IOException
+import java.io.UnsupportedEncodingException
+import java.nio.charset.Charset
 
 /**
  * @Name :ResourceUtils
@@ -20,13 +15,8 @@ import java.util.List;
  * @Author :  Lzq
  * @Desc : 资源
  */
-public final class ResourceUtils {
-
-    private static final int BUFFER_SIZE = 8192;
-
-    private ResourceUtils() {
-    }
-
+object ResourceUtils {
+    private const val BUFFER_SIZE = 8192
 
     /**
      * 按标识符返回可绘制对象。
@@ -34,8 +24,8 @@ public final class ResourceUtils {
      * @param id 标识符
      * @return drawable
      */
-    public static Drawable getDrawable(@DrawableRes int id) {
-        return ContextCompat.getDrawable(DawnBridge.getApp(), id);
+    fun getDrawable(@DrawableRes id: Int): Drawable? {
+        return ContextCompat.getDrawable(DawnBridge.getApp(), id)
     }
 
     /**
@@ -44,8 +34,8 @@ public final class ResourceUtils {
      * @param name id.
      * @return 按名称的 id 标识符
      */
-    public static int getIdByName(String name) {
-        return DawnBridge.getApp().getResources().getIdentifier(name, "id", DawnBridge.getApp().getPackageName());
+    fun getIdByName(name: String?): Int {
+        return DawnBridge.getApp().resources.getIdentifier(name, "id", DawnBridge.getApp().packageName)
     }
 
     /**
@@ -54,8 +44,8 @@ public final class ResourceUtils {
      * @param name 字符串的名称。
      * @return 按名称的字符串标识符
      */
-    public static int getStringIdByName(String name) {
-        return DawnBridge.getApp().getResources().getIdentifier(name, "string", DawnBridge.getApp().getPackageName());
+    fun getStringIdByName(name: String?): Int {
+        return DawnBridge.getApp().resources.getIdentifier(name, "string", DawnBridge.getApp().packageName)
     }
 
     /**
@@ -64,8 +54,8 @@ public final class ResourceUtils {
      * @param name 颜色的名称。
      * @return 名称的颜色标识符
      */
-    public static int getColorIdByName(String name) {
-        return DawnBridge.getApp().getResources().getIdentifier(name, "color", DawnBridge.getApp().getPackageName());
+    fun getColorIdByName(name: String?): Int {
+        return DawnBridge.getApp().resources.getIdentifier(name, "color", DawnBridge.getApp().packageName)
     }
 
     /**
@@ -74,8 +64,8 @@ public final class ResourceUtils {
      * @param name dimen的名字
      * @return 名称的dimen标识符
      */
-    public static int getDimenIdByName(String name) {
-        return DawnBridge.getApp().getResources().getIdentifier(name, "dimen", DawnBridge.getApp().getPackageName());
+    fun getDimenIdByName(name: String?): Int {
+        return DawnBridge.getApp().resources.getIdentifier(name, "dimen", DawnBridge.getApp().packageName)
     }
 
     /**
@@ -84,8 +74,8 @@ public final class ResourceUtils {
      * @param name Drawable的名称。
      * @return 按名称绘制的Drawable标识符
      */
-    public static int getDrawableIdByName(String name) {
-        return DawnBridge.getApp().getResources().getIdentifier(name, "drawable", DawnBridge.getApp().getPackageName());
+    fun getDrawableIdByName(name: String?): Int {
+        return DawnBridge.getApp().resources.getIdentifier(name, "drawable", DawnBridge.getApp().packageName)
     }
 
     /**
@@ -94,8 +84,8 @@ public final class ResourceUtils {
      * @param name mipmap 的名称。
      * @return 名称的 mipmap 标识符
      */
-    public static int getMipmapIdByName(String name) {
-        return DawnBridge.getApp().getResources().getIdentifier(name, "mipmap", DawnBridge.getApp().getPackageName());
+    fun getMipmapIdByName(name: String?): Int {
+        return DawnBridge.getApp().resources.getIdentifier(name, "mipmap", DawnBridge.getApp().packageName)
     }
 
     /**
@@ -104,8 +94,8 @@ public final class ResourceUtils {
      * @param name 布局的名称
      * @return 按名称排列的布局标识符
      */
-    public static int getLayoutIdByName(String name) {
-        return DawnBridge.getApp().getResources().getIdentifier(name, "layout", DawnBridge.getApp().getPackageName());
+    fun getLayoutIdByName(name: String?): Int {
+        return DawnBridge.getApp().resources.getIdentifier(name, "layout", DawnBridge.getApp().packageName)
     }
 
     /**
@@ -114,8 +104,8 @@ public final class ResourceUtils {
      * @param name 样式的名称。
      * @return 按名称的样式标识符
      */
-    public static int getStyleIdByName(String name) {
-        return DawnBridge.getApp().getResources().getIdentifier(name, "style", DawnBridge.getApp().getPackageName());
+    fun getStyleIdByName(name: String?): Int {
+        return DawnBridge.getApp().resources.getIdentifier(name, "style", DawnBridge.getApp().packageName)
     }
 
     /**
@@ -124,8 +114,8 @@ public final class ResourceUtils {
      * @param name 动画的名称。
      * @return 动画标识符的名称
      */
-    public static int getAnimIdByName(String name) {
-        return DawnBridge.getApp().getResources().getIdentifier(name, "anim", DawnBridge.getApp().getPackageName());
+    fun getAnimIdByName(name: String?): Int {
+        return DawnBridge.getApp().resources.getIdentifier(name, "anim", DawnBridge.getApp().packageName)
     }
 
     /**
@@ -134,8 +124,8 @@ public final class ResourceUtils {
      * @param name 菜单的名称
      * @return 按名称的菜单标识符
      */
-    public static int getMenuIdByName(String name) {
-        return DawnBridge.getApp().getResources().getIdentifier(name, "menu", DawnBridge.getApp().getPackageName());
+    fun getMenuIdByName(name: String?): Int {
+        return DawnBridge.getApp().resources.getIdentifier(name, "menu", DawnBridge.getApp().packageName)
     }
 
     /**
@@ -143,39 +133,27 @@ public final class ResourceUtils {
      *
      * @param assetsFilePath assets中文件的路径。
      * @param destFilePath   目标文件的路径。
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean copyFileFromAssets(final String assetsFilePath, final String destFilePath) {
-        boolean res = true;
+    fun copyFileFromAssets(assetsFilePath: String, destFilePath: String): Boolean {
+        var res = true
         try {
-            String[] assets = DawnBridge.getApp().getAssets().list(assetsFilePath);
-            if (assets != null && assets.length > 0) {
-                for (String asset : assets) {
-                    res &= copyFileFromAssets(assetsFilePath + "/" + asset, destFilePath + "/" + asset);
+            val assets = DawnBridge.getApp().assets.list(assetsFilePath)
+            if (assets != null && assets.size > 0) {
+                for (asset in assets) {
+                    res = res and copyFileFromAssets("$assetsFilePath/$asset", "$destFilePath/$asset")
                 }
             } else {
                 res = DawnBridge.writeFileFromIS(
-                        destFilePath,
-                        DawnBridge.getApp().getAssets().open(assetsFilePath)
-                );
+                    destFilePath, DawnBridge.getApp().assets.open(assetsFilePath)
+                )
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            res = false;
+        } catch (e: IOException) {
+            e.printStackTrace()
+            res = false
         }
-        return res;
+        return res
     }
-
-    /**
-     * 返回assets的内容。
-     *
-     * @param assetsFilePath assets中文件的路径。
-     * @return assets的内容。
-     */
-    public static String readAssets2String(final String assetsFilePath) {
-        return readAssets2String(assetsFilePath, null);
-    }
-
     /**
      * 返回assets的内容。
      *
@@ -183,39 +161,32 @@ public final class ResourceUtils {
      * @param charsetName    字符集的名称。
      * @return assets的内容。
      */
-    public static String readAssets2String(final String assetsFilePath, final String charsetName) {
-        try {
-            InputStream is = DawnBridge.getApp().getAssets().open(assetsFilePath);
-            byte[] bytes = DawnBridge.inputStream2Bytes(is);
-            if (bytes == null) {
-                return "";
-            }
+    /**
+     * 返回assets的内容。
+     *
+     * @param assetsFilePath assets中文件的路径。
+     * @return assets的内容。
+     */
+    @JvmOverloads
+    fun readAssets2String(assetsFilePath: String?, charsetName: String? = null): String {
+        return try {
+            val `is` = DawnBridge.getApp().assets.open(assetsFilePath!!)
+            val bytes = DawnBridge.inputStream2Bytes(`is`) ?: return ""
             if (DawnBridge.isSpace(charsetName)) {
-                return new String(bytes);
+                String(bytes)
             } else {
                 try {
-                    return new String(bytes, charsetName);
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                    return "";
+                    String(bytes, charsetName as Charset)
+                } catch (e: UnsupportedEncodingException) {
+                    e.printStackTrace()
+                    ""
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "";
+        } catch (e: IOException) {
+            e.printStackTrace()
+            ""
         }
     }
-
-    /**
-     * 返回assets的内容
-     *
-     * @param assetsPath assets中文件的路径。
-     * @return assets的内容
-     */
-    public static List<String> readAssets2List(final String assetsPath) {
-        return readAssets2List(assetsPath, "");
-    }
-
     /**
      * 返回assets的内容
      *
@@ -223,41 +194,36 @@ public final class ResourceUtils {
      * @param charsetName 字符集的名称。
      * @return assets的内容
      */
-    public static List<String> readAssets2List(final String assetsPath,
-                                               final String charsetName) {
-        try {
-            return DawnBridge.inputStream2Lines(DawnBridge.getApp().getResources().getAssets().open(assetsPath), charsetName);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return Collections.emptyList();
+    /**
+     * 返回assets的内容
+     *
+     * @param assetsPath assets中文件的路径。
+     * @return assets的内容
+     */
+    @JvmOverloads
+    fun readAssets2List(
+        assetsPath: String?, charsetName: String? = ""
+    ): List<String> {
+        return try {
+            DawnBridge.inputStream2Lines(DawnBridge.getApp().resources.assets.open(assetsPath!!), charsetName)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            emptyList()
         }
     }
-
 
     /**
      * 从raw复制文件。
      *
      * @param resId        资源id。
      * @param destFilePath 目标文件的路径。
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public static boolean copyFileFromRaw(@RawRes final int resId, final String destFilePath) {
+    fun copyFileFromRaw(@RawRes resId: Int, destFilePath: String?): Boolean {
         return DawnBridge.writeFileFromIS(
-                destFilePath,
-                DawnBridge.getApp().getResources().openRawResource(resId)
-        );
+            destFilePath, DawnBridge.getApp().resources.openRawResource(resId)
+        )
     }
-
-    /**
-     * 返回原始资源的内容。
-     *
-     * @param resId 资源id。
-     * @return 原始资源的内容。
-     */
-    public static String readRaw2String(@RawRes final int resId) {
-        return readRaw2String(resId, null);
-    }
-
     /**
      * 返回原始资源的内容
      *
@@ -265,34 +231,27 @@ public final class ResourceUtils {
      * @param charsetName 字符集的名称。
      * @return 原始资源的内容
      */
-    public static String readRaw2String(@RawRes final int resId, final String charsetName) {
-        InputStream is = DawnBridge.getApp().getResources().openRawResource(resId);
-        byte[] bytes = DawnBridge.inputStream2Bytes(is);
-        if (bytes == null) {
-            return null;
-        }
-        if (DawnBridge.isSpace(charsetName)) {
-            return new String(bytes);
+    /**
+     * 返回原始资源的内容。
+     *
+     * @param resId 资源id。
+     * @return 原始资源的内容。
+     */
+    @JvmOverloads
+    fun readRaw2String(@RawRes resId: Int, charsetName: String? = null): String? {
+        val `is` = DawnBridge.getApp().resources.openRawResource(resId)
+        val bytes = DawnBridge.inputStream2Bytes(`is`) ?: return null
+        return if (DawnBridge.isSpace(charsetName)) {
+            String(bytes)
         } else {
             try {
-                return new String(bytes, charsetName);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-                return "";
+                 String(bytes, charsetName as Charset)
+            } catch (e: UnsupportedEncodingException) {
+                e.printStackTrace()
+                ""
             }
         }
     }
-
-    /**
-     * 返回原始资源的内容
-     *
-     * @param resId 资源id
-     * @return 原始资源的内容
-     */
-    public static List<String> readRaw2List(@RawRes final int resId) {
-        return readRaw2List(resId, "");
-    }
-
     /**
      * 返回原始资源的内容。
      *
@@ -300,8 +259,16 @@ public final class ResourceUtils {
      * @param charsetName 字符集的名称。
      * @return 中文件的内容
      */
-    public static List<String> readRaw2List(@RawRes final int resId,
-                                            final String charsetName) {
-        return DawnBridge.inputStream2Lines(DawnBridge.getApp().getResources().openRawResource(resId), charsetName);
+    /**
+     * 返回原始资源的内容
+     *
+     * @param resId 资源id
+     * @return 原始资源的内容
+     */
+    @JvmOverloads
+    fun readRaw2List(
+        @RawRes resId: Int, charsetName: String? = ""
+    ): List<String> {
+        return DawnBridge.inputStream2Lines(DawnBridge.getApp().resources.openRawResource(resId), charsetName)
     }
 }

@@ -1,29 +1,27 @@
-package com.lzq.dawn.util.encrypt;
+package com.lzq.dawn.util.encrypt
 
-import android.os.Build;
-
-import com.lzq.dawn.DawnBridge;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.DigestInputStream;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-
-import javax.crypto.Cipher;
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESKeySpec;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
+import android.os.Build
+import com.lzq.dawn.DawnBridge
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.security.DigestInputStream
+import java.security.InvalidKeyException
+import java.security.Key
+import java.security.KeyFactory
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+import java.security.spec.AlgorithmParameterSpec
+import java.security.spec.PKCS8EncodedKeySpec
+import java.security.spec.X509EncodedKeySpec
+import java.util.Locale
+import javax.crypto.Cipher
+import javax.crypto.Mac
+import javax.crypto.SecretKey
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.DESKeySpec
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 /**
  * @Name :EncryptUtils
@@ -31,24 +29,18 @@ import javax.crypto.spec.SecretKeySpec;
  * @Author :  Lzq
  * @Desc : 加密
  */
-public final  class EncryptUtils {
-
-    private EncryptUtils() {
-    }
-
-//-----------------------------------------------hash encryption-----------------------------------------------//
-
+object EncryptUtils {
+    //-----------------------------------------------hash encryption-----------------------------------------------//
     /**
      * 返回 MD2 加密的十六进制字符串。
      *
      * @param data data.
      * @return MD2 加密的十六进制字符串。
      */
-    public static String encryptMD2ToString(final String data) {
-        if (data == null || data.length() == 0) {
-            return "";
-        }
-        return encryptMD2ToString(data.getBytes());
+    fun encryptMD2ToString(data: String?): String {
+        return if (data == null || data.length == 0) {
+            ""
+        } else encryptMD2ToString(data.toByteArray())
     }
 
     /**
@@ -57,8 +49,8 @@ public final  class EncryptUtils {
      * @param data data.
      * @return MD2 加密的十六进制字符串。
      */
-    public static String encryptMD2ToString(final byte[] data) {
-        return DawnBridge.bytes2HexString(encryptMD2(data));
+    fun encryptMD2ToString(data: ByteArray?): String {
+        return DawnBridge.bytes2HexString(encryptMD2(data))
     }
 
     /**
@@ -67,8 +59,8 @@ public final  class EncryptUtils {
      * @param data data.
      * @return MD2 加密的字节。
      */
-    public static byte[] encryptMD2(final byte[] data) {
-        return hashTemplate(data, "MD2");
+    fun encryptMD2(data: ByteArray?): ByteArray? {
+        return hashTemplate(data, "MD2")
     }
 
     /**
@@ -77,11 +69,10 @@ public final  class EncryptUtils {
      * @param data data.
      * @return MD5 加密的十六进制字符串。
      */
-    public static String encryptMD5ToString(final String data) {
-        if (data == null || data.length() == 0) {
-            return "";
-        }
-        return encryptMD5ToString(data.getBytes());
+    fun encryptMD5ToString(data: String?): String {
+        return if (data == null || data.length == 0) {
+            ""
+        } else encryptMD5ToString(data.toByteArray())
     }
 
     /**
@@ -91,19 +82,17 @@ public final  class EncryptUtils {
      * @param salt salt.
      * @return MD5 加密的十六进制字符串。
      */
-    public static String encryptMD5ToString(final String data, final String salt) {
+    fun encryptMD5ToString(data: String?, salt: String?): String {
         if (data == null && salt == null) {
-            return "";
+            return ""
         }
         if (salt == null) {
-            return DawnBridge.bytes2HexString(encryptMD5(data.getBytes()));
+            return DawnBridge.bytes2HexString(encryptMD5(data!!.toByteArray()))
         }
-        if (data == null) {
-            return DawnBridge.bytes2HexString(encryptMD5(salt.getBytes()));
-        }
-        return DawnBridge.bytes2HexString(encryptMD5((data + salt).getBytes()));
+        return if (data == null) {
+            DawnBridge.bytes2HexString(encryptMD5(salt.toByteArray()))
+        } else DawnBridge.bytes2HexString(encryptMD5((data + salt).toByteArray()))
     }
-
 
     /**
      * 返回 MD5 加密的十六进制字符串。
@@ -111,8 +100,8 @@ public final  class EncryptUtils {
      * @param data data.
      * @return MD5 加密的十六进制字符串。
      */
-    public static String encryptMD5ToString(final byte[] data) {
-        return DawnBridge.bytes2HexString(encryptMD5(data));
+    fun encryptMD5ToString(data: ByteArray?): String {
+        return DawnBridge.bytes2HexString(encryptMD5(data))
     }
 
     /**
@@ -122,20 +111,20 @@ public final  class EncryptUtils {
      * @param salt The salt.
      * @return the hex string of MD5 encryption
      */
-    public static String encryptMD5ToString(final byte[] data, final byte[] salt) {
+    fun encryptMD5ToString(data: ByteArray?, salt: ByteArray?): String {
         if (data == null && salt == null) {
-            return "";
+            return ""
         }
         if (salt == null) {
-            return DawnBridge.bytes2HexString(encryptMD5(data));
+            return DawnBridge.bytes2HexString(encryptMD5(data))
         }
         if (data == null) {
-            return DawnBridge.bytes2HexString(encryptMD5(salt));
+            return DawnBridge.bytes2HexString(encryptMD5(salt))
         }
-        byte[] dataSalt = new byte[data.length + salt.length];
-        System.arraycopy(data, 0, dataSalt, 0, data.length);
-        System.arraycopy(salt, 0, dataSalt, data.length, salt.length);
-        return DawnBridge.bytes2HexString(encryptMD5(dataSalt));
+        val dataSalt = ByteArray(data.size + salt.size)
+        System.arraycopy(data, 0, dataSalt, 0, data.size)
+        System.arraycopy(salt, 0, dataSalt, data.size, salt.size)
+        return DawnBridge.bytes2HexString(encryptMD5(dataSalt))
     }
 
     /**
@@ -144,10 +133,9 @@ public final  class EncryptUtils {
      * @param data data.
      * @return MD5 加密的字节数。
      */
-    public static byte[] encryptMD5(final byte[] data) {
-        return hashTemplate(data, "MD5");
+    fun encryptMD5(data: ByteArray?): ByteArray? {
+        return hashTemplate(data, "MD5")
     }
-
 
     /**
      * 返回文件的 MD5 加密的十六进制字符串。
@@ -155,9 +143,9 @@ public final  class EncryptUtils {
      * @param filePath 文件路径
      * @return 文件的 MD5 加密的十六进制字符串。
      */
-    public static String encryptMD5File2String(final String filePath) {
-        File file = DawnBridge.isSpace(filePath) ? null : new File(filePath);
-        return encryptMD5File2String(file);
+    fun encryptMD5File2String(filePath: String?): String {
+        val file = if (DawnBridge.isSpace(filePath)) null else File(filePath)
+        return encryptMD5File2String(file)
     }
 
     /**
@@ -166,11 +154,10 @@ public final  class EncryptUtils {
      * @param filePath 文件路径
      * @return 文件的 MD5 加密字节数。
      */
-    public static byte[] encryptMD5File(final String filePath) {
-        File file = DawnBridge.isSpace(filePath) ? null : new File(filePath);
-        return encryptMD5File(file);
+    fun encryptMD5File(filePath: String?): ByteArray? {
+        val file = if (DawnBridge.isSpace(filePath)) null else File(filePath)
+        return encryptMD5File(file)
     }
-
 
     /**
      * 返回文件的 MD5 加密的十六进制字符串
@@ -178,8 +165,8 @@ public final  class EncryptUtils {
      * @param file file.
      * @return 文件的 MD5 加密的十六进制字符串
      */
-    public static String encryptMD5File2String(final File file) {
-        return DawnBridge.bytes2HexString(encryptMD5File(file));
+    fun encryptMD5File2String(file: File?): String {
+        return DawnBridge.bytes2HexString(encryptMD5File(file))
     }
 
     /**
@@ -188,34 +175,35 @@ public final  class EncryptUtils {
      * @param file file.
      * @return 文件的 MD5 加密字节数。
      */
-    public static byte[] encryptMD5File(final File file) {
+    fun encryptMD5File(file: File?): ByteArray? {
         if (file == null) {
-            return null;
+            return null
         }
-        FileInputStream fis = null;
-        DigestInputStream digestInputStream;
-        try {
-            fis = new FileInputStream(file);
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            digestInputStream = new DigestInputStream(fis, md);
-            byte[] buffer = new byte[256 * 1024];
+        var fis: FileInputStream? = null
+        val digestInputStream: DigestInputStream
+        return try {
+            fis = FileInputStream(file)
+            var md = MessageDigest.getInstance("MD5")
+            digestInputStream = DigestInputStream(fis, md)
+            val buffer = ByteArray(256 * 1024)
             while (true) {
-                if (!(digestInputStream.read(buffer) > 0)) {
-                    break;
+                if (digestInputStream.read(buffer) <= 0) {
+                    break
                 }
             }
-            md = digestInputStream.getMessageDigest();
-            return md.digest();
-        } catch (NoSuchAlgorithmException | IOException e) {
-            e.printStackTrace();
-            return null;
+            md = digestInputStream.messageDigest
+            md.digest()
+        } catch (e: NoSuchAlgorithmException) {
+            e.printStackTrace()
+            null
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
         } finally {
             try {
-                if (fis != null) {
-                    fis.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                fis?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
     }
@@ -226,11 +214,10 @@ public final  class EncryptUtils {
      * @param data data.
      * @return SHA1 加密的十六进制字符串
      */
-    public static String encryptSHA1ToString(final String data) {
-        if (data == null || data.length() == 0) {
-            return "";
-        }
-        return encryptSHA1ToString(data.getBytes());
+    fun encryptSHA1ToString(data: String?): String {
+        return if (data == null || data.length == 0) {
+            ""
+        } else encryptSHA1ToString(data.toByteArray())
     }
 
     /**
@@ -239,8 +226,8 @@ public final  class EncryptUtils {
      * @param data data.
      * @return SHA1 加密的十六进制字符串。
      */
-    public static String encryptSHA1ToString(final byte[] data) {
-        return DawnBridge.bytes2HexString(encryptSHA1(data));
+    fun encryptSHA1ToString(data: ByteArray?): String {
+        return DawnBridge.bytes2HexString(encryptSHA1(data))
     }
 
     /**
@@ -249,8 +236,8 @@ public final  class EncryptUtils {
      * @param data data.
      * @return SHA1 加密的字节。
      */
-    public static byte[] encryptSHA1(final byte[] data) {
-        return hashTemplate(data, "SHA-1");
+    fun encryptSHA1(data: ByteArray?): ByteArray? {
+        return hashTemplate(data, "SHA-1")
     }
 
     /**
@@ -259,13 +246,11 @@ public final  class EncryptUtils {
      * @param data data.
      * @return SHA224 加密的十六进制字符串。
      */
-    public static String encryptSHA224ToString(final String data) {
-        if (data == null || data.length() == 0) {
-            return "";
-        }
-        return encryptSHA224ToString(data.getBytes());
+    fun encryptSHA224ToString(data: String?): String {
+        return if (data == null || data.length == 0) {
+            ""
+        } else encryptSHA224ToString(data.toByteArray())
     }
-
 
     /**
      * 返回 SHA224 加密的十六进制字符串。
@@ -273,8 +258,8 @@ public final  class EncryptUtils {
      * @param data data.
      * @return SHA224 加密的十六进制字符串。
      */
-    public static String encryptSHA224ToString(final byte[] data) {
-        return DawnBridge.bytes2HexString(encryptSHA224(data));
+    fun encryptSHA224ToString(data: ByteArray?): String {
+        return DawnBridge.bytes2HexString(encryptSHA224(data))
     }
 
     /**
@@ -283,8 +268,8 @@ public final  class EncryptUtils {
      * @param data data.
      * @return SHA224 加密的字节数。
      */
-    public static byte[] encryptSHA224(final byte[] data) {
-        return hashTemplate(data, "SHA224");
+    fun encryptSHA224(data: ByteArray?): ByteArray? {
+        return hashTemplate(data, "SHA224")
     }
 
     /**
@@ -293,11 +278,10 @@ public final  class EncryptUtils {
      * @param data data.
      * @return SHA256 加密的十六进制字符串。
      */
-    public static String encryptSHA256ToString(final String data) {
-        if (data == null || data.length() == 0) {
-            return "";
-        }
-        return encryptSHA256ToString(data.getBytes());
+    fun encryptSHA256ToString(data: String?): String {
+        return if (data == null || data.length == 0) {
+            ""
+        } else encryptSHA256ToString(data.toByteArray())
     }
 
     /**
@@ -306,8 +290,8 @@ public final  class EncryptUtils {
      * @param data data.
      * @return SHA256 加密的十六进制字符串。
      */
-    public static String encryptSHA256ToString(final byte[] data) {
-        return DawnBridge.bytes2HexString(encryptSHA256(data));
+    fun encryptSHA256ToString(data: ByteArray?): String {
+        return DawnBridge.bytes2HexString(encryptSHA256(data))
     }
 
     /**
@@ -316,22 +300,8 @@ public final  class EncryptUtils {
      * @param data data.
      * @return SHA256 加密的字节。
      */
-    public static byte[] encryptSHA256(final byte[] data) {
-        return hashTemplate(data, "SHA-256");
-    }
-
-
-    /**
-     * 返回 SHA384 加密的十六进制字符串。
-     *
-     * @param data data.
-     * @return SHA384 加密的十六进制字符串。
-     */
-    public static String encryptSHA384ToString(final String data) {
-        if (data == null || data.length() == 0) {
-            return "";
-        }
-        return encryptSHA384ToString(data.getBytes());
+    fun encryptSHA256(data: ByteArray?): ByteArray? {
+        return hashTemplate(data, "SHA-256")
     }
 
     /**
@@ -340,8 +310,20 @@ public final  class EncryptUtils {
      * @param data data.
      * @return SHA384 加密的十六进制字符串。
      */
-    public static String encryptSHA384ToString(final byte[] data) {
-        return DawnBridge.bytes2HexString(encryptSHA384(data));
+    fun encryptSHA384ToString(data: String?): String {
+        return if (data == null || data.length == 0) {
+            ""
+        } else encryptSHA384ToString(data.toByteArray())
+    }
+
+    /**
+     * 返回 SHA384 加密的十六进制字符串。
+     *
+     * @param data data.
+     * @return SHA384 加密的十六进制字符串。
+     */
+    fun encryptSHA384ToString(data: ByteArray?): String {
+        return DawnBridge.bytes2HexString(encryptSHA384(data))
     }
 
     /**
@@ -350,8 +332,8 @@ public final  class EncryptUtils {
      * @param data data.
      * @return SHA384 加密的字节。
      */
-    public static byte[] encryptSHA384(final byte[] data) {
-        return hashTemplate(data, "SHA-384");
+    fun encryptSHA384(data: ByteArray?): ByteArray? {
+        return hashTemplate(data, "SHA-384")
     }
 
     /**
@@ -360,11 +342,10 @@ public final  class EncryptUtils {
      * @param data data.
      * @return SHA512 加密的十六进制字符串。
      */
-    public static String encryptSHA512ToString(final String data) {
-        if (data == null || data.length() == 0) {
-            return "";
-        }
-        return encryptSHA512ToString(data.getBytes());
+    fun encryptSHA512ToString(data: String?): String {
+        return if (data == null || data.length == 0) {
+            ""
+        } else encryptSHA512ToString(data.toByteArray())
     }
 
     /**
@@ -373,8 +354,8 @@ public final  class EncryptUtils {
      * @param data data.
      * @return SHA512 加密的十六进制字符串
      */
-    public static String encryptSHA512ToString(final byte[] data) {
-        return DawnBridge.bytes2HexString(encryptSHA512(data));
+    fun encryptSHA512ToString(data: ByteArray?): String {
+        return DawnBridge.bytes2HexString(encryptSHA512(data))
     }
 
     /**
@@ -383,8 +364,8 @@ public final  class EncryptUtils {
      * @param data data.
      * @return SHA512 加密的字节数。
      */
-    public static byte[] encryptSHA512(final byte[] data) {
-        return hashTemplate(data, "SHA-512");
+    fun encryptSHA512(data: ByteArray?): ByteArray? {
+        return hashTemplate(data, "SHA-512")
     }
 
     /**
@@ -394,23 +375,20 @@ public final  class EncryptUtils {
      * @param algorithm 哈希加密的名称。
      * @return 哈希加密的字节。
      */
-    public static byte[] hashTemplate(final byte[] data, final String algorithm) {
-        if (data == null || data.length <= 0) {
-            return null;
-        }
-        try {
-            MessageDigest md = MessageDigest.getInstance(algorithm);
-            md.update(data);
-            return md.digest();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
+    @JvmStatic
+    fun hashTemplate(data: ByteArray?, algorithm: String?): ByteArray? {
+        return if (data == null || data.size <= 0) {
+            null
+        } else try {
+            val md = MessageDigest.getInstance(algorithm)
+            md.update(data)
+            md.digest()
+        } catch (e: NoSuchAlgorithmException) {
+            e.printStackTrace()
+            null
         }
     }
-
-
-//-----------------------------------------------Hmac encryption-----------------------------------------------//
-
+    //-----------------------------------------------Hmac encryption-----------------------------------------------//
     /**
      * 返回 HmacMD5 加密的十六进制字符串。
      *
@@ -418,11 +396,10 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacMD5 加密的十六进制字符串。
      */
-    public static String encryptHmacMD5ToString(final String data, final String key) {
-        if (data == null || data.length() == 0 || key == null || key.length() == 0) {
-            return "";
-        }
-        return encryptHmacMD5ToString(data.getBytes(), key.getBytes());
+    fun encryptHmacMD5ToString(data: String?, key: String?): String {
+        return if (data == null || data.length == 0 || key == null || key.length == 0) {
+            ""
+        } else encryptHmacMD5ToString(data.toByteArray(), key.toByteArray())
     }
 
     /**
@@ -432,8 +409,8 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacMD5加密的十六进制字符串
      */
-    public static String encryptHmacMD5ToString(final byte[] data, final byte[] key) {
-        return DawnBridge.bytes2HexString(encryptHmacMD5(data, key));
+    fun encryptHmacMD5ToString(data: ByteArray?, key: ByteArray?): String {
+        return DawnBridge.bytes2HexString(encryptHmacMD5(data, key))
     }
 
     /**
@@ -443,8 +420,8 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacMD5 加密的字节。
      */
-    public static byte[] encryptHmacMD5(final byte[] data, final byte[] key) {
-        return hmacTemplate(data, key, "HmacMD5");
+    fun encryptHmacMD5(data: ByteArray?, key: ByteArray?): ByteArray? {
+        return hmacTemplate(data, key, "HmacMD5")
     }
 
     /**
@@ -454,11 +431,12 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacSHA1 加密的十六进制字符串。
      */
-    public static String encryptHmacSHA1ToString(final String data, final String key) {
-        if (data == null || data.length() == 0 || key == null || key.length() == 0) {
-            return "";
-        }
-        return encryptHmacSHA1ToString(data.getBytes(), key.getBytes());
+    fun encryptHmacSHA1ToString(data: String?, key: String?): String {
+        return if (data == null || data.length == 0 || key == null || key.length == 0) {
+            ""
+        } else encryptHmacSHA1ToString(
+            data.toByteArray(), key.toByteArray()
+        )
     }
 
     /**
@@ -468,8 +446,8 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacSHA1 加密的十六进制字符串。
      */
-    public static String encryptHmacSHA1ToString(final byte[] data, final byte[] key) {
-        return DawnBridge.bytes2HexString(encryptHmacSHA1(data, key));
+    fun encryptHmacSHA1ToString(data: ByteArray?, key: ByteArray?): String {
+        return DawnBridge.bytes2HexString(encryptHmacSHA1(data, key))
     }
 
     /**
@@ -479,8 +457,8 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return Hmac SHA1 加密的字节。
      */
-    public static byte[] encryptHmacSHA1(final byte[] data, final byte[] key) {
-        return hmacTemplate(data, key, "HmacSHA1");
+    fun encryptHmacSHA1(data: ByteArray?, key: ByteArray?): ByteArray? {
+        return hmacTemplate(data, key, "HmacSHA1")
     }
 
     /**
@@ -490,11 +468,10 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacSHA224 加密的十六进制字符串。
      */
-    public static String encryptHmacSHA224ToString(final String data, final String key) {
-        if (data == null || data.length() == 0 || key == null || key.length() == 0) {
-            return "";
-        }
-        return encryptHmacSHA224ToString(data.getBytes(), key.getBytes());
+    fun encryptHmacSHA224ToString(data: String?, key: String?): String {
+        return if (data == null || data.length == 0 || key == null || key.length == 0) {
+            ""
+        } else encryptHmacSHA224ToString(data.toByteArray(), key.toByteArray())
     }
 
     /**
@@ -504,8 +481,8 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacSHA224 加密的十六进制字符串。
      */
-    public static String encryptHmacSHA224ToString(final byte[] data, final byte[] key) {
-        return DawnBridge.bytes2HexString(encryptHmacSHA224(data, key));
+    fun encryptHmacSHA224ToString(data: ByteArray?, key: ByteArray?): String {
+        return DawnBridge.bytes2HexString(encryptHmacSHA224(data, key))
     }
 
     /**
@@ -515,8 +492,8 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacSHA224 加密的字节。
      */
-    public static byte[] encryptHmacSHA224(final byte[] data, final byte[] key) {
-        return hmacTemplate(data, key, "HmacSHA224");
+    fun encryptHmacSHA224(data: ByteArray?, key: ByteArray?): ByteArray? {
+        return hmacTemplate(data, key, "HmacSHA224")
     }
 
     /**
@@ -526,11 +503,10 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacSHA256 加密的十六进制字符串。
      */
-    public static String encryptHmacSHA256ToString(final String data, final String key) {
-        if (data == null || data.length() == 0 || key == null || key.length() == 0) {
-            return "";
-        }
-        return encryptHmacSHA256ToString(data.getBytes(), key.getBytes());
+    fun encryptHmacSHA256ToString(data: String?, key: String?): String {
+        return if (data == null || data.length == 0 || key == null || key.length == 0) {
+            ""
+        } else encryptHmacSHA256ToString(data.toByteArray(), key.toByteArray())
     }
 
     /**
@@ -540,8 +516,8 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacSHA256 加密的十六进制字符串。
      */
-    public static String encryptHmacSHA256ToString(final byte[] data, final byte[] key) {
-        return DawnBridge.bytes2HexString(encryptHmacSHA256(data, key));
+    fun encryptHmacSHA256ToString(data: ByteArray?, key: ByteArray?): String {
+        return DawnBridge.bytes2HexString(encryptHmacSHA256(data, key))
     }
 
     /**
@@ -551,8 +527,8 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacSHA256 加密的字节。
      */
-    public static byte[] encryptHmacSHA256(final byte[] data, final byte[] key) {
-        return hmacTemplate(data, key, "HmacSHA256");
+    fun encryptHmacSHA256(data: ByteArray?, key: ByteArray?): ByteArray? {
+        return hmacTemplate(data, key, "HmacSHA256")
     }
 
     /**
@@ -562,11 +538,12 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacSHA384加密的十六进制字符串
      */
-    public static String encryptHmacSHA384ToString(final String data, final String key) {
-        if (data == null || data.length() == 0 || key == null || key.length() == 0) {
-            return "";
-        }
-        return encryptHmacSHA384ToString(data.getBytes(), key.getBytes());
+    fun encryptHmacSHA384ToString(data: String?, key: String?): String {
+        return if (data == null || data.length == 0 || key == null || key.length == 0) {
+            ""
+        } else encryptHmacSHA384ToString(
+            data.toByteArray(), key.toByteArray()
+        )
     }
 
     /**
@@ -576,8 +553,8 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacSHA384 加密的十六进制字符串。
      */
-    public static String encryptHmacSHA384ToString(final byte[] data, final byte[] key) {
-        return DawnBridge.bytes2HexString(encryptHmacSHA384(data, key));
+    fun encryptHmacSHA384ToString(data: ByteArray?, key: ByteArray?): String {
+        return DawnBridge.bytes2HexString(encryptHmacSHA384(data, key))
     }
 
     /**
@@ -587,8 +564,8 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacSHA384 加密的字节。
      */
-    public static byte[] encryptHmacSHA384(final byte[] data, final byte[] key) {
-        return hmacTemplate(data, key, "HmacSHA384");
+    fun encryptHmacSHA384(data: ByteArray?, key: ByteArray?): ByteArray? {
+        return hmacTemplate(data, key, "HmacSHA384")
     }
 
     /**
@@ -598,11 +575,10 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacSHA512 加密的十六进制字符串。
      */
-    public static String encryptHmacSHA512ToString(final String data, final String key) {
-        if (data == null || data.length() == 0 || key == null || key.length() == 0) {
-            return "";
-        }
-        return encryptHmacSHA512ToString(data.getBytes(), key.getBytes());
+    fun encryptHmacSHA512ToString(data: String?, key: String?): String {
+        return if (data == null || data.length == 0 || key == null || key.length == 0) {
+            ""
+        } else encryptHmacSHA512ToString(data.toByteArray(), key.toByteArray())
     }
 
     /**
@@ -612,8 +588,8 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacSHA512 加密的十六进制字符串。
      */
-    public static String encryptHmacSHA512ToString(final byte[] data, final byte[] key) {
-        return DawnBridge.bytes2HexString(encryptHmacSHA512(data, key));
+    fun encryptHmacSHA512ToString(data: ByteArray?, key: ByteArray?): String {
+        return DawnBridge.bytes2HexString(encryptHmacSHA512(data, key))
     }
 
     /**
@@ -623,8 +599,8 @@ public final  class EncryptUtils {
      * @param key  key.
      * @return HmacSHA512 加密的字节。
      */
-    public static byte[] encryptHmacSHA512(final byte[] data, final byte[] key) {
-        return hmacTemplate(data, key, "HmacSHA512");
+    fun encryptHmacSHA512(data: ByteArray?, key: ByteArray?): ByteArray? {
+        return hmacTemplate(data, key, "HmacSHA512")
     }
 
     /**
@@ -635,39 +611,38 @@ public final  class EncryptUtils {
      * @param algorithm hmac 加密的名称。
      * @return hmac 加密的字节数。
      */
-    private static byte[] hmacTemplate(final byte[] data,
-                                       final byte[] key,
-                                       final String algorithm) {
-        if (data == null || data.length == 0 || key == null || key.length == 0) {
-            return null;
-        }
-        try {
-            SecretKeySpec secretKey = new SecretKeySpec(key, algorithm);
-            Mac mac = Mac.getInstance(algorithm);
-            mac.init(secretKey);
-            return mac.doFinal(data);
-        } catch (InvalidKeyException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
+    private fun hmacTemplate(
+        data: ByteArray?, key: ByteArray?, algorithm: String
+    ): ByteArray? {
+        return if (data == null || data.size == 0 || key == null || key.size == 0) {
+            null
+        } else try {
+            val secretKey = SecretKeySpec(key, algorithm)
+            val mac = Mac.getInstance(algorithm)
+            mac.init(secretKey)
+            mac.doFinal(data)
+        } catch (e: InvalidKeyException) {
+            e.printStackTrace()
+            null
+        } catch (e: NoSuchAlgorithmException) {
+            e.printStackTrace()
+            null
         }
     }
-//-----------------------------------------------DES encryption-----------------------------------------------//
-
-
+    //-----------------------------------------------DES encryption-----------------------------------------------//
     /**
      * 返回 DES 加密的 Base64 编码字节。
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return DES 加密的 Base64 编码字节。
      */
-    public static byte[] encryptDES2Base64(final byte[] data,
-                                           final byte[] key,
-                                           final String transformation,
-                                           final byte[] iv) {
-        return DawnBridge.base64Encode(encryptDES(data, key, transformation, iv));
+    fun encryptDES2Base64(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray {
+        return DawnBridge.base64Encode(encryptDES(data, key, transformation, iv))
     }
 
     /**
@@ -675,15 +650,14 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return DES 加密的十六进制字符串。
      */
-    public static String encryptDES2HexString(final byte[] data,
-                                              final byte[] key,
-                                              final String transformation,
-                                              final byte[] iv) {
-        return DawnBridge.bytes2HexString(encryptDES(data, key, transformation, iv));
+    fun encryptDES2HexString(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): String {
+        return DawnBridge.bytes2HexString(encryptDES(data, key, transformation, iv))
     }
 
     /**
@@ -691,15 +665,14 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return DES 加密的字节
      */
-    public static byte[] encryptDES(final byte[] data,
-                                    final byte[] key,
-                                    final String transformation,
-                                    final byte[] iv) {
-        return symmetricTemplate(data, key, "DES", transformation, iv, true);
+    fun encryptDES(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray? {
+        return symmetricTemplate(data, key, "DES", transformation, iv, true)
     }
 
     /**
@@ -707,15 +680,14 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return Base64 编码字节的 DES 解密字节。
      */
-    public static byte[] decryptBase64DES(final byte[] data,
-                                          final byte[] key,
-                                          final String transformation,
-                                          final byte[] iv) {
-        return decryptDES(DawnBridge.base64Decode(data), key, transformation, iv);
+    fun decryptBase64DES(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray? {
+        return decryptDES(DawnBridge.base64Decode(data), key, transformation, iv)
     }
 
     /**
@@ -723,15 +695,14 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return 十六进制字符串的 DES 解密字节。
      */
-    public static byte[] decryptHexStringDES(final String data,
-                                             final byte[] key,
-                                             final String transformation,
-                                             final byte[] iv) {
-        return decryptDES(DawnBridge.hexString2Bytes(data), key, transformation, iv);
+    fun decryptHexStringDES(
+        data: String?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray? {
+        return decryptDES(DawnBridge.hexString2Bytes(data), key, transformation, iv)
     }
 
     /**
@@ -739,35 +710,29 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return DES 解密的字节。
      */
-    public static byte[] decryptDES(final byte[] data,
-                                    final byte[] key,
-                                    final String transformation,
-                                    final byte[] iv) {
-        return symmetricTemplate(data, key, "DES", transformation, iv, false);
+    fun decryptDES(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray? {
+        return symmetricTemplate(data, key, "DES", transformation, iv, false)
     }
-
-
-//-----------------------------------------------3DES encryption-----------------------------------------------//
-
-
+    //-----------------------------------------------3DES encryption-----------------------------------------------//
     /**
      * 返回 3DES 加密的 Base64 编码字节。
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return 3DES 加密的 Base64 编码字节。
      */
-    public static byte[] encrypt3DES2Base64(final byte[] data,
-                                            final byte[] key,
-                                            final String transformation,
-                                            final byte[] iv) {
-        return DawnBridge.base64Encode(encrypt3DES(data, key, transformation, iv));
+    fun encrypt3DES2Base64(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray {
+        return DawnBridge.base64Encode(encrypt3DES(data, key, transformation, iv))
     }
 
     /**
@@ -775,15 +740,14 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return 3DES 加密的十六进制字符串。
      */
-    public static String encrypt3DES2HexString(final byte[] data,
-                                               final byte[] key,
-                                               final String transformation,
-                                               final byte[] iv) {
-        return DawnBridge.bytes2HexString(encrypt3DES(data, key, transformation, iv));
+    fun encrypt3DES2HexString(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): String {
+        return DawnBridge.bytes2HexString(encrypt3DES(data, key, transformation, iv))
     }
 
     /**
@@ -791,15 +755,14 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return 3DES 加密的字节。
      */
-    public static byte[] encrypt3DES(final byte[] data,
-                                     final byte[] key,
-                                     final String transformation,
-                                     final byte[] iv) {
-        return symmetricTemplate(data, key, "DESede", transformation, iv, true);
+    fun encrypt3DES(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray? {
+        return symmetricTemplate(data, key, "DESede", transformation, iv, true)
     }
 
     /**
@@ -807,15 +770,14 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return Base64 编码字节的 3DES 解密字节。
      */
-    public static byte[] decryptBase64_3DES(final byte[] data,
-                                            final byte[] key,
-                                            final String transformation,
-                                            final byte[] iv) {
-        return decrypt3DES(DawnBridge.base64Decode(data), key, transformation, iv);
+    fun decryptBase64_3DES(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray? {
+        return decrypt3DES(DawnBridge.base64Decode(data), key, transformation, iv)
     }
 
     /**
@@ -823,15 +785,14 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return 十六进制字符串的 3DES 解密字节。
      */
-    public static byte[] decryptHexString3DES(final String data,
-                                              final byte[] key,
-                                              final String transformation,
-                                              final byte[] iv) {
-        return decrypt3DES(DawnBridge.hexString2Bytes(data), key, transformation, iv);
+    fun decryptHexString3DES(
+        data: String?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray? {
+        return decrypt3DES(DawnBridge.hexString2Bytes(data), key, transformation, iv)
     }
 
     /**
@@ -839,33 +800,29 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return 3DES 解密的字节。
      */
-    public static byte[] decrypt3DES(final byte[] data,
-                                     final byte[] key,
-                                     final String transformation,
-                                     final byte[] iv) {
-        return symmetricTemplate(data, key, "DESede", transformation, iv, false);
+    fun decrypt3DES(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray? {
+        return symmetricTemplate(data, key, "DESede", transformation, iv, false)
     }
-//-----------------------------------------------AES encryption-----------------------------------------------//
-
-
+    //-----------------------------------------------AES encryption-----------------------------------------------//
     /**
      * 返回 AES 加密的 Base64 编码字节。
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return AES 加密的 Base64 编码字节。
      */
-    public static byte[] encryptAES2Base64(final byte[] data,
-                                           final byte[] key,
-                                           final String transformation,
-                                           final byte[] iv) {
-        return DawnBridge.base64Encode(encryptAES(data, key, transformation, iv));
+    fun encryptAES2Base64(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray {
+        return DawnBridge.base64Encode(encryptAES(data, key, transformation, iv))
     }
 
     /**
@@ -873,15 +830,14 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return AES 加密的十六进制字符串。
      */
-    public static String encryptAES2HexString(final byte[] data,
-                                              final byte[] key,
-                                              final String transformation,
-                                              final byte[] iv) {
-        return DawnBridge.bytes2HexString(encryptAES(data, key, transformation, iv));
+    fun encryptAES2HexString(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): String {
+        return DawnBridge.bytes2HexString(encryptAES(data, key, transformation, iv))
     }
 
     /**
@@ -889,15 +845,14 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return AES 加密的字节。
      */
-    public static byte[] encryptAES(final byte[] data,
-                                    final byte[] key,
-                                    final String transformation,
-                                    final byte[] iv) {
-        return symmetricTemplate(data, key, "AES", transformation, iv, true);
+    fun encryptAES(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray? {
+        return symmetricTemplate(data, key, "AES", transformation, iv, true)
     }
 
     /**
@@ -905,15 +860,14 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return Base64 编码字节的 AES 解密字节。
      */
-    public static byte[] decryptBase64AES(final byte[] data,
-                                          final byte[] key,
-                                          final String transformation,
-                                          final byte[] iv) {
-        return decryptAES(DawnBridge.base64Decode(data), key, transformation, iv);
+    fun decryptBase64AES(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray? {
+        return decryptAES(DawnBridge.base64Decode(data), key, transformation, iv)
     }
 
     /**
@@ -921,15 +875,14 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return 十六进制字符串的 AES 解密字节。
      */
-    public static byte[] decryptHexStringAES(final String data,
-                                             final byte[] key,
-                                             final String transformation,
-                                             final byte[] iv) {
-        return decryptAES(DawnBridge.hexString2Bytes(data), key, transformation, iv);
+    fun decryptHexStringAES(
+        data: String?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray? {
+        return decryptAES(DawnBridge.hexString2Bytes(data), key, transformation, iv)
     }
 
     /**
@@ -937,15 +890,14 @@ public final  class EncryptUtils {
      *
      * @param data           data.
      * @param key            key.
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param iv             带有 IV 的缓冲区。复制缓冲区的内容以防止后续修改。
      * @return AES 解密的字节。
      */
-    public static byte[] decryptAES(final byte[] data,
-                                    final byte[] key,
-                                    final String transformation,
-                                    final byte[] iv) {
-        return symmetricTemplate(data, key, "AES", transformation, iv, false);
+    fun decryptAES(
+        data: ByteArray?, key: ByteArray?, transformation: String?, iv: ByteArray?
+    ): ByteArray? {
+        return symmetricTemplate(data, key, "AES", transformation, iv, false)
     }
 
     /**
@@ -954,59 +906,56 @@ public final  class EncryptUtils {
      * @param data           data.
      * @param key            key.
      * @param algorithm      算法的名称。
-     * @param transformation 转换的名称，例如  <i>DES/CBC/PKCS5Padding</i>.
+     * @param transformation 转换的名称，例如  *DES/CBC/PKCS5Padding*.
      * @param isEncrypt      加密为真，否则为假。
      * @return 对称加密或解密的字节。
      */
-    private static byte[] symmetricTemplate(final byte[] data,
-                                            final byte[] key,
-                                            final String algorithm,
-                                            final String transformation,
-                                            final byte[] iv,
-                                            final boolean isEncrypt) {
-        if (data == null || data.length == 0 || key == null || key.length == 0) {
-            return null;
-        }
-        try {
-            SecretKey secretKey;
-            if ("DES".equals(algorithm)) {
-                DESKeySpec desKey = new DESKeySpec(key);
-                SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(algorithm);
-                secretKey = keyFactory.generateSecret(desKey);
+    private fun symmetricTemplate(
+        data: ByteArray?,
+        key: ByteArray?,
+        algorithm: String,
+        transformation: String?,
+        iv: ByteArray?,
+        isEncrypt: Boolean
+    ): ByteArray? {
+        return if (data == null || data.size == 0 || key == null || key.size == 0) {
+            null
+        } else try {
+            val secretKey: SecretKey
+            secretKey = if ("DES" == algorithm) {
+                val desKey = DESKeySpec(key)
+                val keyFactory = SecretKeyFactory.getInstance(algorithm)
+                keyFactory.generateSecret(desKey)
             } else {
-                secretKey = new SecretKeySpec(key, algorithm);
+                SecretKeySpec(key, algorithm)
             }
-            Cipher cipher = Cipher.getInstance(transformation);
-            if (iv == null || iv.length == 0) {
-                cipher.init(isEncrypt ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE, secretKey);
+            val cipher = Cipher.getInstance(transformation)
+            if (iv == null || iv.size == 0) {
+                cipher.init(if (isEncrypt) Cipher.ENCRYPT_MODE else Cipher.DECRYPT_MODE, secretKey)
             } else {
-                AlgorithmParameterSpec params = new IvParameterSpec(iv);
-                cipher.init(isEncrypt ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE, secretKey, params);
+                val params: AlgorithmParameterSpec = IvParameterSpec(iv)
+                cipher.init(if (isEncrypt) Cipher.ENCRYPT_MODE else Cipher.DECRYPT_MODE, secretKey, params)
             }
-            return cipher.doFinal(data);
-        } catch (Throwable e) {
-            e.printStackTrace();
-            return null;
+            cipher.doFinal(data)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            null
         }
     }
-
-
-//-----------------------------------------------RSA encryption-----------------------------------------------//
-
+    //-----------------------------------------------RSA encryption-----------------------------------------------//
     /**
      * 返回 RSA 加密的 Base64 编码字节
      *
      * @param data           data.
      * @param publicKey      公钥。
      * @param keySize        密钥的大小，例如1024、2048……
-     * @param transformation 转换的名称，例如  <i>RSA/CBC/PKCS1Padding</i>.
+     * @param transformation 转换的名称，例如  *RSA/CBC/PKCS1Padding*.
      * @return RSA 加密的 Base64 编码字节
      */
-    public static byte[] encryptRSA2Base64(final byte[] data,
-                                           final byte[] publicKey,
-                                           final int keySize,
-                                           final String transformation) {
-        return DawnBridge.base64Encode(encryptRSA(data, publicKey, keySize, transformation));
+    fun encryptRSA2Base64(
+        data: ByteArray?, publicKey: ByteArray?, keySize: Int, transformation: String
+    ): ByteArray {
+        return DawnBridge.base64Encode(encryptRSA(data, publicKey, keySize, transformation))
     }
 
     /**
@@ -1015,14 +964,13 @@ public final  class EncryptUtils {
      * @param data           data.
      * @param publicKey      公钥。
      * @param keySize        密钥的大小，例如1024、2048……
-     * @param transformation 转换的名称，例如  <i>RSA/CBC/PKCS1Padding</i>.
+     * @param transformation 转换的名称，例如  *RSA/CBC/PKCS1Padding*.
      * @return RSA 加密的十六进制字符串。
      */
-    public static String encryptRSA2HexString(final byte[] data,
-                                              final byte[] publicKey,
-                                              final int keySize,
-                                              final String transformation) {
-        return DawnBridge.bytes2HexString(encryptRSA(data, publicKey, keySize, transformation));
+    fun encryptRSA2HexString(
+        data: ByteArray?, publicKey: ByteArray?, keySize: Int, transformation: String
+    ): String {
+        return DawnBridge.bytes2HexString(encryptRSA(data, publicKey, keySize, transformation))
     }
 
     /**
@@ -1031,14 +979,13 @@ public final  class EncryptUtils {
      * @param data           data.
      * @param publicKey      公钥。
      * @param keySize        密钥的大小，例如1024、2048……
-     * @param transformation 转换的名称，例如  <i>RSA/CBC/PKCS1Padding</i>.
+     * @param transformation 转换的名称，例如  *RSA/CBC/PKCS1Padding*.
      * @return RSA 加密的字节。
      */
-    public static byte[] encryptRSA(final byte[] data,
-                                    final byte[] publicKey,
-                                    final int keySize,
-                                    final String transformation) {
-        return rsaTemplate(data, publicKey, keySize, transformation, true);
+    fun encryptRSA(
+        data: ByteArray?, publicKey: ByteArray?, keySize: Int, transformation: String
+    ): ByteArray? {
+        return rsaTemplate(data, publicKey, keySize, transformation, true)
     }
 
     /**
@@ -1047,14 +994,13 @@ public final  class EncryptUtils {
      * @param data           data.
      * @param privateKey     私钥。
      * @param keySize        密钥的大小，例如1024、2048……
-     * @param transformation 转换的名称，例如  <i>RSA/CBC/PKCS1Padding</i>.
+     * @param transformation 转换的名称，例如  *RSA/CBC/PKCS1Padding*.
      * @return Base64 编码字节的 RSA 解密字节。
      */
-    public static byte[] decryptBase64RSA(final byte[] data,
-                                          final byte[] privateKey,
-                                          final int keySize,
-                                          final String transformation) {
-        return decryptRSA(DawnBridge.base64Decode(data), privateKey, keySize, transformation);
+    fun decryptBase64RSA(
+        data: ByteArray?, privateKey: ByteArray?, keySize: Int, transformation: String
+    ): ByteArray? {
+        return decryptRSA(DawnBridge.base64Decode(data), privateKey, keySize, transformation)
     }
 
     /**
@@ -1063,14 +1009,13 @@ public final  class EncryptUtils {
      * @param data           data.
      * @param privateKey     私钥。
      * @param keySize        密钥的大小，例如1024、2048……
-     * @param transformation 转换的名称，例如  <i>RSA/CBC/PKCS1Padding</i>.
+     * @param transformation 转换的名称，例如  *RSA/CBC/PKCS1Padding*.
      * @return 十六进制字符串的 RSA 解密字节。
      */
-    public static byte[] decryptHexStringRSA(final String data,
-                                             final byte[] privateKey,
-                                             final int keySize,
-                                             final String transformation) {
-        return decryptRSA(DawnBridge.hexString2Bytes(data), privateKey, keySize, transformation);
+    fun decryptHexStringRSA(
+        data: String?, privateKey: ByteArray?, keySize: Int, transformation: String
+    ): ByteArray? {
+        return decryptRSA(DawnBridge.hexString2Bytes(data), privateKey, keySize, transformation)
     }
 
     /**
@@ -1079,14 +1024,13 @@ public final  class EncryptUtils {
      * @param data           data.
      * @param privateKey     私钥。
      * @param keySize        密钥的大小，例如1024、2048……
-     * @param transformation 转换的名称，例如  <i>RSA/CBC/PKCS1Padding</i>.
+     * @param transformation 转换的名称，例如  *RSA/CBC/PKCS1Padding*.
      * @return RSA 解密的字节。
      */
-    public static byte[] decryptRSA(final byte[] data,
-                                    final byte[] privateKey,
-                                    final int keySize,
-                                    final String transformation) {
-        return rsaTemplate(data, privateKey, keySize, transformation, false);
+    fun decryptRSA(
+        data: ByteArray?, privateKey: ByteArray?, keySize: Int, transformation: String
+    ): ByteArray? {
+        return rsaTemplate(data, privateKey, keySize, transformation, false)
     }
 
     /**
@@ -1095,70 +1039,68 @@ public final  class EncryptUtils {
      * @param data           data.
      * @param key            key.
      * @param keySize        密钥的大小，例如1024、2048……
-     * @param transformation 转换的名称，例如  <i>RSA/CBC/PKCS1Padding</i>.
+     * @param transformation 转换的名称，例如  *RSA/CBC/PKCS1Padding*.
      * @param isEncrypt      加密为真，否则为假
      * @return RSA 加密或解密的字节。
      */
-    private static byte[] rsaTemplate(final byte[] data,
-                                      final byte[] key,
-                                      final int keySize,
-                                      final String transformation,
-                                      final boolean isEncrypt) {
-        if (data == null || data.length == 0 || key == null || key.length == 0) {
-            return null;
+    private fun rsaTemplate(
+        data: ByteArray?, key: ByteArray?, keySize: Int, transformation: String, isEncrypt: Boolean
+    ): ByteArray? {
+        if (data == null || data.size == 0 || key == null || key.size == 0) {
+            return null
         }
         try {
-            Key rsaKey;
-            KeyFactory keyFactory;
-            if (Build.VERSION.SDK_INT < 28) {
-                keyFactory = KeyFactory.getInstance("RSA", "BC");
+            val rsaKey: Key
+            val keyFactory: KeyFactory
+            keyFactory = if (Build.VERSION.SDK_INT < 28) {
+                KeyFactory.getInstance("RSA", "BC")
             } else {
-                keyFactory = KeyFactory.getInstance("RSA");
+                KeyFactory.getInstance("RSA")
             }
-            if (isEncrypt) {
-                X509EncodedKeySpec keySpec = new X509EncodedKeySpec(key);
-                rsaKey = keyFactory.generatePublic(keySpec);
+            rsaKey = if (isEncrypt) {
+                val keySpec = X509EncodedKeySpec(key)
+                keyFactory.generatePublic(keySpec)
             } else {
-                PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(key);
-                rsaKey = keyFactory.generatePrivate(keySpec);
+                val keySpec = PKCS8EncodedKeySpec(key)
+                keyFactory.generatePrivate(keySpec)
             }
             if (rsaKey == null) {
-                return null;
+                return null
             }
-            Cipher cipher = Cipher.getInstance(transformation);
-            cipher.init(isEncrypt ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE, rsaKey);
-            int len = data.length;
-            int maxLen = keySize / 8;
+            val cipher = Cipher.getInstance(transformation)
+            cipher.init(if (isEncrypt) Cipher.ENCRYPT_MODE else Cipher.DECRYPT_MODE, rsaKey)
+            val len = data.size
+            var maxLen = keySize / 8
             if (isEncrypt) {
-                String lowerTrans = transformation.toLowerCase();
+                val lowerTrans = transformation.lowercase(Locale.getDefault())
                 if (lowerTrans.endsWith("pkcs1padding")) {
-                    maxLen -= 11;
+                    maxLen -= 11
                 }
             }
-            int count = len / maxLen;
-            if (count > 0) {
-                byte[] ret = new byte[0];
-                byte[] buff = new byte[maxLen];
-                int index = 0;
-                for (int i = 0; i < count; i++) {
-                    System.arraycopy(data, index, buff, 0, maxLen);
-                    ret = joins(ret, cipher.doFinal(buff));
-                    index += maxLen;
+            val count = len / maxLen
+            return if (count > 0) {
+                var ret = ByteArray(0)
+                var buff = ByteArray(maxLen)
+                var index = 0
+                for (i in 0 until count) {
+                    System.arraycopy(data, index, buff, 0, maxLen)
+                    ret = joins(ret, cipher.doFinal(buff))
+                    index += maxLen
                 }
                 if (index != len) {
-                    int restLen = len - index;
-                    buff = new byte[restLen];
-                    System.arraycopy(data, index, buff, 0, restLen);
-                    ret = joins(ret, cipher.doFinal(buff));
+                    val restLen = len - index
+                    buff = ByteArray(restLen)
+                    System.arraycopy(data, index, buff, 0, restLen)
+                    ret = joins(ret, cipher.doFinal(buff))
                 }
-                return ret;
+                ret
             } else {
-                return cipher.doFinal(data);
+                cipher.doFinal(data)
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        return null;
+        return null
     }
 
     /**
@@ -1167,48 +1109,47 @@ public final  class EncryptUtils {
      * @param data data.
      * @param key  key.
      */
-    public static byte[] rc4(byte[] data, byte[] key) {
-        if (data == null || data.length == 0 || key == null) {
-            return null;
+    fun rc4(data: ByteArray?, key: ByteArray?): ByteArray? {
+        if (data == null || data.size == 0 || key == null) {
+            return null
         }
-        if (key.length < 1 || key.length > 256) {
-            throw new IllegalArgumentException("key must be between 1 and 256 bytes");
+        require(!(key.size < 1 || key.size > 256)) { "key must be between 1 and 256 bytes" }
+        val iS = ByteArray(256)
+        val iK = ByteArray(256)
+        val keyLen = key.size
+        for (i in 0..255) {
+            iS[i] = i.toByte()
+            iK[i] = key[i % keyLen]
         }
-        final byte[] iS = new byte[256];
-        final byte[] iK = new byte[256];
-        int keyLen = key.length;
-        for (int i = 0; i < 256; i++) {
-            iS[i] = (byte) i;
-            iK[i] = key[i % keyLen];
+        var j = 0
+        var tmp: Byte
+        for (i in 0..255) {
+            j = j + iS[i] + iK[i] and 0xFF
+            tmp = iS[j]
+            iS[j] = iS[i]
+            iS[i] = tmp
         }
-        int j = 0;
-        byte tmp;
-        for (int i = 0; i < 256; i++) {
-            j = (j + iS[i] + iK[i]) & 0xFF;
-            tmp = iS[j];
-            iS[j] = iS[i];
-            iS[i] = tmp;
+        val ret = ByteArray(data.size)
+        var i = 0
+        var k: Int
+        var t: Int
+        for (counter in data.indices) {
+            i = i + 1 and 0xFF
+            j = j + iS[i] and 0xFF
+            tmp = iS[j]
+            iS[j] = iS[i]
+            iS[i] = tmp
+            t = iS[i] + iS[j] and 0xFF
+            k = iS[t].toInt()
+            ret[counter] = (data[counter].toInt() xor k).toByte()
         }
-
-        final byte[] ret = new byte[data.length];
-        int i = 0, k, t;
-        for (int counter = 0; counter < data.length; counter++) {
-            i = (i + 1) & 0xFF;
-            j = (j + iS[i]) & 0xFF;
-            tmp = iS[j];
-            iS[j] = iS[i];
-            iS[i] = tmp;
-            t = (iS[i] + iS[j]) & 0xFF;
-            k = iS[t];
-            ret[counter] = (byte) (data[counter] ^ k);
-        }
-        return ret;
+        return ret
     }
 
-    private static byte[] joins(final byte[] prefix, final byte[] suffix) {
-        byte[] ret = new byte[prefix.length + suffix.length];
-        System.arraycopy(prefix, 0, ret, 0, prefix.length);
-        System.arraycopy(suffix, 0, ret, prefix.length, suffix.length);
-        return ret;
+    private fun joins(prefix: ByteArray, suffix: ByteArray): ByteArray {
+        val ret = ByteArray(prefix.size + suffix.size)
+        System.arraycopy(prefix, 0, ret, 0, prefix.size)
+        System.arraycopy(suffix, 0, ret, prefix.size, suffix.size)
+        return ret
     }
 }

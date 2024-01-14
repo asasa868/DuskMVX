@@ -1,4 +1,4 @@
-package com.lzq.dawn.util.file;
+package com.lzq.dawn.util.file
 
 /**
  * @Name :OnProgressUpdateListener
@@ -6,10 +6,10 @@ package com.lzq.dawn.util.file;
  * @Author :  Lzq
  * @Desc :
  */
-public interface OnProgressUpdateListener {
+interface OnProgressUpdateListener {
     /**
-     *  文件io进度
+     * 文件io进度
      * @param progress 进度
      */
-    void onProgressUpdate(double progress);
+    fun onProgressUpdate(progress: Double)
 }

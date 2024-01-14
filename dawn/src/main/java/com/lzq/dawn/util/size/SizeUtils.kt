@@ -1,10 +1,9 @@
-package com.lzq.dawn.util.size;
+package com.lzq.dawn.util.size
 
-import android.content.res.Resources;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
-import android.view.View;
-import android.view.ViewGroup;
+import android.content.res.Resources
+import android.util.TypedValue
+import android.view.View
+import android.view.ViewGroup
 
 /**
  * @Name :SizeUtils
@@ -12,19 +11,17 @@ import android.view.ViewGroup;
  * @Author :  Lzq
  * @Desc : size
  */
-public final class SizeUtils {
-    private SizeUtils() {
-    }
-
+object SizeUtils {
     /**
      * dp to  px.
      *
      * @param dpValue dp的值。
      * @return value of px
      */
-    public static int dp2px(final float dpValue) {
-        final float scale = Resources.getSystem().getDisplayMetrics().density;
-        return (int) (dpValue * scale + 0.5f);
+    @JvmStatic
+    fun dp2px(dpValue: Float): Int {
+        val scale = Resources.getSystem().displayMetrics.density
+        return (dpValue * scale + 0.5f).toInt()
     }
 
     /**
@@ -33,9 +30,10 @@ public final class SizeUtils {
      * @param pxValue px的值
      * @return value of dp
      */
-    public static int px2dp(final float pxValue) {
-        final float scale = Resources.getSystem().getDisplayMetrics().density;
-        return (int) (pxValue / scale + 0.5f);
+    @JvmStatic
+    fun px2dp(pxValue: Float): Int {
+        val scale = Resources.getSystem().displayMetrics.density
+        return (pxValue / scale + 0.5f).toInt()
     }
 
     /**
@@ -44,9 +42,10 @@ public final class SizeUtils {
      * @param spValue sp的值
      * @return value of px
      */
-    public static int sp2px(final float spValue) {
-        final float fontScale = Resources.getSystem().getDisplayMetrics().scaledDensity;
-        return (int) (spValue * fontScale + 0.5f);
+    @JvmStatic
+    fun sp2px(spValue: Float): Int {
+        val fontScale = Resources.getSystem().displayMetrics.scaledDensity
+        return (spValue * fontScale + 0.5f).toInt()
     }
 
     /**
@@ -55,74 +54,62 @@ public final class SizeUtils {
      * @param pxValue px的值
      * @return value of sp
      */
-    public static int px2sp(final float pxValue) {
-        final float fontScale = Resources.getSystem().getDisplayMetrics().scaledDensity;
-        return (int) (pxValue / fontScale + 0.5f);
+    @JvmStatic
+    fun px2sp(pxValue: Float): Int {
+        val fontScale = Resources.getSystem().displayMetrics.scaledDensity
+        return (pxValue / fontScale + 0.5f).toInt()
     }
 
     /**
      * 将包含维度的未打包复杂数据值转换为其最终浮点值。
      * The two parameters <var>unit</var> and <var>value</var>
-     * are as in {@link TypedValue#TYPE_DIMENSION}.
+     * are as in [TypedValue.TYPE_DIMENSION].
      *
      * @param value 要将单位应用到的值。
      * @param unit  要从中转换的单位。
      * @return 复浮点值乘以取决于其单位的适当度量。
      */
-    public static float applyDimension(final float value, final int unit) {
-        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-        switch (unit) {
-            case TypedValue.COMPLEX_UNIT_PX:
-                return value;
-            case TypedValue.COMPLEX_UNIT_DIP:
-                return value * metrics.density;
-            case TypedValue.COMPLEX_UNIT_SP:
-                return value * metrics.scaledDensity;
-            case TypedValue.COMPLEX_UNIT_PT:
-                return value * metrics.xdpi * (1.0f / 72);
-            case TypedValue.COMPLEX_UNIT_IN:
-                return value * metrics.xdpi;
-            case TypedValue.COMPLEX_UNIT_MM:
-                return value * metrics.xdpi * (1.0f / 25.4f);
-            default:
-                 return 0;
+    fun applyDimension(value: Float, unit: Int): Float {
+        val metrics = Resources.getSystem().displayMetrics
+        return when (unit) {
+            TypedValue.COMPLEX_UNIT_PX -> value
+            TypedValue.COMPLEX_UNIT_DIP -> value * metrics.density
+            TypedValue.COMPLEX_UNIT_SP -> value * metrics.scaledDensity
+            TypedValue.COMPLEX_UNIT_PT -> value * metrics.xdpi * (1.0f / 72)
+            TypedValue.COMPLEX_UNIT_IN -> value * metrics.xdpi
+            TypedValue.COMPLEX_UNIT_MM -> value * metrics.xdpi * (1.0f / 25.4f)
+            else -> 0F
         }
     }
 
     /**
      * 强制获取视图的大小。
-     * <p>e.g.</p>
+     *
+     * e.g.
      * <pre>
      * SizeUtils.forceGetViewSize(view, new SizeUtils.OnGetSizeListener() {
-     *     Override
-     *     public void onGetSize(final View view) {
-     *         view.getWidth();
-     *     }
+     * Override
+     * public void onGetSize(final View view) {
+     * view.getWidth();
+     * }
      * });
-     * </pre>
+    </pre> *
      *
      * @param view     view.
      * @param listener 获取大小侦听器。
      */
-    public static void forceGetViewSize(final View view, final OnGetSizeListener listener) {
-        view.post(new Runnable() {
-            @Override
-            public void run() {
-                if (listener != null) {
-                    listener.onGetSize(view);
-                }
-            }
-        });
+    fun forceGetViewSize(view: View, listener: OnGetSizeListener?) {
+        view.post { listener?.onGetSize(view) }
     }
 
     /**
-     *返回视图的宽度。
+     * 返回视图的宽度。
      *
      * @param view  view.
      * @return 视图的宽度。
      */
-    public static int getMeasuredWidth(final View view) {
-        return measureView(view)[0];
+    fun getMeasuredWidth(view: View): Int {
+        return measureView(view)[0]
     }
 
     /**
@@ -131,8 +118,8 @@ public final class SizeUtils {
      * @param view  view.
      * @return 视图的高度。
      */
-    public static int getMeasuredHeight(final View view) {
-        return measureView(view)[1];
+    fun getMeasuredHeight(view: View): Int {
+        return measureView(view)[1]
     }
 
     /**
@@ -141,32 +128,25 @@ public final class SizeUtils {
      * @param view  view.
      * @return arr[0]: view's width, arr[1]: view's height
      */
-    public static int[] measureView(final View view) {
-        ViewGroup.LayoutParams lp = view.getLayoutParams();
+    fun measureView(view: View): IntArray {
+        var lp = view.layoutParams
         if (lp == null) {
-            lp = new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            );
+            lp = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            )
         }
-        int widthSpec = ViewGroup.getChildMeasureSpec(0, 0, lp.width);
-        int lpHeight = lp.height;
-        int heightSpec;
-        if (lpHeight > 0) {
-            heightSpec = View.MeasureSpec.makeMeasureSpec(lpHeight, View.MeasureSpec.EXACTLY);
+        val widthSpec = ViewGroup.getChildMeasureSpec(0, 0, lp.width)
+        val lpHeight = lp.height
+        val heightSpec: Int = if (lpHeight > 0) {
+            View.MeasureSpec.makeMeasureSpec(lpHeight, View.MeasureSpec.EXACTLY)
         } else {
-            heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         }
-        view.measure(widthSpec, heightSpec);
-        return new int[]{view.getMeasuredWidth(), view.getMeasuredHeight()};
+        view.measure(widthSpec, heightSpec)
+        return intArrayOf(view.measuredWidth, view.measuredHeight)
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // interface
-    ///////////////////////////////////////////////////////////////////////////
-
-    public interface OnGetSizeListener {
-        void onGetSize(View view);
+    interface OnGetSizeListener {
+        fun onGetSize(view: View?)
     }
-
 }

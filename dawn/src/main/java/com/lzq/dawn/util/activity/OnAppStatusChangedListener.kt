@@ -1,6 +1,6 @@
-package com.lzq.dawn.util.activity;
+package com.lzq.dawn.util.activity
 
-import android.app.Activity;
+import android.app.Activity
 
 /**
  * className :OnAppStatusChangedListener
@@ -8,16 +8,16 @@ import android.app.Activity;
  *
  * @Author :  Lzq
  */
-public interface OnAppStatusChangedListener {
+interface OnAppStatusChangedListener {
     /**
      * 在前台的activity
      * @param activity activity
      */
-    void onForeground(Activity activity);
+    fun onForeground(activity: Activity?)
 
     /**
      * 在后台的activity
      * @param activity activity
      */
-    void onBackground(Activity activity);
+    fun onBackground(activity: Activity?)
 }
