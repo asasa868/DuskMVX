@@ -274,7 +274,7 @@ object PhoneUtils {
      * @param phoneNumber 电话号码。
      */
     fun dial(phoneNumber: String) {
-        DawnBridge.getApp().startActivity(DawnBridge.getDialIntent(phoneNumber))
+        DawnBridge.app.startActivity(DawnBridge.getDialIntent(phoneNumber))
     }
 
     /**
@@ -286,7 +286,7 @@ object PhoneUtils {
      */
     @RequiresPermission(permission.CALL_PHONE)
     fun call(phoneNumber: String) {
-        DawnBridge.getApp().startActivity(DawnBridge.getCallIntent(phoneNumber))
+        DawnBridge.app.startActivity(DawnBridge.getCallIntent(phoneNumber))
     }
 
     /**
@@ -296,9 +296,9 @@ object PhoneUtils {
      * @param content     content.
      */
     fun sendSms(phoneNumber: String, content: String?) {
-        DawnBridge.getApp().startActivity(DawnBridge.getSendSmsIntent(phoneNumber, content))
+        DawnBridge.app.startActivity(DawnBridge.getSendSmsIntent(phoneNumber, content))
     }
 
     private val telephonyManager: TelephonyManager
-        private get() = DawnBridge.getApp().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        private get() = DawnBridge.app.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 }

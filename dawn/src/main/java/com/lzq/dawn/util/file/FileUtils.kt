@@ -73,7 +73,7 @@ object FileUtils {
         if (Build.VERSION.SDK_INT >= 29) {
             try {
                 val uri = Uri.parse(filePath)
-                val cr = DawnBridge.getApp().contentResolver
+                val cr = DawnBridge.app.contentResolver
                 val afd = cr.openAssetFileDescriptor(uri, "r") ?: return false
                 try {
                     afd.close()
@@ -1446,7 +1446,7 @@ object FileUtils {
         }
         val intent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
         intent.data = Uri.parse("file://" + file.absolutePath)
-        DawnBridge.getApp().sendBroadcast(intent)
+        DawnBridge.app.sendBroadcast(intent)
     }
 
     /**

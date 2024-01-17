@@ -13,8 +13,6 @@ object Versions {
     const val constraint      = "2.1.0"
     const val legacy          = "1.0.0"
     const val exifInterface   = "1.3.6"
-    const val activityKtx     = "1.5.1"
-    const val fragmentKtx     = "1.5.2"
 
     //Google--------------------------------------------------------------------
     const val material        = "1.4.0"

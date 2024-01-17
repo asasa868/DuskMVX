@@ -7,6 +7,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
@@ -88,7 +89,7 @@ object ActivityUtils {
     ): Boolean {
         val intent = Intent()
         intent.setClassName(pkg, cls)
-        val pm = DawnBridge.getApp().packageManager
+        val pm = DawnBridge.app.packageManager
         return !(pm.resolveActivity(
             intent, 0
         ) == null || intent.resolveActivity(pm) == null || pm.queryIntentActivities(intent, 0).size == 0)
@@ -595,9 +596,7 @@ object ActivityUtils {
         activity: Activity, intent: Intent, vararg sharedElements: View
     ) {
         startActivity(
-            intent,
-            activity,
-            getOptionsBundle(activity, sharedElements.toMutableList().toTypedArray())
+            intent, activity, getOptionsBundle(activity, sharedElements.toMutableList().toTypedArray())
         )
     }
 
@@ -937,7 +936,7 @@ object ActivityUtils {
         fragment: Fragment, clz: Class<out Activity?>, requestCode: Int
     ) {
         startActivityForResult(
-            fragment, null, DawnBridge.getApp().packageName, clz.name, requestCode, null
+            fragment, null, DawnBridge.app.packageName, clz.name, requestCode, null
         )
     }
 
@@ -953,7 +952,7 @@ object ActivityUtils {
         fragment: Fragment, clz: Class<out Activity?>, requestCode: Int, options: Bundle?
     ) {
         startActivityForResult(
-            fragment, null, DawnBridge.getApp().packageName, clz.name, requestCode, options
+            fragment, null, DawnBridge.app.packageName, clz.name, requestCode, options
         )
     }
 
@@ -971,7 +970,7 @@ object ActivityUtils {
         startActivityForResult(
             fragment,
             null,
-            DawnBridge.getApp().packageName,
+            DawnBridge.app.packageName,
             clz.name,
             requestCode,
             getOptionsBundle(fragment, sharedElements.toMutableList().toTypedArray())
@@ -997,7 +996,7 @@ object ActivityUtils {
         startActivityForResult(
             fragment,
             null,
-            DawnBridge.getApp().packageName,
+            DawnBridge.app.packageName,
             clz.name,
             requestCode,
             getOptionsBundle(fragment, enterAnim, exitAnim)
@@ -1016,7 +1015,7 @@ object ActivityUtils {
         extras: Bundle, fragment: Fragment, clz: Class<out Activity?>, requestCode: Int
     ) {
         startActivityForResult(
-            fragment, extras, DawnBridge.getApp().packageName, clz.name, requestCode, null
+            fragment, extras, DawnBridge.app.packageName, clz.name, requestCode, null
         )
     }
 
@@ -1033,7 +1032,7 @@ object ActivityUtils {
         extras: Bundle, fragment: Fragment, clz: Class<out Activity?>, requestCode: Int, options: Bundle?
     ) {
         startActivityForResult(
-            fragment, extras, DawnBridge.getApp().packageName, clz.name, requestCode, options
+            fragment, extras, DawnBridge.app.packageName, clz.name, requestCode, options
         )
     }
 
@@ -1056,7 +1055,7 @@ object ActivityUtils {
         startActivityForResult(
             fragment,
             extras,
-            DawnBridge.getApp().packageName,
+            DawnBridge.app.packageName,
             clz.name,
             requestCode,
             getOptionsBundle(fragment, sharedElements.toMutableList().toTypedArray())
@@ -1084,7 +1083,7 @@ object ActivityUtils {
         startActivityForResult(
             fragment,
             extras,
-            DawnBridge.getApp().packageName,
+            DawnBridge.app.packageName,
             clz.name,
             requestCode,
             getOptionsBundle(fragment, enterAnim, exitAnim)
@@ -1323,16 +1322,14 @@ object ActivityUtils {
         homeIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(homeIntent)
     }
+
     /**
      * 前往main页面 就是在清单列表设置main的activity
      *
      * @param pkg 包名
      */
-    /**
-     * 前往main页面 就是在清单列表设置main的activity
-     */
     @JvmOverloads
-    fun startLauncherActivity(pkg: String = DawnBridge.getApp().packageName) {
+    fun startLauncherActivity(pkg: String = DawnBridge.app.packageName) {
         val launcherActivity = getLauncherActivity(pkg)
         if (TextUtils.isEmpty(launcherActivity)) {
             return
@@ -1346,14 +1343,14 @@ object ActivityUtils {
          *
          * @return the list of activity
          */
-        get() = DawnBridge.getActivityList()
+        get() = DawnBridge.activityList
     val launcherActivity: String
         /**
          * Return launcher activity的名字
          *
          * @return the name of launcher activity
          */
-        get() = getLauncherActivity(DawnBridge.getApp().packageName)
+        get() = getLauncherActivity(DawnBridge.app.packageName)
 
     /**
      * Return launcher activity的名字
@@ -1369,9 +1366,9 @@ object ActivityUtils {
         val intent = Intent(Intent.ACTION_MAIN, null)
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
         intent.setPackage(pkg)
-        val pm = DawnBridge.getApp().packageManager
+        val pm = DawnBridge.app.packageManager
         val info = pm.queryIntentActivities(intent, 0)
-        return if (info == null || info.size == 0) {
+        return if (info.size == 0) {
             ""
         } else info[0].activityInfo.name
     }
@@ -1382,7 +1379,7 @@ object ActivityUtils {
          *
          * @return the list of main activities
          */
-        get() = getMainActivities(DawnBridge.getApp().packageName)
+        get() = getMainActivities(DawnBridge.app.packageName)
 
     /**
      * Return the list of main activities.
@@ -1394,7 +1391,7 @@ object ActivityUtils {
         val ret: MutableList<String> = ArrayList()
         val intent = Intent(Intent.ACTION_MAIN, null)
         intent.setPackage(pkg)
-        val pm = DawnBridge.getApp().packageManager
+        val pm = DawnBridge.app.packageManager
         val info = pm.queryIntentActivities(intent, 0)
         val size = info.size
         if (size == 0) {
@@ -1409,13 +1406,13 @@ object ActivityUtils {
         return ret
     }
 
-    val topActivity: Activity
+    private val topActivity: Activity
         /**
          * Return  栈定的activity
          *
          * @return the top activity in activity's stack
          */
-        get() = DawnBridge.getTopActivity()
+        get() = DawnBridge.topActivity!!
 
     /**
      * 指定activity是否在活动状态
@@ -1445,7 +1442,7 @@ object ActivityUtils {
      * @return `true`: yes<br></br>`false`: no
      */
     fun isActivityExistsInStack(activity: Activity): Boolean {
-        val activities = DawnBridge.getActivityList()
+        val activities = DawnBridge.activityList
         for (aActivity in activities) {
             if (aActivity == activity) {
                 return true
@@ -1461,7 +1458,7 @@ object ActivityUtils {
      * @return `true`: yes<br></br>`false`: no
      */
     fun isActivityExistsInStack(clz: Class<out Activity?>): Boolean {
-        val activities = DawnBridge.getActivityList()
+        val activities = DawnBridge.activityList
         for (aActivity in activities) {
             if (aActivity.javaClass == clz) {
                 return true
@@ -1469,22 +1466,26 @@ object ActivityUtils {
         }
         return false
     }
+
     /**
      * 结束activity
      *
      * @param activity   The activity.
      * @param isLoadAnim True 为传出活动使用动画，否则为 false。
      */
-    /**
-     * 结束activity
-     *
-     * @param activity The activity.
-     */
     @JvmOverloads
     fun finishActivity(activity: Activity, isLoadAnim: Boolean = false) {
         activity.finish()
         if (!isLoadAnim) {
-            activity.overridePendingTransition(0, 0)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                activity.overrideActivityTransition(
+                    Activity.OVERRIDE_TRANSITION_CLOSE,
+                    0,
+                    0
+                )
+            } else {
+                activity.overridePendingTransition(0, 0)
+            }
         }
     }
 
@@ -1499,29 +1500,41 @@ object ActivityUtils {
         activity: Activity, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
     ) {
         activity.finish()
-        activity.overridePendingTransition(enterAnim, exitAnim)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            activity.overrideActivityTransition(
+                Activity.OVERRIDE_TRANSITION_CLOSE,
+                enterAnim,
+                exitAnim
+            )
+        } else {
+            activity.overridePendingTransition(enterAnim, exitAnim)
+        }
     }
+
     /**
      * 结束activity
      *
      * @param clz        The activity class.
      * @param isLoadAnim True to use animation for the outgoing activity, false otherwise.
      */
-    /**
-     * 结束activity
-     *
-     * @param clz The activity class.
-     */
     @JvmOverloads
     fun finishActivity(
         clz: Class<out Activity?>, isLoadAnim: Boolean = false
     ) {
-        val activities = DawnBridge.getActivityList()
+        val activities = DawnBridge.activityList
         for (activity in activities) {
             if (activity.javaClass == clz) {
                 activity.finish()
                 if (!isLoadAnim) {
-                    activity.overridePendingTransition(0, 0)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        activity.overrideActivityTransition(
+                            Activity.OVERRIDE_TRANSITION_CLOSE,
+                            0,
+                            0
+                        )
+                    } else {
+                        activity.overridePendingTransition(0, 0)
+                    }
                 }
             }
         }
@@ -1537,14 +1550,23 @@ object ActivityUtils {
     fun finishActivity(
         clz: Class<out Activity?>, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
     ) {
-        val activities = DawnBridge.getActivityList()
+        val activities = DawnBridge.activityList
         for (activity in activities) {
             if (activity.javaClass == clz) {
                 activity.finish()
-                activity.overridePendingTransition(enterAnim, exitAnim)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    activity.overrideActivityTransition(
+                        Activity.OVERRIDE_TRANSITION_CLOSE,
+                        enterAnim,
+                        exitAnim
+                    )
+                } else {
+                    activity.overridePendingTransition(enterAnim, exitAnim)
+                }
             }
         }
     }
+
     /**
      * 结束activity
      *
@@ -1552,17 +1574,11 @@ object ActivityUtils {
      * @param isIncludeSelf 如果包含活动，则为 true，否则为 false。
      * @param isLoadAnim    动画
      */
-    /**
-     * 结束activity
-     *
-     * @param activity      The activity.
-     * @param isIncludeSelf 如果包含活动，则为 true，否则为 false。
-     */
     @JvmOverloads
     fun finishToActivity(
         activity: Activity, isIncludeSelf: Boolean, isLoadAnim: Boolean = false
     ): Boolean {
-        val activities = DawnBridge.getActivityList()
+        val activities = DawnBridge.activityList
         for (act in activities) {
             if (act == activity) {
                 if (isIncludeSelf) {
@@ -1586,7 +1602,7 @@ object ActivityUtils {
     fun finishToActivity(
         activity: Activity, isIncludeSelf: Boolean, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
     ): Boolean {
-        val activities = DawnBridge.getActivityList()
+        val activities = DawnBridge.activityList
         for (act in activities) {
             if (act == activity) {
                 if (isIncludeSelf) {
@@ -1598,6 +1614,7 @@ object ActivityUtils {
         }
         return false
     }
+
     /**
      * 结束activity
      *
@@ -1605,17 +1622,11 @@ object ActivityUtils {
      * @param isIncludeSelf 如果包含活动，则为 true，否则为 false。
      * @param isLoadAnim    动画
      */
-    /**
-     * 结束activity
-     *
-     * @param clz           The activity class.
-     * @param isIncludeSelf 如果包含活动，则为 true，否则为 false。
-     */
     @JvmOverloads
     fun finishToActivity(
         clz: Class<out Activity?>, isIncludeSelf: Boolean, isLoadAnim: Boolean = false
     ): Boolean {
-        val activities = DawnBridge.getActivityList()
+        val activities = DawnBridge.activityList
         for (act in activities) {
             if (act.javaClass == clz) {
                 if (isIncludeSelf) {
@@ -1639,7 +1650,7 @@ object ActivityUtils {
     fun finishToActivity(
         clz: Class<out Activity?>, isIncludeSelf: Boolean, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
     ): Boolean {
-        val activities = DawnBridge.getActivityList()
+        val activities = DawnBridge.activityList
         for (act in activities) {
             if (act.javaClass == clz) {
                 if (isIncludeSelf) {
@@ -1651,22 +1662,18 @@ object ActivityUtils {
         }
         return false
     }
+
     /**
      * Finish 类型不等于activity类别的activity
      *
      * @param clz        The activity class.
      * @param isLoadAnim 动画
      */
-    /**
-     * Finish 类型不等于activity类别的activity
-     *
-     * @param clz The activity class.
-     */
     @JvmOverloads
     fun finishOtherActivities(
         clz: Class<out Activity?>, isLoadAnim: Boolean = false
     ) {
-        val activities = DawnBridge.getActivityList()
+        val activities = DawnBridge.activityList
         for (act in activities) {
             if (act.javaClass != clz) {
                 finishActivity(act, isLoadAnim)
@@ -1684,30 +1691,36 @@ object ActivityUtils {
     fun finishOtherActivities(
         clz: Class<out Activity?>, @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
     ) {
-        val activities = DawnBridge.getActivityList()
+        val activities = DawnBridge.activityList
         for (act in activities) {
             if (act.javaClass != clz) {
                 finishActivity(act, enterAnim, exitAnim)
             }
         }
     }
+
     /**
      * Finish 所有 activities.
      *
      * @param isLoadAnim 动画
      */
-    /**
-     * Finish 所有 activities.
-     */
     @JvmOverloads
     @JvmStatic
     fun finishAllActivities(isLoadAnim: Boolean = false) {
-        val activityList = DawnBridge.getActivityList()
+        val activityList = DawnBridge.activityList
         for (act in activityList) {
             // sActivityList remove the index activity at onActivityDestroyed
             act.finish()
             if (!isLoadAnim) {
-                act.overridePendingTransition(0, 0)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    act.overrideActivityTransition(
+                        Activity.OVERRIDE_TRANSITION_CLOSE,
+                        0,
+                        0
+                    )
+                } else {
+                    act.overridePendingTransition(0, 0)
+                }
             }
         }
     }
@@ -1721,24 +1734,31 @@ object ActivityUtils {
     fun finishAllActivities(
         @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
     ) {
-        val activityList = DawnBridge.getActivityList()
+        val activityList = DawnBridge.activityList
         for (act in activityList) {
             // sActivityList remove the index activity at onActivityDestroyed
             act.finish()
-            act.overridePendingTransition(enterAnim, exitAnim)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                act.overrideActivityTransition(
+                    Activity.OVERRIDE_TRANSITION_CLOSE,
+                    enterAnim,
+                    exitAnim
+                )
+            } else {
+                act.overridePendingTransition(enterAnim, exitAnim)
+            }
+
         }
     }
+
     /**
      * finish除栈顶activity外的所有activity
      *
      * @param isLoadAnim 动画
      */
-    /**
-     * finish除栈顶activity外的所有activity
-     */
     @JvmOverloads
     fun finishAllActivitiesExceptNewest(isLoadAnim: Boolean = false) {
-        val activities = DawnBridge.getActivityList()
+        val activities = DawnBridge.activityList
         for (i in 1 until activities.size) {
             finishActivity(activities[i], isLoadAnim)
         }
@@ -1753,7 +1773,7 @@ object ActivityUtils {
     fun finishAllActivitiesExceptNewest(
         @AnimRes enterAnim: Int, @AnimRes exitAnim: Int
     ) {
-        val activities = DawnBridge.getActivityList()
+        val activities = DawnBridge.activityList
         for (i in 1 until activities.size) {
             finishActivity(activities[i], enterAnim, exitAnim)
         }
@@ -1776,7 +1796,7 @@ object ActivityUtils {
      * @return activity 的icon
      */
     fun getActivityIcon(clz: Class<out Activity?>): Drawable? {
-        return getActivityIcon(ComponentName(DawnBridge.getApp(), clz))
+        return getActivityIcon(ComponentName(DawnBridge.app, clz))
     }
 
     /**
@@ -1786,7 +1806,7 @@ object ActivityUtils {
      * @return activity 的icon
      */
     fun getActivityIcon(activityName: ComponentName): Drawable? {
-        val pm = DawnBridge.getApp().packageManager
+        val pm = DawnBridge.app.packageManager
         return try {
             pm.getActivityIcon(activityName)
         } catch (e: PackageManager.NameNotFoundException) {
@@ -1812,7 +1832,7 @@ object ActivityUtils {
      * @return activity 的logo
      */
     fun getActivityLogo(clz: Class<out Activity?>): Drawable? {
-        return getActivityLogo(ComponentName(DawnBridge.getApp(), clz))
+        return getActivityLogo(ComponentName(DawnBridge.app, clz))
     }
 
     /**
@@ -1822,7 +1842,7 @@ object ActivityUtils {
      * @return activity 的logo
      */
     fun getActivityLogo(activityName: ComponentName): Drawable? {
-        val pm = DawnBridge.getApp().packageManager
+        val pm = DawnBridge.app.packageManager
         return try {
             pm.getActivityLogo(activityName)
         } catch (e: PackageManager.NameNotFoundException) {
@@ -1849,7 +1869,7 @@ object ActivityUtils {
     }
 
     private fun getActivityByContextInner(context: Context?): Activity? {
-        var context: Context? = context ?: return null
+
         val list: MutableList<Context> = ArrayList()
         while (context is ContextWrapper) {
             if (context is Activity) {
@@ -1860,12 +1880,8 @@ object ActivityUtils {
                 return activity
             }
             list.add(context)
-            context = context.baseContext
-            if (context == null) {
-                return null
-            }
-            if (list.contains(context)) {
-                // loop context
+            val baseContext: Context = context.baseContext ?: return null
+            if (list.contains(baseContext)) {
                 return null
             }
         }
@@ -1917,7 +1933,7 @@ object ActivityUtils {
     }
 
     private fun isIntentAvailable(intent: Intent): Boolean {
-        return DawnBridge.getApp().packageManager.queryIntentActivities(
+        return DawnBridge.app.packageManager.queryIntentActivities(
             intent, PackageManager.MATCH_DEFAULT_ONLY
         ).size > 0
     }
@@ -2016,9 +2032,6 @@ object ActivityUtils {
     private fun getOptionsBundle(
         activity: Activity, sharedElements: Array<View>
     ): Bundle? {
-        if (sharedElements == null) {
-            return null
-        }
         val len = sharedElements.size
         if (len <= 0) {
             return null
@@ -2031,10 +2044,10 @@ object ActivityUtils {
     }
 
     private val topActivityOrApp: Context
-        get() = if (DawnBridge.isAppForeground()) {
+        get() = if (DawnBridge.isAppForeground) {
             val topActivity = topActivity
             topActivity
         } else {
-            DawnBridge.getApp()
+            DawnBridge.app
         }
 }

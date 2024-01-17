@@ -21,7 +21,7 @@ object BrightnessUtils {
          */
         get() = try {
             val mode = Settings.System.getInt(
-                DawnBridge.getApp().contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE
+                DawnBridge.app.contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE
             )
             mode == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
         } catch (e: SettingNotFoundException) {
@@ -39,7 +39,7 @@ object BrightnessUtils {
      */
     fun setAutoBrightnessEnabled(enabled: Boolean): Boolean {
         return Settings.System.putInt(
-            DawnBridge.getApp().contentResolver,
+            DawnBridge.app.contentResolver,
             Settings.System.SCREEN_BRIGHTNESS_MODE,
             if (enabled) Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC else Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
         )
@@ -53,7 +53,7 @@ object BrightnessUtils {
          */
         get() = try {
             Settings.System.getInt(
-                DawnBridge.getApp().contentResolver, Settings.System.SCREEN_BRIGHTNESS
+                DawnBridge.app.contentResolver, Settings.System.SCREEN_BRIGHTNESS
             )
         } catch (e: SettingNotFoundException) {
             e.printStackTrace()
@@ -69,7 +69,7 @@ object BrightnessUtils {
      * @param brightness 亮度值
      */
     fun setBrightness(@IntRange(from = 0, to = 255) brightness: Int): Boolean {
-        val resolver = DawnBridge.getApp().contentResolver
+        val resolver = DawnBridge.app.contentResolver
         val b = Settings.System.putInt(resolver, Settings.System.SCREEN_BRIGHTNESS, brightness)
         resolver.notifyChange(Settings.System.getUriFor("screen_brightness"), null)
         return b

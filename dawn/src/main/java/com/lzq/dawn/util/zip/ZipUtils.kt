@@ -163,11 +163,11 @@ object ZipUtils {
 
     @Throws(IOException::class)
     private fun zipFile(
-        srcFile: File, rootPath: String, zos: ZipOutputStream, comment: String?
+        srcFile: File?, rootPathStr: String, zos: ZipOutputStream, comment: String?
     ): Boolean {
-        var rootPath = rootPath
-        rootPath = rootPath + (if (DawnBridge.isSpace(rootPath)) "" else File.separator) + srcFile.name
-        if (srcFile.isDirectory) {
+        var rootPath = rootPathStr
+        rootPath = rootPath + (if (DawnBridge.isSpace(rootPath)) "" else File.separator) + srcFile?.name
+        if (srcFile?.isDirectory == true) {
             val fileList = srcFile.listFiles()
             if (fileList == null || fileList.isEmpty()) {
                 val entry = ZipEntry("$rootPath/")
@@ -268,9 +268,9 @@ object ZipUtils {
             return null
         }
         val files: MutableList<File> = ArrayList()
-        val zip = ZipFile(zipFile)
-        val entries: Enumeration<*> = zip.entries()
-        zip.use { zip ->
+        val zipF = ZipFile(zipFile)
+        val entries: Enumeration<*> = zipF.entries()
+        zipF.use { zip ->
             if (DawnBridge.isSpace(keyword)) {
                 while (entries.hasMoreElements()) {
                     val entry = entries.nextElement() as ZipEntry

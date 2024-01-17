@@ -1,13 +1,7 @@
-package com.lzq.dawn.util.cache.memory;
+package com.lzq.dawn.util.cache.memory
 
-import androidx.annotation.NonNull;
-import androidx.collection.LruCache;
-
-
-import com.lzq.dawn.util.cache.CacheConstants;
-
-import java.util.HashMap;
-import java.util.Map;
+import androidx.collection.LruCache
+import com.lzq.dawn.util.cache.CacheConstants
 
 /**
  * @Name :CacheMemoryUtils
@@ -15,73 +9,10 @@ import java.util.Map;
  * @Author :  Lzq
  * @Desc : 内存缓存
  */
-public final class CacheMemoryUtils {
-
-
-
-    private static final Map<String, CacheMemoryUtils> CACHE_MAP = new HashMap<>();
-
-    private final String mCacheKey;
-    private final LruCache<String, CacheValue> mMemoryCache;
-
-
-    private CacheMemoryUtils(String cacheKey, LruCache<String, CacheValue> memoryCache) {
-        mCacheKey = cacheKey;
-        mMemoryCache = memoryCache;
-    }
-
-
-    /**
-     * 返回单个{@link CacheMemoryUtils}实例。
-     *
-     * @return 返回单个{@link CacheMemoryUtils}实例。
-     */
-    public static CacheMemoryUtils getInstance() {
-        return getInstance(CacheConstants.MEMORY_DEFAULT_MAX_COUNT);
-    }
-
-    /**
-     * 返回单个{@link CacheMemoryUtils}实例。
-     *
-     * @param maxCount 缓存的最大计数。
-     * @return 单个{@link CacheMemoryUtils}实例
-     */
-    public static CacheMemoryUtils getInstance(final int maxCount) {
-        return getInstance(String.valueOf(maxCount), maxCount);
-    }
-
-    /**
-     * 返回单个{@link CacheMemoryUtils}实例。
-     *
-     * @param cacheKey The key of cache.
-     * @param maxCount 缓存的最大计数。
-     * @return 单个{@link CacheMemoryUtils}实例
-     */
-    public static CacheMemoryUtils getInstance(final String cacheKey, final int maxCount) {
-        CacheMemoryUtils cache = CACHE_MAP.get(cacheKey);
-        if (cache == null) {
-            synchronized (CacheMemoryUtils.class) {
-                cache = CACHE_MAP.get(cacheKey);
-                if (cache == null) {
-                    cache = new CacheMemoryUtils(cacheKey, new LruCache<String, CacheValue>(maxCount));
-                    CACHE_MAP.put(cacheKey, cache);
-                }
-            }
-        }
-        return cache;
-    }
-
-
-    /**
-     * 将字节放入缓存。
-     *
-     * @param key  key
-     * @param value value
-     */
-    public void put(@NonNull final String key, final Object value) {
-        put(key, value, -1);
-    }
-
+class CacheMemoryUtils private constructor(
+    private val mCacheKey: String,
+    private val mMemoryCache: LruCache<String, CacheValue>
+) {
     /**
      * 将字节放入缓存。
      *
@@ -89,12 +20,13 @@ public final class CacheMemoryUtils {
      * @param value value
      * @param saveTime 缓存的保存时间，以秒为单位。
      */
-    public void put(@NonNull final String key, final Object value, int saveTime) {
+    @JvmOverloads
+    fun put(key: String, value: Any?, saveTime: Int = -1) {
         if (value == null) {
-            return;
+            return
         }
-        long dueTime = saveTime < 0 ? -1 : System.currentTimeMillis() + saveTime * 1000;
-        mMemoryCache.put(key, new CacheValue(dueTime, value));
+        val dueTime = if (saveTime < 0) -1 else System.currentTimeMillis() + saveTime * 1000
+        mMemoryCache.put(key, CacheValue(dueTime, value))
     }
 
     /**
@@ -103,9 +35,9 @@ public final class CacheMemoryUtils {
      * @param key  key
      * @param <T> 值类型
      * @return 缓存存在时的值，否则为null
-     */
-    public <T> T get(@NonNull final String key) {
-        return get(key, null);
+    </T> */
+    operator fun <T> get(key: String): T? {
+        return get<T?>(key, null)
     }
 
     /**
@@ -115,54 +47,86 @@ public final class CacheMemoryUtils {
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @param <T>         值类型
      * @return 缓存存在时的值，否则为defaultValue
-     */
-    public <T> T get(@NonNull final String key, final T defaultValue) {
-        CacheValue val = mMemoryCache.get(key);
-        if (val == null) {
-            return defaultValue;
+    </T> */
+    operator fun <T> get(key: String, defaultValue: T): T {
+        val `val` = mMemoryCache[key] ?: return defaultValue
+        if (`val`.dueTime == -1L || `val`.dueTime >= System.currentTimeMillis()) {
+            return `val`.value as T
         }
-        if (val.dueTime == -1 || val.dueTime >= System.currentTimeMillis()) {
-            //noinspection unchecked
-            return (T) val.value;
-        }
-        mMemoryCache.remove(key);
-        return defaultValue;
+        mMemoryCache.remove(key)
+        return defaultValue
     }
 
-    /**
-     * 返回缓存数量
-     *
-     * @return 返回缓存数量
-     */
-    public int getCacheCount() {
-        return mMemoryCache.size();
-    }
+    val cacheCount: Int
+        /**
+         * 返回缓存数量
+         *
+         * @return 返回缓存数量
+         */
+        get() = mMemoryCache.size()
 
     /**
      * 按key删除缓存。
      *
      * @param key key
-     * @return {@code true}: success<br>{@code false}: fail
+     * @return `true`: success<br></br>`false`: fail
      */
-    public Object remove(@NonNull final String key) {
-        CacheValue remove = mMemoryCache.remove(key);
-        if (remove == null) {
-            return null;
-        }
-        return remove.value;
+    fun remove(key: String): Any? {
+        val remove = mMemoryCache.remove(key) ?: return null
+        return remove.value
     }
 
     /**
      * 清除所有缓存。
      */
-    public void clear() {
-        mMemoryCache.evictAll();
+    fun clear() {
+        mMemoryCache.evictAll()
     }
 
-
-    @Override
-    public String toString() {
-        return mCacheKey + "@" + Integer.toHexString(hashCode());
+    override fun toString(): String {
+        return mCacheKey + "@" + Integer.toHexString(hashCode())
     }
 
+    companion object {
+        private val CACHE_MAP: MutableMap<String, CacheMemoryUtils> = HashMap()
+        @JvmStatic
+        val instance: CacheMemoryUtils?
+            /**
+             * 返回单个[CacheMemoryUtils]实例。
+             *
+             * @return 返回单个{@link CacheMemoryUtils}实例。
+             */
+            get() = getInstance(CacheConstants.MEMORY_DEFAULT_MAX_COUNT)
+
+        /**
+         * 返回单个[CacheMemoryUtils]实例。
+         *
+         * @param maxCount 缓存的最大计数。
+         * @return 单个{@link CacheMemoryUtils}实例
+         */
+        fun getInstance(maxCount: Int): CacheMemoryUtils? {
+            return getInstance(maxCount.toString(), maxCount)
+        }
+
+        /**
+         * 返回单个[CacheMemoryUtils]实例。
+         *
+         * @param cacheKey The key of cache.
+         * @param maxCount 缓存的最大计数。
+         * @return 单个{@link CacheMemoryUtils}实例
+         */
+        fun getInstance(cacheKey: String, maxCount: Int): CacheMemoryUtils? {
+            var cache = CACHE_MAP[cacheKey]
+            if (cache == null) {
+                synchronized(CacheMemoryUtils::class.java) {
+                    cache = CACHE_MAP[cacheKey]
+                    if (cache == null) {
+                        cache = CacheMemoryUtils(cacheKey, LruCache(maxCount))
+                        CACHE_MAP[cacheKey] = cache!!
+                    }
+                }
+            }
+            return cache
+        }
+    }
 }

@@ -1,6 +1,5 @@
 package com.lzq.dawn.util.snackbar
 
-import android.R
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
@@ -358,7 +357,7 @@ class SnackbarUtils private constructor(parent: View) {
                     return view
                 }
                 if (view is FrameLayout) {
-                    if (view.getId() == R.id.content) {
+                    if (view.getId() == android.R.id.content) {
                         return view
                     }
                     fallback = view

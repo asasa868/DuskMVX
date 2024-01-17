@@ -694,19 +694,18 @@ object LogUtils {
         // 日志的保存天数。
         var saveDays = -1
             private set
-        private val mProcessName = DawnBridge.getCurrentProcessName()
+        private val mProcessName = DawnBridge.currentProcessName
         var mFileWriter: IFileWriter? = null
         var mOnConsoleOutputListener: OnConsoleOutputListener? = null
         var mOnFileOutputListener: OnFileOutputListener? = null
         val mFileHead = DawnBridge.FileHead("Log")
 
         init {
-            defaultDir = if (DawnBridge.isSDCardEnableByEnvironment() && DawnBridge.getApp()
-                    .getExternalFilesDir(null) != null
+            defaultDir = if (DawnBridge.isSDCardEnableByEnvironment && DawnBridge.app.getExternalFilesDir(null) != null
             ) {
-                DawnBridge.getApp().getExternalFilesDir(null).toString() + FILE_SEP + "log" + FILE_SEP
+                DawnBridge.app.getExternalFilesDir(null).toString() + FILE_SEP + "log" + FILE_SEP
             } else {
-                DawnBridge.getApp().filesDir.toString() + FILE_SEP + "log" + FILE_SEP
+                DawnBridge.app.filesDir.toString() + FILE_SEP + "log" + FILE_SEP
             }
         }
 
@@ -834,12 +833,12 @@ object LogUtils {
             return this
         }
 
-        fun addFileExtraHead(fileExtraHead: Map<String?, String?>?): Config {
+        fun addFileExtraHead(fileExtraHead: Map<String, String>?): Config {
             mFileHead.append(fileExtraHead)
             return this
         }
 
-        fun addFileExtraHead(key: String?, value: String?): Config {
+        fun addFileExtraHead(key: String, value: String): Config {
             mFileHead.append(key, value)
             return this
         }

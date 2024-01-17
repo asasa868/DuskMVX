@@ -66,7 +66,7 @@ object DeviceUtils {
          * @return `true`: yes<br></br>`false`: no
          */
         get() = Settings.Secure.getInt(
-            DawnBridge.getApp().contentResolver, Settings.Global.ADB_ENABLED, 0
+            DawnBridge.app.contentResolver, Settings.Global.ADB_ENABLED, 0
         ) > 0
     val sDKVersionName: String
         /**
@@ -92,7 +92,7 @@ object DeviceUtils {
          */
         get() {
             val id = Settings.Secure.getString(
-                DawnBridge.getApp().getContentResolver(), Settings.Secure.ANDROID_ID
+                DawnBridge.app.contentResolver, Settings.Secure.ANDROID_ID
             )
             return if ("9774d56d682e549c" == id) {
                 ""
@@ -112,40 +112,10 @@ object DeviceUtils {
          */
         get() {
             val macAddress = getMacAddress(*(null as Array<String?>?)!!)
-            if (!TextUtils.isEmpty(macAddress) || wifiEnabled) {
+            if (!TextUtils.isEmpty(macAddress)) {
                 return macAddress
             }
-            wifiEnabled = true
-            wifiEnabled = false
             return getMacAddress(*(null as Array<String?>?)!!)
-        }
-
-    @set:RequiresPermission(Manifest.permission.CHANGE_WIFI_STATE)
-    private var wifiEnabled: Boolean
-        get() {
-            @SuppressLint("WifiManagerLeak") val manager: WifiManager = DawnBridge.getApp().getSystemService(
-                Context.WIFI_SERVICE
-            ) as WifiManager
-            return manager.isWifiEnabled
-        }
-        /**
-         * 启用或禁用 wifi。
-         *
-         * Must hold `<uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />`
-         *
-         *
-         * 从[android.os.Build.VERSION_CODES.Q]开始 app将不能再控制wifi开关
-         *
-         * @param enabled True 启用，否则为 false。
-         */
-        private set(enabled) {
-            @SuppressLint("WifiManagerLeak") val manager: WifiManager = DawnBridge.getApp().getSystemService(
-                Context.WIFI_SERVICE
-            ) as WifiManager ?: return
-            if (enabled == manager.isWifiEnabled) {
-                return
-            }
-            manager.setWifiEnabled(enabled)
         }
 
     /**
@@ -182,7 +152,7 @@ object DeviceUtils {
         if ("02:00:00:00:00:00" == address) {
             return false
         }
-        if (excepts == null || excepts.size == 0) {
+        if (excepts.isEmpty()) {
             return true
         }
         for (filter in excepts) {
@@ -197,11 +167,11 @@ object DeviceUtils {
     private val macAddressByWifiInfo: String
         get() {
             try {
-                val wifi: WifiManager = DawnBridge.getApp().applicationContext
+                val wifi: WifiManager = DawnBridge.app.applicationContext
                     .getSystemService(Context.WIFI_SERVICE) as WifiManager
                 val info: WifiInfo = wifi.getConnectionInfo()
                 if (ActivityCompat.checkSelfPermission(
-                        DawnBridge.getApp(), Manifest.permission.ACCESS_FINE_LOCATION
+                        DawnBridge.app, Manifest.permission.ACCESS_FINE_LOCATION
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     return "02:00:00:00:00:00"
@@ -342,9 +312,9 @@ object DeviceUtils {
             if (checkProperty) {
                 return true
             }
-            var operatorName: String? = ""
+            val operatorName: String?
             val tm: TelephonyManager =
-                DawnBridge.getApp().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+                DawnBridge.app.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
             val name: String = tm.networkOperatorName
             operatorName = name
             val checkOperatorName = "android".equals(operatorName, ignoreCase = true)
@@ -355,7 +325,7 @@ object DeviceUtils {
             val intent = Intent()
             intent.data = Uri.parse(url)
             intent.action = Intent.ACTION_DIAL
-            return intent.resolveActivity(DawnBridge.getApp().packageManager) == null
+            return intent.resolveActivity(DawnBridge.app.packageManager) == null
         }
     val isDevelopmentSettingsEnabled: Boolean
         /**
@@ -364,7 +334,7 @@ object DeviceUtils {
          * @return 用户是否启用了开发设置。
          */
         get() = Settings.Global.getInt(
-            DawnBridge.getApp().contentResolver, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0
+            DawnBridge.app.contentResolver, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0
         ) > 0
 
     private fun getUdid(prefix: String, id: String): String {

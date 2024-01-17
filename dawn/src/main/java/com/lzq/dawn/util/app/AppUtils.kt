@@ -1,8 +1,6 @@
 package com.lzq.dawn.util.app
 
 import android.app.Activity
-import android.app.ActivityManager
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
@@ -33,7 +31,7 @@ object AppUtils {
     @JvmStatic
     fun installApp(file: File?) {
         val installAppIntent: Intent = DawnBridge.getInstallAppIntent(file) ?: return
-        DawnBridge.getApp().startActivity(installAppIntent)
+        DawnBridge.app.startActivity(installAppIntent)
     }
 
     /**
@@ -46,7 +44,7 @@ object AppUtils {
     @JvmStatic
     fun installApp(uri: Uri?) {
         val installAppIntent: Intent = DawnBridge.getInstallAppIntent(uri) ?: return
-        DawnBridge.getApp().startActivity(installAppIntent)
+        DawnBridge.app.startActivity(installAppIntent)
     }
 
     /**
@@ -61,7 +59,7 @@ object AppUtils {
         if (DawnBridge.isSpace(packageName)) {
             return
         }
-        DawnBridge.getApp().startActivity(DawnBridge.getUninstallAppIntent(packageName))
+        DawnBridge.app.startActivity(DawnBridge.getUninstallAppIntent(packageName))
     }
 
     /**
@@ -75,18 +73,18 @@ object AppUtils {
         if (DawnBridge.isSpace(pkgName)) {
             return false
         }
-        val pm: PackageManager = DawnBridge.getApp().packageManager
+        val pm: PackageManager = DawnBridge.app.packageManager
         return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                pm.getApplicationInfo(pkgName?:"", PackageManager.ApplicationInfoFlags.of(0)).enabled
+                pm.getApplicationInfo(pkgName ?: "", PackageManager.ApplicationInfoFlags.of(0)).enabled
             } else {
-                pm.getApplicationInfo(pkgName?:"", 0).enabled
+                pm.getApplicationInfo(pkgName ?: "", 0).enabled
             }
         } catch (e: PackageManager.NameNotFoundException) {
             false
         }
     }
-    
+
     @JvmStatic
     val isAppDebug: Boolean
         /**
@@ -94,7 +92,7 @@ object AppUtils {
          *
          * @return `true`: yes<br></br>`false`: no
          */
-        get() = isAppDebug(DawnBridge.getApp().packageName)
+        get() = isAppDebug(DawnBridge.app.packageName)
 
     /**
      * 返回是否为调试应用程序。
@@ -107,12 +105,11 @@ object AppUtils {
         return if (DawnBridge.isSpace(packageName)) {
             false
         } else try {
-            val pm: PackageManager = DawnBridge.getApp().packageManager
-            var ai: ApplicationInfo? = null
-            ai = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                pm.getApplicationInfo(packageName?:"", PackageManager.ApplicationInfoFlags.of(0))
+            val pm: PackageManager = DawnBridge.app.packageManager
+            val ai: ApplicationInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pm.getApplicationInfo(packageName ?: "", PackageManager.ApplicationInfoFlags.of(0))
             } else {
-                pm.getApplicationInfo(packageName?:"", 0)
+                pm.getApplicationInfo(packageName ?: "", 0)
             }
             ai.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
         } catch (e: PackageManager.NameNotFoundException) {
@@ -128,7 +125,7 @@ object AppUtils {
          *
          * @return `true`: yes<br></br>`false`: no
          */
-        get() = isAppSystem(DawnBridge.getApp().packageName)
+        get() = isAppSystem(DawnBridge.app.packageName)
 
     /**
      * 返回是否为系统应用程序.
@@ -141,8 +138,8 @@ object AppUtils {
         return if (DawnBridge.isSpace(packageName)) {
             false
         } else try {
-            val pm: PackageManager = DawnBridge.getApp().packageManager
-            val ai: ApplicationInfo = pm.getApplicationInfo(packageName?:"", 0)
+            val pm: PackageManager = DawnBridge.app.packageManager
+            val ai: ApplicationInfo = pm.getApplicationInfo(packageName ?: "", 0)
             ai.flags and ApplicationInfo.FLAG_SYSTEM != 0
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
@@ -157,7 +154,7 @@ object AppUtils {
          *
          * @return `true`: yes<br></br>`false`: no
          */
-        get() = DawnBridge.isAppForeground()
+        get() = DawnBridge.isAppForeground
 
     /**
      * 返回app 是否在前台
@@ -169,42 +166,9 @@ object AppUtils {
      */
     @JvmStatic
     fun isAppForeground(pkgName: String): Boolean {
-        return !DawnBridge.isSpace(pkgName) && pkgName == DawnBridge.getForegroundProcessName()
+        return !DawnBridge.isSpace(pkgName) && pkgName == DawnBridge.foregroundProcessName
     }
 
-    /**
-     * 返回应用程序是否正在运行。
-     *
-     * @param pkgName 包名
-     * @return `true`: yes<br></br>`false`: no
-     */
-    @JvmStatic
-    fun isAppRunning(pkgName: String): Boolean {
-        if (DawnBridge.isSpace(pkgName)) {
-            return false
-        }
-        val am: ActivityManager =
-            DawnBridge.getApp().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        val taskInfo: List<ActivityManager.RunningTaskInfo> = am.getRunningTasks(Int.MAX_VALUE)
-        if (taskInfo.isNotEmpty()) {
-            for (aInfo in taskInfo) {
-                if (aInfo.baseActivity != null) {
-                    if (pkgName == aInfo.baseActivity!!.packageName) {
-                        return true
-                    }
-                }
-            }
-        }
-        val serviceInfo: List<ActivityManager.RunningServiceInfo> = am.getRunningServices(Int.MAX_VALUE)
-        if (serviceInfo.isNotEmpty()) {
-            for (aInfo in serviceInfo) {
-                if (pkgName == aInfo.service.packageName) {
-                    return true
-                }
-            }
-        }
-        return false
-    }
 
     /**
      * 启动app
@@ -216,42 +180,38 @@ object AppUtils {
         if (DawnBridge.isSpace(packageName)) {
             return
         }
-        val launchAppIntent: Intent = DawnBridge.getLaunchAppIntent(packageName)
-        DawnBridge.getApp().startActivity(launchAppIntent)
+        val launchAppIntent: Intent = DawnBridge.getLaunchAppIntent(packageName)!!
+        DawnBridge.app.startActivity(launchAppIntent)
     }
+
     /**
      * 重启app
      *
      * @param isKillProcess 是否杀死进程
      */
-    /**
-     * 重启app
-     */
     @JvmOverloads
     @JvmStatic
     fun relaunchApp(isKillProcess: Boolean = false) {
-        val intent: Intent = DawnBridge.getLaunchAppIntent(DawnBridge.getApp().packageName)
+        val intent: Intent = DawnBridge.getLaunchAppIntent(DawnBridge.app.packageName) ?: Intent()
         intent.addFlags(
             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
         )
-        DawnBridge.getApp().startActivity(intent)
+        DawnBridge.app.startActivity(intent)
         if (!isKillProcess) {
             return
         }
         Process.killProcess(Process.myPid())
         exitProcess(0)
     }
+
     /**
      * 启动app的详细信息设置。
      *
      * @param pkgName 包名
      */
-    /**
-     * 启动app的详细信息设置。
-     */
     @JvmStatic
     @JvmOverloads
-    fun launchAppDetailsSettings(pkgName: String? = DawnBridge.getApp().packageName) {
+    fun launchAppDetailsSettings(pkgName: String? = DawnBridge.app.packageName) {
         if (DawnBridge.isSpace(pkgName)) {
             return
         }
@@ -259,8 +219,9 @@ object AppUtils {
         if (!DawnBridge.isIntentAvailable(intent)) {
             return
         }
-        DawnBridge.getApp().startActivity(intent)
+        DawnBridge.app.startActivity(intent)
     }
+
     /**
      * 启动应用程序的详细信息设置。
      *
@@ -268,18 +229,10 @@ object AppUtils {
      * @param requestCode requestCode.
      * @param pkgName     包名
      */
-    /**
-     * 启动应用程序的详细信息设置。
-     *
-     * @param activity    activity.
-     * @param requestCode requestCode.
-     */
     @JvmStatic
     @JvmOverloads
     fun launchAppDetailsSettings(
-        activity: Activity?,
-        requestCode: Int,
-        pkgName: String? = DawnBridge.getApp().packageName
+        activity: Activity?, requestCode: Int, pkgName: String? = DawnBridge.app.packageName
     ) {
         if (activity == null || DawnBridge.isSpace(pkgName)) {
             return
@@ -307,7 +260,7 @@ object AppUtils {
          *
          * @return icon
          */
-        get() = getAppIcon(DawnBridge.getApp().packageName)
+        get() = getAppIcon(DawnBridge.app.packageName)
 
     /**
      * 返回app的icon
@@ -320,9 +273,9 @@ object AppUtils {
         return if (DawnBridge.isSpace(packageName)) {
             null
         } else try {
-            val pm: PackageManager = DawnBridge.getApp().packageManager
-            val pi: PackageInfo = pm.getPackageInfo(packageName?:"", 0)
-            if (pi == null) null else pi.applicationInfo.loadIcon(pm)
+            val pm: PackageManager = DawnBridge.app.packageManager
+            val pi: PackageInfo = pm.getPackageInfo(packageName ?: "", 0)
+            pi.applicationInfo.loadIcon(pm)
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
             null
@@ -336,7 +289,7 @@ object AppUtils {
          *
          * @return 返回app icon 的资源id
          */
-        get() = getAppIconId(DawnBridge.getApp().packageName)
+        get() = getAppIconId(DawnBridge.app.packageName)
 
     /**
      * 返回app icon 的资源id
@@ -349,9 +302,9 @@ object AppUtils {
         return if (DawnBridge.isSpace(packageName)) {
             0
         } else try {
-            val pm: PackageManager = DawnBridge.getApp().packageManager
-            val pi: PackageInfo = pm.getPackageInfo(packageName?:"", 0)
-            pi?.applicationInfo?.icon ?: 0
+            val pm: PackageManager = DawnBridge.app.packageManager
+            val pi: PackageInfo = pm.getPackageInfo(packageName ?: "", 0)
+            pi.applicationInfo?.icon ?: 0
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
             0
@@ -365,10 +318,10 @@ object AppUtils {
          * @return 返回是否第一次在设备上安装应用程序
          */
         get() = try {
-            val firstInstallTime: Long = DawnBridge.getApp().packageManager.getPackageInfo(
+            val firstInstallTime: Long = DawnBridge.app.packageManager.getPackageInfo(
                 appPackageName, 0
             ).firstInstallTime
-            val lastUpdateTime: Long = DawnBridge.getApp().packageManager.getPackageInfo(
+            val lastUpdateTime: Long = DawnBridge.app.packageManager.getPackageInfo(
                 appPackageName, 0
             ).lastUpdateTime
             firstInstallTime == lastUpdateTime
@@ -380,10 +333,10 @@ object AppUtils {
          * @return 如果之前安装了应用程序并且此应用程序是对该应用程序的更新升级，则返回 true，如果这是全新安装而不是 update/upgrade，则返回 false。
          */
         get() = try {
-            val firstInstallTime: Long = DawnBridge.getApp().packageManager.getPackageInfo(
+            val firstInstallTime: Long = DawnBridge.app.packageManager.getPackageInfo(
                 appPackageName, 0
             ).firstInstallTime
-            val lastUpdateTime: Long = DawnBridge.getApp().packageManager.getPackageInfo(
+            val lastUpdateTime: Long = DawnBridge.app.packageManager.getPackageInfo(
                 appPackageName, 0
             ).lastUpdateTime
             firstInstallTime != lastUpdateTime
@@ -396,14 +349,14 @@ object AppUtils {
          *
          * @return 包名
          */
-        get() = DawnBridge.getApp().packageName
+        get() = DawnBridge.app.packageName
     val appName: String
         /**
          * 返回app名字
          *
          * @return app名字
          */
-        get() = getAppName(DawnBridge.getApp().packageName)
+        get() = getAppName(DawnBridge.app.packageName)
 
     /**
      * 返回app名字
@@ -415,9 +368,9 @@ object AppUtils {
         return if (DawnBridge.isSpace(packageName)) {
             ""
         } else try {
-            val pm: PackageManager = DawnBridge.getApp().packageManager
-            val pi: PackageInfo = pm.getPackageInfo(packageName?:"", 0)
-            pi?.applicationInfo?.loadLabel(pm)?.toString() ?: ""
+            val pm: PackageManager = DawnBridge.app.packageManager
+            val pi: PackageInfo = pm.getPackageInfo(packageName ?: "", 0)
+            pi.applicationInfo?.loadLabel(pm)?.toString() ?: ""
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
             ""
@@ -430,7 +383,7 @@ object AppUtils {
          *
          * @return 返回应用程序的路径。
          */
-        get() = getAppPath(DawnBridge.getApp().packageName)
+        get() = getAppPath(DawnBridge.app.packageName)
 
     /**
      * 返回应用程序的路径。
@@ -442,9 +395,9 @@ object AppUtils {
         return if (DawnBridge.isSpace(packageName)) {
             ""
         } else try {
-            val pm: PackageManager = DawnBridge.getApp().packageManager
-            val pi: PackageInfo = pm.getPackageInfo(packageName?:"", 0)
-            if (pi == null) "" else pi.applicationInfo.sourceDir
+            val pm: PackageManager = DawnBridge.app.packageManager
+            val pi: PackageInfo = pm.getPackageInfo(packageName ?: "", 0)
+            pi.applicationInfo.sourceDir
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
             ""
@@ -458,7 +411,7 @@ object AppUtils {
          *
          * @return 版本名
          */
-        get() = getAppVersionName(DawnBridge.getApp().packageName)
+        get() = getAppVersionName(DawnBridge.app.packageName)
 
     /**
      * 返回app版本名。
@@ -470,9 +423,9 @@ object AppUtils {
         return if (DawnBridge.isSpace(packageName)) {
             ""
         } else try {
-            val pm: PackageManager = DawnBridge.getApp().packageManager
-            val pi: PackageInfo = pm.getPackageInfo(packageName?:"", 0)
-            if (pi == null) "" else pi.versionName
+            val pm: PackageManager = DawnBridge.app.packageManager
+            val pi: PackageInfo = pm.getPackageInfo(packageName ?: "", 0)
+            pi.versionName
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
             ""
@@ -486,7 +439,7 @@ object AppUtils {
          *
          * @return 版本号
          */
-        get() = getAppVersionCode(DawnBridge.getApp().packageName)
+        get() = getAppVersionCode(DawnBridge.app.packageName)
 
     /**
      * 返回app版本号
@@ -498,9 +451,13 @@ object AppUtils {
         return if (DawnBridge.isSpace(packageName)) {
             -1
         } else try {
-            val pm: PackageManager = DawnBridge.getApp().packageManager
-            val pi: PackageInfo = pm.getPackageInfo(packageName?:"", 0)
-            pi?.versionCode ?: -1
+            val pm: PackageManager = DawnBridge.app.packageManager
+            val pi: PackageInfo = pm.getPackageInfo(packageName ?: "", 0)
+            if (AndroidVersion.isAndroid9()) {
+                return pi.longVersionCode.toInt()
+            } else {
+                return pi.versionCode
+            }
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
             -1
@@ -513,7 +470,7 @@ object AppUtils {
          *
          * @return 返回应用程序的签名。
          */
-        get() = getAppSignatures(DawnBridge.getApp().packageName)
+        get() = getAppSignatures(DawnBridge.app.packageName)
 
     /**
      * 返回应用程序的签名。
@@ -525,10 +482,11 @@ object AppUtils {
         return if (DawnBridge.isSpace(packageName)) {
             null
         } else try {
-            val pm: PackageManager = DawnBridge.getApp().packageManager
+            val pm: PackageManager = DawnBridge.app.packageManager
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 val pi: PackageInfo =
-                    pm.getPackageInfo(packageName?:"", PackageManager.GET_SIGNING_CERTIFICATES) ?: return null
+                    pm.getPackageInfo(packageName ?: "", PackageManager.GET_SIGNING_CERTIFICATES)
+                        ?: return null
                 val signingInfo = pi.signingInfo
                 if (signingInfo.hasMultipleSigners()) {
                     signingInfo.apkContentsSigners
@@ -537,7 +495,7 @@ object AppUtils {
                 }
             } else {
                 val pi: PackageInfo =
-                    pm.getPackageInfo(packageName?:"", PackageManager.GET_SIGNATURES) ?: return null
+                    pm.getPackageInfo(packageName ?: "", PackageManager.GET_SIGNATURES) ?: return null
                 pi.signatures
             }
         } catch (e: PackageManager.NameNotFoundException) {
@@ -556,7 +514,7 @@ object AppUtils {
         if (file == null) {
             return null
         }
-        val pm: PackageManager = DawnBridge.getApp().packageManager
+        val pm: PackageManager = DawnBridge.app.packageManager
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val pi: PackageInfo =
                 pm.getPackageArchiveInfo(file.absolutePath, PackageManager.GET_SIGNING_CERTIFICATES)
@@ -580,7 +538,7 @@ object AppUtils {
          *
          * @return 返回应用程序对 SHA1 值的签名。
          */
-        get() = getAppSignaturesSHA1(DawnBridge.getApp().packageName)
+        get() = getAppSignaturesSHA1(DawnBridge.app.packageName)
 
     /**
      * 返回应用程序对 SHA1 值的签名。
@@ -598,7 +556,7 @@ object AppUtils {
          *
          * @return 返回应用程序的 SHA256 值签名。
          */
-        get() = getAppSignaturesSHA256(DawnBridge.getApp().packageName)
+        get() = getAppSignaturesSHA256(DawnBridge.app.packageName)
 
     /**
      * 返回应用程序的 SHA256 值签名。
@@ -616,7 +574,7 @@ object AppUtils {
          *
          * @return 返回应用程序对 MD5 值的签名。
          */
-        get() = getAppSignaturesMD5(DawnBridge.getApp().packageName)
+        get() = getAppSignaturesMD5(DawnBridge.app.packageName)
 
     /**
      * 返回应用程序对 MD5 值的签名。
@@ -634,7 +592,7 @@ object AppUtils {
          *
          * @return 返回应用程序的用户 ID。
          */
-        get() = getAppUid(DawnBridge.getApp().packageName)
+        get() = getAppUid(DawnBridge.app.packageName)
 
     /**
      * 返回应用程序的用户 ID。
@@ -644,7 +602,7 @@ object AppUtils {
      */
     fun getAppUid(pkgName: String?): Int {
         return try {
-            DawnBridge.getApp().packageManager.getApplicationInfo(pkgName?:"", 0).uid
+            DawnBridge.app.packageManager.getApplicationInfo(pkgName ?: "", 0).uid
         } catch (e: Exception) {
             e.printStackTrace()
             -1
@@ -684,7 +642,7 @@ object AppUtils {
          *
          * @return 返回应用程序的信息
          */
-        get() = getAppInfo(DawnBridge.getApp().packageName)
+        get() = getAppInfo(DawnBridge.app.packageName)
 
     /**
      * 返回应用程序的信息
@@ -703,8 +661,8 @@ object AppUtils {
      */
     fun getAppInfo(packageName: String?): AppInfo? {
         return try {
-            val pm: PackageManager = DawnBridge.getApp().packageManager ?: return null
-            getBean(pm, pm.getPackageInfo(packageName?:"", 0))
+            val pm: PackageManager = DawnBridge.app.packageManager ?: return null
+            getBean(pm, pm.getPackageInfo(packageName ?: "", 0))
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
             null
@@ -719,7 +677,7 @@ object AppUtils {
          */
         get() {
             val list: MutableList<AppInfo> = ArrayList()
-            val pm: PackageManager = DawnBridge.getApp().packageManager ?: return list
+            val pm: PackageManager = DawnBridge.app.packageManager ?: return list
             val installedPackages: List<PackageInfo> = pm.getInstalledPackages(0)
             for (pi in installedPackages) {
                 val ai = getBean(pm, pi) ?: continue
@@ -748,8 +706,8 @@ object AppUtils {
         if (DawnBridge.isSpace(apkFilePath)) {
             return null
         }
-        val pm: PackageManager = DawnBridge.getApp().packageManager ?: return null
-        val pi: PackageInfo = pm.getPackageArchiveInfo(apkFilePath?:"", 0) ?: return null
+        val pm: PackageManager = DawnBridge.app.packageManager ?: return null
+        val pi: PackageInfo = pm.getPackageArchiveInfo(apkFilePath ?: "", 0) ?: return null
         val appInfo = pi.applicationInfo
         appInfo.sourceDir = apkFilePath
         appInfo.publicSourceDir = apkFilePath
@@ -763,8 +721,7 @@ object AppUtils {
          * @return `true`: yes<br></br>`false`: no
          */
         get() = try {
-            val pi: PackageInfo = DawnBridge.getApp().packageManager
-                .getPackageInfo(DawnBridge.getApp().packageName, 0)
+            val pi: PackageInfo = DawnBridge.app.packageManager.getPackageInfo(DawnBridge.app.packageName, 0)
             pi.firstInstallTime == pi.lastUpdateTime
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()

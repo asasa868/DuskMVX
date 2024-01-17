@@ -51,21 +51,23 @@ object LanguageUtils {
         locale: Locale?, isRelaunchApp: Boolean
     ) {
         val destLocal = locale ?: getLocal(Resources.getSystem().configuration)
-        updateAppContextLanguage(destLocal) { success ->
-            if (success == true) {
-                restart(isRelaunchApp)
-            } else {
-                // use relaunch app
-                DawnBridge.relaunchApp()
+        updateAppContextLanguage(destLocal, object : DawnBridge.Consumer<Boolean?> {
+            override fun accept(t: Boolean?) {
+                if (t == true) {
+                    restart(isRelaunchApp)
+                } else {
+                    DawnBridge.relaunchApp()
+                }
             }
-        }
+
+        })
     }
 
     private fun restart(isRelaunchApp: Boolean) {
         if (isRelaunchApp) {
             DawnBridge.relaunchApp()
         } else {
-            for (activity in DawnBridge.getActivityList()) {
+            for (activity in DawnBridge.activityList) {
                 activity.recreate()
             }
         }
@@ -86,7 +88,7 @@ object LanguageUtils {
          *
          * @return 返回 applicationContext 的语言环境。
          */
-        get() = getContextLanguage(DawnBridge.getApp())
+        get() = getContextLanguage(DawnBridge.app!!)
     val systemLanguage: Locale
         /**
          * 返回系统的语言环境
@@ -106,11 +108,11 @@ object LanguageUtils {
     }
 
     fun pollCheckAppContextLocal(destLocale: Locale, index: Int, consumer: DawnBridge.Consumer<Boolean?>?) {
-        val appResources = DawnBridge.getApp().resources
-        val appConfig = appResources.configuration
+        val appResources = DawnBridge.app?.resources
+        val appConfig = appResources!!.configuration
         val appLocal = getLocal(appConfig)
         setLocal(appConfig, destLocale)
-        DawnBridge.getApp().resources.updateConfiguration(appConfig, appResources.displayMetrics)
+        DawnBridge.app?.resources!!.updateConfiguration(appConfig, appResources.displayMetrics)
         if (consumer == null) {
             return
         }

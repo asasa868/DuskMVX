@@ -243,7 +243,7 @@ object StringUtils {
     @JvmStatic
     fun getString(@StringRes id: Int, vararg formatArgs: Any?): String? {
         return try {
-            format(DawnBridge.getApp().getString(id), *formatArgs)
+            format(DawnBridge.app?.getString(id), *formatArgs)
         } catch (e: Resources.NotFoundException) {
             e.printStackTrace()
             id.toString()
@@ -258,7 +258,7 @@ object StringUtils {
      */
     fun getStringArray(@ArrayRes id: Int): Array<String> {
         return try {
-            DawnBridge.getApp().resources.getStringArray(id)
+            DawnBridge.app?.resources!!.getStringArray(id)
         } catch (e: Resources.NotFoundException) {
             e.printStackTrace()
             arrayOf(id.toString())

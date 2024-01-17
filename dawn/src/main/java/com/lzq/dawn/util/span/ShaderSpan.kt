@@ -1,9 +1,9 @@
-package com.lzq.dawn.util.span;
+package com.lzq.dawn.util.span
 
-import android.graphics.Shader;
-import android.text.TextPaint;
-import android.text.style.CharacterStyle;
-import android.text.style.UpdateAppearance;
+import android.graphics.Shader
+import android.text.TextPaint
+import android.text.style.CharacterStyle
+import android.text.style.UpdateAppearance
 
 /**
  * @Name :ShaderSpan
@@ -11,15 +11,8 @@ import android.text.style.UpdateAppearance;
  * @Author :  Lzq
  * @Desc :
  */
- class ShaderSpan extends CharacterStyle implements UpdateAppearance {
-    private final Shader mShader;
-
-    public ShaderSpan(final Shader shader) {
-        this.mShader = shader;
-    }
-
-    @Override
-    public void updateDrawState(final TextPaint tp) {
-        tp.setShader(mShader);
+internal class ShaderSpan(private val mShader: Shader) : CharacterStyle(), UpdateAppearance {
+    override fun updateDrawState(tp: TextPaint) {
+        tp.shader = mShader
     }
 }

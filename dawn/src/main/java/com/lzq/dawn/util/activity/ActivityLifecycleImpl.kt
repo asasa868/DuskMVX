@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.lifecycle.Lifecycle
 import com.lzq.dawn.DawnBridge
+import java.lang.ref.WeakReference
 import java.util.LinkedList
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -96,7 +97,7 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
     }
 
     fun addActivityLifecycleCallbacks(listener: ActivityLifecycleCallbacks?) {
-        addActivityLifecycleCallbacks(STUB, listener)
+        addActivityLifecycleCallbacks(STUB.get(), listener)
     }
 
     fun addActivityLifecycleCallbacks(
@@ -127,7 +128,7 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
     }
 
     fun removeActivityLifecycleCallbacks(callbacks: ActivityLifecycleCallbacks?) {
-        removeActivityLifecycleCallbacks(STUB, callbacks)
+        removeActivityLifecycleCallbacks(STUB.get(), callbacks)
     }
 
     fun removeActivityLifecycleCallbacks(activity: Activity?) {
@@ -150,20 +151,18 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
         activity: Activity, callbacks: ActivityLifecycleCallbacks
     ) {
         val callbacksList = mActivityLifecycleCallbacksMap[activity]
-        if (callbacksList != null && !callbacksList.isEmpty()) {
+        if (!callbacksList.isNullOrEmpty()) {
             callbacksList.remove(callbacks)
         }
     }
 
     private fun consumeActivityLifecycleCallbacks(activity: Activity, event: Lifecycle.Event) {
         consumeLifecycle(activity, event, mActivityLifecycleCallbacksMap[activity])
-        consumeLifecycle(activity, event, mActivityLifecycleCallbacksMap[STUB])
+        consumeLifecycle(activity, event, mActivityLifecycleCallbacksMap[STUB.get()])
     }
 
     private fun consumeLifecycle(
-        activity: Activity,
-        event: Lifecycle.Event,
-        listeners: List<ActivityLifecycleCallbacks>?
+        activity: Activity, event: Lifecycle.Event, listeners: List<ActivityLifecycleCallbacks>?
     ) {
         if (listeners == null) {
             return
@@ -350,7 +349,7 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
         /**
          * @return 排名靠前的活动
          */
-        private get() {
+        get() {
             val list = LinkedList<Activity>()
             var topActivity: Activity? = null
             try {
@@ -358,9 +357,9 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
                 val mActivitiesField = activityThread.javaClass.getDeclaredField("mActivities")
                 mActivitiesField.isAccessible = true
                 val mActivities = mActivitiesField[activityThread] as? Map<*, *> ?: return list
-                val binder_activityClientRecord_map = mActivities as Map<Any, Any>
-                for (activityRecord in binder_activityClientRecord_map.values) {
-                    val activityClientRecordClass: Class<out Any> = activityRecord.javaClass
+                for (activityRecord in mActivities.values) {
+                    val activityClientRecordClass: Class<out Any> =
+                        activityRecord?.javaClass ?: activityThread.javaClass
                     val activityField = activityClientRecordClass.getDeclaredField("activity")
                     activityField.isAccessible = true
                     val activity = activityField[activityRecord] as Activity
@@ -385,14 +384,14 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
             return list
         }
     private val activityThread: Any?
-        private get() {
+        get() {
             val activityThread = activityThreadInActivityThreadStaticField
             return activityThread ?: activityThreadInActivityThreadStaticMethod
         }
 
     @get:SuppressLint("PrivateApi", "DiscouragedPrivateApi")
     private val activityThreadInActivityThreadStaticField: Any?
-        private get() = try {
+        get() = try {
             val activityThreadClass = Class.forName("android.app.ActivityThread")
             val sCurrentActivityThreadField = activityThreadClass.getDeclaredField("sCurrentActivityThread")
             sCurrentActivityThreadField.isAccessible = true
@@ -404,7 +403,7 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
 
     @get:SuppressLint("PrivateApi", "DiscouragedPrivateApi")
     private val activityThreadInActivityThreadStaticMethod: Any?
-        private get() = try {
+        get() = try {
             val activityThreadClass = Class.forName("android.app.ActivityThread")
             activityThreadClass.getMethod("currentActivityThread").invoke(null)
         } catch (e: Exception) {
@@ -418,7 +417,7 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
          */
         @JvmField
         val INSTANCE = ActivityLifecycleImpl()
-        private val STUB = Activity()
+        private val STUB = WeakReference(Activity())
 
         /**
          * 设置启用动画器。

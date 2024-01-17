@@ -1,13 +1,11 @@
-package com.lzq.dawn.view;
+package com.lzq.dawn.view
 
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.os.Bundle;
-import android.view.View;
-
-import com.lzq.dawn.R;
-
+import android.app.Dialog
+import android.content.Context
+import android.content.DialogInterface
+import android.os.Bundle
+import android.view.View
+import com.lzq.dawn.R
 
 /**
  * @author Lzq
@@ -15,94 +13,68 @@ import com.lzq.dawn.R;
  * @date : Created by Lzq on 2023/12/25 16:27
  * @description: 占位的弹窗
  */
-public class ShapeLoadingDialog extends Dialog {
+class ShapeLoadingDialog private constructor(val builder: Builder) : Dialog(
+    builder.mContext, R.style.dawn_custom_dialog
+) {
+    private var mLoadingView: LoadingView? = null
 
-    private LoadingView mLoadingView;
-
-    private final Builder mBuilder;
-
-    private ShapeLoadingDialog(Builder builder) {
-        super(builder.mContext, R.style.dawn_custom_dialog);
-        mBuilder = builder;
-        setCancelable(mBuilder.mCancelable);
-        setCanceledOnTouchOutside(mBuilder.mCanceledOnTouchOutside);
+    init {
+        setCancelable(builder.mCancelable)
+        setCanceledOnTouchOutside(builder.mCanceledOnTouchOutside)
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.dawn_layout_dialog);
-
-        mLoadingView = findViewById(R.id.loadView);
-
-        mLoadingView.setDelay(mBuilder.mDelay);
-        mLoadingView.setLoadingText(mBuilder.mLoadText);
-
-        setOnDismissListener(dialog -> mLoadingView.setVisibility(View.GONE));
+    override fun onCreate(savedInstanceState: Bundle) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.dawn_layout_dialog)
+        mLoadingView = findViewById(R.id.loadView)
+        mLoadingView?.delay = builder.mDelay
+        mLoadingView?.loadingText = builder.mLoadText
+        setOnDismissListener { mLoadingView?.visibility = View.GONE }
     }
 
-    @Override
-    public void show() {
-        super.show();
-        mLoadingView.setVisibility(View.VISIBLE);
+    override fun show() {
+        super.show()
+        mLoadingView!!.visibility = View.VISIBLE
     }
 
-
-    public Builder getBuilder() {
-        return mBuilder;
-    }
-
-    public static class Builder {
-
-        private final Context mContext;
-
-        private int mDelay = 80;
-
-        private CharSequence mLoadText;
-
-        private boolean mCancelable = true;
-
-        private boolean mCanceledOnTouchOutside = true;
-
-        public Builder(Context context) {
-            mContext = context;
+    class Builder(val mContext: Context) {
+        var mDelay = 80
+        var mLoadText: CharSequence? = null
+        var mCancelable = true
+        var mCanceledOnTouchOutside = true
+        fun delay(delay: Int): Builder {
+            mDelay = delay
+            return this
         }
 
-        public Builder delay(int delay) {
-            mDelay = delay;
-            return this;
+        fun loadText(loadText: CharSequence?): Builder {
+            mLoadText = loadText
+            return this
         }
 
-        public Builder loadText(CharSequence loadText) {
-            mLoadText = loadText;
-            return this;
+        fun loadText(resId: Int): Builder {
+            mLoadText = mContext.getString(resId)
+            return this
         }
 
-        public Builder loadText(int resId) {
-            mLoadText = mContext.getString(resId);
-            return this;
+        fun setContentTxt(loadText: CharSequence?): Builder {
+            mLoadText = loadText
+            return this
         }
 
-        public Builder setContentTxt(CharSequence loadText) {
-            mLoadText = loadText;
-            return this;
+        fun cancelable(cancelable: Boolean): Builder {
+            mCancelable = cancelable
+            mCanceledOnTouchOutside = cancelable
+            return this
         }
 
-
-        public Builder cancelable(boolean cancelable) {
-            mCancelable = cancelable;
-            mCanceledOnTouchOutside = cancelable;
-            return this;
+        fun canceledOnTouchOutside(canceledOnTouchOutside: Boolean): Builder {
+            mCanceledOnTouchOutside = canceledOnTouchOutside
+            return this
         }
 
-        public Builder canceledOnTouchOutside(boolean canceledOnTouchOutside) {
-            mCanceledOnTouchOutside = canceledOnTouchOutside;
-            return this;
+        fun build(): ShapeLoadingDialog {
+            return ShapeLoadingDialog(this)
         }
-
-        public ShapeLoadingDialog build() {
-            return new ShapeLoadingDialog(this);
-        }
-
     }
 }

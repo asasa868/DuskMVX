@@ -30,7 +30,7 @@ object IntentUtils {
      */
     @JvmStatic
     fun isIntentAvailable(intent: Intent?): Boolean {
-        return DawnBridge.getApp().packageManager.queryIntentActivities(
+        return DawnBridge.app.packageManager.queryIntentActivities(
                 intent!!,
                 PackageManager.MATCH_DEFAULT_ONLY
             ).size > 0
@@ -68,8 +68,8 @@ object IntentUtils {
         uri = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             Uri.fromFile(file)
         } else {
-            val authority = DawnBridge.getApp().packageName + ".fileprovider"
-            FileProvider.getUriForFile(DawnBridge.getApp(), authority, file!!)
+            val authority = DawnBridge.app.packageName + ".fileprovider"
+            FileProvider.getUriForFile(DawnBridge.app, authority, file!!)
         }
         return getInstallAppIntent(uri)
     }

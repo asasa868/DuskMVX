@@ -21,7 +21,7 @@ object CleanUtils {
      * @return `true`: success<br></br>`false`: fail
      */
     fun cleanInternalCache(): Boolean {
-        return DawnBridge.deleteAllInDir(DawnBridge.getApp().cacheDir)
+        return DawnBridge.deleteAllInDir(DawnBridge.app.cacheDir)
     }
 
     /**
@@ -32,7 +32,7 @@ object CleanUtils {
      * @return `true`: success<br></br>`false`: fail
      */
     fun cleanInternalFiles(): Boolean {
-        return DawnBridge.deleteAllInDir(DawnBridge.getApp().filesDir)
+        return DawnBridge.deleteAllInDir(DawnBridge.app.filesDir)
     }
 
     /**
@@ -43,7 +43,7 @@ object CleanUtils {
      * @return `true`: success<br></br>`false`: fail
      */
     fun cleanInternalDbs(): Boolean {
-        return DawnBridge.deleteAllInDir(File(DawnBridge.getApp().filesDir.parent, "databases"))
+        return DawnBridge.deleteAllInDir(File(DawnBridge.app.filesDir.parent, "databases"))
     }
 
     /**
@@ -55,7 +55,7 @@ object CleanUtils {
      * @return `true`: success<br></br>`false`: fail
      */
     fun cleanInternalDbByName(dbName: String?): Boolean {
-        return DawnBridge.getApp().deleteDatabase(dbName)
+        return DawnBridge.app.deleteDatabase(dbName)
     }
 
     /**
@@ -66,7 +66,7 @@ object CleanUtils {
      * @return `true`: success<br></br>`false`: fail
      */
     fun cleanInternalSp(): Boolean {
-        return DawnBridge.deleteAllInDir(File(DawnBridge.getApp().filesDir.parent, "shared_prefs"))
+        return DawnBridge.deleteAllInDir(File(DawnBridge.app.filesDir?.parent, "shared_prefs"))
     }
 
     /**
@@ -78,7 +78,7 @@ object CleanUtils {
      */
     fun cleanExternalCache(): Boolean {
         return Environment.MEDIA_MOUNTED == Environment.getExternalStorageState() && DawnBridge.deleteAllInDir(
-            DawnBridge.getApp().externalCacheDir
+            DawnBridge.app.externalCacheDir
         )
     }
 
@@ -96,7 +96,7 @@ object CleanUtils {
      * 清理app的数据
      */
     fun cleanAppUserData() {
-        val am = DawnBridge.getApp().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val am = DawnBridge.app.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         am.clearApplicationUserData()
     }
 }

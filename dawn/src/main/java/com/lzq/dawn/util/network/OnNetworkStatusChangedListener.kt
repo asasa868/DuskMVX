@@ -1,4 +1,4 @@
-package com.lzq.dawn.util.network;
+package com.lzq.dawn.util.network
 
 /**
  * @Name :OnNetworkStatusChangedListener
@@ -6,16 +6,16 @@ package com.lzq.dawn.util.network;
  * @Author :  Lzq
  * @Desc : 网络状态
  */
-public interface OnNetworkStatusChangedListener {
+interface OnNetworkStatusChangedListener {
     /**
      * 断开
      */
-    void onDisconnected();
+    fun onDisconnected()
 
     /**
      * 连接
      *
      * @param networkType NetworkType
      */
-    void onConnected(NetworkType networkType);
+    fun onConnected(networkType: NetworkType?)
 }

@@ -1,72 +1,68 @@
-package com.lzq.dawn;
+package com.lzq.dawn
 
-import static android.Manifest.permission.CALL_PHONE;
-
-import android.app.Activity;
-import android.app.Application;
-import android.app.Notification;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Parcelable;
-import android.provider.Settings;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.View;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.annotation.RequiresPermission;
-import androidx.annotation.StringRes;
-import androidx.core.app.NotificationCompat;
-
-import com.google.gson.Gson;
-import com.hjq.toast.Toaster;
-import com.lzq.dawn.util.activity.ActivityLifecycleCallbacks;
-import com.lzq.dawn.util.activity.ActivityLifecycleImpl;
-import com.lzq.dawn.util.activity.ActivityUtils;
-import com.lzq.dawn.util.activity.OnAppStatusChangedListener;
-import com.lzq.dawn.util.app.AppUtils;
-import com.lzq.dawn.util.convert.ConvertUtils;
-import com.lzq.dawn.util.encode.EncodeUtils;
-import com.lzq.dawn.util.encrypt.EncryptUtils;
-import com.lzq.dawn.util.file.FileIOUtils;
-import com.lzq.dawn.util.file.FileUtils;
-import com.lzq.dawn.util.gson.GsonUtils;
-import com.lzq.dawn.util.image.ImageUtils;
-import com.lzq.dawn.util.intent.IntentUtils;
-import com.lzq.dawn.util.notification.ChannelConfig;
-import com.lzq.dawn.util.notification.NotificationUtils;
-import com.lzq.dawn.util.process.ProcessUtils;
-import com.lzq.dawn.util.rom.RomUtils;
-import com.lzq.dawn.util.screen.ScreenUtils;
-import com.lzq.dawn.util.sdcard.SDCardUtils;
-import com.lzq.dawn.util.service.ServiceUtils;
-import com.lzq.dawn.util.shell.CommandResult;
-import com.lzq.dawn.util.shell.ShellUtils;
-import com.lzq.dawn.util.size.SizeUtils;
-import com.lzq.dawn.util.string.StringUtils;
-import com.lzq.dawn.util.thread.SimpleTask;
-import com.lzq.dawn.util.thread.ThreadUtils;
-import com.lzq.dawn.util.throwable.ThrowableUtils;
-import com.lzq.dawn.util.time.TimeUtils;
-import com.lzq.dawn.util.uri.UriUtils;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.lang.reflect.Type;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import android.Manifest.permission
+import android.app.Activity
+import android.app.Application
+import android.app.Notification
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Bitmap.CompressFormat
+import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.os.Build
+import android.os.Parcelable
+import android.provider.Settings
+import android.text.TextUtils
+import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.annotation.RequiresPermission
+import androidx.annotation.StringRes
+import androidx.core.app.NotificationCompat
+import com.google.gson.Gson
+import com.hjq.toast.Toaster
+import com.lzq.dawn.util.activity.ActivityLifecycleCallbacks
+import com.lzq.dawn.util.activity.ActivityLifecycleImpl
+import com.lzq.dawn.util.activity.ActivityUtils
+import com.lzq.dawn.util.activity.OnAppStatusChangedListener
+import com.lzq.dawn.util.app.AppUtils
+import com.lzq.dawn.util.app.AppUtils.appVersionCode
+import com.lzq.dawn.util.app.AppUtils.appVersionName
+import com.lzq.dawn.util.convert.ConvertUtils
+import com.lzq.dawn.util.convert.ConvertUtils.bytes2String
+import com.lzq.dawn.util.encode.EncodeUtils
+import com.lzq.dawn.util.encrypt.EncryptUtils
+import com.lzq.dawn.util.file.FileIOUtils
+import com.lzq.dawn.util.file.FileIOUtils.readFile2BytesByChannel
+import com.lzq.dawn.util.file.FileIOUtils.writeFileFromBytesByChannel
+import com.lzq.dawn.util.file.FileUtils
+import com.lzq.dawn.util.gson.GsonUtils
+import com.lzq.dawn.util.image.ImageUtils
+import com.lzq.dawn.util.intent.IntentUtils
+import com.lzq.dawn.util.notification.ChannelConfig
+import com.lzq.dawn.util.notification.NotificationUtils
+import com.lzq.dawn.util.process.ProcessUtils
+import com.lzq.dawn.util.rom.RomUtils
+import com.lzq.dawn.util.rom.RomUtils.romInfo
+import com.lzq.dawn.util.screen.ScreenUtils
+import com.lzq.dawn.util.sdcard.SDCardUtils
+import com.lzq.dawn.util.service.ServiceUtils
+import com.lzq.dawn.util.shell.CommandResult
+import com.lzq.dawn.util.shell.ShellUtils
+import com.lzq.dawn.util.size.SizeUtils
+import com.lzq.dawn.util.string.StringUtils
+import com.lzq.dawn.util.thread.SimpleTask
+import com.lzq.dawn.util.thread.ThreadUtils
+import com.lzq.dawn.util.throwable.ThrowableUtils
+import com.lzq.dawn.util.time.TimeUtils
+import com.lzq.dawn.util.uri.UriUtils
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.InputStream
+import java.io.Serializable
+import java.lang.reflect.Type
 
 /**
  * @Name :DawnBridge
@@ -74,662 +70,582 @@ import java.util.Map;
  * @Author :  Lzq
  * @Desc : Dawn框架
  */
-public class DawnBridge {
-    private static Application mApp;
+object DawnBridge {
+    private var mApp: Application? = null
 
     /**
      * 初始化工具类
      *
      * @param app app application
      */
-    public static void init(Application app) {
+    fun init(app: Application?) {
         if (app == null) {
-            Log.e("DawnUtil", "app is null.");
-            return;
+            Log.e("DawnUtil", "app is null.")
+            return
         }
         if (mApp == null) {
-            mApp = app;
-            ActivityLifecycleImpl.INSTANCE.init(mApp);
-            preLoad();
-            return;
+            mApp = app
+            ActivityLifecycleImpl.INSTANCE.init(mApp!!)
+            return
         }
-        if (!Toaster.isInit()){
-            Toaster.init(mApp);
+        if (!Toaster.isInit()) {
+            Toaster.init(mApp)
         }
-        if (mApp.equals(app)) {
-            return;
+        if (mApp == app) {
+            return
         }
-        ActivityLifecycleImpl.INSTANCE.unInit(mApp);
-        mApp = app;
-        ActivityLifecycleImpl.INSTANCE.init(mApp);
+        ActivityLifecycleImpl.INSTANCE.unInit(mApp!!)
+        mApp = app
+        ActivityLifecycleImpl.INSTANCE.init(mApp!!)
     }
 
-    public static Application getApp() {
-        if (mApp != null) {
-            return mApp;
-        } else {
-            throw new NullPointerException("DawnUtil not init");
-        }
+    @JvmStatic
+    val app: Application
+        get() =  mApp!!
+    val topActivity: Activity?
+        ///////////////////////////////////////////////////////////////////////////
+        get() = ActivityLifecycleImpl.INSTANCE.topActivity
+
+    fun addOnAppStatusChangedListener(listener: OnAppStatusChangedListener) {
+        ActivityLifecycleImpl.INSTANCE.addOnAppStatusChangedListener(listener)
     }
 
-
-    ///////////////////////////////////////////////////////////////////////////
-    // UtilsActivityLifecycleImpl
-    ///////////////////////////////////////////////////////////////////////////
-    public static Activity getTopActivity() {
-        return ActivityLifecycleImpl.INSTANCE.getTopActivity();
+    fun removeOnAppStatusChangedListener(listener: OnAppStatusChangedListener) {
+        ActivityLifecycleImpl.INSTANCE.removeOnAppStatusChangedListener(listener)
     }
 
-    public static void addOnAppStatusChangedListener(final OnAppStatusChangedListener listener) {
-        ActivityLifecycleImpl.INSTANCE.addOnAppStatusChangedListener(listener);
+    fun addActivityLifecycleCallbacks(callbacks: ActivityLifecycleCallbacks?) {
+        ActivityLifecycleImpl.INSTANCE.addActivityLifecycleCallbacks(callbacks)
     }
 
-    public static void removeOnAppStatusChangedListener(final OnAppStatusChangedListener listener) {
-        ActivityLifecycleImpl.INSTANCE.removeOnAppStatusChangedListener(listener);
+    fun removeActivityLifecycleCallbacks(callbacks: ActivityLifecycleCallbacks?) {
+        ActivityLifecycleImpl.INSTANCE.removeActivityLifecycleCallbacks(callbacks)
     }
 
-    public static void addActivityLifecycleCallbacks(final ActivityLifecycleCallbacks callbacks) {
-        ActivityLifecycleImpl.INSTANCE.addActivityLifecycleCallbacks(callbacks);
+    fun addActivityLifecycleCallbacks(
+        activity: Activity?, callbacks: ActivityLifecycleCallbacks?
+    ) {
+        ActivityLifecycleImpl.INSTANCE.addActivityLifecycleCallbacks(activity, callbacks)
     }
 
-    public static void removeActivityLifecycleCallbacks(final ActivityLifecycleCallbacks callbacks) {
-        ActivityLifecycleImpl.INSTANCE.removeActivityLifecycleCallbacks(callbacks);
+    fun removeActivityLifecycleCallbacks(activity: Activity?) {
+        ActivityLifecycleImpl.INSTANCE.removeActivityLifecycleCallbacks(activity)
     }
 
-    public static void addActivityLifecycleCallbacks(final Activity activity,
-                                                     final ActivityLifecycleCallbacks callbacks) {
-        ActivityLifecycleImpl.INSTANCE.addActivityLifecycleCallbacks(activity, callbacks);
+    fun removeActivityLifecycleCallbacks(
+        activity: Activity?, callbacks: ActivityLifecycleCallbacks?
+    ) {
+        ActivityLifecycleImpl.INSTANCE.removeActivityLifecycleCallbacks(activity, callbacks)
     }
 
-    public static void removeActivityLifecycleCallbacks(final Activity activity) {
-        ActivityLifecycleImpl.INSTANCE.removeActivityLifecycleCallbacks(activity);
-    }
-
-    public static void removeActivityLifecycleCallbacks(final Activity activity,
-                                                        final ActivityLifecycleCallbacks callbacks) {
-        ActivityLifecycleImpl.INSTANCE.removeActivityLifecycleCallbacks(activity, callbacks);
-    }
-
-    public static List<Activity> getActivityList() {
-        return ActivityLifecycleImpl.INSTANCE.getActivityList();
-    }
-
-    public static Application getApplicationByReflect() {
-        return ActivityLifecycleImpl.INSTANCE.getApplicationByReflect();
-    }
-
-    public static boolean isAppForeground() {
-        return ActivityLifecycleImpl.INSTANCE.isAppForeground();
-    }
+    val activityList: List<Activity>
+        get() = ActivityLifecycleImpl.INSTANCE.activityList
+    val applicationByReflect: Application?
+        get() = ActivityLifecycleImpl.INSTANCE.applicationByReflect
+    val isAppForeground: Boolean
+        get() = ActivityLifecycleImpl.INSTANCE.isAppForeground
 
     ///////////////////////////////////////////////////////////////////////////
     // ActivityUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static boolean isActivityAlive(final Activity activity) {
-        return ActivityUtils.isActivityAlive(activity);
+    fun isActivityAlive(activity: Activity?): Boolean {
+        return ActivityUtils.isActivityAlive(activity)
     }
 
-    public static String getLauncherActivity(final String pkg) {
-        return ActivityUtils.getLauncherActivity(pkg);
+    fun getLauncherActivity(pkg: String?): String {
+        return ActivityUtils.getLauncherActivity(pkg!!)
     }
 
-    public static Activity getActivityByContext(Context context) {
-        return ActivityUtils.getActivityByContext(context);
+    fun getActivityByContext(context: Context?): Activity? {
+        return ActivityUtils.getActivityByContext(context)
     }
 
-    public static void startHomeActivity() {
-        ActivityUtils.startHomeActivity();
+    fun startHomeActivity() {
+        ActivityUtils.startHomeActivity()
     }
 
-    public static void finishAllActivities() {
-        ActivityUtils.finishAllActivities();
+    fun finishAllActivities() {
+        ActivityUtils.finishAllActivities()
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // AppUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static boolean isAppRunning(@NonNull final String pkgName) {
-        return AppUtils.isAppRunning(pkgName);
+    fun isAppInstalled(pkgName: String?): Boolean {
+        return AppUtils.isAppInstalled(pkgName)
     }
 
-    public static boolean isAppInstalled(final String pkgName) {
-        return AppUtils.isAppInstalled(pkgName);
-    }
+    val isAppDebug: Boolean
+        get() = AppUtils.isAppDebug
 
-    public static boolean isAppDebug() {
-        return AppUtils.isAppDebug();
-    }
-
-    public static void relaunchApp() {
-        AppUtils.relaunchApp();
+    fun relaunchApp() {
+        AppUtils.relaunchApp()
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // ConvertUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static String bytes2HexString(final byte[] bytes) {
-        return ConvertUtils.bytes2HexString(bytes);
+    fun bytes2HexString(bytes: ByteArray?): String {
+        return ConvertUtils.bytes2HexString(bytes)
     }
 
-    public static byte[] hexString2Bytes(String hexString) {
-        return ConvertUtils.hexString2Bytes(hexString);
+    fun hexString2Bytes(hexString: String?): ByteArray {
+        return ConvertUtils.hexString2Bytes(hexString!!)
     }
 
-    public static byte[] string2Bytes(final String string) {
-        return ConvertUtils.string2Bytes(string);
+    fun string2Bytes(string: String?): ByteArray? {
+        return ConvertUtils.string2Bytes(string)
     }
 
-    public static String bytes2String(final byte[] bytes) {
-        return ConvertUtils.bytes2String(bytes,"");
+    fun bytes2String(bytes: ByteArray?): String? {
+        return bytes2String(bytes!!, "")
     }
 
-    public static byte[] jsonObject2Bytes(final JSONObject jsonObject) {
-        return ConvertUtils.jsonObject2Bytes(jsonObject);
+    fun jsonObject2Bytes(jsonObject: JSONObject?): ByteArray? {
+        return ConvertUtils.jsonObject2Bytes(jsonObject)
     }
 
-    public static JSONObject bytes2JSONObject(final byte[] bytes) {
-        return ConvertUtils.bytes2JSONObject(bytes);
+    fun bytes2JSONObject(bytes: ByteArray?): JSONObject? {
+        return ConvertUtils.bytes2JSONObject(bytes)
     }
 
-    public static byte[] jsonArray2Bytes(final JSONArray jsonArray) {
-        return ConvertUtils.jsonArray2Bytes(jsonArray);
+    fun jsonArray2Bytes(jsonArray: JSONArray?): ByteArray? {
+        return ConvertUtils.jsonArray2Bytes(jsonArray)
     }
 
-    public static JSONArray bytes2JSONArray(final byte[] bytes) {
-        return ConvertUtils.bytes2JSONArray(bytes);
+    fun bytes2JSONArray(bytes: ByteArray?): JSONArray? {
+        return ConvertUtils.bytes2JSONArray(bytes)
     }
 
-    public static byte[] parcelable2Bytes(final Parcelable parcelable) {
-        return ConvertUtils.parcelable2Bytes(parcelable);
+    fun parcelable2Bytes(parcelable: Parcelable?): ByteArray? {
+        return ConvertUtils.parcelable2Bytes(parcelable)
     }
 
-    public static <T> T bytes2Parcelable(final byte[] bytes,
-                                         final Parcelable.Creator<T> creator) {
-        return ConvertUtils.bytes2Parcelable(bytes, creator);
+    fun <T> bytes2Parcelable(
+        bytes: ByteArray?, creator: Parcelable.Creator<T?>
+    ): T? {
+        return ConvertUtils.bytes2Parcelable(bytes, creator)
     }
 
-    public static byte[] serializable2Bytes(final Serializable serializable) {
-        return ConvertUtils.serializable2Bytes(serializable);
+    fun serializable2Bytes(serializable: Serializable?): ByteArray? {
+        return ConvertUtils.serializable2Bytes(serializable)
     }
 
-    public static Object bytes2Object(final byte[] bytes) {
-        return ConvertUtils.bytes2Object(bytes);
+    fun bytes2Object(bytes: ByteArray?): Any? {
+        return ConvertUtils.bytes2Object(bytes)
     }
 
-    public static String byte2FitMemorySize(final long byteSize) {
-        return ConvertUtils.byte2FitMemorySize(byteSize);
+    fun byte2FitMemorySize(byteSize: Long): String {
+        return ConvertUtils.byte2FitMemorySize(byteSize)
     }
 
-    public static byte[] inputStream2Bytes(final InputStream is) {
-        return ConvertUtils.inputStream2Bytes(is);
+    fun inputStream2Bytes(`is`: InputStream?): ByteArray? {
+        return ConvertUtils.inputStream2Bytes(`is`)
     }
 
-    public static ByteArrayOutputStream input2OutputStream(final InputStream is) {
-        return ConvertUtils.input2OutputStream(is);
+    fun input2OutputStream(`is`: InputStream?): ByteArrayOutputStream? {
+        return ConvertUtils.input2OutputStream(`is`)
     }
 
-    public static List<String> inputStream2Lines(final InputStream is, final String charsetName) {
-        return ConvertUtils.inputStream2Lines(is, charsetName);
+    fun inputStream2Lines(`is`: InputStream?, charsetName: String?): List<String>? {
+        return ConvertUtils.inputStream2Lines(`is`, charsetName!!)
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // EncodeUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static byte[] base64Encode(final byte[] input) {
-        return EncodeUtils.base64Encode(input);
+    fun base64Encode(input: ByteArray?): ByteArray {
+        return EncodeUtils.base64Encode(input)
     }
 
-    public static byte[] base64Decode(final byte[] input) {
-        return EncodeUtils.base64Decode(input);
+    fun base64Decode(input: ByteArray?): ByteArray {
+        return EncodeUtils.base64Decode(input)
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // EncryptUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static byte[] hashTemplate(final byte[] data, final String algorithm) {
-        return EncryptUtils.hashTemplate(data, algorithm);
+    fun hashTemplate(data: ByteArray?, algorithm: String?): ByteArray? {
+        return EncryptUtils.hashTemplate(data, algorithm)
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // FileIOUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static boolean writeFileFromBytes(final File file,
-                                             final byte[] bytes) {
-        return FileIOUtils.writeFileFromBytesByChannel(file, bytes, true);
+    fun writeFileFromBytes(
+        file: File?, bytes: ByteArray?
+    ): Boolean {
+        return writeFileFromBytesByChannel(file!!, bytes, true)
     }
 
-    public static byte[] readFile2Bytes(final File file) {
-        return FileIOUtils.readFile2BytesByChannel(file);
+    fun readFile2Bytes(file: File?): ByteArray? {
+        return readFile2BytesByChannel(file)
     }
 
-    public static boolean writeFileFromString(final String filePath, final String content, final boolean append) {
-        return FileIOUtils.writeFileFromString(filePath, content, append);
+    fun writeFileFromString(filePath: String?, content: String?, append: Boolean): Boolean {
+        return FileIOUtils.writeFileFromString(filePath, content, append)
     }
 
-    public static boolean writeFileFromIS(final String filePath, final InputStream is) {
-        return FileIOUtils.writeFileFromIS(filePath, is);
+    fun writeFileFromIS(filePath: String?, `is`: InputStream?): Boolean {
+        return FileIOUtils.writeFileFromIS(filePath, `is`)
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // FileUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static boolean isFileExists(final File file) {
-        return FileUtils.isFileExists(file);
+    fun isFileExists(file: File?): Boolean {
+        return FileUtils.isFileExists(file)
     }
 
-    public static File getFileByPath(final String filePath) {
-        return FileUtils.getFileByPath(filePath);
+    fun getFileByPath(filePath: String?): File? {
+        return FileUtils.getFileByPath(filePath)
     }
 
-    public static boolean deleteAllInDir(final File dir) {
-        return FileUtils.deleteAllInDir(dir);
+    fun deleteAllInDir(dir: File?): Boolean {
+        return FileUtils.deleteAllInDir(dir)
     }
 
-    public static boolean createOrExistsFile(final File file) {
-        return FileUtils.createOrExistsFile(file);
+    fun createOrExistsFile(file: File?): Boolean {
+        return FileUtils.createOrExistsFile(file)
     }
 
-    public static boolean createOrExistsDir(final File file) {
-        return FileUtils.createOrExistsDir(file);
+    fun createOrExistsDir(file: File?): Boolean {
+        return FileUtils.createOrExistsDir(file)
     }
 
-    public static boolean createFileByDeleteOldFile(final File file) {
-        return FileUtils.createFileByDeleteOldFile(file);
+    fun createFileByDeleteOldFile(file: File?): Boolean {
+        return FileUtils.createFileByDeleteOldFile(file)
     }
 
-    public static long getFsTotalSize(String path) {
-        return FileUtils.getFsTotalSize(path);
+    fun getFsTotalSize(path: String?): Long {
+        return FileUtils.getFsTotalSize(path)
     }
 
-    public static long getFsAvailableSize(String path) {
-        return FileUtils.getFsAvailableSize(path);
+    fun getFsAvailableSize(path: String?): Long {
+        return FileUtils.getFsAvailableSize(path)
     }
 
-    public static void notifySystemToScan(File file) {
-        FileUtils.notifySystemToScan(file);
+    fun notifySystemToScan(file: File?) {
+        FileUtils.notifySystemToScan(file)
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // GsonUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static String toJson(final Object object) {
-        return GsonUtils.toJson(object);
+    fun toJson(`object`: Any?): String {
+        return GsonUtils.toJson(`object`)
     }
 
-    public static <T> T fromJson(final String json, final Type type) {
-        return GsonUtils.fromJson(json, type);
+    fun <T> fromJson(json: String?, type: Type?): T {
+        return GsonUtils.fromJson(json, type!!)
     }
 
-    public static Gson getGson4LogUtils() {
-        return GsonUtils.getGson4LogUtils();
-    }
+    val gson4LogUtils: Gson?
+        get() = GsonUtils.gson4LogUtils
 
     ///////////////////////////////////////////////////////////////////////////
     // ImageUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static byte[] bitmap2Bytes(final Bitmap bitmap) {
-        return ImageUtils.bitmap2Bytes(bitmap);
+    fun bitmap2Bytes(bitmap: Bitmap?): ByteArray? {
+        return ImageUtils.bitmap2Bytes(bitmap)
     }
 
-    public static byte[] bitmap2Bytes(final Bitmap bitmap, final Bitmap.CompressFormat format, int quality) {
-        return ImageUtils.bitmap2Bytes(bitmap, format, quality);
+    fun bitmap2Bytes(bitmap: Bitmap?, format: CompressFormat?, quality: Int): ByteArray? {
+        return ImageUtils.bitmap2Bytes(bitmap, format!!, quality)
     }
 
-    public static Bitmap bytes2Bitmap(final byte[] bytes) {
-        return ImageUtils.bytes2Bitmap(bytes);
+    fun bytes2Bitmap(bytes: ByteArray?): Bitmap? {
+        return ImageUtils.bytes2Bitmap(bytes)
     }
 
-    public static byte[] drawable2Bytes(final Drawable drawable) {
-        return ImageUtils.drawable2Bytes(drawable);
+    fun drawable2Bytes(drawable: Drawable?): ByteArray? {
+        return ImageUtils.drawable2Bytes(drawable)
     }
 
-    public static byte[] drawable2Bytes(final Drawable drawable, final Bitmap.CompressFormat format, int quality) {
-        return ImageUtils.drawable2Bytes(drawable, format, quality);
+    fun drawable2Bytes(drawable: Drawable?, format: CompressFormat?, quality: Int): ByteArray? {
+        return ImageUtils.drawable2Bytes(drawable, format!!, quality)
     }
 
-    public static Drawable bytes2Drawable(final byte[] bytes) {
-        return ImageUtils.bytes2Drawable(bytes);
+    fun bytes2Drawable(bytes: ByteArray?): Drawable? {
+        return ImageUtils.bytes2Drawable(bytes)
     }
 
-
-    public static Bitmap drawable2Bitmap(final Drawable drawable) {
-        return ImageUtils.drawable2Bitmap(drawable);
+    fun drawable2Bitmap(drawable: Drawable?): Bitmap? {
+        return ImageUtils.drawable2Bitmap(drawable)
     }
 
-    public static Drawable bitmap2Drawable(final Bitmap bitmap) {
-        return ImageUtils.bitmap2Drawable(bitmap);
+    fun bitmap2Drawable(bitmap: Bitmap?): Drawable? {
+        return ImageUtils.bitmap2Drawable(bitmap)
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // IntentUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static boolean isIntentAvailable(final Intent intent) {
-        return IntentUtils.isIntentAvailable(intent);
+    fun isIntentAvailable(intent: Intent?): Boolean {
+        return IntentUtils.isIntentAvailable(intent)
     }
 
-    public static Intent getLaunchAppIntent(final String pkgName) {
-        return IntentUtils.getLaunchAppIntent(pkgName);
+    fun getLaunchAppIntent(pkgName: String?): Intent? {
+        return IntentUtils.getLaunchAppIntent(pkgName)
     }
 
-    public static Intent getInstallAppIntent(final File file) {
-        return IntentUtils.getInstallAppIntent(file);
+    fun getInstallAppIntent(file: File?): Intent? {
+        return IntentUtils.getInstallAppIntent(file)
     }
 
-    public static Intent getInstallAppIntent(final Uri uri) {
-        return IntentUtils.getInstallAppIntent(uri);
+    fun getInstallAppIntent(uri: Uri?): Intent? {
+        return IntentUtils.getInstallAppIntent(uri)
     }
 
-    public static Intent getUninstallAppIntent(final String pkgName) {
-        return IntentUtils.getUninstallAppIntent(pkgName);
+    fun getUninstallAppIntent(pkgName: String?): Intent {
+        return IntentUtils.getUninstallAppIntent(pkgName!!)
     }
 
-    public static Intent getDialIntent(final String phoneNumber) {
-        return IntentUtils.getDialIntent(phoneNumber);
+    fun getDialIntent(phoneNumber: String?): Intent {
+        return IntentUtils.getDialIntent(phoneNumber!!)
     }
 
-    @RequiresPermission(CALL_PHONE)
-    public static Intent getCallIntent(final String phoneNumber) {
-        return IntentUtils.getCallIntent(phoneNumber);
+    @RequiresPermission(permission.CALL_PHONE)
+    fun getCallIntent(phoneNumber: String?): Intent {
+        return IntentUtils.getCallIntent(phoneNumber!!)
     }
 
-    public static Intent getSendSmsIntent(final String phoneNumber, final String content) {
-        return IntentUtils.getSendSmsIntent(phoneNumber, content);
+    fun getSendSmsIntent(phoneNumber: String?, content: String?): Intent {
+        return IntentUtils.getSendSmsIntent(phoneNumber!!, content)
     }
 
-    public static Intent getLaunchAppDetailsSettingsIntent(final String pkgName, final boolean isNewTask) {
-        return IntentUtils.getLaunchAppDetailsSettingsIntent(pkgName, isNewTask);
+    fun getLaunchAppDetailsSettingsIntent(pkgName: String?, isNewTask: Boolean): Intent {
+        return IntentUtils.getLaunchAppDetailsSettingsIntent(pkgName!!, isNewTask)
     }
-
 
     ///////////////////////////////////////////////////////////////////////////
     // NotificationUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static Notification getNotification(ChannelConfig channelConfig,
-                                               Consumer<NotificationCompat.Builder> consumer) {
-        return NotificationUtils.getNotification(channelConfig, consumer);
+    fun getNotification(
+        channelConfig: ChannelConfig?, consumer: Consumer<NotificationCompat.Builder?>?
+    ): Notification {
+        return NotificationUtils.getNotification(channelConfig!!, consumer)
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // PermissionUtils
-    ///////////////////////////////////////////////////////////////////////////
-    public static boolean isGranted(final String permissions) {
-//        return PermissionL.Companion.isGranted(DawnUtil.getApp(), permissions);
-        return true;
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    public static boolean isGrantedDrawOverlays() {
-        return Settings.canDrawOverlays(getApp());
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // ProcessUtils
-    ///////////////////////////////////////////////////////////////////////////
-    public static boolean isMainProcess() {
-        return ProcessUtils.isMainProcess();
-    }
-
-    public static String getForegroundProcessName() {
-        return ProcessUtils.getForegroundProcessName();
-    }
-
-    public static String getCurrentProcessName() {
-        return ProcessUtils.getCurrentProcessName();
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // RomUtils
-    ///////////////////////////////////////////////////////////////////////////
-    public static boolean isSamsung() {
-        return RomUtils.isSamsung();
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // ScreenUtils
-    ///////////////////////////////////////////////////////////////////////////
-    public static int getAppScreenWidth() {
-        return ScreenUtils.getAppScreenWidth();
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // SDCardUtils
-    ///////////////////////////////////////////////////////////////////////////
-    public static boolean isSDCardEnableByEnvironment() {
-        return SDCardUtils.isSDCardEnableByEnvironment();
-    }
+    val isGrantedDrawOverlays: Boolean
+        get() = Settings.canDrawOverlays(app)
+    val isMainProcess: Boolean
+        ///////////////////////////////////////////////////////////////////////////
+        get() = ProcessUtils.isMainProcess
+    val foregroundProcessName: String?
+        get() = ProcessUtils.foregroundProcessName
+    val currentProcessName: String
+        get() = ProcessUtils.currentProcessName
+    val isSamsung: Boolean
+        ///////////////////////////////////////////////////////////////////////////
+        get() = RomUtils.isSamsung
+    val appScreenWidth: Int
+        ///////////////////////////////////////////////////////////////////////////
+        get() = ScreenUtils.appScreenWidth
+    val isSDCardEnableByEnvironment: Boolean
+        ///////////////////////////////////////////////////////////////////////////
+        get() = SDCardUtils.isSDCardEnableByEnvironment
 
     ///////////////////////////////////////////////////////////////////////////
     // ServiceUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static boolean isServiceRunning(final String className) {
-        return ServiceUtils.isServiceRunning(className);
+    fun isServiceRunning(className: String?): Boolean {
+        return ServiceUtils.isServiceRunning(className!!)
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // ShellUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static CommandResult execCmd(final String command, final boolean isRooted) {
-        return ShellUtils.execCmd(command, isRooted);
+    fun execCmd(command: String?, isRooted: Boolean): CommandResult {
+        return ShellUtils.execCmd(command, isRooted)
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // SizeUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static int dp2px(final float dpValue) {
-        return SizeUtils.dp2px(dpValue);
+    fun dp2px(dpValue: Float): Int {
+        return SizeUtils.dp2px(dpValue)
     }
 
-    public static int px2dp(final float pxValue) {
-        return SizeUtils.px2dp(pxValue);
+    fun px2dp(pxValue: Float): Int {
+        return SizeUtils.px2dp(pxValue)
     }
 
-    public static int sp2px(final float spValue) {
-        return SizeUtils.sp2px(spValue);
+    fun sp2px(spValue: Float): Int {
+        return SizeUtils.sp2px(spValue)
     }
 
-    public static int px2sp(final float pxValue) {
-        return SizeUtils.px2sp(pxValue);
+    fun px2sp(pxValue: Float): Int {
+        return SizeUtils.px2sp(pxValue)
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // StringUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static boolean isSpace(final String s) {
-        return StringUtils.isSpace(s);
+    fun isSpace(s: String?): Boolean {
+        return StringUtils.isSpace(s)
     }
 
-    public static boolean equals(final CharSequence s1, final CharSequence s2) {
-        return StringUtils.equals(s1, s2);
+    @JvmStatic
+    fun equals(s1: CharSequence?, s2: CharSequence?): Boolean {
+        return StringUtils.equals(s1, s2)
     }
 
-    public static String getString(@StringRes int id) {
-        return StringUtils.getString(id);
+    fun getString(@StringRes id: Int): String? {
+        return StringUtils.getString(id)
     }
 
-    public static String getString(@StringRes int id, Object... formatArgs) {
-        return StringUtils.getString(id, formatArgs);
+    fun getString(@StringRes id: Int, vararg formatArgs: Any?): String? {
+        return StringUtils.getString(id, *formatArgs)
     }
 
-    public static String format(@Nullable String str, Object... args) {
-        return StringUtils.format(str, args);
+    fun format(str: String?, vararg args: Any?): String? {
+        return StringUtils.format(str, *args)
     }
-
 
     ///////////////////////////////////////////////////////////////////////////
     // ThreadUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static <T> Task<T> doAsync(final Task<T> task) {
-        ThreadUtils.getCachedPool().execute(task);
-        return task;
+    @JvmStatic
+    fun <T> doAsync(task: Task<T>): Task<T> {
+        ThreadUtils.cachedPool.execute(task)
+        return task
     }
 
-    public static void runOnUiThread(final Runnable runnable) {
-        ThreadUtils.runOnUiThread(runnable);
+    @JvmStatic
+    fun runOnUiThread(runnable: Runnable) {
+        ThreadUtils.runOnUiThread(runnable)
     }
 
-    public static void runOnUiThreadDelayed(final Runnable runnable, long delayMillis) {
-        ThreadUtils.runOnUiThreadDelayed(runnable, delayMillis);
+    @JvmStatic
+    fun runOnUiThreadDelayed(runnable: Runnable?, delayMillis: Long) {
+        ThreadUtils.runOnUiThreadDelayed(runnable, delayMillis)
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // ThrowableUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static String getFullStackTrace(Throwable throwable) {
-        return ThrowableUtils.getFullStackTrace(throwable);
+    fun getFullStackTrace(throwable: Throwable?): String {
+        return ThrowableUtils.getFullStackTrace(throwable)
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // TimeUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static String millis2FitTimeSpan(long millis, int precision) {
-        return TimeUtils.millis2FitTimeSpan(millis, precision);
+    fun millis2FitTimeSpan(millis: Long, precision: Int): String? {
+        return TimeUtils.millis2FitTimeSpan(millis, precision)
     }
 
 
-    public static void preLoad(final Runnable... runs) {
-        for (final Runnable r : runs) {
-            ThreadUtils.getCachedPool().execute(r);
-        }
-    }
 
     ///////////////////////////////////////////////////////////////////////////
     // UriUtils
     ///////////////////////////////////////////////////////////////////////////
-    public static Uri file2Uri(final File file) {
-        return UriUtils.file2Uri(file);
+    fun file2Uri(file: File?): Uri? {
+        return UriUtils.file2Uri(file)
     }
 
-    public static File uri2File(final Uri uri) {
-        return UriUtils.uri2File(uri);
+    fun uri2File(uri: Uri?): File? {
+        return UriUtils.uri2File(uri)
     }
 
-
-
-    public static Class getClassName(String paramType) throws ClassNotFoundException {
-        switch (paramType) {
-            case "boolean":
-                return boolean.class;
-            case "int":
-                return int.class;
-            case "long":
-                return long.class;
-            case "short":
-                return short.class;
-            case "byte":
-                return byte.class;
-            case "double":
-                return double.class;
-            case "float":
-                return float.class;
-            case "char":
-                return char.class;
-            default:
-                return Class.forName(paramType);
+    @Throws(ClassNotFoundException::class)
+    fun getClassName(paramType: String?): Class<*>? {
+        return when (paramType) {
+            "boolean" -> Boolean::class.javaPrimitiveType
+            "int" -> Int::class.javaPrimitiveType
+            "long" -> Long::class.javaPrimitiveType
+            "short" -> Short::class.javaPrimitiveType
+            "byte" -> Byte::class.javaPrimitiveType
+            "double" -> Double::class.javaPrimitiveType
+            "float" -> Float::class.javaPrimitiveType
+            "char" -> Char::class.javaPrimitiveType
+            else -> paramType?.let { Class.forName(it) }
         }
     }
 
-    public abstract static class Task<Result> extends SimpleTask<Result> {
-
-        private Consumer<Result> mConsumer;
-
-        public Task(final Consumer<Result> consumer) {
-            mConsumer = consumer;
-        }
-
-        @Override
-        public void onSuccess(Result result) {
-            if (mConsumer != null) {
-                mConsumer.accept(result);
-            }
+    abstract class Task<Result>(private val mConsumer: Consumer<Result>?) : SimpleTask<Result>() {
+        override fun onSuccess(result: Result) {
+            mConsumer?.accept(result)
         }
     }
 
-
-    public interface Consumer<T> {
-        void accept(T t);
+    interface Consumer<T> {
+        fun accept(t: T)
     }
 
-    public interface Supplier<T> {
-        T get();
+    interface Supplier<T> {
+        fun get(): T
     }
 
-    public interface Func1<Ret, Par> {
-        Ret call(Par param);
+    interface Func1<Ret, Par> {
+        fun call(param: Par): Ret
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // Common
     ///////////////////////////////////////////////////////////////////////////
-    public static final class FileHead {
-
-        private final String mName;
-        private final LinkedHashMap<String, String> mFirst = new LinkedHashMap<>();
-        private final LinkedHashMap<String, String> mLast = new LinkedHashMap<>();
-
-        public FileHead(String name) {
-            mName = name;
+    class FileHead(private val mName: String) {
+        private val mFirst = LinkedHashMap<String, String>()
+        private val mLast = LinkedHashMap<String, String>()
+        fun addFirst(key: String, value: String) {
+            append2Host(mFirst, key, value)
         }
 
-        public void addFirst(String key, String value) {
-            append2Host(mFirst, key, value);
+        fun append(extra: Map<String, String>?) {
+            append2Host(mLast, extra)
         }
 
-        public void append(Map<String, String> extra) {
-            append2Host(mLast, extra);
+        fun append(key: String, value: String) {
+            append2Host(mLast, key, value)
         }
 
-        public void append(String key, String value) {
-            append2Host(mLast, key, value);
-        }
-
-        private void append2Host(Map<String, String> host, Map<String, String> extra) {
-            if (extra == null || extra.isEmpty()) {
-                return;
+        private fun append2Host(host: MutableMap<String, String>, extra: Map<String, String>?) {
+            if (extra.isNullOrEmpty()) {
+                return
             }
-            for (Map.Entry<String, String> entry : extra.entrySet()) {
-                append2Host(host, entry.getKey(), entry.getValue());
+            for ((key, value) in extra) {
+                append2Host(host, key, value)
             }
         }
 
-        private void append2Host(Map<String, String> host, String key, String value) {
+        private fun append2Host(host: MutableMap<String, String>, key: String, value: String) {
+            var key = key
             if (TextUtils.isEmpty(key) || TextUtils.isEmpty(value)) {
-                return;
+                return
             }
-            int delta = 19 - key.length(); // 19 is length of "Device Manufacturer"
+            val delta = 19 - key.length // 19 is length of "Device Manufacturer"
             if (delta > 0) {
-                key = key + "                   ".substring(0, delta);
+                key += "                   ".substring(0, delta)
             }
-            host.put(key, value);
+            host[key] = value
         }
 
-        public String getAppended() {
-            StringBuilder sb = new StringBuilder();
-            for (Map.Entry<String, String> entry : mLast.entrySet()) {
-                sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
-            }
-            return sb.toString();
-        }
-
-        @NonNull
-        @Override
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            String border = "************* " + mName + " Head ****************\n";
-            sb.append(border);
-            for (Map.Entry<String, String> entry : mFirst.entrySet()) {
-                sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+        val appended: String
+            get() {
+                val sb = StringBuilder()
+                for ((key, value) in mLast) {
+                    sb.append(key).append(": ").append(value).append("\n")
+                }
+                return sb.toString()
             }
 
-            sb.append("Rom Info           : ").append(RomUtils.getRomInfo()).append("\n");
-            sb.append("Device Manufacturer: ").append(Build.MANUFACTURER).append("\n");
-            sb.append("Device Model       : ").append(Build.MODEL).append("\n");
-            sb.append("Android Version    : ").append(Build.VERSION.RELEASE).append("\n");
-            sb.append("Android SDK        : ").append(Build.VERSION.SDK_INT).append("\n");
-            sb.append("App VersionName    : ").append(AppUtils.getAppVersionName()).append("\n");
-            sb.append("App VersionCode    : ").append(AppUtils.getAppVersionCode()).append("\n");
-
-            sb.append(getAppended());
-            return sb.append(border).append("\n").toString();
+        override fun toString(): String {
+            val sb = StringBuilder()
+            val border = "************* $mName Head ****************\n"
+            sb.append(border)
+            for ((key, value) in mFirst) {
+                sb.append(key).append(": ").append(value).append("\n")
+            }
+            sb.append("Rom Info           : ").append(romInfo).append("\n")
+            sb.append("Device Manufacturer: ").append(Build.MANUFACTURER).append("\n")
+            sb.append("Device Model       : ").append(Build.MODEL).append("\n")
+            sb.append("Android Version    : ").append(Build.VERSION.RELEASE).append("\n")
+            sb.append("Android SDK        : ").append(Build.VERSION.SDK_INT).append("\n")
+            sb.append("App VersionName    : ").append(appVersionName).append("\n")
+            sb.append("App VersionCode    : ").append(appVersionCode).append("\n")
+            sb.append(appended)
+            return sb.append(border).append("\n").toString()
         }
     }
 }

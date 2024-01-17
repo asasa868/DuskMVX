@@ -22,8 +22,8 @@ object MetaDataUtils {
      */
     fun getMetaDataInApp(key: String): String {
         var value = ""
-        val pm = DawnBridge.getApp().packageManager
-        val packageName = DawnBridge.getApp().packageName
+        val pm = DawnBridge.app.packageManager
+        val packageName = DawnBridge.app.packageName
         try {
             val ai = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
             value = ai.metaData[key].toString()
@@ -57,8 +57,8 @@ object MetaDataUtils {
         clz: Class<out Activity?>, key: String
     ): String {
         var value = ""
-        val pm = DawnBridge.getApp().packageManager
-        val componentName = ComponentName(DawnBridge.getApp(), clz)
+        val pm = DawnBridge.app.packageManager
+        val componentName = ComponentName(DawnBridge.app, clz)
         try {
             val ai = pm.getActivityInfo(componentName, PackageManager.GET_META_DATA)
             value = ai.metaData[key].toString()
@@ -92,8 +92,8 @@ object MetaDataUtils {
         clz: Class<out Service?>, key: String
     ): String {
         var value = ""
-        val pm = DawnBridge.getApp().packageManager
-        val componentName = ComponentName(DawnBridge.getApp(), clz)
+        val pm = DawnBridge.app.packageManager
+        val componentName = ComponentName(DawnBridge.app, clz)
         try {
             val info = pm.getServiceInfo(componentName, PackageManager.GET_META_DATA)
             value = info.metaData[key].toString()
@@ -127,8 +127,8 @@ object MetaDataUtils {
         clz: Class<out BroadcastReceiver?>, key: String
     ): String {
         var value = ""
-        val pm = DawnBridge.getApp().packageManager
-        val componentName = ComponentName(DawnBridge.getApp(), clz)
+        val pm = DawnBridge.app.packageManager
+        val componentName = ComponentName(DawnBridge.app, clz)
         try {
             val info = pm.getReceiverInfo(componentName, PackageManager.GET_META_DATA)
             value = info.metaData[key].toString()

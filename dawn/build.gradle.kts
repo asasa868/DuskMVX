@@ -70,11 +70,12 @@ android {
 
     lint {
         baseline = file(ProjectConfigs.lintName)
+        enable.add("deprecation")
     }
 
     libraryVariants.all {
         artifacts {
-            archivesName.set("${project.name}")
+            archivesName.set(project.name)
         }
     }
 }

@@ -1,20 +1,13 @@
-package com.lzq.dawn.util.cache;
+package com.lzq.dawn.util.cache
 
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
-
-import com.lzq.dawn.util.cache.disk.CacheDiskUtils;
-import com.lzq.dawn.util.cache.memory.CacheMemoryUtils;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
+import android.os.Parcelable
+import com.lzq.dawn.util.cache.disk.CacheDiskUtils
+import com.lzq.dawn.util.cache.memory.CacheMemoryUtils
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.Serializable
 
 /**
  * @Name :CacheDoubleUtils
@@ -22,64 +15,9 @@ import java.util.Map;
  * @Author :  Lzq
  * @Desc : 双缓存
  */
-public final class CacheDoubleUtils implements CacheConstants {
-
-    private static final Map<String, CacheDoubleUtils> CACHE_MAP = new HashMap<>();
-
-    private final CacheMemoryUtils mCacheMemoryUtils;
-    private final CacheDiskUtils mCacheDiskUtils;
-
-    private CacheDoubleUtils(CacheMemoryUtils cacheMemoryUtils, CacheDiskUtils cacheUtils) {
-        mCacheMemoryUtils = cacheMemoryUtils;
-        mCacheDiskUtils = cacheUtils;
-    }
-
-    /**
-     * 返回单个{@link CacheDoubleUtils}实例。
-     *
-     * @return 返回单个{@link CacheDoubleUtils}实例。
-     */
-    public static CacheDoubleUtils getInstance() {
-        return getInstance(CacheMemoryUtils.getInstance(), CacheDiskUtils.getInstance());
-    }
-
-    /**
-     * 返回单个{@link CacheDoubleUtils}实例。
-     *
-     * @param cacheMemoryUtils {@link CacheMemoryUtils}的实例。
-     * @param cacheDiskUtils   {@link CacheDiskUtils}的实例。
-     * @return 单个{@link CacheDoubleUtils}实例。
-     */
-    public static CacheDoubleUtils getInstance(@NonNull final CacheMemoryUtils cacheMemoryUtils,
-                                               @NonNull final CacheDiskUtils cacheDiskUtils) {
-        final String cacheKey = cacheDiskUtils.toString() + "_" + cacheMemoryUtils.toString();
-        CacheDoubleUtils cache = CACHE_MAP.get(cacheKey);
-        if (cache == null) {
-            synchronized (CacheDoubleUtils.class) {
-                cache = CACHE_MAP.get(cacheKey);
-                if (cache == null) {
-                    cache = new CacheDoubleUtils(cacheMemoryUtils, cacheDiskUtils);
-                    CACHE_MAP.put(cacheKey, cache);
-                }
-            }
-        }
-        return cache;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // about bytes
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 bytes  放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public void put(@NonNull final String key, final byte[] value) {
-        put(key, value, -1);
-    }
-
+class CacheDoubleUtils private constructor(
+    private val mCacheMemoryUtils: CacheMemoryUtils, private val mCacheDiskUtils: CacheDiskUtils
+) : CacheConstants {
     /**
      * 将 bytes  放入缓存
      *
@@ -87,53 +25,40 @@ public final class CacheDoubleUtils implements CacheConstants {
      * @param value    value
      * @param saveTime 缓存的保存时间，以秒为单位。
      */
-    public void put(@NonNull final String key, byte[] value, final int saveTime) {
-        mCacheMemoryUtils.put(key, value, saveTime);
-        mCacheDiskUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(key: String, value: ByteArray?, saveTime: Int = -1) {
+        mCacheMemoryUtils.put(key, value, saveTime)
+        mCacheDiskUtils.put(key, value, saveTime)
     }
 
     /**
-     * Return the bytes  
+     * Return the bytes
      *
      * @param key key
      * @return 如果缓存存在，则为字节，否则为空
      */
-    public byte[] getBytes(@NonNull final String key) {
-        return getBytes(key, null);
+    fun getBytes(key: String): ByteArray? {
+        return getBytes(key, null)
     }
 
     /**
-     * Return the bytes  
+     * Return the bytes
      *
      * @param key          key
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @return 如果缓存存在，则为字节，否则为默认值。
      */
-    public byte[] getBytes(@NonNull final String key, final byte[] defaultValue) {
-        byte[] obj = mCacheMemoryUtils.get(key);
+    fun getBytes(key: String, defaultValue: ByteArray?): ByteArray? {
+        val obj = mCacheMemoryUtils.get<ByteArray>(key)
         if (obj != null) {
-            return obj;
+            return obj
         }
-        byte[] bytes = mCacheDiskUtils.getBytes(key);
+        val bytes = mCacheDiskUtils.getBytes(key)
         if (bytes != null) {
-            mCacheMemoryUtils.put(key, bytes);
-            return bytes;
+            mCacheMemoryUtils.put(key, bytes)
+            return bytes
         }
-        return defaultValue;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // about String
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 string value  放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public void put(@NonNull final String key, final String value) {
-        put(key, value, -1);
+        return defaultValue
     }
 
     /**
@@ -143,51 +68,38 @@ public final class CacheDoubleUtils implements CacheConstants {
      * @param value    value
      * @param saveTime 缓存的保存时间，以秒为单位。
      */
-    public void put(@NonNull final String key, final String value, final int saveTime) {
-        mCacheMemoryUtils.put(key, value, saveTime);
-        mCacheDiskUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(key: String, value: String?, saveTime: Int = -1) {
+        mCacheMemoryUtils.put(key, value, saveTime)
+        mCacheDiskUtils.put(key, value, saveTime)
     }
 
     /**
-     * Return the string value  
+     * Return the string value
      *
      * @param key key
      * @return 如果缓存存在，则为string，否则为空
      */
-    public String getString(@NonNull final String key) {
-        return getString(key, null);
+    fun getString(key: String): String? {
+        return getString(key, null)
     }
 
     /**
-     * Return the string value  
+     * Return the string value
      *
      * @param key          key
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @return 如果缓存存在，则为string，否则为默认值。
      */
-    public String getString(@NonNull final String key, final String defaultValue) {
-        String obj = mCacheMemoryUtils.get(key);
-        if (obj != null) return obj;
-        String string = mCacheDiskUtils.getString(key);
+    fun getString(key: String, defaultValue: String?): String? {
+        val obj = mCacheMemoryUtils.get<String>(key)
+        if (obj != null) return obj
+        val string = mCacheDiskUtils.getString(key)
         if (string != null) {
-            mCacheMemoryUtils.put(key, string);
-            return string;
+            mCacheMemoryUtils.put(key, string)
+            return string
         }
-        return defaultValue;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // about JSONObject
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 JSONObject  放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public void put(@NonNull final String key, final JSONObject value) {
-        put(key, value, -1);
+        return defaultValue
     }
 
     /**
@@ -197,56 +109,42 @@ public final class CacheDoubleUtils implements CacheConstants {
      * @param value    value
      * @param saveTime 缓存的保存时间，以秒为单位。
      */
-    public void put(@NonNull final String key,
-                    final JSONObject value,
-                    final int saveTime) {
-        mCacheMemoryUtils.put(key, value, saveTime);
-        mCacheDiskUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(
+        key: String, value: JSONObject?, saveTime: Int = -1
+    ) {
+        mCacheMemoryUtils.put(key, value, saveTime)
+        mCacheDiskUtils.put(key, value, saveTime)
     }
 
     /**
-     * Return the JSONObject  
+     * Return the JSONObject
      *
      * @param key key
      * @return 如果缓存存在，则为JSONObject，否则为null。
      */
-    public JSONObject getJSONObject(@NonNull final String key) {
-        return getJSONObject(key, null);
+    fun getJSONObject(key: String): JSONObject? {
+        return getJSONObject(key, null)
     }
 
     /**
-     * Return the JSONObject  
+     * Return the JSONObject
      *
      * @param key          key
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @return 如果缓存存在，则为JSONObject，否则为默认值。
      */
-    public JSONObject getJSONObject(@NonNull final String key, final JSONObject defaultValue) {
-        JSONObject obj = mCacheMemoryUtils.get(key);
+    fun getJSONObject(key: String, defaultValue: JSONObject?): JSONObject? {
+        val obj = mCacheMemoryUtils.get<JSONObject>(key)
         if (obj != null) {
-            return obj;
+            return obj
         }
-        JSONObject jsonObject = mCacheDiskUtils.getJSONObject(key);
+        val jsonObject = mCacheDiskUtils.getJSONObject(key)
         if (jsonObject != null) {
-            mCacheMemoryUtils.put(key, jsonObject);
-            return jsonObject;
+            mCacheMemoryUtils.put(key, jsonObject)
+            return jsonObject
         }
-        return defaultValue;
-    }
-
-
-    ///////////////////////////////////////////////////////////////////////////
-    // about JSONArray
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 JSONArray  放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public void put(@NonNull final String key, final JSONArray value) {
-        put(key, value, -1);
+        return defaultValue
     }
 
     /**
@@ -256,53 +154,40 @@ public final class CacheDoubleUtils implements CacheConstants {
      * @param value    value
      * @param saveTime 缓存的保存时间，以秒为单位。
      */
-    public void put(@NonNull final String key, final JSONArray value, final int saveTime) {
-        mCacheMemoryUtils.put(key, value, saveTime);
-        mCacheDiskUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(key: String, value: JSONArray?, saveTime: Int = -1) {
+        mCacheMemoryUtils.put(key, value, saveTime)
+        mCacheDiskUtils.put(key, value, saveTime)
     }
 
     /**
-     * Return the JSONArray  
+     * Return the JSONArray
      *
      * @param key key
      * @return 如果缓存存在，则为JSONArray，否则为默认值。
      */
-    public JSONArray getJSONArray(@NonNull final String key) {
-        return getJSONArray(key, null);
+    fun getJSONArray(key: String): JSONArray? {
+        return getJSONArray(key, null)
     }
 
     /**
-     * Return the JSONArray  
+     * Return the JSONArray
      *
      * @param key          key
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @return 如果缓存存在，则为 JSONArray，否则为默认值。
      */
-    public JSONArray getJSONArray(@NonNull final String key, final JSONArray defaultValue) {
-        JSONArray obj = mCacheMemoryUtils.get(key);
+    fun getJSONArray(key: String, defaultValue: JSONArray?): JSONArray? {
+        val obj = mCacheMemoryUtils.get<JSONArray>(key)
         if (obj != null) {
-            return obj;
+            return obj
         }
-        JSONArray jsonArray = mCacheDiskUtils.getJSONArray(key);
+        val jsonArray = mCacheDiskUtils.getJSONArray(key)
         if (jsonArray != null) {
-            mCacheMemoryUtils.put(key, jsonArray);
-            return jsonArray;
+            mCacheMemoryUtils.put(key, jsonArray)
+            return jsonArray
         }
-        return defaultValue;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Bitmap cache
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 bitmap  放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public void put(@NonNull final String key, final Bitmap value) {
-        put(key, value, -1);
+        return defaultValue
     }
 
     /**
@@ -312,53 +197,40 @@ public final class CacheDoubleUtils implements CacheConstants {
      * @param value    value
      * @param saveTime 缓存的保存时间，以秒为单位。
      */
-    public void put(@NonNull final String key, final Bitmap value, final int saveTime) {
-        mCacheMemoryUtils.put(key, value, saveTime);
-        mCacheDiskUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(key: String, value: Bitmap?, saveTime: Int = -1) {
+        mCacheMemoryUtils.put(key, value, saveTime)
+        mCacheDiskUtils.put(key, value, saveTime)
     }
 
     /**
-     * Return the bitmap  
+     * Return the bitmap
      *
      * @param key key
      * @return 如果缓存存在，则为 bitmap，否则为默认值。
      */
-    public Bitmap getBitmap(@NonNull final String key) {
-        return getBitmap(key, null);
+    fun getBitmap(key: String): Bitmap? {
+        return getBitmap(key, null)
     }
 
     /**
-     * Return the bitmap  
+     * Return the bitmap
      *
      * @param key          key
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @return 如果缓存存在，则为 bitmap，否则为默认值。
      */
-    public Bitmap getBitmap(@NonNull final String key, final Bitmap defaultValue) {
-        Bitmap obj = mCacheMemoryUtils.get(key);
+    fun getBitmap(key: String, defaultValue: Bitmap?): Bitmap? {
+        val obj = mCacheMemoryUtils.get<Bitmap>(key)
         if (obj != null) {
-            return obj;
+            return obj
         }
-        Bitmap bitmap = mCacheDiskUtils.getBitmap(key);
+        val bitmap = mCacheDiskUtils.getBitmap(key)
         if (bitmap != null) {
-            mCacheMemoryUtils.put(key, bitmap);
-            return bitmap;
+            mCacheMemoryUtils.put(key, bitmap)
+            return bitmap
         }
-        return defaultValue;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // about Drawable
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 drawable  放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public void put(@NonNull final String key, final Drawable value) {
-        put(key, value, -1);
+        return defaultValue
     }
 
     /**
@@ -368,53 +240,40 @@ public final class CacheDoubleUtils implements CacheConstants {
      * @param value    value
      * @param saveTime 缓存的保存时间，以秒为单位。
      */
-    public void put(@NonNull final String key, final Drawable value, final int saveTime) {
-        mCacheMemoryUtils.put(key, value, saveTime);
-        mCacheDiskUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(key: String, value: Drawable?, saveTime: Int = -1) {
+        mCacheMemoryUtils.put(key, value, saveTime)
+        mCacheDiskUtils.put(key, value, saveTime)
     }
 
     /**
-     * Return the drawable  
+     * Return the drawable
      *
      * @param key key
      * @return 如果缓存存在，则为 drawable，否则为默认值。
      */
-    public Drawable getDrawable(@NonNull final String key) {
-        return getDrawable(key, null);
+    fun getDrawable(key: String): Drawable? {
+        return getDrawable(key, null)
     }
 
     /**
-     * Return the drawable  
+     * Return the drawable
      *
      * @param key          key
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @return 如果缓存存在，则为 drawable，否则为默认值。
      */
-    public Drawable getDrawable(@NonNull final String key, final Drawable defaultValue) {
-        Drawable obj = mCacheMemoryUtils.get(key);
+    fun getDrawable(key: String, defaultValue: Drawable?): Drawable? {
+        val obj = mCacheMemoryUtils.get<Drawable>(key)
         if (obj != null) {
-            return obj;
+            return obj
         }
-        Drawable drawable = mCacheDiskUtils.getDrawable(key);
+        val drawable = mCacheDiskUtils.getDrawable(key)
         if (drawable != null) {
-            mCacheMemoryUtils.put(key, drawable);
-            return drawable;
+            mCacheMemoryUtils.put(key, drawable)
+            return drawable
         }
-        return defaultValue;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // about Parcelable
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 parcelable  放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public void put(@NonNull final String key, final Parcelable value) {
-        put(key, value, -1);
+        return defaultValue
     }
 
     /**
@@ -424,60 +283,48 @@ public final class CacheDoubleUtils implements CacheConstants {
      * @param value    value
      * @param saveTime 缓存的保存时间，以秒为单位。
      */
-    public void put(@NonNull final String key, final Parcelable value, final int saveTime) {
-        mCacheMemoryUtils.put(key, value, saveTime);
-        mCacheDiskUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(key: String, value: Parcelable?, saveTime: Int = -1) {
+        mCacheMemoryUtils.put(key, value, saveTime)
+        mCacheDiskUtils.put(key, value, saveTime)
     }
 
     /**
-     * Return the parcelable  
+     * Return the parcelable
      *
      * @param key     key
      * @param creator The creator.
      * @param <T>    值类型
      * @return 如果缓存存在，则为 parcelable，否则为默认值。
-     */
-    public <T> T getParcelable(@NonNull final String key,
-                               @NonNull final Parcelable.Creator<T> creator) {
-        return getParcelable(key, creator, null);
+    </T> */
+    fun <T> getParcelable(
+        key: String, creator: Parcelable.Creator<T?>
+    ): T? {
+        return getParcelable(key, creator, null)
     }
 
     /**
-     * Return the parcelable  
+     * Return the parcelable
      *
      * @param key          key
      * @param creator      The creator.
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @param <T>          值类型
      * @return 如果缓存存在，则为 parcelable，否则为默认值。
-     */
-    public <T> T getParcelable(@NonNull final String key,
-                               @NonNull final Parcelable.Creator<T> creator,
-                               final T defaultValue) {
-        T value = mCacheMemoryUtils.get(key);
+    </T> */
+    fun <T> getParcelable(
+        key: String, creator: Parcelable.Creator<T?>, defaultValue: T
+    ): T {
+        val value = mCacheMemoryUtils.get<T>(key)
         if (value != null) {
-            return value;
+            return value
         }
-        T val = mCacheDiskUtils.getParcelable(key, creator);
-        if (val != null) {
-            mCacheMemoryUtils.put(key, val);
-            return val;
+        val values = mCacheDiskUtils.getParcelable(key, creator)
+        if (values != null) {
+            mCacheMemoryUtils.put(key, values)
+            return values
         }
-        return defaultValue;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // about Serializable
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 serializable  放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public void put(@NonNull final String key, final Serializable value) {
-        put(key, value, -1);
+        return defaultValue
     }
 
     /**
@@ -487,9 +334,10 @@ public final class CacheDoubleUtils implements CacheConstants {
      * @param value    value
      * @param saveTime 缓存的保存时间，以秒为单位。
      */
-    public void put(@NonNull final String key, final Serializable value, final int saveTime) {
-        mCacheMemoryUtils.put(key, value, saveTime);
-        mCacheDiskUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(key: String, value: Serializable?, saveTime: Int = -1) {
+        mCacheMemoryUtils.put(key, value, saveTime)
+        mCacheDiskUtils.put(key, value, saveTime)
     }
 
     /**
@@ -498,8 +346,8 @@ public final class CacheDoubleUtils implements CacheConstants {
      * @param key key
      * @return serializable（如果缓存存在），否则为null
      */
-    public Object getSerializable(@NonNull final String key) {
-        return getSerializable(key, null);
+    fun getSerializable(key: String): Any? {
+        return getSerializable(key, null)
     }
 
     /**
@@ -509,61 +357,93 @@ public final class CacheDoubleUtils implements CacheConstants {
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @return serializable（如果缓存存在）或默认值（否则）
      */
-    public Object getSerializable(@NonNull final String key, final Object defaultValue) {
-        Object obj = mCacheMemoryUtils.get(key);
+    fun getSerializable(key: String, defaultValue: Any?): Any? {
+        val obj = mCacheMemoryUtils.get<Any>(key)
         if (obj != null) {
-            return obj;
+            return obj
         }
-        Object serializable = mCacheDiskUtils.getSerializable(key);
+        val serializable = mCacheDiskUtils.getSerializable(key)
         if (serializable != null) {
-            mCacheMemoryUtils.put(key, serializable);
-            return serializable;
+            mCacheMemoryUtils.put(key, serializable)
+            return serializable
         }
-        return defaultValue;
+        return defaultValue
     }
 
-    /**
-     * 返回磁盘中缓存的大小。
-     *
-     * @return 返回磁盘中缓存的大小。
-     */
-    public long getCacheDiskSize() {
-        return mCacheDiskUtils.getCacheSize();
-    }
-
-    /**
-     * 返回磁盘中缓存的数量
-     *
-     * @return 返回磁盘中缓存的数量
-     */
-    public int getCacheDiskCount() {
-        return mCacheDiskUtils.getCacheCount();
-    }
-
-    /**
-     * 返回内存中缓存的数量
-     *
-     * @return 返回内存中缓存的数量
-     */
-    public int getCacheMemoryCount() {
-        return mCacheMemoryUtils.getCacheCount();
-    }
+    val cacheDiskSize: Long
+        /**
+         * 返回磁盘中缓存的大小。
+         *
+         * @return 返回磁盘中缓存的大小。
+         */
+        get() = mCacheDiskUtils.cacheSize
+    val cacheDiskCount: Int
+        /**
+         * 返回磁盘中缓存的数量
+         *
+         * @return 返回磁盘中缓存的数量
+         */
+        get() = mCacheDiskUtils.cacheCount
+    val cacheMemoryCount: Int
+        /**
+         * 返回内存中缓存的数量
+         *
+         * @return 返回内存中缓存的数量
+         */
+        get() = mCacheMemoryUtils.cacheCount
 
     /**
      * 删除缓存中指定的key
      *
      * @param key key
      */
-    public void remove(@NonNull String key) {
-        mCacheMemoryUtils.remove(key);
-        mCacheDiskUtils.remove(key);
+    fun remove(key: String) {
+        mCacheMemoryUtils.remove(key)
+        mCacheDiskUtils.remove(key)
     }
 
     /**
      * 清空缓存
      */
-    public void clear() {
-        mCacheMemoryUtils.clear();
-        mCacheDiskUtils.clear();
+    fun clear() {
+        mCacheMemoryUtils.clear()
+        mCacheDiskUtils.clear()
+    }
+
+    companion object {
+        private val CACHE_MAP: MutableMap<String, CacheDoubleUtils> = HashMap()
+
+        @JvmStatic
+        val instance: CacheDoubleUtils?
+            /**
+             * 返回单个[CacheDoubleUtils]实例。
+             *
+             * @return 返回单个{@link CacheDoubleUtils}实例。
+             */
+            get() = getInstance(CacheMemoryUtils.instance!!, CacheDiskUtils.instance!!)
+
+        /**
+         * 返回单个[CacheDoubleUtils]实例。
+         *
+         * @param cacheMemoryUtils [CacheMemoryUtils]的实例。
+         * @param cacheDiskUtils   [CacheDiskUtils]的实例。
+         * @return 单个{@link CacheDoubleUtils}实例。
+         */
+        fun getInstance(
+            cacheMemoryUtils: CacheMemoryUtils, cacheDiskUtils: CacheDiskUtils
+        ): CacheDoubleUtils? {
+            val cacheKey = cacheDiskUtils.toString() + "_" + cacheMemoryUtils.toString()
+            var cache = CACHE_MAP[cacheKey]
+            if (cache == null) {
+                synchronized(CacheDoubleUtils::class.java) {
+                    cache = CACHE_MAP[cacheKey]
+                    if (cache == null) {
+                        cache = CacheDoubleUtils(cacheMemoryUtils, cacheDiskUtils)
+                        CACHE_MAP[cacheKey] = cache!!
+                    }
+                }
+            }
+            return cache
+        }
     }
 }

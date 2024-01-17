@@ -1,15 +1,12 @@
-package com.lzq.dawn.util.cache;
+package com.lzq.dawn.util.cache
 
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.Serializable;
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
+import android.os.Parcelable
+import com.lzq.dawn.util.cache.CacheDoubleUtils.Companion.instance
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.Serializable
 
 /**
  * @Name :CacheDoubleStaticUtils
@@ -17,39 +14,8 @@ import java.io.Serializable;
  * @Author :  Lzq
  * @Desc : 双缓存
  */
-public final class CacheDoubleStaticUtils {
-
-    private static CacheDoubleUtils sDefaultCacheDoubleUtils;
-
-    /**
-     * 设置{@link CacheDoubleUtils}的默认实例。
-     *
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的默认实例。
-     */
-    public static void setDefaultCacheDoubleUtils(final CacheDoubleUtils cacheDoubleUtils) {
-        sDefaultCacheDoubleUtils = cacheDoubleUtils;
-    }
-
-    /**
-     * 将 bytes   放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public static void put(@NonNull final String key, final byte[] value) {
-        put(key, value, getDefaultCacheDoubleUtils());
-    }
-
-    /**
-     * 将 bytes   放入缓存
-     *
-     * @param key      key
-     * @param value    value
-     * @param saveTime 缓存的保存时间，以秒为单位。
-     */
-    public static void put(@NonNull final String key, byte[] value, final int saveTime) {
-        put(key, value, saveTime, getDefaultCacheDoubleUtils());
-    }
+object CacheDoubleStaticUtils {
+    private var sDefaultCacheDoubleUtils: CacheDoubleUtils? = null
 
     /**
      * Return the bytes
@@ -57,8 +23,8 @@ public final class CacheDoubleStaticUtils {
      * @param key key
      * @return 如果缓存存在，则为 bytes ，否则为默认值
      */
-    public static byte[] getBytes(@NonNull final String key) {
-        return getBytes(key, getDefaultCacheDoubleUtils());
+    fun getBytes(key: String): ByteArray? {
+        return getBytes(key, defaultCacheDoubleUtils!!)
     }
 
     /**
@@ -68,33 +34,8 @@ public final class CacheDoubleStaticUtils {
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @return 如果缓存存在，则为 bytes ，否则为默认值
      */
-    public static byte[] getBytes(@NonNull final String key, final byte[] defaultValue) {
-        return getBytes(key, defaultValue, getDefaultCacheDoubleUtils());
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // about String
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 string value   放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public static void put(@NonNull final String key, final String value) {
-        put(key, value, getDefaultCacheDoubleUtils());
-    }
-
-    /**
-     * 将 string value   放入缓存
-     *
-     * @param key      key
-     * @param value    value
-     * @param saveTime 缓存的保存时间，以秒为单位。
-     */
-    public static void put(@NonNull final String key, final String value, final int saveTime) {
-        put(key, value, saveTime, getDefaultCacheDoubleUtils());
+    fun getBytes(key: String, defaultValue: ByteArray?): ByteArray? {
+        return getBytes(key, defaultValue, defaultCacheDoubleUtils!!)
     }
 
     /**
@@ -103,8 +44,8 @@ public final class CacheDoubleStaticUtils {
      * @param key key
      * @return 如果缓存存在，则为 string ，否则为默认值
      */
-    public static String getString(@NonNull final String key) {
-        return getString(key, getDefaultCacheDoubleUtils());
+    fun getString(key: String): String? {
+        return getString(key, defaultCacheDoubleUtils!!)
     }
 
     /**
@@ -114,35 +55,8 @@ public final class CacheDoubleStaticUtils {
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @return 如果缓存存在，则为 string ，否则为默认值
      */
-    public static String getString(@NonNull final String key, final String defaultValue) {
-        return getString(key, defaultValue, getDefaultCacheDoubleUtils());
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // about JSONObject
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 JSONObject   放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public static void put(@NonNull final String key, final JSONObject value) {
-        put(key, value, getDefaultCacheDoubleUtils());
-    }
-
-    /**
-     * 将 JSONObject   放入缓存
-     *
-     * @param key      key
-     * @param value    value
-     * @param saveTime 缓存的保存时间，以秒为单位。
-     */
-    public static void put(@NonNull final String key,
-                           final JSONObject value,
-                           final int saveTime) {
-        put(key, value, saveTime, getDefaultCacheDoubleUtils());
+    fun getString(key: String, defaultValue: String?): String? {
+        return getString(key, defaultValue, defaultCacheDoubleUtils!!)
     }
 
     /**
@@ -151,8 +65,8 @@ public final class CacheDoubleStaticUtils {
      * @param key key
      * @return 如果缓存存在，则为 JSONObject ，否则为默认值
      */
-    public static JSONObject getJSONObject(@NonNull final String key) {
-        return getJSONObject(key, getDefaultCacheDoubleUtils());
+    fun getJSONObject(key: String): JSONObject? {
+        return getJSONObject(key, defaultCacheDoubleUtils!!)
     }
 
     /**
@@ -162,34 +76,8 @@ public final class CacheDoubleStaticUtils {
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @return 如果缓存存在，则为 JSONObject ，否则为默认值
      */
-    public static JSONObject getJSONObject(@NonNull final String key, final JSONObject defaultValue) {
-        return getJSONObject(key, defaultValue, getDefaultCacheDoubleUtils());
-    }
-
-
-    ///////////////////////////////////////////////////////////////////////////
-    // about JSONArray
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 JSONArray   放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public static void put(@NonNull final String key, final JSONArray value) {
-        put(key, value, getDefaultCacheDoubleUtils());
-    }
-
-    /**
-     * 将 JSONArray   放入缓存
-     *
-     * @param key      key
-     * @param value    value
-     * @param saveTime 缓存的保存时间，以秒为单位。
-     */
-    public static void put(@NonNull final String key, final JSONArray value, final int saveTime) {
-        put(key, value, saveTime, getDefaultCacheDoubleUtils());
+    fun getJSONObject(key: String, defaultValue: JSONObject?): JSONObject? {
+        return getJSONObject(key, defaultValue, defaultCacheDoubleUtils!!)
     }
 
     /**
@@ -198,8 +86,8 @@ public final class CacheDoubleStaticUtils {
      * @param key key
      * @return 如果缓存存在，则为 JSONArray ，否则为默认值
      */
-    public static JSONArray getJSONArray(@NonNull final String key) {
-        return getJSONArray(key, getDefaultCacheDoubleUtils());
+    fun getJSONArray(key: String): JSONArray? {
+        return getJSONArray(key, defaultCacheDoubleUtils!!)
     }
 
     /**
@@ -209,33 +97,8 @@ public final class CacheDoubleStaticUtils {
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @return 如果缓存存在，则为 JSONArray ，否则为默认值
      */
-    public static JSONArray getJSONArray(@NonNull final String key, final JSONArray defaultValue) {
-        return getJSONArray(key, defaultValue, getDefaultCacheDoubleUtils());
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Bitmap cache
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 bitmap   放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public static void put(@NonNull final String key, final Bitmap value) {
-        put(key, value, getDefaultCacheDoubleUtils());
-    }
-
-    /**
-     * 将 bitmap   放入缓存
-     *
-     * @param key      key
-     * @param value    value
-     * @param saveTime 缓存的保存时间，以秒为单位。
-     */
-    public static void put(@NonNull final String key, final Bitmap value, final int saveTime) {
-        put(key, value, saveTime, getDefaultCacheDoubleUtils());
+    fun getJSONArray(key: String, defaultValue: JSONArray?): JSONArray? {
+        return getJSONArray(key, defaultValue, defaultCacheDoubleUtils!!)
     }
 
     /**
@@ -244,8 +107,8 @@ public final class CacheDoubleStaticUtils {
      * @param key key
      * @return 如果缓存存在，则为 bitmap ，否则为默认值
      */
-    public static Bitmap getBitmap(@NonNull final String key) {
-        return getBitmap(key, getDefaultCacheDoubleUtils());
+    fun getBitmap(key: String): Bitmap? {
+        return getBitmap(key, defaultCacheDoubleUtils!!)
     }
 
     /**
@@ -255,33 +118,8 @@ public final class CacheDoubleStaticUtils {
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @return 如果缓存存在，则为 bitmap ，否则为默认值
      */
-    public static Bitmap getBitmap(@NonNull final String key, final Bitmap defaultValue) {
-        return getBitmap(key, defaultValue, getDefaultCacheDoubleUtils());
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // about Drawable
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 drawable   放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public static void put(@NonNull final String key, final Drawable value) {
-        put(key, value, getDefaultCacheDoubleUtils());
-    }
-
-    /**
-     * 将 drawable   放入缓存
-     *
-     * @param key      key
-     * @param value    value
-     * @param saveTime 缓存的保存时间，以秒为单位。
-     */
-    public static void put(@NonNull final String key, final Drawable value, final int saveTime) {
-        put(key, value, saveTime, getDefaultCacheDoubleUtils());
+    fun getBitmap(key: String, defaultValue: Bitmap?): Bitmap? {
+        return getBitmap(key, defaultValue, defaultCacheDoubleUtils!!)
     }
 
     /**
@@ -290,8 +128,8 @@ public final class CacheDoubleStaticUtils {
      * @param key key
      * @return 如果缓存存在，则为 drawable ，否则为默认值
      */
-    public static Drawable getDrawable(@NonNull final String key) {
-        return getDrawable(key, getDefaultCacheDoubleUtils());
+    fun getDrawable(key: String): Drawable? {
+        return getDrawable(key, defaultCacheDoubleUtils!!)
     }
 
     /**
@@ -301,47 +139,10 @@ public final class CacheDoubleStaticUtils {
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @return 如果缓存存在，则为 drawable ，否则为默认值
      */
-    public static Drawable getDrawable(@NonNull final String key, final Drawable defaultValue) {
-        return getDrawable(key, defaultValue, getDefaultCacheDoubleUtils());
+    fun getDrawable(key: String, defaultValue: Drawable?): Drawable? {
+        return getDrawable(key, defaultValue, defaultCacheDoubleUtils!!)
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // about Parcelable
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 parcelable   放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public static void put(@NonNull final String key, final Parcelable value) {
-        put(key, value, getDefaultCacheDoubleUtils());
-    }
-
-    /**
-     * 将 parcelable   放入缓存
-     *
-     * @param key      key
-     * @param value    value
-     * @param saveTime 缓存的保存时间，以秒为单位。
-     */
-    public static void put(@NonNull final String key, final Parcelable value, final int saveTime) {
-        put(key, value, saveTime, getDefaultCacheDoubleUtils());
-    }
-
-    /**
-     * Return the parcelable
-     *
-     * @param key     key
-     * @param creator The creator.
-     * @param <T>     值类型
-     * @return 如果缓存存在，则为 parcelable ，否则为默认值
-     */
-    public static <T> T getParcelable(@NonNull final String key,
-                                      @NonNull final Parcelable.Creator<T> creator) {
-        return getParcelable(key, creator, getDefaultCacheDoubleUtils());
-    }
 
     /**
      * Return the parcelable
@@ -351,36 +152,9 @@ public final class CacheDoubleStaticUtils {
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @param <T>          值类型
      * @return 如果缓存存在，则为 parcelable ，否则为默认值
-     */
-    public static <T> T getParcelable(@NonNull final String key,
-                                      @NonNull final Parcelable.Creator<T> creator,
-                                      final T defaultValue) {
-        return getParcelable(key, creator, defaultValue, getDefaultCacheDoubleUtils());
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // about Serializable
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 将 serializable   放入缓存
-     *
-     * @param key   key
-     * @param value value
-     */
-    public static void put(@NonNull final String key, final Serializable value) {
-        put(key, value, getDefaultCacheDoubleUtils());
-    }
-
-    /**
-     * 将 serializable   放入缓存
-     *
-     * @param key      key
-     * @param value    value
-     * @param saveTime 缓存的保存时间，以秒为单位。
-     */
-    public static void put(@NonNull final String key, final Serializable value, final int saveTime) {
-        put(key, value, saveTime, getDefaultCacheDoubleUtils());
+    </T> */
+    fun <T> getParcelable(key: String, creator: Parcelable.Creator<T?>, defaultValue: T): T {
+        return getParcelable(key, creator, defaultValue, defaultCacheDoubleUtils!!)
     }
 
     /**
@@ -389,8 +163,8 @@ public final class CacheDoubleStaticUtils {
      * @param key key
      * @return 如果缓存存在，则为 serializable ，否则为默认值
      */
-    public static Object getSerializable(@NonNull final String key) {
-        return getSerializable(key, getDefaultCacheDoubleUtils());
+    fun getSerializable(key: String): Any? {
+        return getSerializable(key, defaultCacheDoubleUtils)
     }
 
     /**
@@ -400,94 +174,74 @@ public final class CacheDoubleStaticUtils {
      * @param defaultValue 如果缓存不存在，则为默认值。
      * @return 如果缓存存在，则为 serializable ，否则为默认值
      */
-    public static Object getSerializable(@NonNull final String key, final Object defaultValue) {
-        return getSerializable(key, defaultValue, getDefaultCacheDoubleUtils());
+    fun getSerializable(key: String, defaultValue: Any?): Any? {
+        return getSerializable(key, defaultValue, defaultCacheDoubleUtils!!)
     }
 
-    /**
-     * 返回磁盘中缓存的大小.
-     *
-     * @return 返回磁盘中缓存的大小
-     */
-    public static long getCacheDiskSize() {
-        return getCacheDiskSize(getDefaultCacheDoubleUtils());
-    }
-
-    /**
-     * 返回磁盘中缓存的数量.
-     *
-     * @return 返回磁盘中缓存的数量
-     */
-    public static int getCacheDiskCount() {
-        return getCacheDiskCount(getDefaultCacheDoubleUtils());
-    }
-
-    /**
-     * 返回内存中缓存的数量
-     *
-     * @return 返回内存中缓存的数量
-     */
-    public static int getCacheMemoryCount() {
-        return getCacheMemoryCount(getDefaultCacheDoubleUtils());
-    }
-
-    /**
-     * 按key删除缓存。
-     *
-     * @param key key
-     */
-    public static void remove(@NonNull String key) {
-        remove(key, getDefaultCacheDoubleUtils());
-    }
-
-    /**
-     * 清空缓存
-     */
-    public static void clear() {
-        clear(getDefaultCacheDoubleUtils());
-    }
-
+    val cacheDiskSize: Long
+        /**
+         * 返回磁盘中缓存的大小.
+         *
+         * @return 返回磁盘中缓存的大小
+         */
+        get() = getCacheDiskSize(defaultCacheDoubleUtils!!)
+    val cacheDiskCount: Int
+        /**
+         * 返回磁盘中缓存的数量.
+         *
+         * @return 返回磁盘中缓存的数量
+         */
+        get() = getCacheDiskCount(defaultCacheDoubleUtils!!)
+    val cacheMemoryCount: Int
+        /**
+         * 返回内存中缓存的数量
+         *
+         * @return 返回内存中缓存的数量
+         */
+        get() = getCacheMemoryCount(defaultCacheDoubleUtils!!)
     ///////////////////////////////////////////////////////////////////////////
     // dividing line
     ///////////////////////////////////////////////////////////////////////////
-
     /**
      * 将 bytes   放入缓存
      *
      * @param key              key
      * @param value            value
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final byte[] value,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value);
+    @JvmOverloads
+    fun put(
+        key: String, value: ByteArray?, cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value)
     }
-
     /**
      * 将 bytes   放入缓存
      *
      * @param key              key
      * @param value            value
      * @param saveTime         缓存的保存时间，以秒为单位。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final byte[] value,
-                           final int saveTime,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(
+        key: String,
+        value: ByteArray?,
+        saveTime: Int,
+        cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value, saveTime)
     }
 
     /**
      * Return the bytes
      *
      * @param key              key
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 如果缓存存在，则为 bytes ，否则为默认值
      */
-    public static byte[] getBytes(@NonNull final String key, @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getBytes(key);
+    fun getBytes(key: String, cacheDoubleUtils: CacheDoubleUtils): ByteArray? {
+        return cacheDoubleUtils.getBytes(key)
     }
 
     /**
@@ -495,56 +249,57 @@ public final class CacheDoubleStaticUtils {
      *
      * @param key              key
      * @param defaultValue    如果缓存不存在，则为默认值。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 如果缓存存在，则为 bytes ，否则为默认值
      */
-    public static byte[] getBytes(@NonNull final String key,
-                                  final byte[] defaultValue,
-                                  @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getBytes(key, defaultValue);
+    fun getBytes(
+        key: String, defaultValue: ByteArray?, cacheDoubleUtils: CacheDoubleUtils
+    ): ByteArray? {
+        return cacheDoubleUtils.getBytes(key, defaultValue)
     }
-
     ///////////////////////////////////////////////////////////////////////////
     // about String
     ///////////////////////////////////////////////////////////////////////////
-
     /**
      * 将 string value   放入缓存
      *
      * @param key              key
      * @param value            value
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final String value,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value);
+    @JvmOverloads
+    fun put(
+        key: String, value: String?, cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value)
     }
-
     /**
      * 将 string value   放入缓存
      *
      * @param key              key
      * @param value            value
      * @param saveTime         缓存的保存时间，以秒为单位。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final String value,
-                           final int saveTime,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(
+        key: String,
+        value: String?,
+        saveTime: Int,
+        cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value, saveTime)
     }
 
     /**
      * Return the string value
      *
      * @param key              key
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 如果缓存存在，则为 string ，否则为默认值
      */
-    public static String getString(@NonNull final String key, @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getString(key);
+    fun getString(key: String, cacheDoubleUtils: CacheDoubleUtils): String? {
+        return cacheDoubleUtils.getString(key)
     }
 
     /**
@@ -552,57 +307,59 @@ public final class CacheDoubleStaticUtils {
      *
      * @param key              key
      * @param defaultValue    如果缓存不存在，则为默认值。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 如果缓存存在，则为 string ，否则为默认值
      */
-    public static String getString(@NonNull final String key,
-                                   final String defaultValue,
-                                   @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getString(key, defaultValue);
+    fun getString(
+        key: String, defaultValue: String?, cacheDoubleUtils: CacheDoubleUtils
+    ): String? {
+        return cacheDoubleUtils.getString(key, defaultValue)
     }
-
     ///////////////////////////////////////////////////////////////////////////
     // about JSONObject
     ///////////////////////////////////////////////////////////////////////////
-
     /**
      * 将 JSONObject   放入缓存
      *
      * @param key              key
      * @param value            value
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final JSONObject value,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value);
+    @JvmOverloads
+    fun put(
+        key: String, value: JSONObject?, cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value)
     }
-
     /**
      * 将 JSONObject   放入缓存
      *
      * @param key              key
      * @param value            value
      * @param saveTime         缓存的保存时间，以秒为单位。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final JSONObject value,
-                           final int saveTime,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(
+        key: String,
+        value: JSONObject?,
+        saveTime: Int,
+        cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value, saveTime)
     }
 
     /**
      * Return the JSONObject
      *
      * @param key              key
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return  如果缓存存在，则为 JSONObject ，否则为默认值
      */
-    public static JSONObject getJSONObject(@NonNull final String key,
-                                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getJSONObject(key);
+    fun getJSONObject(
+        key: String, cacheDoubleUtils: CacheDoubleUtils
+    ): JSONObject? {
+        return cacheDoubleUtils.getJSONObject(key)
     }
 
     /**
@@ -610,57 +367,57 @@ public final class CacheDoubleStaticUtils {
      *
      * @param key              key
      * @param defaultValue    如果缓存不存在，则为默认值。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return  如果缓存存在，则为 JSONObject ，否则为默认值
      */
-    public static JSONObject getJSONObject(@NonNull final String key,
-                                           final JSONObject defaultValue,
-                                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getJSONObject(key, defaultValue);
+    fun getJSONObject(
+        key: String, defaultValue: JSONObject?, cacheDoubleUtils: CacheDoubleUtils
+    ): JSONObject? {
+        return cacheDoubleUtils.getJSONObject(key, defaultValue)
     }
-
-
     ///////////////////////////////////////////////////////////////////////////
     // about JSONArray
     ///////////////////////////////////////////////////////////////////////////
-
     /**
      * 将 JSONArray   放入缓存
      *
      * @param key              key
      * @param value            value
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final JSONArray value,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value);
+    @JvmOverloads
+    fun put(
+        key: String, value: JSONArray?, cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value)
     }
-
     /**
      * 将 JSONArray   放入缓存
      *
      * @param key              key
      * @param value            value
      * @param saveTime         缓存的保存时间，以秒为单位。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final JSONArray value,
-                           final int saveTime,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(
+        key: String,
+        value: JSONArray?,
+        saveTime: Int,
+        cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value, saveTime)
     }
 
     /**
      * Return the JSONArray
      *
      * @param key              key
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 如果缓存存在，则为 JSONArray ，否则为默认值
      */
-    public static JSONArray getJSONArray(@NonNull final String key, @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getJSONArray(key);
+    fun getJSONArray(key: String, cacheDoubleUtils: CacheDoubleUtils): JSONArray? {
+        return cacheDoubleUtils.getJSONArray(key)
     }
 
     /**
@@ -668,56 +425,57 @@ public final class CacheDoubleStaticUtils {
      *
      * @param key              key
      * @param defaultValue    如果缓存不存在，则为默认值。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 如果缓存存在，则为 JSONArray ，否则为默认值
      */
-    public static JSONArray getJSONArray(@NonNull final String key,
-                                         final JSONArray defaultValue,
-                                         @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getJSONArray(key, defaultValue);
+    fun getJSONArray(
+        key: String, defaultValue: JSONArray?, cacheDoubleUtils: CacheDoubleUtils
+    ): JSONArray? {
+        return cacheDoubleUtils.getJSONArray(key, defaultValue)
     }
-
     ///////////////////////////////////////////////////////////////////////////
     // Bitmap cache
     ///////////////////////////////////////////////////////////////////////////
-
     /**
      * 将 bitmap   放入缓存
      *
      * @param key              key
      * @param value            value
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final Bitmap value,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value);
+    @JvmOverloads
+    fun put(
+        key: String, value: Bitmap?, cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value)
     }
-
     /**
      * 将 bitmap   放入缓存
      *
      * @param key              key
      * @param value            value
      * @param saveTime         缓存的保存时间，以秒为单位。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final Bitmap value,
-                           final int saveTime,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(
+        key: String,
+        value: Bitmap?,
+        saveTime: Int,
+        cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value, saveTime)
     }
 
     /**
      * Return the bitmap
      *
      * @param key              key
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 如果缓存存在，则为 bitmap ，否则为默认值
      */
-    public static Bitmap getBitmap(@NonNull final String key, @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getBitmap(key);
+    fun getBitmap(key: String, cacheDoubleUtils: CacheDoubleUtils): Bitmap? {
+        return cacheDoubleUtils.getBitmap(key)
     }
 
     /**
@@ -725,56 +483,57 @@ public final class CacheDoubleStaticUtils {
      *
      * @param key              key
      * @param defaultValue    如果缓存不存在，则为默认值。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 如果缓存存在，则为 bitmap ，否则为默认值
      */
-    public static Bitmap getBitmap(@NonNull final String key,
-                                   final Bitmap defaultValue,
-                                   @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getBitmap(key, defaultValue);
+    fun getBitmap(
+        key: String, defaultValue: Bitmap?, cacheDoubleUtils: CacheDoubleUtils
+    ): Bitmap? {
+        return cacheDoubleUtils.getBitmap(key, defaultValue)
     }
-
     ///////////////////////////////////////////////////////////////////////////
     // about Drawable
     ///////////////////////////////////////////////////////////////////////////
-
     /**
      * 将 drawable   放入缓存
      *
      * @param key              key
      * @param value            value
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final Drawable value,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value);
+    @JvmOverloads
+    fun put(
+        key: String, value: Drawable?, cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value)
     }
-
     /**
      * 将 drawable   放入缓存
      *
      * @param key              key
      * @param value            value
      * @param saveTime         缓存的保存时间，以秒为单位。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final Drawable value,
-                           final int saveTime,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(
+        key: String,
+        value: Drawable?,
+        saveTime: Int,
+        cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value, saveTime)
     }
 
     /**
      * Return the drawable
      *
      * @param key              key
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 如果缓存存在，则为 drawable ，否则为默认值
      */
-    public static Drawable getDrawable(@NonNull final String key, @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getDrawable(key);
+    fun getDrawable(key: String, cacheDoubleUtils: CacheDoubleUtils): Drawable? {
+        return cacheDoubleUtils.getDrawable(key)
     }
 
     /**
@@ -782,45 +541,46 @@ public final class CacheDoubleStaticUtils {
      *
      * @param key              key
      * @param defaultValue    如果缓存不存在，则为默认值。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 如果缓存存在，则为 drawable ，否则为默认值
      */
-    public static Drawable getDrawable(@NonNull final String key,
-                                       final Drawable defaultValue,
-                                       @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getDrawable(key, defaultValue);
+    fun getDrawable(
+        key: String, defaultValue: Drawable?, cacheDoubleUtils: CacheDoubleUtils
+    ): Drawable? {
+        return cacheDoubleUtils.getDrawable(key, defaultValue)
     }
-
     ///////////////////////////////////////////////////////////////////////////
     // about Parcelable
     ///////////////////////////////////////////////////////////////////////////
-
     /**
      * 将 parcelable   放入缓存
      *
      * @param key              key
      * @param value            value
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final Parcelable value,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value);
+    @JvmOverloads
+    fun put(
+        key: String, value: Parcelable?, cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value)
     }
-
     /**
      * 将 parcelable   放入缓存
      *
      * @param key              key
      * @param value            value
      * @param saveTime         缓存的保存时间，以秒为单位。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final Parcelable value,
-                           final int saveTime,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(
+        key: String,
+        value: Parcelable?,
+        saveTime: Int,
+        cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value, saveTime)
     }
 
     /**
@@ -828,14 +588,14 @@ public final class CacheDoubleStaticUtils {
      *
      * @param key              key
      * @param creator          The creator.
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @param <T>              The value type.
      * @return 如果缓存存在，则为 parcelable ，否则为默认值
-     */
-    public static <T> T getParcelable(@NonNull final String key,
-                                      @NonNull final Parcelable.Creator<T> creator,
-                                      @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getParcelable(key, creator);
+    </T> */
+    fun <T> getParcelable(
+        key: String, creator: Parcelable.Creator<T?>, cacheDoubleUtils: CacheDoubleUtils
+    ): T? {
+        return cacheDoubleUtils.getParcelable<T>(key, creator)
     }
 
     /**
@@ -844,58 +604,58 @@ public final class CacheDoubleStaticUtils {
      * @param key              key
      * @param creator          The creator.
      * @param defaultValue    如果缓存不存在，则为默认值。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @param <T>              The value type.
      * @return 如果缓存存在，则为 parcelable ，否则为默认值
-     */
-    public static <T> T getParcelable(@NonNull final String key,
-                                      @NonNull final Parcelable.Creator<T> creator,
-                                      final T defaultValue,
-                                      @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getParcelable(key, creator, defaultValue);
+    </T> */
+    fun <T> getParcelable(
+        key: String, creator: Parcelable.Creator<T?>, defaultValue: T, cacheDoubleUtils: CacheDoubleUtils
+    ): T {
+        return cacheDoubleUtils.getParcelable(key, creator, defaultValue)
     }
-
     ///////////////////////////////////////////////////////////////////////////
     // about Serializable
     ///////////////////////////////////////////////////////////////////////////
-
     /**
      * 将 serializable   放入缓存
      *
      * @param key              key
      * @param value            value
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final Serializable value,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value);
+    @JvmOverloads
+    fun put(
+        key: String, value: Serializable?, cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value)
     }
-
     /**
      * 将 serializable   放入缓存
      *
      * @param key              key
      * @param value            value
      * @param saveTime         缓存的保存时间，以秒为单位。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void put(@NonNull final String key,
-                           final Serializable value,
-                           final int saveTime,
-                           @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.put(key, value, saveTime);
+    @JvmOverloads
+    fun put(
+        key: String,
+        value: Serializable?,
+        saveTime: Int,
+        cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!
+    ) {
+        cacheDoubleUtils.put(key, value, saveTime)
     }
 
     /**
      * Return the serializable
      *
      * @param key              key
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 如果缓存存在，则为 serializable ，否则为默认值
      */
-    public static Object getSerializable(@NonNull final String key, @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getSerializable(key);
+    fun getSerializable(key: String, cacheDoubleUtils: CacheDoubleUtils): Any? {
+        return cacheDoubleUtils.getSerializable(key)
     }
 
     /**
@@ -903,65 +663,72 @@ public final class CacheDoubleStaticUtils {
      *
      * @param key              key
      * @param defaultValue    如果缓存不存在，则为默认值。
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 如果缓存存在，则为 serializable ，否则为默认值
      */
-    public static Object getSerializable(@NonNull final String key,
-                                         final Object defaultValue,
-                                         @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getSerializable(key, defaultValue);
+    fun getSerializable(
+        key: String, defaultValue: Any?, cacheDoubleUtils: CacheDoubleUtils
+    ): Any? {
+        return cacheDoubleUtils.getSerializable(key, defaultValue)
     }
 
     /**
      * 返回磁盘中缓存的大小.
      *
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 返回磁盘中缓存的大小
      */
-    public static long getCacheDiskSize(@NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getCacheDiskSize();
+    fun getCacheDiskSize(cacheDoubleUtils: CacheDoubleUtils): Long {
+        return cacheDoubleUtils.cacheDiskSize
     }
 
     /**
      * 返回磁盘中缓存的数量.
      *
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 返回磁盘中缓存的数量
      */
-    public static int getCacheDiskCount(@NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getCacheDiskCount();
+    fun getCacheDiskCount(cacheDoubleUtils: CacheDoubleUtils): Int {
+        return cacheDoubleUtils.cacheDiskCount
     }
 
     /**
      * 返回内存中缓存的数量
      *
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      * @return 返回内存中缓存的数量
      */
-    public static int getCacheMemoryCount(@NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        return cacheDoubleUtils.getCacheMemoryCount();
+    fun getCacheMemoryCount(cacheDoubleUtils: CacheDoubleUtils): Int {
+        return cacheDoubleUtils.cacheMemoryCount
     }
-
     /**
      * 按key删除缓存。
      *
      * @param key              key
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void remove(@NonNull String key, @NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.remove(key);
+    @JvmOverloads
+    fun remove(key: String, cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!) {
+        cacheDoubleUtils.remove(key)
     }
-
     /**
      * 清空缓存
      *
-     * @param cacheDoubleUtils {@link CacheDoubleUtils}的实例。
+     * @param cacheDoubleUtils [CacheDoubleUtils]的实例。
      */
-    public static void clear(@NonNull final CacheDoubleUtils cacheDoubleUtils) {
-        cacheDoubleUtils.clear();
+    @JvmOverloads
+    fun clear(cacheDoubleUtils: CacheDoubleUtils = defaultCacheDoubleUtils!!) {
+        cacheDoubleUtils.clear()
     }
 
-    private static CacheDoubleUtils getDefaultCacheDoubleUtils() {
-        return sDefaultCacheDoubleUtils != null ? sDefaultCacheDoubleUtils : CacheDoubleUtils.getInstance();
-    }
+    private var defaultCacheDoubleUtils: CacheDoubleUtils?
+        get() = if (sDefaultCacheDoubleUtils != null) sDefaultCacheDoubleUtils else instance
+        /**
+         * 设置[CacheDoubleUtils]的默认实例。
+         *
+         * @param cacheDoubleUtils [CacheDoubleUtils]的默认实例。
+         */
+        set(cacheDoubleUtils) {
+            sDefaultCacheDoubleUtils = cacheDoubleUtils
+        }
 }

@@ -38,7 +38,7 @@ object EncryptUtils {
      * @return MD2 加密的十六进制字符串。
      */
     fun encryptMD2ToString(data: String?): String {
-        return if (data == null || data.length == 0) {
+        return if (data.isNullOrEmpty()) {
             ""
         } else encryptMD2ToString(data.toByteArray())
     }
@@ -70,7 +70,7 @@ object EncryptUtils {
      * @return MD5 加密的十六进制字符串。
      */
     fun encryptMD5ToString(data: String?): String {
-        return if (data == null || data.length == 0) {
+        return if (data.isNullOrEmpty()) {
             ""
         } else encryptMD5ToString(data.toByteArray())
     }
@@ -144,7 +144,7 @@ object EncryptUtils {
      * @return 文件的 MD5 加密的十六进制字符串。
      */
     fun encryptMD5File2String(filePath: String?): String {
-        val file = if (DawnBridge.isSpace(filePath)) null else File(filePath)
+        val file = if (DawnBridge.isSpace(filePath)) null else filePath?.let { File(it) }
         return encryptMD5File2String(file)
     }
 
@@ -155,7 +155,7 @@ object EncryptUtils {
      * @return 文件的 MD5 加密字节数。
      */
     fun encryptMD5File(filePath: String?): ByteArray? {
-        val file = if (DawnBridge.isSpace(filePath)) null else File(filePath)
+        val file = if (DawnBridge.isSpace(filePath)) null else filePath?.let { File(it) }
         return encryptMD5File(file)
     }
 
@@ -215,7 +215,7 @@ object EncryptUtils {
      * @return SHA1 加密的十六进制字符串
      */
     fun encryptSHA1ToString(data: String?): String {
-        return if (data == null || data.length == 0) {
+        return if (data.isNullOrEmpty()) {
             ""
         } else encryptSHA1ToString(data.toByteArray())
     }
@@ -247,7 +247,7 @@ object EncryptUtils {
      * @return SHA224 加密的十六进制字符串。
      */
     fun encryptSHA224ToString(data: String?): String {
-        return if (data == null || data.length == 0) {
+        return if (data.isNullOrEmpty()) {
             ""
         } else encryptSHA224ToString(data.toByteArray())
     }
@@ -279,7 +279,7 @@ object EncryptUtils {
      * @return SHA256 加密的十六进制字符串。
      */
     fun encryptSHA256ToString(data: String?): String {
-        return if (data == null || data.length == 0) {
+        return if (data.isNullOrEmpty()) {
             ""
         } else encryptSHA256ToString(data.toByteArray())
     }
@@ -311,7 +311,7 @@ object EncryptUtils {
      * @return SHA384 加密的十六进制字符串。
      */
     fun encryptSHA384ToString(data: String?): String {
-        return if (data == null || data.length == 0) {
+        return if (data.isNullOrEmpty()) {
             ""
         } else encryptSHA384ToString(data.toByteArray())
     }
@@ -343,7 +343,7 @@ object EncryptUtils {
      * @return SHA512 加密的十六进制字符串。
      */
     fun encryptSHA512ToString(data: String?): String {
-        return if (data == null || data.length == 0) {
+        return if (data.isNullOrEmpty()) {
             ""
         } else encryptSHA512ToString(data.toByteArray())
     }
@@ -377,12 +377,12 @@ object EncryptUtils {
      */
     @JvmStatic
     fun hashTemplate(data: ByteArray?, algorithm: String?): ByteArray? {
-        return if (data == null || data.size <= 0) {
+        return if (data == null || data.isEmpty()) {
             null
         } else try {
-            val md = MessageDigest.getInstance(algorithm)
-            md.update(data)
-            md.digest()
+            val md = algorithm?.let { MessageDigest.getInstance(it) }
+            md?.update(data)
+            md?.digest()
         } catch (e: NoSuchAlgorithmException) {
             e.printStackTrace()
             null
@@ -397,7 +397,7 @@ object EncryptUtils {
      * @return HmacMD5 加密的十六进制字符串。
      */
     fun encryptHmacMD5ToString(data: String?, key: String?): String {
-        return if (data == null || data.length == 0 || key == null || key.length == 0) {
+        return if (data.isNullOrEmpty() || key.isNullOrEmpty()) {
             ""
         } else encryptHmacMD5ToString(data.toByteArray(), key.toByteArray())
     }
@@ -432,7 +432,7 @@ object EncryptUtils {
      * @return HmacSHA1 加密的十六进制字符串。
      */
     fun encryptHmacSHA1ToString(data: String?, key: String?): String {
-        return if (data == null || data.length == 0 || key == null || key.length == 0) {
+        return if (data.isNullOrEmpty() || key.isNullOrEmpty()) {
             ""
         } else encryptHmacSHA1ToString(
             data.toByteArray(), key.toByteArray()

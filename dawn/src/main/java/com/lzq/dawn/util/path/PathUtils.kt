@@ -45,8 +45,8 @@ object PathUtils {
          * @return 返回内部应用数据路径
          */
         get() = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            DawnBridge.getApp().applicationInfo.dataDir
-        } else getAbsolutePath(DawnBridge.getApp().dataDir)
+            DawnBridge.app.applicationInfo.dataDir
+        } else getAbsolutePath(DawnBridge.app.dataDir)
     val internalAppCodeCacheDir: String
         /**
          * 返回文件系统上用于存储缓存代码的应用程序特定缓存目录的绝对路径
@@ -54,7 +54,7 @@ object PathUtils {
          *
          * @return 内部应用程序缓存目录
          */
-        get() = getAbsolutePath(DawnBridge.getApp().codeCacheDir)
+        get() = getAbsolutePath(DawnBridge.app.codeCacheDir)
     val internalAppCachePath: String
         /**
          * 返回文件系统上应用程序特定缓存目录的绝对路径
@@ -62,7 +62,7 @@ object PathUtils {
          *
          * @return 内部应用缓存路径
          */
-        get() = getAbsolutePath(DawnBridge.getApp().cacheDir)
+        get() = getAbsolutePath(DawnBridge.app.cacheDir)
     val internalAppDbsPath: String
         /**
          * 返回内部应用数据库的路径
@@ -70,7 +70,7 @@ object PathUtils {
          *
          * @return 内部应用数据库的路径
          */
-        get() = DawnBridge.getApp().applicationInfo.dataDir + "/databases"
+        get() = DawnBridge.app.applicationInfo.dataDir + "/databases"
 
     /**
      * 返回内部应用数据库的路径
@@ -80,7 +80,7 @@ object PathUtils {
      * @return 内部应用数据库的路径
      */
     fun getInternalAppDbPath(name: String?): String {
-        return getAbsolutePath(DawnBridge.getApp().getDatabasePath(name))
+        return getAbsolutePath(DawnBridge.app.getDatabasePath(name))
     }
 
     val internalAppFilesPath: String
@@ -90,7 +90,7 @@ object PathUtils {
          *
          * @return 内部应用程序文件路径
          */
-        get() = getAbsolutePath(DawnBridge.getApp().filesDir)
+        get() = getAbsolutePath(DawnBridge.app.filesDir)
     val internalAppSpPath: String
         /**
          * 返回内部 App Sp 路径
@@ -98,7 +98,7 @@ object PathUtils {
          *
          * @return 内部 App Sp 路径
          */
-        get() = DawnBridge.getApp().applicationInfo.dataDir + "/shared_prefs"
+        get() = DawnBridge.app.applicationInfo.dataDir + "/shared_prefs"
     val internalAppNoBackupFilesPath: String
         /**
          * 返回内部应用程序无备份文件路径
@@ -106,7 +106,7 @@ object PathUtils {
          *
          * @return 内部应用程序无备份文件路径
          */
-        get() = getAbsolutePath(DawnBridge.getApp().noBackupFilesDir)
+        get() = getAbsolutePath(DawnBridge.app.noBackupFilesDir)
     val externalStoragePath: String
         /**
          * 返回外部存储路径
@@ -114,7 +114,7 @@ object PathUtils {
          *
          * @return 外部存储路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
             Environment.getExternalStorageDirectory()
@@ -126,7 +126,7 @@ object PathUtils {
          *
          * @return 外部音乐路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
             Environment.getExternalStoragePublicDirectory(
@@ -140,7 +140,7 @@ object PathUtils {
          *
          * @return 外部播客路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
             Environment.getExternalStoragePublicDirectory(
@@ -154,7 +154,7 @@ object PathUtils {
          *
          * @return 外部铃声路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
             Environment.getExternalStoragePublicDirectory(
@@ -168,7 +168,7 @@ object PathUtils {
          *
          * @return 外部警报路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_ALARMS)
@@ -180,7 +180,7 @@ object PathUtils {
          *
          * @return 外部通知路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
             Environment.getExternalStoragePublicDirectory(
@@ -194,7 +194,7 @@ object PathUtils {
          *
          * @return 外部图片路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
@@ -206,7 +206,7 @@ object PathUtils {
          *
          * @return 外部电影路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
             Environment.getExternalStoragePublicDirectory(
@@ -219,7 +219,7 @@ object PathUtils {
          *
          * @return 外部下载路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
             Environment.getExternalStoragePublicDirectory(
@@ -233,7 +233,7 @@ object PathUtils {
          *
          * @return 外部 DCIM 路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
             Environment.getExternalStoragePublicDirectory(
@@ -247,7 +247,7 @@ object PathUtils {
          *
          * @return 外部文档路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
             Environment.getExternalStoragePublicDirectory(
@@ -262,10 +262,10 @@ object PathUtils {
          * @return 外部应用数据路径
          */
         get() {
-            if (!DawnBridge.isSDCardEnableByEnvironment()) {
+            if (!DawnBridge.isSDCardEnableByEnvironment) {
                 return ""
             }
-            val externalCacheDir = DawnBridge.getApp().externalCacheDir ?: return ""
+            val externalCacheDir = DawnBridge.app.externalCacheDir ?: return ""
             return getAbsolutePath(externalCacheDir.parentFile)
         }
     val externalAppCachePath: String
@@ -275,9 +275,9 @@ object PathUtils {
          *
          * @return 外部应用缓存路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
-        } else getAbsolutePath(DawnBridge.getApp().externalCacheDir)
+        } else getAbsolutePath(DawnBridge.app.externalCacheDir)
     val externalAppFilesPath: String
         /**
          * Return 外部应用程序文件路径
@@ -285,9 +285,9 @@ object PathUtils {
          *
          * @return 外部应用程序文件路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
-        } else getAbsolutePath(DawnBridge.getApp().getExternalFilesDir(null))
+        } else getAbsolutePath(DawnBridge.app.getExternalFilesDir(null))
     val externalAppMusicPath: String
         /**
          * Return 外部应用音乐路径
@@ -295,10 +295,10 @@ object PathUtils {
          *
          * @return 外部应用音乐路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
-            DawnBridge.getApp().getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+            DawnBridge.app.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
         )
     val externalAppPodcastsPath: String
         /**
@@ -307,10 +307,10 @@ object PathUtils {
          *
          * @return 外部应用播客路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
-            DawnBridge.getApp().getExternalFilesDir(Environment.DIRECTORY_PODCASTS)
+            DawnBridge.app.getExternalFilesDir(Environment.DIRECTORY_PODCASTS)
         )
     val externalAppRingtonesPath: String
         /**
@@ -319,10 +319,10 @@ object PathUtils {
          *
          * @return 外部应用铃声路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
-            DawnBridge.getApp().getExternalFilesDir(Environment.DIRECTORY_RINGTONES)
+            DawnBridge.app.getExternalFilesDir(Environment.DIRECTORY_RINGTONES)
         )
     val externalAppAlarmsPath: String
         /**
@@ -331,10 +331,10 @@ object PathUtils {
          *
          * @return 外部应用警报路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
-            DawnBridge.getApp().getExternalFilesDir(Environment.DIRECTORY_ALARMS)
+            DawnBridge.app.getExternalFilesDir(Environment.DIRECTORY_ALARMS)
         )
     val externalAppNotificationsPath: String
         /**
@@ -343,10 +343,10 @@ object PathUtils {
          *
          * @return 外部应用通知路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
-            DawnBridge.getApp().getExternalFilesDir(Environment.DIRECTORY_NOTIFICATIONS)
+            DawnBridge.app.getExternalFilesDir(Environment.DIRECTORY_NOTIFICATIONS)
         )
     val externalAppPicturesPath: String
         /**
@@ -354,10 +354,10 @@ object PathUtils {
          *
          * @return 外部应用图片路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
-            DawnBridge.getApp().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            DawnBridge.app.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         )
     val externalAppMoviesPath: String
         /**
@@ -366,10 +366,10 @@ object PathUtils {
          *
          * @return 外部应用电影路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
-            DawnBridge.getApp().getExternalFilesDir(Environment.DIRECTORY_MOVIES)
+            DawnBridge.app.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
         )
     val externalAppDownloadPath: String
         /**
@@ -378,10 +378,10 @@ object PathUtils {
          *
          * @return 外部应用下载路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
-            DawnBridge.getApp().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+            DawnBridge.app.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
         )
     val externalAppDcimPath: String
         /**
@@ -390,10 +390,10 @@ object PathUtils {
          *
          * @return 外部应用程序 Dcim 路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
-            DawnBridge.getApp().getExternalFilesDir(Environment.DIRECTORY_DCIM)
+            DawnBridge.app.getExternalFilesDir(Environment.DIRECTORY_DCIM)
         )
     val externalAppDocumentsPath: String
         /**
@@ -401,10 +401,10 @@ object PathUtils {
          *
          * @return 外部应用文档路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
         } else getAbsolutePath(
-            DawnBridge.getApp().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+            DawnBridge.app.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
         )
     val externalAppObbPath: String
         /**
@@ -413,10 +413,10 @@ object PathUtils {
          *
          * @return 外部应用程序 Obb 路径
          */
-        get() = if (!DawnBridge.isSDCardEnableByEnvironment()) {
+        get() = if (!DawnBridge.isSDCardEnableByEnvironment) {
             ""
-        } else getAbsolutePath(DawnBridge.getApp().obbDir)
-    val rootPathExternalFirst: String?
+        } else getAbsolutePath(DawnBridge.app.obbDir)
+    val rootPathExternalFirst: String
         get() {
             var rootPath = externalStoragePath
             if (TextUtils.isEmpty(rootPath)) {
@@ -424,7 +424,7 @@ object PathUtils {
             }
             return rootPath
         }
-    val appDataPathExternalFirst: String?
+    val appDataPathExternalFirst: String
         get() {
             var appDataPath = externalAppDataPath
             if (TextUtils.isEmpty(appDataPath)) {
@@ -432,7 +432,7 @@ object PathUtils {
             }
             return appDataPath
         }
-    val filesPathExternalFirst: String?
+    val filesPathExternalFirst: String
         get() {
             var filePath = externalAppFilesPath
             if (TextUtils.isEmpty(filePath)) {
@@ -440,7 +440,7 @@ object PathUtils {
             }
             return filePath
         }
-    val cachePathExternalFirst: String?
+    val cachePathExternalFirst: String
         get() {
             var appPath = externalAppCachePath
             if (TextUtils.isEmpty(appPath)) {

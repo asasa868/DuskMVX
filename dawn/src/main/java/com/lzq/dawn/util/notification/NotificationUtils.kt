@@ -34,7 +34,7 @@ object NotificationUtils {
      * @return `true`: yes<br></br>`false`: no
      */
     fun areNotificationsEnabled(): Boolean {
-        return NotificationManagerCompat.from(DawnBridge.getApp()).areNotificationsEnabled()
+        return NotificationManagerCompat.from(DawnBridge.app).areNotificationsEnabled()
     }
 
     /**
@@ -88,13 +88,13 @@ object NotificationUtils {
         consumer: DawnBridge.Consumer<NotificationCompat.Builder?>?
     ) {
         if (ActivityCompat.checkSelfPermission(
-                DawnBridge.getApp(),
+                DawnBridge.app,
                 permission.POST_NOTIFICATIONS
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             return
         }
-        NotificationManagerCompat.from(DawnBridge.getApp())
+        NotificationManagerCompat.from(DawnBridge.app)
             .notify(tag, id, getNotification(channelConfig, consumer))
     }
 
@@ -104,14 +104,14 @@ object NotificationUtils {
         consumer: DawnBridge.Consumer<NotificationCompat.Builder?>?
     ): Notification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val nm = DawnBridge.getApp().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val nm = DawnBridge.app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             nm.createNotificationChannel(channelConfig.notificationChannel!!)
         }
         val builder: NotificationCompat.Builder
         builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationCompat.Builder(DawnBridge.getApp(), channelConfig.notificationChannel!!.id)
+            NotificationCompat.Builder(DawnBridge.app, channelConfig.notificationChannel!!.id)
         } else {
-            NotificationCompat.Builder(DawnBridge.getApp())
+            NotificationCompat.Builder(DawnBridge.app)
         }
         consumer?.accept(builder)
         return builder.build()
@@ -124,7 +124,7 @@ object NotificationUtils {
      * @param id  The identifier for the notification will be cancelled.
      */
     fun cancel(tag: String?, id: Int) {
-        NotificationManagerCompat.from(DawnBridge.getApp()).cancel(tag, id)
+        NotificationManagerCompat.from(DawnBridge.app).cancel(tag, id)
     }
 
     /**
@@ -133,14 +133,14 @@ object NotificationUtils {
      * @param id The identifier for the notification will be cancelled.
      */
     fun cancel(id: Int) {
-        NotificationManagerCompat.from(DawnBridge.getApp()).cancel(id)
+        NotificationManagerCompat.from(DawnBridge.app).cancel(id)
     }
 
     /**
      * 取消所有通知。
      */
     fun cancelAll() {
-        NotificationManagerCompat.from(DawnBridge.getApp()).cancelAll()
+        NotificationManagerCompat.from(DawnBridge.app).cancelAll()
     }
 
     /**
@@ -165,8 +165,10 @@ object NotificationUtils {
 
     private fun invokePanels(methodName: String) {
         try {
-            @SuppressLint("WrongConstant") val service = DawnBridge.getApp().getSystemService("statusbar")
-            @SuppressLint("PrivateApi") val statusBarManager = Class.forName("android.app.StatusBarManager")
+            @SuppressLint("WrongConstant")
+            val service = DawnBridge.app.getSystemService("statusbar")
+            @SuppressLint("PrivateApi")
+            val statusBarManager = Class.forName("android.app.StatusBarManager")
             val expand = statusBarManager.getMethod(methodName)
             expand.invoke(service)
         } catch (e: Exception) {

@@ -1,13 +1,11 @@
-package com.lzq.dawn.util.thread;
+package com.lzq.dawn.util.thread
 
-import android.util.Log;
-
-import androidx.annotation.CallSuper;
-
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicInteger;
+import android.util.Log
+import androidx.annotation.CallSuper
+import java.util.Timer
+import java.util.TimerTask
+import java.util.concurrent.Executor
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * @Name :Task
@@ -15,32 +13,21 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Author :  Lzq
  * @Desc :
  */
-public abstract class Task<T> implements Runnable {
-
-    /**
-     * 线程状态
-     */
-    private static final int NEW = 0;
-    private static final int RUNNING = 1;
-    private static final int EXCEPTIONAL = 2;
-    private static final int COMPLETING = 3;
-    private static final int CANCELLED = 4;
-    private static final int INTERRUPTED = 5;
-    private static final int TIMEOUT = 6;
-
+abstract class Task<T>() : Runnable {
     /**
      * 当前线程状态
      */
-    private final AtomicInteger state = new AtomicInteger(NEW);
+    private val state = AtomicInteger(NEW)
 
-    private volatile boolean isSchedule;
-    private volatile Thread runner;
+    @Volatile
+    private var isSchedule = false
 
-    private Timer mTimer;
-    private long mTimeoutMillis;
-    private OnTimeoutListener mTimeoutListener;
-
-    private Executor deliver;
+    @Volatile
+    private var runner: Thread? = null
+    private var mTimer: Timer? = null
+    private var mTimeoutMillis: Long = 0
+    private var mTimeoutListener: OnTimeoutListener? = null
+    private var deliver: Executor? = null
 
     /**
      * 在后台
@@ -48,153 +35,146 @@ public abstract class Task<T> implements Runnable {
      * @return T
      * @throws Throwable Throwable
      */
-    public abstract T doInBackground() throws Throwable;
+    @Throws(Throwable::class)
+    abstract fun doInBackground(): T
 
     /**
      * 执行成功
      *
      * @param result T
      */
-    public abstract void onSuccess(T result);
+    abstract fun onSuccess(result: T)
 
     /**
      * 执行取消
      */
-    public abstract void onCancel();
+    abstract fun onCancel()
 
     /**
      * 执行出错
      *
      * @param t Throwable
      */
-    public abstract void onFail(Throwable t);
-
-
-    @Override
-    public void run() {
+    abstract fun onFail(t: Throwable)
+    override fun run() {
         if (isSchedule) {
             if (runner == null) {
                 //如果当前值 {@code ==} 是预期值，则自动将值设置为给定的更新值。
                 if (!state.compareAndSet(NEW, RUNNING)) {
-                    return;
+                    return
                 }
-                runner = Thread.currentThread();
+                runner = Thread.currentThread()
                 if (mTimeoutListener != null) {
-                    Log.w("ThreadUtils", "Scheduled task doesn't support timeout.");
+                    Log.w("ThreadUtils", "Scheduled task doesn't support timeout.")
                 }
             } else {
                 if (state.get() != RUNNING) {
-                    return;
+                    return
                 }
             }
         } else {
             //如果当前值 {@code ==} 是预期值，则自动将值设置为给定的更新值。
             if (!state.compareAndSet(NEW, RUNNING)) {
-                return;
+                return
             }
-            runner = Thread.currentThread();
+            runner = Thread.currentThread()
             if (mTimeoutListener != null) {
-                mTimer = new Timer();
-                mTimer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        if (!isDone() && mTimeoutListener != null) {
-                            timeout();
-                            mTimeoutListener.onTimeout();
-                            onDone();
+                mTimer = Timer()
+                mTimer!!.schedule(object : TimerTask() {
+                    override fun run() {
+                        if (!isDone && mTimeoutListener != null) {
+                            timeout()
+                            mTimeoutListener!!.onTimeout()
+                            onDone()
                         }
                     }
-                }, mTimeoutMillis);
+                }, mTimeoutMillis)
             }
-
         }
-
     }
 
-
-    public void cancel() {
-        cancel(true);
-    }
-
-    public void cancel(boolean mayInterruptIfRunning) {
-        synchronized (state) {
+    @JvmOverloads
+    fun cancel(mayInterruptIfRunning: Boolean = true) {
+        synchronized(state) {
             if (state.get() > RUNNING) {
-                return;
+                return
             }
-            state.set(CANCELLED);
+            state.set(CANCELLED)
         }
         if (mayInterruptIfRunning) {
             if (runner != null) {
-                runner.interrupt();
+                runner!!.interrupt()
             }
         }
-
-        getDeliver().execute(new Runnable() {
-            @Override
-            public void run() {
-                onCancel();
-                onDone();
-            }
-        });
+        getDeliver().execute(Runnable {
+            onCancel()
+            onDone()
+        })
     }
 
-    public boolean isCanceled() {
-        return state.get() >= CANCELLED;
-    }
+    val isCanceled: Boolean
+        get() = state.get() >= CANCELLED
+    val isDone: Boolean
+        get() = state.get() > RUNNING
 
-    public boolean isDone() {
-        return state.get() > RUNNING;
-    }
-
-    public Task<T> setDeliver(Executor deliver) {
-        this.deliver = deliver;
-        return this;
+    fun setDeliver(deliver: Executor?): Task<T> {
+        this.deliver = deliver
+        return this
     }
 
     /**
      * Scheduled task doesn't support timeout.
      */
-    public Task<T> setTimeout(final long timeoutMillis, final OnTimeoutListener listener) {
-        mTimeoutMillis = timeoutMillis;
-        mTimeoutListener = listener;
-        return this;
+    fun setTimeout(timeoutMillis: Long, listener: OnTimeoutListener?): Task<T> {
+        mTimeoutMillis = timeoutMillis
+        mTimeoutListener = listener
+        return this
     }
 
-     void setSchedule(boolean isSchedule) {
-        this.isSchedule = isSchedule;
+    fun setSchedule(isSchedule: Boolean) {
+        this.isSchedule = isSchedule
     }
 
-
-    private void timeout() {
-        synchronized (state) {
+    private fun timeout() {
+        synchronized(state) {
             if (state.get() > RUNNING) {
-                return;
+                return
             }
-            state.set(TIMEOUT);
+            state.set(TIMEOUT)
         }
         if (runner != null) {
-            runner.interrupt();
+            runner!!.interrupt()
         }
     }
 
-    private Executor getDeliver() {
-        if (deliver == null) {
-            return ThreadUtils.getGlobalDeliver();
-        }
-        return deliver;
+    private fun getDeliver(): Executor {
+        return deliver ?: ThreadUtils.globalDeliver
     }
 
     @CallSuper
-    protected void onDone() {
-        ThreadUtils.TASK_POOL_MAP.remove(this);
+    protected fun onDone() {
+        ThreadUtils.TASK_POOL_MAP.remove(this)
         if (mTimer != null) {
-            mTimer.cancel();
-            mTimer = null;
-            mTimeoutListener = null;
+            mTimer!!.cancel()
+            mTimer = null
+            mTimeoutListener = null
         }
     }
 
-    public interface OnTimeoutListener {
-        void onTimeout();
+    interface OnTimeoutListener {
+        fun onTimeout()
+    }
+
+    companion object {
+        /**
+         * 线程状态
+         */
+        private const val NEW = 0
+        private const val RUNNING = 1
+        private const val EXCEPTIONAL = 2
+        private const val COMPLETING = 3
+        private const val CANCELLED = 4
+        private const val INTERRUPTED = 5
+        private const val TIMEOUT = 6
     }
 }

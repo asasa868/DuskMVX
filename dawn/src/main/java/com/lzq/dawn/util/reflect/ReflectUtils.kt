@@ -407,8 +407,8 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
         return objects.hashCode()
     }
 
-    override fun equals(obj: Any?): Boolean {
-        return obj is ReflectUtils && objects == obj.get<Any>()
+    override fun equals(other: Any?): Boolean {
+        return other is ReflectUtils && objects == other.get<Any>()
     }
 
     override fun toString(): String {
@@ -460,7 +460,7 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
         /**
          * 反射class
          *
-         * @param object object.
+         * @param objects object.
          * @return [ReflectUtils] 实例
          * @throws ReflectException 如果反射不成功
          */

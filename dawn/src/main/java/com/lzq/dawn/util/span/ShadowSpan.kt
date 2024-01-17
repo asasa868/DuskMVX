@@ -1,8 +1,8 @@
-package com.lzq.dawn.util.span;
+package com.lzq.dawn.util.span
 
-import android.text.TextPaint;
-import android.text.style.CharacterStyle;
-import android.text.style.UpdateAppearance;
+import android.text.TextPaint
+import android.text.style.CharacterStyle
+import android.text.style.UpdateAppearance
 
 /**
  * @Name :ShadowSpan
@@ -10,24 +10,10 @@ import android.text.style.UpdateAppearance;
  * @Author :  Lzq
  * @Desc :
  */
-class ShadowSpan extends CharacterStyle implements UpdateAppearance {
-    private final float radius;
-    private final float dx;
-    private final float dy;
-    private final int shadowColor;
-
-    ShadowSpan(final float radius,
-               final float dx,
-               final float dy,
-               final int shadowColor) {
-        this.radius = radius;
-        this.dx = dx;
-        this.dy = dy;
-        this.shadowColor = shadowColor;
-    }
-
-    @Override
-    public void updateDrawState(final TextPaint tp) {
-        tp.setShadowLayer(radius, dx, dy, shadowColor);
+internal class ShadowSpan(
+    private val radius: Float, private val dx: Float, private val dy: Float, private val shadowColor: Int
+) : CharacterStyle(), UpdateAppearance {
+    override fun updateDrawState(tp: TextPaint) {
+        tp.setShadowLayer(radius, dx, dy, shadowColor)
     }
 }
