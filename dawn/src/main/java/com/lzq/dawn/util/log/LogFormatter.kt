@@ -217,7 +217,7 @@ object LogFormatter {
 
     private fun object2Json(`object`: Any): String {
         return try {
-            DawnBridge.getGson4LogUtils().toJson(`object`)
+            DawnBridge.gson4LogUtils?.toJson(`object`)?:""
         } catch (t: Throwable) {
             `object`.toString()
         }

@@ -1,15 +1,10 @@
-package com.lzq.dawn.util.cache.disk;
+package com.lzq.dawn.util.cache.disk
 
-import com.lzq.dawn.util.cache.CacheConstants;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import com.lzq.dawn.util.cache.CacheConstants
+import java.io.File
+import java.util.Collections
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * @Name :DiskCacheManager
@@ -17,140 +12,120 @@ import java.util.concurrent.atomic.AtomicLong;
  * @Author :  Lzq
  * @Desc : 磁盘缓存管理器
  */
-public final class DiskCacheManager {
-
-    private final AtomicLong cacheSize;
-    private final AtomicInteger cacheCount;
-    private final long sizeLimit;
-    private final int countLimit;
-    private final Map<File, Long> lastUsageDates
-            = Collections.synchronizedMap(new HashMap<File, Long>());
-    private final File cacheDir;
-    private final Thread mThread;
-
-    DiskCacheManager(final File cacheDir, final long sizeLimit, final int countLimit) {
-        this.cacheDir = cacheDir;
-        this.sizeLimit = sizeLimit;
-        this.countLimit = countLimit;
-        cacheSize = new AtomicLong();
-        cacheCount = new AtomicInteger();
-        mThread = new Thread(() -> {
-            int size = 0;
-            int count = 0;
-            final File[] cachedFiles = cacheDir.listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                    return name.startsWith(CacheConstants.CACHE_PREFIX);
-                }
-            });
-            if (cachedFiles != null) {
-                for (File cachedFile : cachedFiles) {
-                    size += cachedFile.length();
-                    count += 1;
-                    lastUsageDates.put(cachedFile, cachedFile.lastModified());
-                }
-                cacheSize.getAndAdd(size);
-                cacheCount.getAndAdd(count);
+class DiskCacheManager internal constructor(
+    private val cacheDir: File,
+    private val sizeLimit: Long,
+    private val countLimit: Int
+) {
+    private val cacheSize: AtomicLong = AtomicLong()
+    private val cacheCount: AtomicInteger = AtomicInteger()
+    private val lastUsageDates = Collections.synchronizedMap(HashMap<File, Long>())
+    private val mThread: Thread = Thread {
+        var size = 0
+        var count = 0
+        val cachedFiles =
+            cacheDir.listFiles { _, name -> return@listFiles name.startsWith(CacheConstants.CACHE_PREFIX) }
+        if (cachedFiles != null) {
+            for (cachedFile in cachedFiles) {
+                size += cachedFile.length().toInt()
+                count += 1
+                lastUsageDates[cachedFile] = cachedFile.lastModified()
             }
-        });
-        mThread.start();
+            cacheSize.getAndAdd(size.toLong())
+            cacheCount.getAndAdd(count)
+        }
     }
 
-    long getCacheSize() {
-        wait2InitOk();
-        return cacheSize.get();
+    init {
+        mThread.start()
     }
 
-    int getCacheCount() {
-        wait2InitOk();
-        return cacheCount.get();
+    fun getCacheSize(): Long {
+        wait2InitOk()
+        return cacheSize.get()
     }
 
-    File getFileBeforePut(final String key) {
-        wait2InitOk();
-        File file = new File(cacheDir, getCacheNameByKey(key));
+    fun getCacheCount(): Int {
+        wait2InitOk()
+        return cacheCount.get()
+    }
+
+    fun getFileBeforePut(key: String): File {
+        wait2InitOk()
+        val file = File(cacheDir, getCacheNameByKey(key))
         if (file.exists()) {
-            cacheCount.addAndGet(-1);
-            cacheSize.addAndGet(-file.length());
+            cacheCount.addAndGet(-1)
+            cacheSize.addAndGet(-file.length())
         }
-        return file;
+        return file
     }
 
-    private void wait2InitOk() {
+    private fun wait2InitOk() {
         try {
-            mThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            mThread.join()
+        } catch (e: InterruptedException) {
+            e.printStackTrace()
         }
     }
 
-    File getFileIfExists(final String key) {
-        File file = new File(cacheDir, getCacheNameByKey(key));
-        if (!file.exists()) {
-            return null;
-        }
-        return file;
+    fun getFileIfExists(key: String): File? {
+        val file = File(cacheDir, getCacheNameByKey(key))
+        return if (!file.exists()) {
+            null
+        } else file
     }
 
-    private String getCacheNameByKey(final String key) {
-        return CacheConstants.CACHE_PREFIX + key.substring(0, 3) + key.substring(3).hashCode();
+    private fun getCacheNameByKey(key: String): String {
+        return CacheConstants.CACHE_PREFIX + key.substring(0, 3) + key.substring(3).hashCode()
     }
 
-    void put(final File file) {
-        cacheCount.addAndGet(1);
-        cacheSize.addAndGet(file.length());
+    fun put(file: File) {
+        cacheCount.addAndGet(1)
+        cacheSize.addAndGet(file.length())
         while (cacheCount.get() > countLimit || cacheSize.get() > sizeLimit) {
-            cacheSize.addAndGet(-removeOldest());
-            cacheCount.addAndGet(-1);
+            cacheSize.addAndGet(-removeOldest())
+            cacheCount.addAndGet(-1)
         }
     }
 
-    void updateModify(final File file) {
-        long millis = System.currentTimeMillis();
-        file.setLastModified(millis);
-        lastUsageDates.put(file, millis);
+    fun updateModify(file: File) {
+        val millis = System.currentTimeMillis()
+        file.setLastModified(millis)
+        lastUsageDates[file] = millis
     }
 
-    boolean removeByKey(final String key) {
-        File file = getFileIfExists(key);
-        if (file == null) {
-            return true;
-        }
+    fun removeByKey(key: String): Boolean {
+        val file = getFileIfExists(key) ?: return true
         if (!file.delete()) {
-            return false;
+            return false
         }
-        cacheSize.addAndGet(-file.length());
-        cacheCount.addAndGet(-1);
-        lastUsageDates.remove(file);
-        return true;
+        cacheSize.addAndGet(-file.length())
+        cacheCount.addAndGet(-1)
+        lastUsageDates.remove(file)
+        return true
     }
 
-     boolean clear() {
-        File[] files = cacheDir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.startsWith(CacheConstants.CACHE_PREFIX);
-            }
-        });
-        if (files == null || files.length <= 0) {
-            return true;
+    fun clear(): Boolean {
+        val files = cacheDir.listFiles { dir, name -> name.startsWith(CacheConstants.CACHE_PREFIX) }
+        if (files == null || files.size <= 0) {
+            return true
         }
-        boolean flag = true;
-        for (File file : files) {
+        var flag = true
+        for (file in files) {
             if (!file.delete()) {
-                flag = false;
-                continue;
+                flag = false
+                continue
             }
-            cacheSize.addAndGet(-file.length());
-            cacheCount.addAndGet(-1);
-            lastUsageDates.remove(file);
+            cacheSize.addAndGet(-file.length())
+            cacheCount.addAndGet(-1)
+            lastUsageDates.remove(file)
         }
         if (flag) {
-            lastUsageDates.clear();
-            cacheSize.set(0);
-            cacheCount.set(0);
+            lastUsageDates.clear()
+            cacheSize.set(0)
+            cacheCount.set(0)
         }
-        return flag;
+        return flag
     }
 
     /**
@@ -158,30 +133,29 @@ public final class DiskCacheManager {
      *
      * @return 最旧文件的大小，以字节为单位
      */
-    private long removeOldest() {
+    private fun removeOldest(): Long {
         if (lastUsageDates.isEmpty()) {
-            return 0;
+            return 0
         }
-        Long oldestUsage = Long.MAX_VALUE;
-        File oldestFile = null;
-        Set<Map.Entry<File, Long>> entries = lastUsageDates.entrySet();
-        synchronized (lastUsageDates) {
-            for (Map.Entry<File, Long> entry : entries) {
-                Long lastValueUsage = entry.getValue();
+        var oldestUsage = Long.MAX_VALUE
+        var oldestFile: File? = null
+        val entries: Set<Map.Entry<File, Long>> = lastUsageDates.entries
+        synchronized(lastUsageDates) {
+            for ((key, lastValueUsage) in entries) {
                 if (lastValueUsage < oldestUsage) {
-                    oldestUsage = lastValueUsage;
-                    oldestFile = entry.getKey();
+                    oldestUsage = lastValueUsage
+                    oldestFile = key
                 }
             }
         }
         if (oldestFile == null) {
-            return 0;
+            return 0
         }
-        long fileSize = oldestFile.length();
-        if (oldestFile.delete()) {
-            lastUsageDates.remove(oldestFile);
-            return fileSize;
+        val fileSize = oldestFile!!.length()
+        if (oldestFile!!.delete()) {
+            lastUsageDates.remove(oldestFile)
+            return fileSize
         }
-        return 0;
+        return 0
     }
 }

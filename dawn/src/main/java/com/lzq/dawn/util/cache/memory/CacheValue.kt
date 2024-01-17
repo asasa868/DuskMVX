@@ -1,4 +1,4 @@
-package com.lzq.dawn.util.cache.memory;
+package com.lzq.dawn.util.cache.memory
 
 /**
  * @Name :CacheValue
@@ -6,13 +6,4 @@ package com.lzq.dawn.util.cache.memory;
  * @Author :  Lzq
  * @Desc : 内存缓存bean
  */
-public final class CacheValue {
-    long dueTime;
-    Object value;
-
-    CacheValue(long dueTime, Object value) {
-        this.dueTime = dueTime;
-        this.value = value;
-    }
-
-}
+class CacheValue internal constructor(@JvmField var dueTime: Long, @JvmField var value: Any)

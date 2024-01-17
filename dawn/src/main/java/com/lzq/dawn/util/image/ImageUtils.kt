@@ -39,6 +39,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.FloatRange
 import androidx.annotation.IntRange
 import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker.PermissionResult
 import androidx.exifinterface.media.ExifInterface
 import com.lzq.dawn.DawnBridge
 import java.io.BufferedOutputStream
@@ -146,7 +147,7 @@ object ImageUtils {
      */
     @JvmStatic
     fun bitmap2Drawable(bitmap: Bitmap?): Drawable? {
-        return if (bitmap == null) null else BitmapDrawable(DawnBridge.getApp().resources, bitmap)
+        return if (bitmap == null) null else BitmapDrawable(DawnBridge.app.resources, bitmap)
     }
 
     /**
@@ -322,7 +323,7 @@ object ImageUtils {
      * @return bitmap
      */
     fun getBitmap(@DrawableRes resId: Int): Bitmap? {
-        val drawable = ContextCompat.getDrawable(DawnBridge.getApp(), resId) ?: return null
+        val drawable = ContextCompat.getDrawable(DawnBridge.app, resId) ?: return null
         val canvas = Canvas()
         val bitmap = Bitmap.createBitmap(
             drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888
@@ -345,7 +346,7 @@ object ImageUtils {
         @DrawableRes resId: Int, maxWidth: Int, maxHeight: Int
     ): Bitmap {
         val options = BitmapFactory.Options()
-        val resources = DawnBridge.getApp().resources
+        val resources = DawnBridge.app.resources
         options.inJustDecodeBounds = true
         BitmapFactory.decodeResource(resources, resId, options)
         options.inSampleSize = calculateInSampleSize(options, maxWidth, maxHeight)
@@ -1103,26 +1104,6 @@ object ImageUtils {
      * @param isReturnScale 返回比例模糊位图为真，否则为假。
      * @return 返回模糊位图
      */
-    /**
-     * 返回模糊位图。
-     *
-     * zoom out, blur, zoom in
-     *
-     * @param src    位图的来源
-     * @param scale  比例（0...1）。
-     * @param radius radius(0...25).
-     * @return 模糊位图。
-     */
-    /**
-     * 返回模糊位图。
-     *
-     * zoom out, blur, zoom in
-     *
-     * @param src    位图的来源
-     * @param scale  比例（0...1）。
-     * @param radius radius(0...25).
-     * @return 返回模糊位图。
-     */
     @JvmOverloads
     fun fastBlur(
         src: Bitmap,
@@ -1191,7 +1172,7 @@ object ImageUtils {
         var rs: RenderScript? = null
         val ret = if (recycle) src else src.copy(src.config, true)
         try {
-            rs = RenderScript.create(DawnBridge.getApp())
+            rs = RenderScript.create(DawnBridge.app)
             rs.messageHandler = RSMessageHandler()
             val input = Allocation.createFromBitmap(
                 rs, ret, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT
@@ -1214,13 +1195,6 @@ object ImageUtils {
      * @param radius  radius(0...25).
      * @param recycle True 回收位图的来源，否则为 false。
      * @return 使用堆栈返回模糊位图
-     */
-    /**
-     * 使用堆栈返回模糊位图。
-     *
-     * @param src    位图的来源。
-     * @param radius radius(0...25).
-     * @return 使用堆栈返回模糊位图。
      */
     @JvmOverloads
     fun stackBlur(src: Bitmap, radius: Int, recycle: Boolean = false): Bitmap {
@@ -1492,7 +1466,7 @@ object ImageUtils {
     @JvmOverloads
     fun save(
         src: Bitmap,
-        file: File,
+        file: File?,
         format: CompressFormat?,
         quality: Int = 100,
         recycle: Boolean = false
@@ -1609,35 +1583,15 @@ object ImageUtils {
      * @param recycle True 回收位图的来源，否则为 false。
      * @return 文件保存成功，否则返回null
      */
-    /**
-     * 保存到相册
-     *
-     * @param src     位图的来源
-     * @param dirName 目录的名称。
-     * @param format  图像的格式
-     * @return 文件保存成功，否则返回null
-     */
-    /**
-     * 保存到相册
-     *
-     * @param src     位图的来源
-     * @param dirName 目录的名称。
-     * @param format  图像的格式
-     * @param quality 提示压缩机，0-100。 0 表示压缩为小尺寸，100 表示压缩为最大质量。某些格式，例如无损的 PNG，将忽略质量设置
-     * @return 文件保存成功，否则返回null
-     */
     @JvmOverloads
     fun save2Album(
         src: Bitmap, dirName: String?, format: CompressFormat, quality: Int = 100, recycle: Boolean = false
     ): File? {
-        val safeDirName = if (TextUtils.isEmpty(dirName)) DawnBridge.getApp().packageName else dirName!!
+        val safeDirName = if (TextUtils.isEmpty(dirName)) DawnBridge.app.packageName else dirName!!
         val suffix = if (CompressFormat.JPEG == format) "JPG" else format.name
         val fileName = System.currentTimeMillis().toString() + "_" + quality + "." + suffix
         return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            if (!DawnBridge.isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                Log.e("ImageUtils", "save to album need storage permission")
-                return null
-            }
+
             val picDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
             val destFile = File(picDir, "$safeDirName/$fileName")
             if (!save(src, destFile, format, quality, recycle)) {
@@ -1660,17 +1614,17 @@ object ImageUtils {
                 Environment.DIRECTORY_DCIM + "/" + safeDirName
             )
             contentValues.put(MediaStore.MediaColumns.IS_PENDING, 1)
-            val uri = DawnBridge.getApp().contentResolver.insert(contentUri, contentValues) ?: return null
+            val uri = DawnBridge.app.contentResolver.insert(contentUri, contentValues) ?: return null
             var os: OutputStream? = null
             try {
-                os = DawnBridge.getApp().contentResolver.openOutputStream(uri)
+                os = DawnBridge.app.contentResolver.openOutputStream(uri)
                 src.compress(format, quality, os!!)
                 contentValues.clear()
                 contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
-                DawnBridge.getApp().contentResolver.update(uri, contentValues, null, null)
+                DawnBridge.app.contentResolver.update(uri, contentValues, null, null)
                 DawnBridge.uri2File(uri)
             } catch (e: Exception) {
-                DawnBridge.getApp().contentResolver.delete(uri, null, null)
+                DawnBridge.app.contentResolver.delete(uri, null, null)
                 e.printStackTrace()
                 null
             } finally {
@@ -1865,13 +1819,6 @@ object ImageUtils {
      * @param recycle True 回收位图的来源，否则为 false。
      * @return 使用质量返回压缩数据。
      */
-    /**
-     * 使用质量返回压缩数据。
-     *
-     * @param src     位图的来源
-     * @param quality 质量
-     * @return 使用质量返回压缩数据。
-     */
     @JvmOverloads
     fun compressByQuality(
         src: Bitmap, @IntRange(from = 0, to = 100) quality: Int, recycle: Boolean = false
@@ -1893,13 +1840,6 @@ object ImageUtils {
      * @param src         位图的来源
      * @param maxByteSize 字节的最大大小。
      * @param recycle     True 回收位图的来源，否则为 false。
-     * @return 使用质量返回压缩数据。
-     */
-    /**
-     * 使用质量返回压缩数据。
-     *
-     * @param src         位图的来源
-     * @param maxByteSize 字节的最大大小。
      * @return 使用质量返回压缩数据。
      */
     @JvmOverloads
@@ -1957,13 +1897,6 @@ object ImageUtils {
      * @param recycle    True 回收位图的来源，否则为 false。
      * @return 使用样本大小返回压缩位图
      */
-    /**
-     * 使用样本大小返回压缩位图。
-     *
-     * @param src        位图的来源
-     * @param sampleSize 样本量。
-     * @return 使用样本大小返回压缩位图
-     */
     @JvmOverloads
     fun compressBySampleSize(
         src: Bitmap, sampleSize: Int, recycle: Boolean = false
@@ -1988,14 +1921,6 @@ object ImageUtils {
      * @param maxWidth  最大宽度
      * @param maxHeight 最大高度
      * @param recycle   True 回收位图的来源，否则为 false。
-     * @return 使用样本大小返回压缩位图
-     */
-    /**
-     * 使用样本大小返回压缩位图
-     *
-     * @param src       位图的来源
-     * @param maxWidth  最大宽度
-     * @param maxHeight 最大高度
      * @return 使用样本大小返回压缩位图
      */
     @JvmOverloads

@@ -76,7 +76,7 @@ class ScreenUtils private constructor() {
              * @return 屏幕宽度，以像素为单位
              */
             get() {
-                val wm = DawnBridge.getApp().getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                val wm = DawnBridge.app.getSystemService(Context.WINDOW_SERVICE) as WindowManager
                 val point = Point()
                 wm.defaultDisplay.getRealSize(point)
                 return point.x
@@ -88,7 +88,7 @@ class ScreenUtils private constructor() {
              * @return 屏幕高度，以像素为单位。
              */
             get() {
-                val wm = DawnBridge.getApp().getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                val wm = DawnBridge.app.getSystemService(Context.WINDOW_SERVICE) as WindowManager
                 val point = Point()
                 wm.defaultDisplay.getRealSize(point)
                 return point.y
@@ -101,7 +101,7 @@ class ScreenUtils private constructor() {
              * @return 应用程序的屏幕宽度（以像素为单位）。
              */
             get() {
-                val wm = DawnBridge.getApp().getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                val wm = DawnBridge.app.getSystemService(Context.WINDOW_SERVICE) as WindowManager
                 val point = Point()
                 wm.defaultDisplay.getSize(point)
                 return point.x
@@ -113,7 +113,7 @@ class ScreenUtils private constructor() {
              * @return 应用程序的屏幕高度（以像素为单位）。
              */
             get() {
-                val wm = DawnBridge.getApp().getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                val wm = DawnBridge.app.getSystemService(Context.WINDOW_SERVICE) as WindowManager
                 val point = Point()
                 wm.defaultDisplay.getSize(point)
                 return point.y
@@ -217,14 +217,14 @@ class ScreenUtils private constructor() {
              *
              * @return `true`: yes<br></br>`false`: no
              */
-            get() = (DawnBridge.getApp().resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+            get() = (DawnBridge.app.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
         val isPortrait: Boolean
             /**
              * 返回屏幕是否为纵向。
              *
              * @return `true`: yes<br></br>`false`: no
              */
-            get() = (DawnBridge.getApp().resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+            get() = (DawnBridge.app.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
 
         /**
          * 返回屏幕的旋转。
@@ -249,7 +249,7 @@ class ScreenUtils private constructor() {
              * @return `true`: yes<br></br>`false`: no
              */
             get() {
-                val km = DawnBridge.getApp().getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+                val km = DawnBridge.app.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
                     ?: return false
                 return km.inKeyguardRestrictedInputMode()
             }
@@ -263,7 +263,7 @@ class ScreenUtils private constructor() {
              */
             get() = try {
                 Settings.System.getInt(
-                    DawnBridge.getApp().contentResolver, Settings.System.SCREEN_OFF_TIMEOUT
+                    DawnBridge.app.contentResolver, Settings.System.SCREEN_OFF_TIMEOUT
                 )
             } catch (e: SettingNotFoundException) {
                 e.printStackTrace()
@@ -278,7 +278,7 @@ class ScreenUtils private constructor() {
              */
             set(duration) {
                 Settings.System.putInt(
-                    DawnBridge.getApp().contentResolver, Settings.System.SCREEN_OFF_TIMEOUT, duration
+                    DawnBridge.app.contentResolver, Settings.System.SCREEN_OFF_TIMEOUT, duration
                 )
             }
     }

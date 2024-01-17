@@ -29,7 +29,7 @@ object VolumeUtils {
      * @return 音量
      */
     fun getVolume(streamType: Int): Int {
-        val am = DawnBridge.getApp().getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val am = DawnBridge.app.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         return am.getStreamVolume(streamType)
     }
 
@@ -59,7 +59,7 @@ object VolumeUtils {
      *
      */
     fun setVolume(streamType: Int, volume: Int, flags: Int) {
-        val am = DawnBridge.getApp().getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val am = DawnBridge.app.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         try {
             am.setStreamVolume(streamType, volume, flags)
         } catch (ignore: SecurityException) {
@@ -83,7 +83,7 @@ object VolumeUtils {
      * @return 最大音量
      */
     fun getMaxVolume(streamType: Int): Int {
-        val am = DawnBridge.getApp().getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val am = DawnBridge.app.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         return am.getStreamMaxVolume(streamType)
     }
 
@@ -104,7 +104,7 @@ object VolumeUtils {
      * @return 最小音量。
      */
     fun getMinVolume(streamType: Int): Int {
-        val am = DawnBridge.getApp().getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val am = DawnBridge.app.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             am.getStreamMinVolume(streamType)
         } else 0

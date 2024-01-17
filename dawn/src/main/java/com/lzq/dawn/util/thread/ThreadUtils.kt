@@ -1,21 +1,16 @@
-package com.lzq.dawn.util.thread;
+package com.lzq.dawn.util.thread
 
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
-
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import androidx.annotation.IntRange
+import com.lzq.dawn.util.thread.ThreadPoolExecutor4Util.Companion.createPool
+import java.util.Timer
+import java.util.TimerTask
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.TimeUnit
 
 /**
  * @Name :ThreadUtils
@@ -23,52 +18,40 @@ import java.util.concurrent.TimeUnit;
  * @Author :  Lzq
  * @Desc : 线程池
  */
-public final class ThreadUtils {
-
-    private static final Handler HANDLER = new Handler(Looper.getMainLooper());
-
-    private static final Map<Integer, Map<Integer, ExecutorService>> TYPE_PRIORITY_POOLS = new HashMap<>();
-
-    public static final Map<Task, ExecutorService> TASK_POOL_MAP = new ConcurrentHashMap<>();
-
-    public static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
-    private static final Timer TIMER = new Timer();
-
-    public static final byte TYPE_SINGLE = -1;
-    public static final byte TYPE_CACHED = -2;
-    public static final byte TYPE_IO = -4;
-    public static final byte TYPE_CPU = -8;
-
-    private static Executor sDeliver;
-
-    /**
-     * 返回线程是否是主线程。
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isMainThread() {
-        return Looper.myLooper() == Looper.getMainLooper();
-    }
-
+object ThreadUtils {
     /**
      * 获取主线程Handler
      *
      * @return Handler
      */
-    public static Handler getMainHandler() {
-        return HANDLER;
-    }
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val TYPE_PRIORITY_POOLS: MutableMap<Int, MutableMap<Int, ExecutorService>> = HashMap()
+    val TASK_POOL_MAP: MutableMap<Task<*>, ExecutorService?> = ConcurrentHashMap()
+    val CPU_COUNT = Runtime.getRuntime().availableProcessors()
+    private val TIMER = Timer()
+    const val TYPE_SINGLE: Byte = -1
+    const val TYPE_CACHED: Byte = -2
+    const val TYPE_IO: Byte = -4
+    const val TYPE_CPU: Byte = -8
+    private var sDeliver: Executor? = null
+    val isMainThread: Boolean
+        /**
+         * 返回线程是否是主线程。
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = Looper.myLooper() == Looper.getMainLooper()
 
     /**
      * 主线程执行任务
      *
      * @param runnable runnable
      */
-    public static void runOnUiThread(final Runnable runnable) {
+    fun runOnUiThread(runnable: Runnable) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            runnable.run();
+            runnable.run()
         } else {
-            HANDLER.post(runnable);
+            mainHandler.post(runnable)
         }
     }
 
@@ -78,8 +61,8 @@ public final class ThreadUtils {
      * @param runnable    runnable
      * @param delayMillis 延迟时间
      */
-    public static void runOnUiThreadDelayed(final Runnable runnable, long delayMillis) {
-        HANDLER.postDelayed(runnable, delayMillis);
+    fun runOnUiThreadDelayed(runnable: Runnable?, delayMillis: Long) {
+        mainHandler.postDelayed(runnable!!, delayMillis)
     }
 
     /**
@@ -88,8 +71,8 @@ public final class ThreadUtils {
      * @param size 线程池大小
      * @return 固定线程池
      */
-    public static ExecutorService getFixedPool(@IntRange(from = 1) final int size) {
-        return getPoolByTypeAndPriority(size);
+    fun getFixedPool(@IntRange(from = 1) size: Int): ExecutorService {
+        return getPoolByTypeAndPriority(size)
     }
 
     /**
@@ -99,19 +82,19 @@ public final class ThreadUtils {
      * @param priority 轮询中线程的优先级。
      * @return 固定线程池
      */
-    public static ExecutorService getFixedPool(@IntRange(from = 1) final int size,
-                                               @IntRange(from = 1, to = 10) final int priority) {
-        return getPoolByTypeAndPriority(size, priority);
+    fun getFixedPool(
+        @IntRange(from = 1) size: Int, @IntRange(from = 1, to = 10) priority: Int
+    ): ExecutorService {
+        return getPoolByTypeAndPriority(size, priority)
     }
 
-    /**
-     * 返回一个线程池，该线程池使用在无限队列中运行的单个工作线程，并在需要时使用提供的 ThreadFactory 创建新线程
-     *
-     * @return 单线程池
-     */
-    public static ExecutorService getSinglePool() {
-        return getPoolByTypeAndPriority(TYPE_SINGLE);
-    }
+    val singlePool: ExecutorService
+        /**
+         * 返回一个线程池，该线程池使用在无限队列中运行的单个工作线程，并在需要时使用提供的 ThreadFactory 创建新线程
+         *
+         * @return 单线程池
+         */
+        get() = getPoolByTypeAndPriority(TYPE_SINGLE.toInt())
 
     /**
      * 返回一个线程池，该线程池使用在无限队列中运行的单个工作线程，并在需要时使用提供的 ThreadFactory 创建新线程
@@ -119,18 +102,17 @@ public final class ThreadUtils {
      * @param priority 轮询中线程的优先级。
      * @return 单线程池
      */
-    public static ExecutorService getSinglePool(@IntRange(from = 1, to = 10) final int priority) {
-        return getPoolByTypeAndPriority(TYPE_SINGLE, priority);
+    fun getSinglePool(@IntRange(from = 1, to = 10) priority: Int): ExecutorService {
+        return getPoolByTypeAndPriority(TYPE_SINGLE.toInt(), priority)
     }
 
-    /**
-     * 返回一个线程池，该线程池根据需要创建新线程，但在以前构造的线程可用时将重用它们。
-     *
-     * @return 缓存的线程池
-     */
-    public static ExecutorService getCachedPool() {
-        return getPoolByTypeAndPriority(TYPE_CACHED);
-    }
+    val cachedPool: ExecutorService
+        /**
+         * 返回一个线程池，该线程池根据需要创建新线程，但在以前构造的线程可用时将重用它们。
+         *
+         * @return 缓存的线程池
+         */
+        get() = getPoolByTypeAndPriority(TYPE_CACHED.toInt())
 
     /**
      * 返回一个线程池，该线程池根据需要创建新线程，但在以前构造的线程可用时将重用它们。
@@ -138,19 +120,17 @@ public final class ThreadUtils {
      * @param priority 轮询中线程的优先级。
      * @return 缓存的线程池
      */
-    public static ExecutorService getCachedPool(@IntRange(from = 1, to = 10) final int priority) {
-        return getPoolByTypeAndPriority(TYPE_CACHED, priority);
+    fun getCachedPool(@IntRange(from = 1, to = 10) priority: Int): ExecutorService {
+        return getPoolByTypeAndPriority(TYPE_CACHED.toInt(), priority)
     }
 
-
-    /**
-     * 返回一个线程池，该线程池创建 （2 * CPU_COUNT + 1） 个线程，这些线程在大小为 128 的队列中运行。
-     *
-     * @return 一个 IO 线程池
-     */
-    public static ExecutorService getIoPool() {
-        return getPoolByTypeAndPriority(TYPE_IO);
-    }
+    val ioPool: ExecutorService
+        /**
+         * 返回一个线程池，该线程池创建 （2 * CPU_COUNT + 1） 个线程，这些线程在大小为 128 的队列中运行。
+         *
+         * @return 一个 IO 线程池
+         */
+        get() = getPoolByTypeAndPriority(TYPE_IO.toInt())
 
     /**
      * 返回一个线程池，该线程池创建 （2 * CPU_COUNT + 1） 个线程，这些线程在大小为 128 的队列中运行。
@@ -158,18 +138,17 @@ public final class ThreadUtils {
      * @param priority 轮询中线程的优先级
      * @return 一个 IO 线程池
      */
-    public static ExecutorService getIoPool(@IntRange(from = 1, to = 10) final int priority) {
-        return getPoolByTypeAndPriority(TYPE_IO, priority);
+    fun getIoPool(@IntRange(from = 1, to = 10) priority: Int): ExecutorService {
+        return getPoolByTypeAndPriority(TYPE_IO.toInt(), priority)
     }
 
-    /**
-     * 返回一个线程池，该线程池创建 （CPU_COUNT + 1） 个线程，这些线程在大小为 128 且最大线程数等于 （2 * CPU_COUNT + 1） 的队列中运行。
-     *
-     * @return 一个 CPU 线程池
-     */
-    public static ExecutorService getCpuPool() {
-        return getPoolByTypeAndPriority(TYPE_CPU);
-    }
+    val cpuPool: ExecutorService
+        /**
+         * 返回一个线程池，该线程池创建 （CPU_COUNT + 1） 个线程，这些线程在大小为 128 且最大线程数等于 （2 * CPU_COUNT + 1） 的队列中运行。
+         *
+         * @return 一个 CPU 线程池
+         */
+        get() = getPoolByTypeAndPriority(TYPE_CPU.toInt())
 
     /**
      * 返回一个线程池，该线程池创建 （CPU_COUNT + 1） 个线程，这些线程在大小为 128 且最大线程数等于 （2 * CPU_COUNT + 1） 的队列中运行。
@@ -177,8 +156,8 @@ public final class ThreadUtils {
      * @param priority 轮询中线程的优先级
      * @return 一个 CPU 线程池
      */
-    public static ExecutorService getCpuPool(@IntRange(from = 1, to = 10) final int priority) {
-        return getPoolByTypeAndPriority(TYPE_CPU, priority);
+    fun getCpuPool(@IntRange(from = 1, to = 10) priority: Int): ExecutorService {
+        return getPoolByTypeAndPriority(TYPE_CPU.toInt(), priority)
     }
 
     /**
@@ -187,9 +166,9 @@ public final class ThreadUtils {
      * @param size 固定线程池中的线程大小。
      * @param task 要执行的任务。
      * @param <T>  任务结果的类型。
-     */
-    public static <T> void executeByFixed(@IntRange(from = 1) final int size, final Task<T> task) {
-        execute(getPoolByTypeAndPriority(size), task);
+    </T> */
+    fun <T> executeByFixed(@IntRange(from = 1) size: Int, task: Task<T>) {
+        execute(getPoolByTypeAndPriority(size), task)
     }
 
     /**
@@ -199,11 +178,11 @@ public final class ThreadUtils {
      * @param task     要执行的任务。
      * @param priority 轮询中线程的优先级
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeByFixed(@IntRange(from = 1) final int size,
-                                          final Task<T> task,
-                                          @IntRange(from = 1, to = 10) final int priority) {
-        execute(getPoolByTypeAndPriority(size, priority), task);
+    </T> */
+    fun <T> executeByFixed(
+        @IntRange(from = 1) size: Int, task: Task<T>, @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        execute(getPoolByTypeAndPriority(size, priority), task)
     }
 
     /**
@@ -214,14 +193,12 @@ public final class ThreadUtils {
      * @param delay 从现在开始延迟执行的时间。
      * @param unit  延迟参数的时间单位。
      * @param <T>   任务结果的类型。
-     */
-    public static <T> void executeByFixedWithDelay(@IntRange(from = 1) final int size,
-                                                   final Task<T> task,
-                                                   final long delay,
-                                                   final TimeUnit unit) {
-        executeWithDelay(getPoolByTypeAndPriority(size), task, delay, unit);
+    </T> */
+    fun <T> executeByFixedWithDelay(
+        @IntRange(from = 1) size: Int, task: Task<T>, delay: Long, unit: TimeUnit
+    ) {
+        executeWithDelay(getPoolByTypeAndPriority(size), task, delay, unit)
     }
-
 
     /**
      * 在给定延迟后在固定线程池中执行给定任务。
@@ -232,13 +209,15 @@ public final class ThreadUtils {
      * @param unit     延迟参数的时间单位。
      * @param priority 轮询中线程的优先级
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeByFixedWithDelay(@IntRange(from = 1) final int size,
-                                                   final Task<T> task,
-                                                   final long delay,
-                                                   final TimeUnit unit,
-                                                   @IntRange(from = 1, to = 10) final int priority) {
-        executeWithDelay(getPoolByTypeAndPriority(size, priority), task, delay, unit);
+    </T> */
+    fun <T> executeByFixedWithDelay(
+        @IntRange(from = 1) size: Int,
+        task: Task<T>,
+        delay: Long,
+        unit: TimeUnit,
+        @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        executeWithDelay(getPoolByTypeAndPriority(size, priority), task, delay, unit)
     }
 
     /**
@@ -249,12 +228,11 @@ public final class ThreadUtils {
      * @param period 连续执行之间的时间段。
      * @param unit   周期参数的时间单位。
      * @param <T>    任务结果的类型。
-     */
-    public static <T> void executeByFixedAtFixRate(@IntRange(from = 1) final int size,
-                                                   final Task<T> task,
-                                                   final long period,
-                                                   final TimeUnit unit) {
-        executeAtFixedRate(getPoolByTypeAndPriority(size), task, 0, period, unit);
+    </T> */
+    fun <T> executeByFixedAtFixRate(
+        @IntRange(from = 1) size: Int, task: Task<T>, period: Long, unit: TimeUnit
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(size), task, 0, period, unit)
     }
 
     /**
@@ -266,13 +244,15 @@ public final class ThreadUtils {
      * @param unit     周期参数的时间单位。
      * @param priority 轮询中线程的优先级。
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeByFixedAtFixRate(@IntRange(from = 1) final int size,
-                                                   final Task<T> task,
-                                                   final long period,
-                                                   final TimeUnit unit,
-                                                   @IntRange(from = 1, to = 10) final int priority) {
-        executeAtFixedRate(getPoolByTypeAndPriority(size, priority), task, 0, period, unit);
+    </T> */
+    fun <T> executeByFixedAtFixRate(
+        @IntRange(from = 1) size: Int,
+        task: Task<T>,
+        period: Long,
+        unit: TimeUnit,
+        @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(size, priority), task, 0, period, unit)
     }
 
     /**
@@ -284,13 +264,11 @@ public final class ThreadUtils {
      * @param period       连续执行之间的时间段。
      * @param unit         周期参数的时间单位。
      * @param <T>          任务结果的类型。
-     */
-    public static <T> void executeByFixedAtFixRate(@IntRange(from = 1) final int size,
-                                                   final Task<T> task,
-                                                   long initialDelay,
-                                                   final long period,
-                                                   final TimeUnit unit) {
-        executeAtFixedRate(getPoolByTypeAndPriority(size), task, initialDelay, period, unit);
+    </T> */
+    fun <T> executeByFixedAtFixRate(
+        @IntRange(from = 1) size: Int, task: Task<T>, initialDelay: Long, period: Long, unit: TimeUnit
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(size), task, initialDelay, period, unit)
     }
 
     /**
@@ -303,25 +281,26 @@ public final class ThreadUtils {
      * @param unit         周期参数的时间单位。
      * @param priority     轮询中线程的优先级。
      * @param <T>          任务结果的类型。
-     */
-    public static <T> void executeByFixedAtFixRate(@IntRange(from = 1) final int size,
-                                                   final Task<T> task,
-                                                   long initialDelay,
-                                                   final long period,
-                                                   final TimeUnit unit,
-                                                   @IntRange(from = 1, to = 10) final int priority) {
-        executeAtFixedRate(getPoolByTypeAndPriority(size, priority), task, initialDelay, period, unit);
+    </T> */
+    fun <T> executeByFixedAtFixRate(
+        @IntRange(from = 1) size: Int,
+        task: Task<T>,
+        initialDelay: Long,
+        period: Long,
+        unit: TimeUnit,
+        @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(size, priority), task, initialDelay, period, unit)
     }
-
 
     /**
      * 在单个线程池中执行给定的任务。
      *
      * @param task 要执行的任务
      * @param <T>  任务结果的类型。
-     */
-    public static <T> void executeBySingle(final Task<T> task) {
-        execute(getPoolByTypeAndPriority(TYPE_SINGLE), task);
+    </T> */
+    fun <T> executeBySingle(task: Task<T>) {
+        execute(getPoolByTypeAndPriority(TYPE_SINGLE.toInt()), task)
     }
 
     /**
@@ -330,10 +309,11 @@ public final class ThreadUtils {
      * @param task     要执行的任务
      * @param priority 轮询中线程的优先级。
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeBySingle(final Task<T> task,
-                                           @IntRange(from = 1, to = 10) final int priority) {
-        execute(getPoolByTypeAndPriority(TYPE_SINGLE, priority), task);
+    </T> */
+    fun <T> executeBySingle(
+        task: Task<T>, @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        execute(getPoolByTypeAndPriority(TYPE_SINGLE.toInt(), priority), task)
     }
 
     /**
@@ -343,11 +323,11 @@ public final class ThreadUtils {
      * @param delay 从现在开始延迟执行的时间。
      * @param unit  延迟参数的时间单位。
      * @param <T>   任务结果的类型。
-     */
-    public static <T> void executeBySingleWithDelay(final Task<T> task,
-                                                    final long delay,
-                                                    final TimeUnit unit) {
-        executeWithDelay(getPoolByTypeAndPriority(TYPE_SINGLE), task, delay, unit);
+    </T> */
+    fun <T> executeBySingleWithDelay(
+        task: Task<T>, delay: Long, unit: TimeUnit
+    ) {
+        executeWithDelay(getPoolByTypeAndPriority(TYPE_SINGLE.toInt()), task, delay, unit)
     }
 
     /**
@@ -358,12 +338,11 @@ public final class ThreadUtils {
      * @param unit     延迟参数的时间单位。
      * @param priority 轮询中线程的优先级。
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeBySingleWithDelay(final Task<T> task,
-                                                    final long delay,
-                                                    final TimeUnit unit,
-                                                    @IntRange(from = 1, to = 10) final int priority) {
-        executeWithDelay(getPoolByTypeAndPriority(TYPE_SINGLE, priority), task, delay, unit);
+    </T> */
+    fun <T> executeBySingleWithDelay(
+        task: Task<T>, delay: Long, unit: TimeUnit, @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        executeWithDelay(getPoolByTypeAndPriority(TYPE_SINGLE.toInt(), priority), task, delay, unit)
     }
 
     /**
@@ -373,11 +352,11 @@ public final class ThreadUtils {
      * @param period 连续执行之间的时间段。
      * @param unit   周期参数的时间单位。
      * @param <T>    任务结果的类型。
-     */
-    public static <T> void executeBySingleAtFixRate(final Task<T> task,
-                                                    final long period,
-                                                    final TimeUnit unit) {
-        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_SINGLE), task, 0, period, unit);
+    </T> */
+    fun <T> executeBySingleAtFixRate(
+        task: Task<T>, period: Long, unit: TimeUnit
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_SINGLE.toInt()), task, 0, period, unit)
     }
 
     /**
@@ -388,12 +367,11 @@ public final class ThreadUtils {
      * @param unit     周期参数的时间单位。
      * @param priority 轮询中线程的优先级。
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeBySingleAtFixRate(final Task<T> task,
-                                                    final long period,
-                                                    final TimeUnit unit,
-                                                    @IntRange(from = 1, to = 10) final int priority) {
-        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_SINGLE, priority), task, 0, period, unit);
+    </T> */
+    fun <T> executeBySingleAtFixRate(
+        task: Task<T>, period: Long, unit: TimeUnit, @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_SINGLE.toInt(), priority), task, 0, period, unit)
     }
 
     /**
@@ -404,12 +382,11 @@ public final class ThreadUtils {
      * @param period       连续执行之间的时间段。
      * @param unit         初始延迟和周期参数的时间单位。
      * @param <T>          任务结果的类型。
-     */
-    public static <T> void executeBySingleAtFixRate(final Task<T> task,
-                                                    long initialDelay,
-                                                    final long period,
-                                                    final TimeUnit unit) {
-        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_SINGLE), task, initialDelay, period, unit);
+    </T> */
+    fun <T> executeBySingleAtFixRate(
+        task: Task<T>, initialDelay: Long, period: Long, unit: TimeUnit
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_SINGLE.toInt()), task, initialDelay, period, unit)
     }
 
     /**
@@ -421,26 +398,27 @@ public final class ThreadUtils {
      * @param unit         初始延迟和周期参数的时间单位。
      * @param priority     轮询中线程的优先级。
      * @param <T>          任务结果的类型。
-     */
-    public static <T> void executeBySingleAtFixRate(final Task<T> task,
-                                                    long initialDelay,
-                                                    final long period,
-                                                    final TimeUnit unit,
-                                                    @IntRange(from = 1, to = 10) final int priority) {
+    </T> */
+    fun <T> executeBySingleAtFixRate(
+        task: Task<T>,
+        initialDelay: Long,
+        period: Long,
+        unit: TimeUnit,
+        @IntRange(from = 1, to = 10) priority: Int
+    ) {
         executeAtFixedRate(
-                getPoolByTypeAndPriority(TYPE_SINGLE, priority), task, initialDelay, period, unit
-        );
+            getPoolByTypeAndPriority(TYPE_SINGLE.toInt(), priority), task, initialDelay, period, unit
+        )
     }
-
 
     /**
      * 在缓存的线程池中执行给定的任务。
      *
      * @param task 要执行的任务。
      * @param <T>  任务结果的类型。
-     */
-    public static <T> void executeByCached(final Task<T> task) {
-        execute(getPoolByTypeAndPriority(TYPE_CACHED), task);
+    </T> */
+    fun <T> executeByCached(task: Task<T>) {
+        execute(getPoolByTypeAndPriority(TYPE_CACHED.toInt()), task)
     }
 
     /**
@@ -449,10 +427,11 @@ public final class ThreadUtils {
      * @param task     要执行的任务。
      * @param priority 轮询中线程的优先级。
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeByCached(final Task<T> task,
-                                           @IntRange(from = 1, to = 10) final int priority) {
-        execute(getPoolByTypeAndPriority(TYPE_CACHED, priority), task);
+    </T> */
+    fun <T> executeByCached(
+        task: Task<T>, @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        execute(getPoolByTypeAndPriority(TYPE_CACHED.toInt(), priority), task)
     }
 
     /**
@@ -462,11 +441,11 @@ public final class ThreadUtils {
      * @param delay 从现在开始延迟执行的时间。
      * @param unit  延迟参数的时间单位。
      * @param <T>   任务结果的类型。
-     */
-    public static <T> void executeByCachedWithDelay(final Task<T> task,
-                                                    final long delay,
-                                                    final TimeUnit unit) {
-        executeWithDelay(getPoolByTypeAndPriority(TYPE_CACHED), task, delay, unit);
+    </T> */
+    fun <T> executeByCachedWithDelay(
+        task: Task<T>, delay: Long, unit: TimeUnit
+    ) {
+        executeWithDelay(getPoolByTypeAndPriority(TYPE_CACHED.toInt()), task, delay, unit)
     }
 
     /**
@@ -477,12 +456,11 @@ public final class ThreadUtils {
      * @param unit     轮询中线程的优先级。
      * @param priority 轮询中线程的优先级。
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeByCachedWithDelay(final Task<T> task,
-                                                    final long delay,
-                                                    final TimeUnit unit,
-                                                    @IntRange(from = 1, to = 10) final int priority) {
-        executeWithDelay(getPoolByTypeAndPriority(TYPE_CACHED, priority), task, delay, unit);
+    </T> */
+    fun <T> executeByCachedWithDelay(
+        task: Task<T>, delay: Long, unit: TimeUnit, @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        executeWithDelay(getPoolByTypeAndPriority(TYPE_CACHED.toInt(), priority), task, delay, unit)
     }
 
     /**
@@ -492,11 +470,11 @@ public final class ThreadUtils {
      * @param period 连续执行之间的时间段。
      * @param unit   周期参数的时间单位。
      * @param <T>    任务结果的类型。
-     */
-    public static <T> void executeByCachedAtFixRate(final Task<T> task,
-                                                    final long period,
-                                                    final TimeUnit unit) {
-        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_CACHED), task, 0, period, unit);
+    </T> */
+    fun <T> executeByCachedAtFixRate(
+        task: Task<T>, period: Long, unit: TimeUnit
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_CACHED.toInt()), task, 0, period, unit)
     }
 
     /**
@@ -507,12 +485,11 @@ public final class ThreadUtils {
      * @param unit     周期参数的时间单位。
      * @param priority 轮询中线程的优先级。
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeByCachedAtFixRate(final Task<T> task,
-                                                    final long period,
-                                                    final TimeUnit unit,
-                                                    @IntRange(from = 1, to = 10) final int priority) {
-        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_CACHED, priority), task, 0, period, unit);
+    </T> */
+    fun <T> executeByCachedAtFixRate(
+        task: Task<T>, period: Long, unit: TimeUnit, @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_CACHED.toInt(), priority), task, 0, period, unit)
     }
 
     /**
@@ -523,12 +500,11 @@ public final class ThreadUtils {
      * @param period       连续执行之间的时间段。
      * @param unit         初始延迟和周期参数的时间单位。
      * @param <T>          任务结果的类型。
-     */
-    public static <T> void executeByCachedAtFixRate(final Task<T> task,
-                                                    long initialDelay,
-                                                    final long period,
-                                                    final TimeUnit unit) {
-        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_CACHED), task, initialDelay, period, unit);
+    </T> */
+    fun <T> executeByCachedAtFixRate(
+        task: Task<T>, initialDelay: Long, period: Long, unit: TimeUnit
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_CACHED.toInt()), task, initialDelay, period, unit)
     }
 
     /**
@@ -540,15 +516,17 @@ public final class ThreadUtils {
      * @param unit         初始延迟和周期参数的时间单位。
      * @param priority     轮询中线程的优先级。
      * @param <T>          任务结果的类型。
-     */
-    public static <T> void executeByCachedAtFixRate(final Task<T> task,
-                                                    long initialDelay,
-                                                    final long period,
-                                                    final TimeUnit unit,
-                                                    @IntRange(from = 1, to = 10) final int priority) {
+    </T> */
+    fun <T> executeByCachedAtFixRate(
+        task: Task<T>,
+        initialDelay: Long,
+        period: Long,
+        unit: TimeUnit,
+        @IntRange(from = 1, to = 10) priority: Int
+    ) {
         executeAtFixedRate(
-                getPoolByTypeAndPriority(TYPE_CACHED, priority), task, initialDelay, period, unit
-        );
+            getPoolByTypeAndPriority(TYPE_CACHED.toInt(), priority), task, initialDelay, period, unit
+        )
     }
 
     /**
@@ -556,9 +534,9 @@ public final class ThreadUtils {
      *
      * @param task 要执行的任务。
      * @param <T>  任务结果的类型。
-     */
-    public static <T> void executeByIo(final Task<T> task) {
-        execute(getPoolByTypeAndPriority(TYPE_IO), task);
+    </T> */
+    fun <T> executeByIo(task: Task<T>) {
+        execute(getPoolByTypeAndPriority(TYPE_IO.toInt()), task)
     }
 
     /**
@@ -567,10 +545,11 @@ public final class ThreadUtils {
      * @param task     要执行的任务。
      * @param priority 轮询中线程的优先级。
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeByIo(final Task<T> task,
-                                       @IntRange(from = 1, to = 10) final int priority) {
-        execute(getPoolByTypeAndPriority(TYPE_IO, priority), task);
+    </T> */
+    fun <T> executeByIo(
+        task: Task<T>, @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        execute(getPoolByTypeAndPriority(TYPE_IO.toInt(), priority), task)
     }
 
     /**
@@ -580,11 +559,11 @@ public final class ThreadUtils {
      * @param delay 轮询中线程的优先级。
      * @param unit  轮询中线程的优先级。
      * @param <T>   任务结果的类型。
-     */
-    public static <T> void executeByIoWithDelay(final Task<T> task,
-                                                final long delay,
-                                                final TimeUnit unit) {
-        executeWithDelay(getPoolByTypeAndPriority(TYPE_IO), task, delay, unit);
+    </T> */
+    fun <T> executeByIoWithDelay(
+        task: Task<T>, delay: Long, unit: TimeUnit
+    ) {
+        executeWithDelay(getPoolByTypeAndPriority(TYPE_IO.toInt()), task, delay, unit)
     }
 
     /**
@@ -595,12 +574,11 @@ public final class ThreadUtils {
      * @param unit     轮询中线程的优先级。
      * @param priority 轮询中线程的优先级。
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeByIoWithDelay(final Task<T> task,
-                                                final long delay,
-                                                final TimeUnit unit,
-                                                @IntRange(from = 1, to = 10) final int priority) {
-        executeWithDelay(getPoolByTypeAndPriority(TYPE_IO, priority), task, delay, unit);
+    </T> */
+    fun <T> executeByIoWithDelay(
+        task: Task<T>, delay: Long, unit: TimeUnit, @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        executeWithDelay(getPoolByTypeAndPriority(TYPE_IO.toInt(), priority), task, delay, unit)
     }
 
     /**
@@ -610,11 +588,11 @@ public final class ThreadUtils {
      * @param period 连续执行之间的时间段。
      * @param unit   周期参数的时间单位。
      * @param <T>    任务结果的类型。
-     */
-    public static <T> void executeByIoAtFixRate(final Task<T> task,
-                                                final long period,
-                                                final TimeUnit unit) {
-        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_IO), task, 0, period, unit);
+    </T> */
+    fun <T> executeByIoAtFixRate(
+        task: Task<T>, period: Long, unit: TimeUnit
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_IO.toInt()), task, 0, period, unit)
     }
 
     /**
@@ -625,12 +603,11 @@ public final class ThreadUtils {
      * @param unit     周期参数的时间单位。
      * @param priority 轮询中线程的优先级。
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeByIoAtFixRate(final Task<T> task,
-                                                final long period,
-                                                final TimeUnit unit,
-                                                @IntRange(from = 1, to = 10) final int priority) {
-        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_IO, priority), task, 0, period, unit);
+    </T> */
+    fun <T> executeByIoAtFixRate(
+        task: Task<T>, period: Long, unit: TimeUnit, @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_IO.toInt(), priority), task, 0, period, unit)
     }
 
     /**
@@ -641,12 +618,11 @@ public final class ThreadUtils {
      * @param period       连续执行之间的时间段。
      * @param unit         初始延迟和周期参数的时间单位。
      * @param <T>          任务结果的类型。
-     */
-    public static <T> void executeByIoAtFixRate(final Task<T> task,
-                                                long initialDelay,
-                                                final long period,
-                                                final TimeUnit unit) {
-        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_IO), task, initialDelay, period, unit);
+    </T> */
+    fun <T> executeByIoAtFixRate(
+        task: Task<T>, initialDelay: Long, period: Long, unit: TimeUnit
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_IO.toInt()), task, initialDelay, period, unit)
     }
 
     /**
@@ -658,15 +634,17 @@ public final class ThreadUtils {
      * @param unit         初始延迟和周期参数的时间单位。
      * @param priority     轮询中线程的优先级。
      * @param <T>          任务结果的类型。
-     */
-    public static <T> void executeByIoAtFixRate(final Task<T> task,
-                                                long initialDelay,
-                                                final long period,
-                                                final TimeUnit unit,
-                                                @IntRange(from = 1, to = 10) final int priority) {
+    </T> */
+    fun <T> executeByIoAtFixRate(
+        task: Task<T>,
+        initialDelay: Long,
+        period: Long,
+        unit: TimeUnit,
+        @IntRange(from = 1, to = 10) priority: Int
+    ) {
         executeAtFixedRate(
-                getPoolByTypeAndPriority(TYPE_IO, priority), task, initialDelay, period, unit
-        );
+            getPoolByTypeAndPriority(TYPE_IO.toInt(), priority), task, initialDelay, period, unit
+        )
     }
 
     /**
@@ -674,9 +652,9 @@ public final class ThreadUtils {
      *
      * @param task 要执行的任务。
      * @param <T>  任务结果的类型。
-     */
-    public static <T> void executeByCpu(final Task<T> task) {
-        execute(getPoolByTypeAndPriority(TYPE_CPU), task);
+    </T> */
+    fun <T> executeByCpu(task: Task<T>) {
+        execute(getPoolByTypeAndPriority(TYPE_CPU.toInt()), task)
     }
 
     /**
@@ -685,10 +663,11 @@ public final class ThreadUtils {
      * @param task     要执行的任务。
      * @param priority 轮询中线程的优先级。
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeByCpu(final Task<T> task,
-                                        @IntRange(from = 1, to = 10) final int priority) {
-        execute(getPoolByTypeAndPriority(TYPE_CPU, priority), task);
+    </T> */
+    fun <T> executeByCpu(
+        task: Task<T>, @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        execute(getPoolByTypeAndPriority(TYPE_CPU.toInt(), priority), task)
     }
 
     /**
@@ -698,11 +677,11 @@ public final class ThreadUtils {
      * @param delay 轮询中线程的优先级。
      * @param unit  轮询中线程的优先级。
      * @param <T>   任务结果的类型。
-     */
-    public static <T> void executeByCpuWithDelay(final Task<T> task,
-                                                 final long delay,
-                                                 final TimeUnit unit) {
-        executeWithDelay(getPoolByTypeAndPriority(TYPE_CPU), task, delay, unit);
+    </T> */
+    fun <T> executeByCpuWithDelay(
+        task: Task<T>, delay: Long, unit: TimeUnit
+    ) {
+        executeWithDelay(getPoolByTypeAndPriority(TYPE_CPU.toInt()), task, delay, unit)
     }
 
     /**
@@ -713,12 +692,11 @@ public final class ThreadUtils {
      * @param unit     轮询中线程的优先级。
      * @param priority 轮询中线程的优先级。
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeByCpuWithDelay(final Task<T> task,
-                                                 final long delay,
-                                                 final TimeUnit unit,
-                                                 @IntRange(from = 1, to = 10) final int priority) {
-        executeWithDelay(getPoolByTypeAndPriority(TYPE_CPU, priority), task, delay, unit);
+    </T> */
+    fun <T> executeByCpuWithDelay(
+        task: Task<T>, delay: Long, unit: TimeUnit, @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        executeWithDelay(getPoolByTypeAndPriority(TYPE_CPU.toInt(), priority), task, delay, unit)
     }
 
     /**
@@ -728,11 +706,11 @@ public final class ThreadUtils {
      * @param period 连续执行之间的时间段。
      * @param unit   周期参数的时间单位。
      * @param <T>    任务结果的类型。
-     */
-    public static <T> void executeByCpuAtFixRate(final Task<T> task,
-                                                 final long period,
-                                                 final TimeUnit unit) {
-        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_CPU), task, 0, period, unit);
+    </T> */
+    fun <T> executeByCpuAtFixRate(
+        task: Task<T>, period: Long, unit: TimeUnit
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_CPU.toInt()), task, 0, period, unit)
     }
 
     /**
@@ -743,12 +721,11 @@ public final class ThreadUtils {
      * @param unit     周期参数的时间单位。
      * @param priority 轮询中线程的优先级。
      * @param <T>      任务结果的类型。
-     */
-    public static <T> void executeByCpuAtFixRate(final Task<T> task,
-                                                 final long period,
-                                                 final TimeUnit unit,
-                                                 @IntRange(from = 1, to = 10) final int priority) {
-        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_CPU, priority), task, 0, period, unit);
+    </T> */
+    fun <T> executeByCpuAtFixRate(
+        task: Task<T>, period: Long, unit: TimeUnit, @IntRange(from = 1, to = 10) priority: Int
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_CPU.toInt(), priority), task, 0, period, unit)
     }
 
     /**
@@ -759,12 +736,11 @@ public final class ThreadUtils {
      * @param period       连续执行之间的时间段。
      * @param unit         初始延迟和周期参数的时间单位。
      * @param <T>          任务结果的类型。
-     */
-    public static <T> void executeByCpuAtFixRate(final Task<T> task,
-                                                 long initialDelay,
-                                                 final long period,
-                                                 final TimeUnit unit) {
-        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_CPU), task, initialDelay, period, unit);
+    </T> */
+    fun <T> executeByCpuAtFixRate(
+        task: Task<T>, initialDelay: Long, period: Long, unit: TimeUnit
+    ) {
+        executeAtFixedRate(getPoolByTypeAndPriority(TYPE_CPU.toInt()), task, initialDelay, period, unit)
     }
 
     /**
@@ -776,15 +752,17 @@ public final class ThreadUtils {
      * @param unit         初始延迟和周期参数的时间单位。
      * @param priority     轮询中线程的优先级。
      * @param <T>          任务结果的类型。
-     */
-    public static <T> void executeByCpuAtFixRate(final Task<T> task,
-                                                 long initialDelay,
-                                                 final long period,
-                                                 final TimeUnit unit,
-                                                 @IntRange(from = 1, to = 10) final int priority) {
+    </T> */
+    fun <T> executeByCpuAtFixRate(
+        task: Task<T>,
+        initialDelay: Long,
+        period: Long,
+        unit: TimeUnit,
+        @IntRange(from = 1, to = 10) priority: Int
+    ) {
         executeAtFixedRate(
-                getPoolByTypeAndPriority(TYPE_CPU, priority), task, initialDelay, period, unit
-        );
+            getPoolByTypeAndPriority(TYPE_CPU.toInt(), priority), task, initialDelay, period, unit
+        )
     }
 
     /**
@@ -793,9 +771,9 @@ public final class ThreadUtils {
      * @param pool 自定义线程池。
      * @param task 要执行的任务。
      * @param <T>  任务结果的类型。
-     */
-    public static <T> void executeByCustom(final ExecutorService pool, final Task<T> task) {
-        execute(pool, task);
+    </T> */
+    fun <T> executeByCustom(pool: ExecutorService, task: Task<T>) {
+        execute(pool, task)
     }
 
     /**
@@ -806,12 +784,11 @@ public final class ThreadUtils {
      * @param delay 从现在开始延迟执行的时间。
      * @param unit  延迟参数的时间单位。
      * @param <T>   任务结果的类型。
-     */
-    public static <T> void executeByCustomWithDelay(final ExecutorService pool,
-                                                    final Task<T> task,
-                                                    final long delay,
-                                                    final TimeUnit unit) {
-        executeWithDelay(pool, task, delay, unit);
+    </T> */
+    fun <T> executeByCustomWithDelay(
+        pool: ExecutorService, task: Task<T>, delay: Long, unit: TimeUnit
+    ) {
+        executeWithDelay(pool, task, delay, unit)
     }
 
     /**
@@ -822,12 +799,11 @@ public final class ThreadUtils {
      * @param period 连续执行之间的时间段。
      * @param unit   延迟参数的时间单位。
      * @param <T>    任务结果的类型。
-     */
-    public static <T> void executeByCustomAtFixRate(final ExecutorService pool,
-                                                    final Task<T> task,
-                                                    final long period,
-                                                    final TimeUnit unit) {
-        executeAtFixedRate(pool, task, 0, period, unit);
+    </T> */
+    fun <T> executeByCustomAtFixRate(
+        pool: ExecutorService, task: Task<T>, period: Long, unit: TimeUnit
+    ) {
+        executeAtFixedRate(pool, task, 0, period, unit)
     }
 
     /**
@@ -839,13 +815,11 @@ public final class ThreadUtils {
      * @param period       连续执行之间的时间段。
      * @param unit         初始延迟和周期参数的时间单位。
      * @param <T>          任务结果的类型。
-     */
-    public static <T> void executeByCustomAtFixRate(final ExecutorService pool,
-                                                    final Task<T> task,
-                                                    long initialDelay,
-                                                    final long period,
-                                                    final TimeUnit unit) {
-        executeAtFixedRate(pool, task, initialDelay, period, unit);
+    </T> */
+    fun <T> executeByCustomAtFixRate(
+        pool: ExecutorService, task: Task<T>, initialDelay: Long, period: Long, unit: TimeUnit
+    ) {
+        executeAtFixedRate(pool, task, initialDelay, period, unit)
     }
 
     /**
@@ -853,11 +827,11 @@ public final class ThreadUtils {
      *
      * @param task 要取消的任务。
      */
-    public static void cancel(final Task task) {
+    fun cancel(task: Task<*>?) {
         if (task == null) {
-            return;
+            return
         }
-        task.cancel();
+        task.cancel()
     }
 
     /**
@@ -865,15 +839,15 @@ public final class ThreadUtils {
      *
      * @param tasks 要取消的任务。
      */
-    public static void cancel(final Task... tasks) {
-        if (tasks == null || tasks.length == 0) {
-            return;
+    fun cancel(vararg tasks: Task<*>?) {
+        if (tasks.isEmpty()) {
+            return
         }
-        for (Task task : tasks) {
+        for (task in tasks) {
             if (task == null) {
-                continue;
+                continue
             }
-            task.cancel();
+            task.cancel()
         }
     }
 
@@ -882,15 +856,15 @@ public final class ThreadUtils {
      *
      * @param tasks 要取消的任务。
      */
-    public static void cancel(final List<Task> tasks) {
-        if (tasks == null || tasks.size() == 0) {
-            return;
+    fun cancel(tasks: List<Task<*>?>?) {
+        if (tasks.isNullOrEmpty()) {
+            return
         }
-        for (Task task : tasks) {
+        for (task in tasks) {
             if (task == null) {
-                continue;
+                continue
             }
-            task.cancel();
+            task.cancel()
         }
     }
 
@@ -899,15 +873,15 @@ public final class ThreadUtils {
      *
      * @param executorService 线程池
      */
-    public static void cancel(ExecutorService executorService) {
-        if (executorService instanceof ThreadPoolExecutor4Util) {
-            for (Map.Entry<Task, ExecutorService> taskTaskInfoEntry : TASK_POOL_MAP.entrySet()) {
-                if (taskTaskInfoEntry.getValue() == executorService) {
-                    cancel(taskTaskInfoEntry.getKey());
+    fun cancel(executorService: ExecutorService) {
+        if (executorService is ThreadPoolExecutor4Util) {
+            for ((key, value) in TASK_POOL_MAP) {
+                if (value === executorService) {
+                    cancel(key)
                 }
             }
         } else {
-            Log.e("ThreadUtils", "The executorService is not ThreadUtils's pool.");
+            Log.e("ThreadUtils", "The executorService is not ThreadUtils's pool.")
         }
     }
 
@@ -916,95 +890,87 @@ public final class ThreadUtils {
      *
      * @param deliver The deliver.
      */
-    public static void setDeliver(final Executor deliver) {
-        sDeliver = deliver;
+    fun setDeliver(deliver: Executor?) {
+        sDeliver = deliver
     }
 
-    private static <T> void execute(final ExecutorService pool, final Task<T> task) {
-        execute(pool, task, 0, 0, null);
+    private fun <T> execute(pool: ExecutorService, task: Task<T>) {
+        execute(pool, task, 0, 0, null)
     }
 
-    private static <T> void executeWithDelay(final ExecutorService pool,
-                                             final Task<T> task,
-                                             final long delay,
-                                             final TimeUnit unit) {
-        execute(pool, task, delay, 0, unit);
+    private fun <T> executeWithDelay(
+        pool: ExecutorService, task: Task<T>, delay: Long, unit: TimeUnit
+    ) {
+        execute(pool, task, delay, 0, unit)
     }
 
-    private static <T> void executeAtFixedRate(final ExecutorService pool,
-                                               final Task<T> task,
-                                               long delay,
-                                               final long period,
-                                               final TimeUnit unit) {
-        execute(pool, task, delay, period, unit);
+    private fun <T> executeAtFixedRate(
+        pool: ExecutorService, task: Task<T>, delay: Long, period: Long, unit: TimeUnit
+    ) {
+        execute(pool, task, delay, period, unit)
     }
 
-    private static <T> void execute(final ExecutorService pool, final Task<T> task,
-                                    long delay, final long period, final TimeUnit unit) {
-        synchronized (TASK_POOL_MAP) {
-            if (TASK_POOL_MAP.get(task) != null) {
-                Log.e("ThreadUtils", "Task can only be executed once.");
-                return;
+    private fun <T> execute(
+        pool: ExecutorService, task: Task<T>, delay: Long, period: Long, unit: TimeUnit?
+    ) {
+        synchronized(TASK_POOL_MAP) {
+            if (TASK_POOL_MAP[task] != null) {
+                Log.e("ThreadUtils", "Task can only be executed once.")
+                return
             }
-            TASK_POOL_MAP.put(task, pool);
+            TASK_POOL_MAP.put(task, pool)
         }
-        if (period == 0) {
-            if (delay == 0) {
-                pool.execute(task);
+        if (period == 0L) {
+            if (delay == 0L) {
+                pool.execute(task)
             } else {
-                TimerTask timerTask = new TimerTask() {
-                    @Override
-                    public void run() {
-                        pool.execute(task);
+                val timerTask: TimerTask = object : TimerTask() {
+                    override fun run() {
+                        pool.execute(task)
                     }
-                };
-                TIMER.schedule(timerTask, unit.toMillis(delay));
+                }
+                TIMER.schedule(timerTask, unit!!.toMillis(delay))
             }
         } else {
-            task.setSchedule(true);
-            TimerTask timerTask = new TimerTask() {
-                @Override
-                public void run() {
-                    pool.execute(task);
-                }
-            };
-            TIMER.scheduleAtFixedRate(timerTask, unit.toMillis(delay), unit.toMillis(period));
-        }
-    }
-
-    private static ExecutorService getPoolByTypeAndPriority(final int type) {
-        return getPoolByTypeAndPriority(type, Thread.NORM_PRIORITY);
-    }
-
-    private static ExecutorService getPoolByTypeAndPriority(final int type, final int priority) {
-        synchronized (TYPE_PRIORITY_POOLS) {
-            ExecutorService pool;
-            Map<Integer, ExecutorService> priorityPools = TYPE_PRIORITY_POOLS.get(type);
-            if (priorityPools == null) {
-                priorityPools = new ConcurrentHashMap<>();
-                pool = ThreadPoolExecutor4Util.createPool(type, priority);
-                priorityPools.put(priority, pool);
-                TYPE_PRIORITY_POOLS.put(type, priorityPools);
-            } else {
-                pool = priorityPools.get(priority);
-                if (pool == null) {
-                    pool = ThreadPoolExecutor4Util.createPool(type, priority);
-                    priorityPools.put(priority, pool);
+            task.setSchedule(true)
+            val timerTask: TimerTask = object : TimerTask() {
+                override fun run() {
+                    pool.execute(task)
                 }
             }
-            return pool;
+            TIMER.scheduleAtFixedRate(timerTask, unit!!.toMillis(delay), unit.toMillis(period))
         }
     }
 
-    public static Executor getGlobalDeliver() {
-        if (sDeliver == null) {
-            sDeliver = new Executor() {
-                @Override
-                public void execute(@NonNull Runnable command) {
-                    runOnUiThread(command);
-                }
-            };
-        }
-        return sDeliver;
+    private fun getPoolByTypeAndPriority(type: Int): ExecutorService {
+        return getPoolByTypeAndPriority(type, Thread.NORM_PRIORITY)
     }
+
+    private fun getPoolByTypeAndPriority(type: Int, priority: Int): ExecutorService {
+        synchronized(TYPE_PRIORITY_POOLS) {
+            var pool: ExecutorService?
+            var priorityPools = TYPE_PRIORITY_POOLS[type]
+            if (priorityPools == null) {
+                priorityPools = ConcurrentHashMap()
+                pool = createPool(type, priority)
+                priorityPools[priority] = pool
+                TYPE_PRIORITY_POOLS[type] = priorityPools
+            } else {
+                pool = priorityPools[priority]
+                if (pool == null) {
+                    pool = createPool(type, priority)
+                    priorityPools[priority] = pool
+                }
+            }
+            return pool
+        }
+    }
+
+    val globalDeliver: Executor
+        get() {
+            if (sDeliver == null) {
+                sDeliver = Executor { command -> runOnUiThread(command) }
+            }
+            return sDeliver!!
+        }
 }

@@ -8,18 +8,18 @@ import com.lzq.dawn.DawnBridge
  * @Author :  Lzq
  * @Desc :
  */
-class CrashInfo internal constructor(time: String?, val throwable: Throwable?) {
+class CrashInfo internal constructor(time: String, val throwable: Throwable?) {
     private val mFileHeadProvider: DawnBridge.FileHead = DawnBridge.FileHead("Crash")
 
     init {
         mFileHeadProvider.addFirst("Time Of Crash", time)
     }
 
-    fun addExtraHead(extraHead: Map<String?, String?>?) {
+    fun addExtraHead(extraHead: Map<String, String>?) {
         mFileHeadProvider.append(extraHead)
     }
 
-    fun addExtraHead(key: String?, value: String?) {
+    fun addExtraHead(key: String, value: String) {
         mFileHeadProvider.append(key, value)
     }
 

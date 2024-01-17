@@ -39,7 +39,7 @@ object ProcessUtils {
          * @return 前台进程名称。
          */
         get() {
-            val am = DawnBridge.getApp().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val am = DawnBridge.app.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             val pInfo = am.runningAppProcesses
             if (pInfo != null && pInfo.size > 0) {
                 for (aInfo in pInfo) {
@@ -48,7 +48,7 @@ object ProcessUtils {
                     }
                 }
             }
-            val pm = DawnBridge.getApp().packageManager
+            val pm = DawnBridge.app.packageManager
             val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
             val list = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
             Log.i("ProcessUtils", list.toString())
@@ -59,14 +59,14 @@ object ProcessUtils {
                 return ""
             }
             try { // Access to usage information.
-                val info = pm.getApplicationInfo(DawnBridge.getApp().packageName, 0)
-                val aom = DawnBridge.getApp().getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+                val info = pm.getApplicationInfo(DawnBridge.app.packageName, 0)
+                val aom = DawnBridge.app.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
                 if (aom.checkOpNoThrow(
                         AppOpsManager.OPSTR_GET_USAGE_STATS, info.uid, info.packageName
                     ) != AppOpsManager.MODE_ALLOWED
                 ) {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    DawnBridge.getApp().startActivity(intent)
+                    DawnBridge.app.startActivity(intent)
                 }
                 if (aom.checkOpNoThrow(
                         AppOpsManager.OPSTR_GET_USAGE_STATS, info.uid, info.packageName
@@ -78,7 +78,7 @@ object ProcessUtils {
                     return ""
                 }
                 val usageStatsManager =
-                    DawnBridge.getApp().getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+                    DawnBridge.app.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
                 var usageStatsList: List<UsageStats>? = null
                 if (usageStatsManager != null) {
                     val endTime = System.currentTimeMillis()
@@ -113,7 +113,7 @@ object ProcessUtils {
          * @return 所有后台进程。
          */
         get() {
-            val am = DawnBridge.getApp().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val am = DawnBridge.app.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             val info = am.runningAppProcesses
             val set: MutableSet<String> = mutableSetOf()
             if (info != null) {
@@ -133,7 +133,7 @@ object ProcessUtils {
      */
     @RequiresPermission(permission.KILL_BACKGROUND_PROCESSES)
     fun killAllBackgroundProcesses(): Set<String> {
-        val am = DawnBridge.getApp().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val am = DawnBridge.app.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         var info = am.runningAppProcesses
         val set: MutableSet<String> = HashSet()
         if (info == null) {
@@ -164,7 +164,7 @@ object ProcessUtils {
      */
     @RequiresPermission(permission.KILL_BACKGROUND_PROCESSES)
     fun killBackgroundProcesses(packageName: String): Boolean {
-        val am = DawnBridge.getApp().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val am = DawnBridge.app.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         var info = am.runningAppProcesses
         if (info == null || info.size == 0) {
             return true
@@ -193,7 +193,7 @@ object ProcessUtils {
          *
          * @return `true`: yes<br></br>`false`: no
          */
-        get() = DawnBridge.getApp().packageName == currentProcessName
+        get() = DawnBridge.app.packageName == currentProcessName
     @JvmStatic
     val currentProcessName: String
         /**
@@ -227,7 +227,7 @@ object ProcessUtils {
     private val currentProcessNameByAms: String
         private get() {
             try {
-                val am = DawnBridge.getApp().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                val am = DawnBridge.app.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
                     ?: return ""
                 val info = am.runningAppProcesses
                 if (info == null || info.size == 0) {
@@ -250,7 +250,7 @@ object ProcessUtils {
         private get() {
             var processName = ""
             try {
-                val app = DawnBridge.getApp()
+                val app = DawnBridge.app
                 val loadedApkField = app.javaClass.getField("mLoadedApk")
                 loadedApkField.isAccessible = true
                 val loadedApk = loadedApkField[app]

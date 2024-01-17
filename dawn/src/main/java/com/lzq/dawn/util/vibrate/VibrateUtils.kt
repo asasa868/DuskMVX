@@ -20,10 +20,10 @@ object VibrateUtils {
         get() {
             if (field == null) {
                 field = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
-                    (DawnBridge.getApp()
+                    (DawnBridge.app
                         .getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
                 } else {
-                    DawnBridge.getApp().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                    DawnBridge.app.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
                 }
             }
             return field

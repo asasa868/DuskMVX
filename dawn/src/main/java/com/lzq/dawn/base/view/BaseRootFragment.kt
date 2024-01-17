@@ -25,7 +25,7 @@ abstract class BaseRootFragment : Fragment(), IBaseRootView, OnNetworkStatusChan
      * 占位弹窗
      */
     private val loadingDialog by lazy {
-        ShapeLoadingDialog.Builder(activity).cancelable(false).canceledOnTouchOutside(false).loadText("加载中...")
+        ShapeLoadingDialog.Builder(requireActivity()).cancelable(false).canceledOnTouchOutside(false).loadText("加载中...")
             .build()
     }
 

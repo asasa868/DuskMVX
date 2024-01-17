@@ -19,7 +19,7 @@ class SDCardInfo internal constructor(
 
     override fun toString(): String {
         return "SDCardInfo {path = $path, state = $state, isRemovable = $isRemovable, totalSize = " + Formatter.formatFileSize(
-            DawnBridge.getApp(), totalSize
-        ) + ", availableSize = " + Formatter.formatFileSize(DawnBridge.getApp(), availableSize) + '}'
+            DawnBridge.app, totalSize
+        ) + ", availableSize = " + Formatter.formatFileSize(DawnBridge.app, availableSize) + '}'
     }
 }

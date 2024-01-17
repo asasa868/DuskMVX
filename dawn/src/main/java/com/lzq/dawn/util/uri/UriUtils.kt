@@ -36,7 +36,7 @@ object UriUtils {
      * @return uri
      */
     fun res2Uri(resPath: String): Uri {
-        return Uri.parse("android.resource://" + DawnBridge.getApp().packageName + "/" + resPath)
+        return Uri.parse("android.resource://" + DawnBridge.app.packageName + "/" + resPath)
     }
 
     /**
@@ -51,8 +51,8 @@ object UriUtils {
             return null
         }
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val authority = DawnBridge.getApp().packageName + ".init.fileprovider"
-            FileProvider.getUriForFile(DawnBridge.getApp(), authority, file!!)
+            val authority = DawnBridge.app.packageName + ".init.fileprovider"
+            FileProvider.getUriForFile(DawnBridge.app, authority, file!!)
         } else {
             Uri.fromFile(file)
         }
@@ -85,7 +85,7 @@ object UriUtils {
         }
         var `is`: InputStream? = null
         return try {
-            `is` = DawnBridge.getApp().contentResolver.openInputStream(uri)
+            `is` = DawnBridge.app.contentResolver.openInputStream(uri)
             DawnBridge.inputStream2Bytes(`is`)
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
@@ -130,20 +130,20 @@ object UriUtils {
             file = null
             if (path.startsWith("/files_path/")) {
                 file = File(
-                    DawnBridge.getApp().filesDir.absolutePath + path.replace("/files_path/", "/")
+                    DawnBridge.app.filesDir.absolutePath + path.replace("/files_path/", "/")
                 )
             } else if (path.startsWith("/cache_path/")) {
                 file = File(
-                    DawnBridge.getApp().cacheDir.absolutePath + path.replace("/cache_path/", "/")
+                    DawnBridge.app.cacheDir.absolutePath + path.replace("/cache_path/", "/")
                 )
             } else if (path.startsWith("/external_files_path/")) {
                 file = File(
-                    DawnBridge.getApp()
+                    DawnBridge.app
                         .getExternalFilesDir(null)!!.absolutePath + path.replace("/external_files_path/", "/")
                 )
             } else if (path.startsWith("/external_cache_path/")) {
                 file = File(
-                    DawnBridge.getApp().externalCacheDir!!.absolutePath + path.replace(
+                    DawnBridge.app.externalCacheDir!!.absolutePath + path.replace(
                         "/external_cache_path/",
                         "/"
                     )
@@ -162,7 +162,7 @@ object UriUtils {
             null
         } // end 0
         else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(
-                DawnBridge.getApp(),
+                DawnBridge.app,
                 uri
             )
         ) {
@@ -176,7 +176,7 @@ object UriUtils {
                     // Below logic is how External Storage provider build URI for documents
                     // http://stackoverflow.com/questions/28605278/android-5-sd-card-label
                     val mStorageManager =
-                        DawnBridge.getApp().getSystemService(Context.STORAGE_SERVICE) as StorageManager
+                        DawnBridge.app.getSystemService(Context.STORAGE_SERVICE) as StorageManager
                     try {
                         val storageVolumeClazz = Class.forName("android.os.storage.StorageVolume")
                         val getVolumeList = mStorageManager.javaClass.getMethod("getVolumeList")
@@ -313,7 +313,7 @@ object UriUtils {
                 return File(path!!.replace("/root", ""))
             }
         }
-        val cursor = DawnBridge.getApp().contentResolver.query(
+        val cursor = DawnBridge.app.contentResolver.query(
             uri, arrayOf("_data"), selection, selectionArgs, null
         )
         if (cursor == null) {
@@ -345,8 +345,8 @@ object UriUtils {
         Log.d("UriUtils", "copyUri2Cache() called")
         var `is`: InputStream? = null
         return try {
-            `is` = DawnBridge.getApp().contentResolver.openInputStream(uri)
-            val file = File(DawnBridge.getApp().cacheDir, "" + System.currentTimeMillis())
+            `is` = DawnBridge.app.contentResolver.openInputStream(uri)
+            val file = File(DawnBridge.app.cacheDir, "" + System.currentTimeMillis())
             DawnBridge.writeFileFromIS(file.absolutePath, `is`)
             file
         } catch (e: FileNotFoundException) {

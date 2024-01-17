@@ -45,7 +45,7 @@ object SDCardUtils {
          */
         get() {
             val paths: MutableList<SDCardInfo> = ArrayList()
-            val sm = DawnBridge.getApp().getSystemService(Context.STORAGE_SERVICE) as StorageManager
+            val sm = DawnBridge.app.getSystemService(Context.STORAGE_SERVICE) as StorageManager
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 val storageVolumes = sm.storageVolumes
                 try {

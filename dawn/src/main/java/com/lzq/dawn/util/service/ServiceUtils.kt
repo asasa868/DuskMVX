@@ -34,7 +34,7 @@ object ServiceUtils {
      * @param cls 类
      */
     fun startService(cls: Class<*>) {
-        startService(Intent(DawnBridge.getApp(), cls))
+        startService(Intent(DawnBridge.app, cls))
     }
 
     /**
@@ -46,9 +46,9 @@ object ServiceUtils {
         try {
             intent.flags = Intent.FLAG_INCLUDE_STOPPED_PACKAGES
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                DawnBridge.getApp().startForegroundService(intent)
+                DawnBridge.app.startForegroundService(intent)
             } else {
-                DawnBridge.getApp().startService(intent)
+                DawnBridge.app.startService(intent)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -77,7 +77,7 @@ object ServiceUtils {
      * @return `true`: success<br></br>`false`: fail
      */
     fun stopService(cls: Class<*>): Boolean {
-        return stopService(Intent(DawnBridge.getApp(), cls))
+        return stopService(Intent(DawnBridge.app, cls))
     }
 
     /**
@@ -88,7 +88,7 @@ object ServiceUtils {
      */
     fun stopService(intent: Intent): Boolean {
         return try {
-            DawnBridge.getApp().stopService(intent)
+            DawnBridge.app.stopService(intent)
         } catch (e: Exception) {
             e.printStackTrace()
             false
@@ -140,7 +140,7 @@ object ServiceUtils {
     fun bindService(
         cls: Class<*>, conn: ServiceConnection, flags: Int
     ) {
-        bindService(Intent(DawnBridge.getApp(), cls), conn, flags)
+        bindService(Intent(DawnBridge.app, cls), conn, flags)
     }
 
     /**
@@ -163,7 +163,7 @@ object ServiceUtils {
         intent: Intent, conn: ServiceConnection, flags: Int
     ) {
         try {
-            DawnBridge.getApp().bindService(intent, conn, flags)
+            DawnBridge.app.bindService(intent, conn, flags)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -175,7 +175,7 @@ object ServiceUtils {
      * @param conn 服务连接对象。
      */
     fun unbindService(conn: ServiceConnection) {
-        DawnBridge.getApp().unbindService(conn)
+        DawnBridge.app.unbindService(conn)
     }
 
     /**
@@ -197,7 +197,7 @@ object ServiceUtils {
     @JvmStatic
     fun isServiceRunning(className: String): Boolean {
         return try {
-            val am = DawnBridge.getApp().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val am = DawnBridge.app.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             val info = am.getRunningServices(0x7FFFFFFF)
             if (info == null || info.size == 0) {
                 return false

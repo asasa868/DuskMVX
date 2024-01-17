@@ -1,6 +1,6 @@
-package com.lzq.dawn.util.thread;
+package com.lzq.dawn.util.thread
 
-import android.util.Log;
+import android.util.Log
 
 /**
  * @Name :SimpleTask
@@ -8,16 +8,12 @@ import android.util.Log;
  * @Author :  Lzq
  * @Desc :
  */
-public abstract class SimpleTask<T> extends Task<T> {
-
-    @Override
-    public void onCancel() {
-        Log.e("ThreadUtils", "onCancel: " + Thread.currentThread());
+abstract class SimpleTask<T> : Task<T>() {
+    override fun onCancel() {
+        Log.e("ThreadUtils", "onCancel: " + Thread.currentThread())
     }
 
-    @Override
-    public void onFail(Throwable t) {
-        Log.e("ThreadUtils", "onFail: ", t);
+    override fun onFail(t: Throwable) {
+        Log.e("ThreadUtils", "onFail: ", t)
     }
-
 }

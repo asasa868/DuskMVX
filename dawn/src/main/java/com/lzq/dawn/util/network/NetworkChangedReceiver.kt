@@ -1,19 +1,16 @@
-package com.lzq.dawn.util.network;
+package com.lzq.dawn.util.network
 
-import static android.Manifest.permission.ACCESS_NETWORK_STATE;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
-
-import androidx.annotation.RequiresPermission;
-
-import com.lzq.dawn.DawnBridge;
-
-import java.util.HashSet;
-import java.util.Set;
+import android.Manifest.permission
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
+import androidx.annotation.RequiresPermission
+import com.lzq.dawn.DawnBridge.app
+import com.lzq.dawn.DawnBridge.runOnUiThread
+import com.lzq.dawn.DawnBridge.runOnUiThreadDelayed
+import com.lzq.dawn.util.network.NetworkUtils.networkType
 
 /**
  * @Name :NetworkChangedReceiver
@@ -21,85 +18,71 @@ import java.util.Set;
  * @Author :  Lzq
  * @Desc :
  */
-public class NetworkChangedReceiver extends BroadcastReceiver {
-    public static NetworkChangedReceiver getInstance() {
-        return NetworkChangedReceiver.LazyHolder.INSTANCE;
-    }
+class NetworkChangedReceiver : BroadcastReceiver() {
+    private var mType: NetworkType? = null
+    private val mListeners: MutableSet<OnNetworkStatusChangedListener> = HashSet()
 
-    private NetworkType                         mType;
-    private Set<OnNetworkStatusChangedListener> mListeners = new HashSet<>();
-
-    @RequiresPermission(ACCESS_NETWORK_STATE)
-    void registerListener(final OnNetworkStatusChangedListener listener) {
+    @RequiresPermission(permission.ACCESS_NETWORK_STATE)
+    fun registerListener(listener: OnNetworkStatusChangedListener?) {
         if (listener == null) {
-            return;
+            return
         }
-        DawnBridge.runOnUiThread(new Runnable() {
-            @Override
-            @RequiresPermission(ACCESS_NETWORK_STATE)
-            public void run() {
-                int preSize = mListeners.size();
-                mListeners.add(listener);
-                if (preSize == 0 && mListeners.size() == 1) {
-                    mType = NetworkUtils.getNetworkType();
-                    IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-                    DawnBridge.getApp().registerReceiver(NetworkChangedReceiver.getInstance(), intentFilter);
-                }
+        runOnUiThread {
+            val preSize = mListeners.size
+            mListeners.add(listener)
+            if (preSize == 0 && mListeners.size == 1) {
+                mType = networkType
+                val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+                app.registerReceiver(Companion.instance, intentFilter)
             }
-        });
+        }
     }
 
-    boolean isRegistered(final OnNetworkStatusChangedListener listener) {
-        if (listener == null) {
-            return false;
-        }
-        return mListeners.contains(listener);
+    fun isRegistered(listener: OnNetworkStatusChangedListener?): Boolean {
+        return if (listener == null) {
+            false
+        } else mListeners.contains(listener)
     }
 
-    void unregisterListener(final OnNetworkStatusChangedListener listener) {
+    fun unregisterListener(listener: OnNetworkStatusChangedListener?) {
         if (listener == null) {
-            return;
+            return
         }
-        DawnBridge.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                int preSize = mListeners.size();
-                mListeners.remove(listener);
-                if (preSize == 1 && mListeners.size() == 0) {
-                    DawnBridge.getApp().unregisterReceiver(NetworkChangedReceiver.getInstance());
-                }
+        runOnUiThread {
+            val preSize = mListeners.size
+            mListeners.remove(listener)
+            if (preSize == 1 && mListeners.size == 0) {
+                app.unregisterReceiver(Companion.instance)
             }
-        });
+        }
     }
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
+    override fun onReceive(context: Context, intent: Intent) {
+        if (ConnectivityManager.CONNECTIVITY_ACTION == intent.action) {
             // debouncing
-            DawnBridge.runOnUiThreadDelayed(new Runnable() {
-                @Override
-                @RequiresPermission(ACCESS_NETWORK_STATE)
-                public void run() {
-                    NetworkType networkType = NetworkUtils.getNetworkType();
-                    if (mType == networkType) {
-                        return;
+            runOnUiThreadDelayed(Runnable {
+                val networkType = networkType
+                if (mType === networkType) {
+                    return@Runnable
+                }
+                mType = networkType
+                if (networkType === NetworkType.NETWORK_NO) {
+                    for (listener in mListeners) {
+                        listener.onDisconnected()
                     }
-                    mType = networkType;
-                    if (networkType == NetworkType.NETWORK_NO) {
-                        for ( OnNetworkStatusChangedListener listener : mListeners) {
-                            listener.onDisconnected();
-                        }
-                    } else {
-                        for ( OnNetworkStatusChangedListener listener : mListeners) {
-                            listener.onConnected(networkType);
-                        }
+                } else {
+                    for (listener in mListeners) {
+                        listener.onConnected(networkType)
                     }
                 }
-            }, 1000);
+            }, 1000)
         }
     }
 
-    private static class LazyHolder {
-        private static final  NetworkChangedReceiver INSTANCE = new  NetworkChangedReceiver();
+
+    companion object {
+        val instance: NetworkChangedReceiver by lazy {
+            NetworkChangedReceiver()
+        }
     }
 }

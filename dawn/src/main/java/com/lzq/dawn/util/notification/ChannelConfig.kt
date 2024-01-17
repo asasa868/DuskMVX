@@ -165,8 +165,8 @@ class ChannelConfig(id: String?, name: CharSequence?, @Importance importance: In
     companion object {
         @JvmField
         val DEFAULT_CHANNEL_CONFIG = ChannelConfig(
-            DawnBridge.getApp().packageName,
-            DawnBridge.getApp().packageName,
+            DawnBridge.app.packageName,
+            DawnBridge.app.packageName,
             NotificationUtils.IMPORTANCE_DEFAULT
         )
     }

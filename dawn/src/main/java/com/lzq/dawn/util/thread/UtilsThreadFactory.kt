@@ -1,12 +1,9 @@
-package com.lzq.dawn.util.thread;
+package com.lzq.dawn.util.thread
 
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import android.util.Log
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * @Name :UtilsThreadFactory
@@ -14,46 +11,43 @@ import java.util.concurrent.atomic.AtomicLong;
  * @Author :  Lzq
  * @Desc :
  */
-public class UtilsThreadFactory extends AtomicLong
-        implements ThreadFactory {
-    private static final AtomicInteger POOL_NUMBER      = new AtomicInteger(1);
-    private static final long          serialVersionUID = -9209200509960368598L;
-    private final        String        namePrefix;
-    private final        int           priority;
-    private final        boolean       isDaemon;
+class UtilsThreadFactory @JvmOverloads internal constructor(
+    prefix: String,
+    private val priority: Int,
+    private val isDaemon: Boolean = false
+) : AtomicLong(), ThreadFactory {
+    private val namePrefix: String
 
-    UtilsThreadFactory(String prefix, int priority) {
-        this(prefix, priority, false);
+    init {
+        namePrefix = prefix + "-pool-" + POOL_NUMBER.getAndIncrement() + "-thread-"
     }
 
-    UtilsThreadFactory(String prefix, int priority, boolean isDaemon) {
-        namePrefix = prefix + "-pool-" +
-                POOL_NUMBER.getAndIncrement() +
-                "-thread-";
-        this.priority = priority;
-        this.isDaemon = isDaemon;
-    }
-
-    @Override
-    public Thread newThread(@NonNull Runnable r) {
-        Thread t = new Thread(r, namePrefix + getAndIncrement()) {
-            @Override
-            public void run() {
+    override fun newThread(r: Runnable): Thread {
+        val t: Thread = object : Thread(r, namePrefix + andIncrement) {
+            override fun run() {
                 try {
-                    super.run();
-                } catch (Throwable t) {
-                    Log.e("ThreadUtils", "Request threw uncaught throwable", t);
+                    super.run()
+                } catch (t: Throwable) {
+                    Log.e("ThreadUtils", "Request threw uncaught throwable", t)
                 }
             }
-        };
-        t.setDaemon(isDaemon);
-        t.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                System.out.println(e);
-            }
-        });
-        t.setPriority(priority);
-        return t;
+        }
+        t.isDaemon = isDaemon
+        t.uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { t, e -> println(e) }
+        t.priority = priority
+        return t
+    }
+
+    companion object {
+        private val POOL_NUMBER = AtomicInteger(1)
+        private const val serialVersionUID = -9209200509960368598L
+    }
+
+    override fun toByte(): Byte {
+        return super.get().toByte()
+    }
+
+    override fun toShort(): Short {
+     return super.get().toShort()
     }
 }

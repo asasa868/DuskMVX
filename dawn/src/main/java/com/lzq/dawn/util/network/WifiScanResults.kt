@@ -1,11 +1,7 @@
-package com.lzq.dawn.util.network;
+package com.lzq.dawn.util.network
 
-import android.net.wifi.ScanResult;
-import android.text.TextUtils;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import android.net.wifi.ScanResult
+import android.text.TextUtils
 
 /**
  * @Name :WifiScanResults
@@ -13,42 +9,32 @@ import java.util.List;
  * @Author :  Lzq
  * @Desc : wifi 扫描
  */
-public class WifiScanResults {
-
-    private List<ScanResult> allResults    = new ArrayList<>();
-    private List<ScanResult> filterResults = new ArrayList<>();
-
-    public WifiScanResults() {
-    }
-
-    public List<ScanResult> getAllResults() {
-        return allResults;
-    }
-
-    public List<ScanResult> getFilterResults() {
-        return filterResults;
-    }
-
-    public void setAllResults(List<ScanResult> allResults) {
-        this.allResults = allResults;
-        filterResults = filterScanResult(allResults);
-    }
-
-    private static List<ScanResult> filterScanResult(final List<ScanResult> results) {
-        if (results == null || results.isEmpty()) {
-            return new ArrayList<>();
+class WifiScanResults {
+    var allResults: List<ScanResult> = ArrayList()
+        set(allResults) {
+            field = allResults
+            filterResults = filterScanResult(allResults)
         }
-        LinkedHashMap<String, ScanResult> map = new LinkedHashMap<>(results.size());
-        for (ScanResult result : results) {
-            if (TextUtils.isEmpty(result.SSID)) {
-                continue;
+    var filterResults: List<ScanResult> = ArrayList()
+        private set
+
+    companion object {
+        private fun filterScanResult(results: List<ScanResult>?): List<ScanResult> {
+            if (results == null || results.isEmpty()) {
+                return ArrayList()
             }
-            ScanResult resultInMap = map.get(result.SSID);
-            if (resultInMap != null && resultInMap.level >= result.level) {
-                continue;
+            val map = LinkedHashMap<String, ScanResult>(results.size)
+            for (result in results) {
+                if (TextUtils.isEmpty(result.SSID)) {
+                    continue
+                }
+                val resultInMap = map[result.SSID]
+                if (resultInMap != null && resultInMap.level >= result.level) {
+                    continue
+                }
+                map[result.SSID] = result
             }
-            map.put(result.SSID, result);
+            return ArrayList(map.values)
         }
-        return new ArrayList<>(map.values());
     }
 }

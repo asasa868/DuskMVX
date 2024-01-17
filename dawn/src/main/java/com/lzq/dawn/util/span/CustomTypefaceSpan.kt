@@ -1,9 +1,9 @@
-package com.lzq.dawn.util.span;
+package com.lzq.dawn.util.span
 
-import android.graphics.Paint;
-import android.graphics.Typeface;
-import android.text.TextPaint;
-import android.text.style.TypefaceSpan;
+import android.graphics.Paint
+import android.graphics.Typeface
+import android.text.TextPaint
+import android.text.style.TypefaceSpan
 
 /**
  * @Name :CustomTypefaceSpan
@@ -11,47 +11,27 @@ import android.text.style.TypefaceSpan;
  * @Author :  Lzq
  * @Desc : 附加文本
  */
-
-class CustomTypefaceSpan extends TypefaceSpan {
-
-    private final Typeface newType;
-
-    CustomTypefaceSpan(final Typeface type) {
-        super("");
-        newType = type;
+internal class CustomTypefaceSpan(private val newType: Typeface) : TypefaceSpan("") {
+    override fun updateDrawState(textPaint: TextPaint) {
+        apply(textPaint, newType)
     }
 
-    @Override
-    public void updateDrawState(final TextPaint textPaint) {
-        apply(textPaint, newType);
+    override fun updateMeasureState(paint: TextPaint) {
+        apply(paint, newType)
     }
 
-    @Override
-    public void updateMeasureState(final TextPaint paint) {
-        apply(paint, newType);
-    }
-
-
-    private void apply(final Paint paint, final Typeface tf) {
-        int oldStyle;
-        Typeface old = paint.getTypeface();
-        if (old == null) {
-            oldStyle = 0;
-        } else {
-            oldStyle = old.getStyle();
+    private fun apply(paint: Paint, tf: Typeface) {
+        val oldStyle: Int
+        val old = paint.typeface
+        oldStyle = old?.style ?: 0
+        val fake = oldStyle and tf.style.inv()
+        if (fake and Typeface.BOLD != 0) {
+            paint.isFakeBoldText = true
         }
-
-        int fake = oldStyle & ~tf.getStyle();
-        if ((fake & Typeface.BOLD) != 0) {
-            paint.setFakeBoldText(true);
+        if (fake and Typeface.ITALIC != 0) {
+            paint.textSkewX = -0.25f
         }
-
-        if ((fake & Typeface.ITALIC) != 0) {
-            paint.setTextSkewX(-0.25f);
-        }
-
-        paint.getShader();
-
-        paint.setTypeface(tf);
+        paint.shader
+        paint.typeface = tf
     }
 }

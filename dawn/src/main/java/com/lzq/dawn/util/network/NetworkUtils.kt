@@ -1,49 +1,37 @@
-package com.lzq.dawn.util.network;
+package com.lzq.dawn.util.network
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
-import static android.Manifest.permission.ACCESS_NETWORK_STATE;
-import static android.Manifest.permission.ACCESS_WIFI_STATE;
-import static android.Manifest.permission.CHANGE_WIFI_STATE;
-import static android.Manifest.permission.INTERNET;
-import static android.content.Context.WIFI_SERVICE;
-
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.os.Build;
-import android.telephony.TelephonyManager;
-import android.text.TextUtils;
-import android.text.format.Formatter;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresPermission;
-import androidx.core.app.ActivityCompat;
-
-import com.lzq.dawn.DawnBridge;
-import com.lzq.dawn.util.shell.CommandResult;
-import com.lzq.dawn.util.shell.ShellUtils;
-
-import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.CopyOnWriteArraySet;
+import android.Manifest.permission
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.NetworkInfo
+import android.net.wifi.ScanResult
+import android.net.wifi.WifiManager
+import android.os.Build
+import android.provider.Settings
+import android.telephony.TelephonyManager
+import android.text.TextUtils
+import android.text.format.Formatter
+import androidx.annotation.RequiresPermission
+import androidx.core.app.ActivityCompat
+import com.lzq.dawn.DawnBridge
+import com.lzq.dawn.DawnBridge.app
+import com.lzq.dawn.DawnBridge.doAsync
+import com.lzq.dawn.DawnBridge.equals
+import com.lzq.dawn.DawnBridge.runOnUiThread
+import com.lzq.dawn.util.shell.ShellUtils
+import java.net.InetAddress
+import java.net.NetworkInterface
+import java.net.SocketException
+import java.net.UnknownHostException
+import java.util.LinkedList
+import java.util.Locale
+import java.util.Timer
+import java.util.TimerTask
+import java.util.concurrent.CopyOnWriteArraySet
 
 /**
  * @Name :NetworkUtils
@@ -51,703 +39,656 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @Author :  Lzq
  * @Desc :网络
  */
-public final class NetworkUtils {
-
-    private NetworkUtils() {
-    }
-
+object NetworkUtils {
     /**
      * 打开无线设置。
      */
-    public static void openWirelessSettings() {
-        DawnBridge.getApp().startActivity(
-                new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS)
-                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        );
+    fun openWirelessSettings() {
+        app.startActivity(
+            Intent(Settings.ACTION_WIRELESS_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
     }
 
-    /**
-     * 返回网络是否连接。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
-     *
-     * @return {@code true}: connected<br>{@code false}: disconnected
-     */
-    @RequiresPermission(ACCESS_NETWORK_STATE)
-    public static boolean isConnected() {
-        NetworkInfo info = getActiveNetworkInfo();
-        return info != null && info.isConnected();
-    }
+    @get:RequiresPermission(permission.ACCESS_NETWORK_STATE)
+    val isConnected: Boolean
+        /**
+         * 返回网络是否连接。
+         *
+         * 必须持有 `<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />`
+         *
+         * @return `true`: connected<br></br>`false`: disconnected
+         */
+        get() {
+            val info = activeNetworkInfo
+            return info != null && info.isConnected
+        }
 
     /**
      * 返回网络是否可用。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * 必须持有 `<uses-permission android:name="android.permission.INTERNET" />`
      *
      * @param consumer The consumer.
      * @return the task
      */
-    @RequiresPermission(INTERNET)
-    public static DawnBridge.Task<Boolean> isAvailableAsync(@NonNull final DawnBridge.Consumer<Boolean> consumer) {
-        return DawnBridge.doAsync(new DawnBridge.Task<Boolean>(consumer) {
-            @RequiresPermission(INTERNET)
-            @Override
-            public Boolean doInBackground() {
-                return isAvailable();
+    @RequiresPermission(permission.INTERNET)
+    fun isAvailableAsync(consumer: DawnBridge.Consumer<Boolean>?): DawnBridge.Task<Boolean> {
+        return doAsync(object : DawnBridge.Task<Boolean>(consumer) {
+
+            @RequiresPermission(permission.INTERNET)
+            override fun doInBackground(): Boolean {
+                return isAvailable
             }
-        });
+        })
     }
 
-    /**
-     * 返回网络是否可用。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    @RequiresPermission(INTERNET)
-    public static boolean isAvailable() {
-        return isAvailableByDns() || isAvailableByPing(null);
-    }
+    @get:RequiresPermission(permission.INTERNET)
+    val isAvailable: Boolean
+        /**
+         * 返回网络是否可用。
+         *
+         * 必须持有 `<uses-permission android:name="android.permission.INTERNET" />`
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = isAvailableByDns || isAvailableByPing(null)
 
     /**
      * 使用 ping 返回网络是否可用。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
-     * <p>The default ping ip: 223.5.5.5</p>
+     *
+     * 必须持有 `<uses-permission android:name="android.permission.INTERNET" />`
+     *
+     * The default ping ip: 223.5.5.5
      *
      * @param consumer The consumer.
      */
-    @RequiresPermission(INTERNET)
-    public static void isAvailableByPingAsync(final DawnBridge.Consumer<Boolean> consumer) {
-        isAvailableByPingAsync("", consumer);
+    @RequiresPermission(permission.INTERNET)
+    fun isAvailableByPingAsync(consumer: DawnBridge.Consumer<Boolean>) {
+        isAvailableByPingAsync("", consumer)
     }
 
     /**
      * 使用 ping 返回网络是否可用。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * 必须持有 `<uses-permission android:name="android.permission.INTERNET" />`
      *
      * @param ip       The ip address.
      * @param consumer The consumer.
      * @return the task
      */
-    @RequiresPermission(INTERNET)
-    public static DawnBridge.Task<Boolean> isAvailableByPingAsync(final String ip,
-                                                                  @NonNull final DawnBridge.Consumer<Boolean> consumer) {
-        return DawnBridge.doAsync(new DawnBridge.Task<Boolean>(consumer) {
-            @RequiresPermission(INTERNET)
-            @Override
-            public Boolean doInBackground() {
-                return isAvailableByPing(ip);
+    @RequiresPermission(permission.INTERNET)
+    fun isAvailableByPingAsync(
+        ip: String?, consumer: DawnBridge.Consumer<Boolean>
+    ): DawnBridge.Task<Boolean> {
+        return doAsync(object : DawnBridge.Task<Boolean>(consumer) {
+            @RequiresPermission(permission.INTERNET)
+            override fun doInBackground(): Boolean {
+                return isAvailableByPing(ip)
             }
-        });
+        })
     }
+
+    @get:RequiresPermission(permission.INTERNET)
+    val isAvailableByPing: Boolean
+        /**
+         * 使用 ping 返回网络是否可用。
+         *
+         * 必须持有 `<uses-permission android:name="android.permission.INTERNET" />`
+         *
+         * The default ping ip: 223.5.5.5
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = isAvailableByPing("")
 
     /**
      * 使用 ping 返回网络是否可用。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
-     * <p>The default ping ip: 223.5.5.5</p>
      *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    @RequiresPermission(INTERNET)
-    public static boolean isAvailableByPing() {
-        return isAvailableByPing("");
-    }
-
-    /**
-     * 使用 ping 返回网络是否可用。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     * 必须持有 `<uses-permission android:name="android.permission.INTERNET" />`
      *
      * @param ip The ip address.
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    @RequiresPermission(INTERNET)
-    public static boolean isAvailableByPing(final String ip) {
-        final String realIp = TextUtils.isEmpty(ip) ? "223.5.5.5" : ip;
-        CommandResult result = ShellUtils.execCmd(String.format("ping -c 1 %s", realIp), false);
-        return result.result == 0;
+    @RequiresPermission(permission.INTERNET)
+    fun isAvailableByPing(ip: String?): Boolean {
+        val realIp = if (TextUtils.isEmpty(ip)) "223.5.5.5" else ip!!
+        val result = ShellUtils.execCmd(String.format("ping -c 1 %s", realIp), false)
+        return result.result == 0
     }
 
     /**
      * 使用域返回网络是否可用。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * 必须持有 `<uses-permission android:name="android.permission.INTERNET" />`
      *
      * @param consumer The consumer.
      */
-    @RequiresPermission(INTERNET)
-    public static void isAvailableByDnsAsync(final DawnBridge.Consumer<Boolean> consumer) {
-        isAvailableByDnsAsync("", consumer);
+    @RequiresPermission(permission.INTERNET)
+    fun isAvailableByDnsAsync(consumer: DawnBridge.Consumer<Boolean>) {
+        isAvailableByDnsAsync("", consumer)
     }
 
     /**
      * 使用域返回网络是否可用。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * 必须持有 `<uses-permission android:name="android.permission.INTERNET" />`
      *
      * @param domain   The name of domain.
      * @param consumer The consumer.
      * @return the task
      */
-    @RequiresPermission(INTERNET)
-    public static DawnBridge.Task isAvailableByDnsAsync(final String domain,
-                                                        @NonNull final DawnBridge.Consumer<Boolean> consumer) {
-        return DawnBridge.doAsync(new DawnBridge.Task<Boolean>(consumer) {
-            @RequiresPermission(INTERNET)
-            @Override
-            public Boolean doInBackground() {
-                return isAvailableByDns(domain);
+    @RequiresPermission(permission.INTERNET)
+    fun isAvailableByDnsAsync(
+        domain: String?, consumer: DawnBridge.Consumer<Boolean>
+    ): DawnBridge.Task<*> {
+        return doAsync<Boolean>(object : DawnBridge.Task<Boolean>(consumer) {
+            @RequiresPermission(permission.INTERNET)
+            override fun doInBackground(): Boolean {
+                return isAvailableByDns(domain)
             }
-        });
+        })
     }
+
+    @get:RequiresPermission(permission.INTERNET)
+    val isAvailableByDns: Boolean
+        /**
+         * 使用域返回网络是否可用。
+         *
+         * 必须持有 `<uses-permission android:name="android.permission.INTERNET" />`
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() = isAvailableByDns("")
 
     /**
      * 使用域返回网络是否可用。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
      *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    @RequiresPermission(INTERNET)
-    public static boolean isAvailableByDns() {
-        return isAvailableByDns("");
-    }
-
-    /**
-     * 使用域返回网络是否可用。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     * 必须持有 `<uses-permission android:name="android.permission.INTERNET" />`
      *
      * @param domain The name of domain.
-     * @return {@code true}: yes<br>{@code false}: no
+     * @return `true`: yes<br></br>`false`: no
      */
-    @RequiresPermission(INTERNET)
-    public static boolean isAvailableByDns(final String domain) {
-        final String realDomain = TextUtils.isEmpty(domain) ? "www.baidu.com" : domain;
-        InetAddress inetAddress;
-        try {
-            inetAddress = InetAddress.getByName(realDomain);
-            return inetAddress != null;
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            return false;
+    @RequiresPermission(permission.INTERNET)
+    fun isAvailableByDns(domain: String?): Boolean {
+        val realDomain = if (TextUtils.isEmpty(domain)) "www.baidu.com" else domain!!
+        val inetAddress: InetAddress?
+        return try {
+            inetAddress = InetAddress.getByName(realDomain)
+            inetAddress != null
+        } catch (e: UnknownHostException) {
+            e.printStackTrace()
+            false
         }
     }
 
-    /**
-     * 返回是否启用移动数据。
-     *
-     * @return {@code true}: enabled<br>{@code false}: disabled
-     */
-    @RequiresPermission(ACCESS_NETWORK_STATE)
-    public static boolean getMobileDataEnabled() {
-        try {
-            TelephonyManager tm =
-                    (TelephonyManager) DawnBridge.getApp().getSystemService(Context.TELEPHONY_SERVICE);
-            if (tm == null) {
-                return false;
+    @get:RequiresPermission(permission.ACCESS_NETWORK_STATE)
+    val mobileDataEnabled: Boolean
+        /**
+         * 返回是否启用移动数据。
+         *
+         * @return `true`: enabled<br></br>`false`: disabled
+         */
+        get() {
+            try {
+                val tm = app.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    return tm.isDataEnabled
+                }
+                @SuppressLint("PrivateApi") val getMobileDataEnabledMethod =
+                    tm.javaClass.getDeclaredMethod("getDataEnabled")
+                return getMobileDataEnabledMethod.invoke(tm) as Boolean
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                return tm.isDataEnabled();
-            }
-            @SuppressLint("PrivateApi")
-            Method getMobileDataEnabledMethod =
-                    tm.getClass().getDeclaredMethod("getDataEnabled");
-            if (null != getMobileDataEnabledMethod) {
-                return (boolean) getMobileDataEnabledMethod.invoke(tm);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            return false
         }
-        return false;
-    }
-
-    /**
-     * 如果设备通过代理连接到互联网，则返回 true，适用于 Wi-Fi 和移动数据。
-     *
-     * @return 如果使用代理连接到 Internet，则为 true。
-     */
-    public static boolean isBehindProxy() {
-        return !(System.getProperty("http.proxyHost") == null || System.getProperty("http.proxyPort") == null);
-    }
-
-    /**
-     * 如果设备通过 VPN 连接到互联网，则返回 true。
-     *
-     * @return 如果使用 VPN 连接到 Internet，则为 true。
-     */
-    public static boolean isUsingVPN() {
-        ConnectivityManager cm = (ConnectivityManager) DawnBridge.getApp().getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            return cm.getNetworkInfo(ConnectivityManager.TYPE_VPN).isConnectedOrConnecting();
-        } else {
-            return cm.getNetworkInfo(NetworkCapabilities.TRANSPORT_VPN).isConnectedOrConnecting();
+    val isBehindProxy: Boolean
+        /**
+         * 如果设备通过代理连接到互联网，则返回 true，适用于 Wi-Fi 和移动数据。
+         *
+         * @return 如果使用代理连接到 Internet，则为 true。
+         */
+        get() = !(System.getProperty("http.proxyHost") == null || System.getProperty("http.proxyPort") == null)
+    val isUsingVPN: Boolean
+        /**
+         * 如果设备通过 VPN 连接到互联网，则返回 true。
+         *
+         * @return 如果使用 VPN 连接到 Internet，则为 true。
+         */
+        get() {
+            val cm = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                cm.getNetworkInfo(ConnectivityManager.TYPE_VPN)!!.isConnectedOrConnecting
+            } else {
+                cm.getNetworkInfo(NetworkCapabilities.TRANSPORT_VPN)!!.isConnectedOrConnecting
+            }
         }
-    }
 
-
-    /**
-     * 返回是否使用移动数据
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    @RequiresPermission(ACCESS_NETWORK_STATE)
-    public static boolean isMobileData() {
-        NetworkInfo info = getActiveNetworkInfo();
-        return null != info
-                && info.isAvailable()
-                && info.getType() == ConnectivityManager.TYPE_MOBILE;
-    }
+    @get:RequiresPermission(permission.ACCESS_NETWORK_STATE)
+    val isMobileData: Boolean
+        /**
+         * 返回是否使用移动数据
+         *
+         * 必须持有 `<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />`
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() {
+            val info = activeNetworkInfo
+            return null != info && info.isAvailable && info.type == ConnectivityManager.TYPE_MOBILE
+        }
 
     /**
      * 返回是否使用4G。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
      *
-     * @return {@code true}: yes<br>{@code false}: no
+     * 必须持有 `<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />`
+     *
+     * @return `true`: yes<br></br>`false`: no
      */
-    @RequiresPermission(ACCESS_NETWORK_STATE)
-    public static boolean is4G() {
-        NetworkInfo info = getActiveNetworkInfo();
-        return info != null
-                && info.isAvailable()
-                && info.getSubtype() == TelephonyManager.NETWORK_TYPE_LTE;
+    @RequiresPermission(permission.ACCESS_NETWORK_STATE)
+    fun is4G(): Boolean {
+        val info = activeNetworkInfo
+        return info != null && info.isAvailable && info.subtype == TelephonyManager.NETWORK_TYPE_LTE
     }
 
     /**
      * 返回是否使用5G。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
      *
-     * @return {@code true}: yes<br>{@code false}: no
+     * 必须持有 `<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />`
+     *
+     * @return `true`: yes<br></br>`false`: no
      */
-    @RequiresPermission(ACCESS_NETWORK_STATE)
-    public static boolean is5G() {
-        NetworkInfo info = getActiveNetworkInfo();
-        return info != null
-                && info.isAvailable()
-                && info.getSubtype() == TelephonyManager.NETWORK_TYPE_NR;
+    @RequiresPermission(permission.ACCESS_NETWORK_STATE)
+    fun is5G(): Boolean {
+        val info = activeNetworkInfo
+        return info != null && info.isAvailable && info.subtype == TelephonyManager.NETWORK_TYPE_NR
     }
 
-    /**
-     * 返回是否启用 wifi。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />}</p>
-     *
-     * @return {@code true}: enabled<br>{@code false}: disabled
-     */
-    @RequiresPermission(ACCESS_WIFI_STATE)
-    public static boolean getWifiEnabled() {
-        @SuppressLint("WifiManagerLeak")
-        WifiManager manager = (WifiManager) DawnBridge.getApp().getSystemService(WIFI_SERVICE);
-        if (manager == null) {
-            return false;
+    @get:RequiresPermission(permission.ACCESS_WIFI_STATE)
+    @set:RequiresPermission(permission.CHANGE_WIFI_STATE)
+    var wifiEnabled: Boolean
+        /**
+         * 返回是否启用 wifi。
+         *
+         * 必须持有 `<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />`
+         *
+         * @return `true`: enabled<br></br>`false`: disabled
+         */
+        get() {
+            @SuppressLint("WifiManagerLeak")
+            val manager = app.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            return manager.isWifiEnabled
         }
-        return manager.isWifiEnabled();
-    }
+        /**
+         * 启用或禁用 wifi。
+         *
+         * 必须持有 `<uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />`
+         *
+         * @param enabled True to enabled, false otherwise.
+         */
+        set(enabled) {
+            @SuppressLint("WifiManagerLeak")
+            val manager = app.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            if (enabled == manager.isWifiEnabled) {
+                return
+            }
+            manager.isWifiEnabled = enabled
+        }
 
-    /**
-     * 启用或禁用 wifi。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />}</p>
-     *
-     * @param enabled True to enabled, false otherwise.
-     */
-    @RequiresPermission(CHANGE_WIFI_STATE)
-    public static void setWifiEnabled(final boolean enabled) {
-        @SuppressLint("WifiManagerLeak")
-        WifiManager manager = (WifiManager) DawnBridge.getApp().getSystemService(WIFI_SERVICE);
-        if (manager == null) {
-            return;
+    @get:RequiresPermission(permission.ACCESS_NETWORK_STATE)
+    val isWifiConnected: Boolean
+        /**
+         * 返回是否连接了wifi。
+         *
+         * 必须持有 `<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />`
+         *
+         * @return `true`: connected<br></br>`false`: disconnected
+         */
+        get() {
+            val cm = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val ni = cm.activeNetworkInfo
+            return ni != null && ni.type == ConnectivityManager.TYPE_WIFI
         }
-        if (enabled == manager.isWifiEnabled()) {
-            return;
-        }
-        manager.setWifiEnabled(enabled);
-    }
 
-    /**
-     * 返回是否连接了wifi。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
-     *
-     * @return {@code true}: connected<br>{@code false}: disconnected
-     */
-    @RequiresPermission(ACCESS_NETWORK_STATE)
-    public static boolean isWifiConnected() {
-        ConnectivityManager cm =
-                (ConnectivityManager) DawnBridge.getApp().getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm == null) {
-            return false;
-        }
-        NetworkInfo ni = cm.getActiveNetworkInfo();
-        return ni != null && ni.getType() == ConnectivityManager.TYPE_WIFI;
-    }
+    @get:RequiresPermission(allOf = [permission.ACCESS_WIFI_STATE, permission.INTERNET])
+    val isWifiAvailable: Boolean
+        /**
+         * 返回wifi是否可用。
+         *
+         * 必须持有 `<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />`,
+         * `<uses-permission android:name="android.permission.INTERNET" />`
+         *
+         * @return `true`: available<br></br>`false`: unavailable
+         */
+        get() = wifiEnabled && isAvailable
 
     /**
      * 返回wifi是否可用。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />},
-     * {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
      *
-     * @return {@code true}: available<br>{@code false}: unavailable
-     */
-    @RequiresPermission(allOf = {ACCESS_WIFI_STATE, INTERNET})
-    public static boolean isWifiAvailable() {
-        return getWifiEnabled() && isAvailable();
-    }
-
-    /**
-     * 返回wifi是否可用。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />},
-     * {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     * 必须持有 `<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />`,
+     * `<uses-permission android:name="android.permission.INTERNET" />`
      *
      * @param consumer The consumer.
      * @return the task
      */
-    @RequiresPermission(allOf = {ACCESS_WIFI_STATE, INTERNET})
-    public static DawnBridge.Task<Boolean> isWifiAvailableAsync(@NonNull final DawnBridge.Consumer<Boolean> consumer) {
-        return DawnBridge.doAsync(new DawnBridge.Task<Boolean>(consumer) {
-            @RequiresPermission(allOf = {ACCESS_WIFI_STATE, INTERNET})
-            @Override
-            public Boolean doInBackground() {
-                return isWifiAvailable();
+    @RequiresPermission(allOf = [permission.ACCESS_WIFI_STATE, permission.INTERNET])
+    fun isWifiAvailableAsync(consumer: DawnBridge.Consumer<Boolean>): DawnBridge.Task<Boolean> {
+        return doAsync<Boolean>(object : DawnBridge.Task<Boolean>(consumer) {
+            @RequiresPermission(allOf = [permission.ACCESS_WIFI_STATE, permission.INTERNET])
+            override fun doInBackground(): Boolean {
+                return isWifiAvailable
             }
-        });
+        })
     }
 
-    /**
-     * 返回网络运营的名称。
-     *
-     * @return 网络运营名称
-     */
-    public static String getNetworkOperatorName() {
-        TelephonyManager tm =
-                (TelephonyManager) DawnBridge.getApp().getSystemService(Context.TELEPHONY_SERVICE);
-        if (tm == null) {
-            return "";
+    val networkOperatorName: String
+        /**
+         * 返回网络运营的名称。
+         *
+         * @return 网络运营名称
+         */
+        get() {
+            val tm = app.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            return tm.networkOperatorName
         }
-        return tm.getNetworkOperatorName();
-    }
 
-    /**
-     * 返回网络类型。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
-     *
-     * @return 网络类型。
-     * <ul>
-     * <li>{@link  NetworkType#NETWORK_ETHERNET} </li>
-     * <li>{@link  NetworkType#NETWORK_WIFI    } </li>
-     * <li>{@link  NetworkType#NETWORK_4G      } </li>
-     * <li>{@link  NetworkType#NETWORK_3G      } </li>
-     * <li>{@link  NetworkType#NETWORK_2G      } </li>
-     * <li>{@link  NetworkType#NETWORK_UNKNOWN } </li>
-     * <li>{@link  NetworkType#NETWORK_NO      } </li>
-     * </ul>
-     */
-    @RequiresPermission(ACCESS_NETWORK_STATE)
-    public static NetworkType getNetworkType() {
-        if (isEthernet()) {
-            return NetworkType.NETWORK_ETHERNET;
-        }
-        NetworkInfo info = getActiveNetworkInfo();
-        if (info != null && info.isAvailable()) {
-            if (info.getType() == ConnectivityManager.TYPE_WIFI) {
-                return NetworkType.NETWORK_WIFI;
-            } else if (info.getType() == ConnectivityManager.TYPE_MOBILE) {
-                switch (info.getSubtype()) {
-                    case TelephonyManager.NETWORK_TYPE_GSM:
-                    case TelephonyManager.NETWORK_TYPE_GPRS:
-                    case TelephonyManager.NETWORK_TYPE_CDMA:
-                    case TelephonyManager.NETWORK_TYPE_EDGE:
-                    case TelephonyManager.NETWORK_TYPE_1xRTT:
-                    case TelephonyManager.NETWORK_TYPE_IDEN:
-                        return NetworkType.NETWORK_2G;
-
-                    case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
-                    case TelephonyManager.NETWORK_TYPE_EVDO_A:
-                    case TelephonyManager.NETWORK_TYPE_UMTS:
-                    case TelephonyManager.NETWORK_TYPE_EVDO_0:
-                    case TelephonyManager.NETWORK_TYPE_HSDPA:
-                    case TelephonyManager.NETWORK_TYPE_HSUPA:
-                    case TelephonyManager.NETWORK_TYPE_HSPA:
-                    case TelephonyManager.NETWORK_TYPE_EVDO_B:
-                    case TelephonyManager.NETWORK_TYPE_EHRPD:
-                    case TelephonyManager.NETWORK_TYPE_HSPAP:
-                        return NetworkType.NETWORK_3G;
-
-                    case TelephonyManager.NETWORK_TYPE_IWLAN:
-                    case TelephonyManager.NETWORK_TYPE_LTE:
-                        return NetworkType.NETWORK_4G;
-
-                    case TelephonyManager.NETWORK_TYPE_NR:
-                        return NetworkType.NETWORK_5G;
-                    default:
-                        String subtypeName = info.getSubtypeName();
-                        if (subtypeName.equalsIgnoreCase("TD-SCDMA")
-                                || subtypeName.equalsIgnoreCase("WCDMA")
-                                || subtypeName.equalsIgnoreCase("CDMA2000")) {
-                            return NetworkType.NETWORK_3G;
-                        } else {
-                            return NetworkType.NETWORK_UNKNOWN;
+    @JvmStatic
+    @get:RequiresPermission(permission.ACCESS_NETWORK_STATE)
+    val networkType: NetworkType
+        /**
+         * 返回网络类型。
+         *
+         * 必须持有 `<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />`
+         *
+         * @return 网络类型。
+         *
+         *  * [NetworkType.NETWORK_ETHERNET]
+         *  * [NetworkType.NETWORK_WIFI]
+         *  * [NetworkType.NETWORK_4G]
+         *  * [NetworkType.NETWORK_3G]
+         *  * [NetworkType.NETWORK_2G]
+         *  * [NetworkType.NETWORK_UNKNOWN]
+         *  * [NetworkType.NETWORK_NO]
+         *
+         */
+        get() {
+            if (isEthernet) {
+                return NetworkType.NETWORK_ETHERNET
+            }
+            val info = activeNetworkInfo
+            return if (info != null && info.isAvailable) {
+                if (info.type == ConnectivityManager.TYPE_WIFI) {
+                    NetworkType.NETWORK_WIFI
+                } else if (info.type == ConnectivityManager.TYPE_MOBILE) {
+                    when (info.subtype) {
+                        TelephonyManager.NETWORK_TYPE_GSM, TelephonyManager.NETWORK_TYPE_GPRS, TelephonyManager.NETWORK_TYPE_CDMA, TelephonyManager.NETWORK_TYPE_EDGE, TelephonyManager.NETWORK_TYPE_1xRTT, TelephonyManager.NETWORK_TYPE_IDEN -> NetworkType.NETWORK_2G
+                        TelephonyManager.NETWORK_TYPE_TD_SCDMA, TelephonyManager.NETWORK_TYPE_EVDO_A, TelephonyManager.NETWORK_TYPE_UMTS, TelephonyManager.NETWORK_TYPE_EVDO_0, TelephonyManager.NETWORK_TYPE_HSDPA, TelephonyManager.NETWORK_TYPE_HSUPA, TelephonyManager.NETWORK_TYPE_HSPA, TelephonyManager.NETWORK_TYPE_EVDO_B, TelephonyManager.NETWORK_TYPE_EHRPD, TelephonyManager.NETWORK_TYPE_HSPAP -> NetworkType.NETWORK_3G
+                        TelephonyManager.NETWORK_TYPE_IWLAN, TelephonyManager.NETWORK_TYPE_LTE -> NetworkType.NETWORK_4G
+                        TelephonyManager.NETWORK_TYPE_NR -> NetworkType.NETWORK_5G
+                        else -> {
+                            val subtypeName = info.subtypeName
+                            if (subtypeName.equals("TD-SCDMA", ignoreCase = true) || subtypeName.equals(
+                                    "WCDMA", ignoreCase = true
+                                ) || subtypeName.equals("CDMA2000", ignoreCase = true)
+                            ) {
+                                NetworkType.NETWORK_3G
+                            } else {
+                                NetworkType.NETWORK_UNKNOWN
+                            }
                         }
+                    }
+                } else {
+                    NetworkType.NETWORK_UNKNOWN
                 }
-            } else {
-                return NetworkType.NETWORK_UNKNOWN;
-            }
+            } else NetworkType.NETWORK_NO
         }
-        return NetworkType.NETWORK_NO;
-    }
 
-    /**
-     * 返回是否使用以太网。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    @RequiresPermission(ACCESS_NETWORK_STATE)
-    private static boolean isEthernet() {
-        final ConnectivityManager cm =
-                (ConnectivityManager) DawnBridge.getApp().getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm == null) {
-            return false;
+    @get:RequiresPermission(permission.ACCESS_NETWORK_STATE)
+    private val isEthernet: Boolean
+        /**
+         * 返回是否使用以太网。
+         *
+         * 必须持有 `<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />`
+         *
+         * @return `true`: yes<br></br>`false`: no
+         */
+        get() {
+            val cm = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val info = cm.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET) ?: return false
+            val state = info.state ?: return false
+            return state == NetworkInfo.State.CONNECTED || state == NetworkInfo.State.CONNECTING
         }
-        final NetworkInfo info = cm.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET);
-        if (info == null) {
-            return false;
-        }
-        NetworkInfo.State state = info.getState();
-        if (null == state) {
-            return false;
-        }
-        return state == NetworkInfo.State.CONNECTED || state == NetworkInfo.State.CONNECTING;
-    }
 
-    @RequiresPermission(ACCESS_NETWORK_STATE)
-    private static NetworkInfo getActiveNetworkInfo() {
-        ConnectivityManager cm =
-                (ConnectivityManager) DawnBridge.getApp().getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm == null) {
-            return null;
+    @get:RequiresPermission(permission.ACCESS_NETWORK_STATE)
+    private val activeNetworkInfo: NetworkInfo?
+        get() {
+            val cm = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            return cm.activeNetworkInfo
         }
-        return cm.getActiveNetworkInfo();
-    }
 
     /**
      * 返回IP地址。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * 必须持有 `<uses-permission android:name="android.permission.INTERNET" />`
      *
      * @param useIPv4  使用 ipv4 为真，否则为假。
      * @param consumer consumer.
      * @return the task
      */
-    public static DawnBridge.Task<String> getIPAddressAsync(final boolean useIPv4,
-                                                            @NonNull final DawnBridge.Consumer<String> consumer) {
-        return DawnBridge.doAsync(new DawnBridge.Task<String>(consumer) {
-            @RequiresPermission(INTERNET)
-            @Override
-            public String doInBackground() {
-                return getIPAddress(useIPv4);
+    fun getIPAddressAsync(
+        useIPv4: Boolean, consumer: DawnBridge.Consumer<String>
+    ): DawnBridge.Task<String> {
+        return doAsync(object : DawnBridge.Task<String>(consumer) {
+            @RequiresPermission(permission.INTERNET)
+            override fun doInBackground(): String {
+                return getIPAddress(useIPv4)
             }
-        });
+        })
     }
 
     /**
      * 返回IP地址
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * 必须持有 `<uses-permission android:name="android.permission.INTERNET" />`
      *
      * @param useIPv4 使用 ipv4 为真，否则为假。
      * @return IP地址
      */
-    @RequiresPermission(INTERNET)
-    public static String getIPAddress(final boolean useIPv4) {
+    @RequiresPermission(permission.INTERNET)
+    fun getIPAddress(useIPv4: Boolean): String {
         try {
-            Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
-            LinkedList<InetAddress> adds = new LinkedList<>();
+            val nis = NetworkInterface.getNetworkInterfaces()
+            val adds = LinkedList<InetAddress>()
             while (nis.hasMoreElements()) {
-                NetworkInterface ni = nis.nextElement();
+                val ni = nis.nextElement()
                 // To prevent phone of xiaomi return "10.0.2.15"
-                if (!ni.isUp() || ni.isLoopback()) {
-                    continue;
+                if (!ni.isUp || ni.isLoopback) {
+                    continue
                 }
-                Enumeration<InetAddress> addresses = ni.getInetAddresses();
+                val addresses = ni.inetAddresses
                 while (addresses.hasMoreElements()) {
-                    adds.addFirst(addresses.nextElement());
+                    adds.addFirst(addresses.nextElement())
                 }
             }
-            for (InetAddress add : adds) {
-                if (!add.isLoopbackAddress()) {
-                    String hostAddress = add.getHostAddress();
-                    boolean isIPv4 = hostAddress.indexOf(':') < 0;
+            for (add in adds) {
+                if (!add.isLoopbackAddress) {
+                    val hostAddress = add.hostAddress
+                    val isIPv4 = hostAddress.indexOf(':') < 0
                     if (useIPv4) {
                         if (isIPv4) {
-                            return hostAddress;
+                            return hostAddress
                         }
                     } else {
                         if (!isIPv4) {
-                            int index = hostAddress.indexOf('%');
-                            return index < 0
-                                    ? hostAddress.toUpperCase()
-                                    : hostAddress.substring(0, index).toUpperCase();
+                            val index = hostAddress.indexOf('%')
+                            return if (index < 0) hostAddress.uppercase(Locale.getDefault()) else hostAddress.substring(
+                                0, index
+                            ).uppercase(
+                                Locale.getDefault()
+                            )
                         }
                     }
                 }
             }
-        } catch (SocketException e) {
-            e.printStackTrace();
+        } catch (e: SocketException) {
+            e.printStackTrace()
         }
-        return "";
+        return ""
     }
 
-    /**
-     * 返回广播的ip地址。
-     *
-     * @return 广播的ip地址。
-     */
-    public static String getBroadcastIpAddress() {
-        try {
-            Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
-            LinkedList<InetAddress> adds = new LinkedList<>();
-            while (nis.hasMoreElements()) {
-                NetworkInterface ni = nis.nextElement();
-                if (!ni.isUp() || ni.isLoopback()) {
-                    continue;
-                }
-                List<InterfaceAddress> ias = ni.getInterfaceAddresses();
-                for (int i = 0, size = ias.size(); i < size; i++) {
-                    InterfaceAddress ia = ias.get(i);
-                    InetAddress broadcast = ia.getBroadcast();
-                    if (broadcast != null) {
-                        return broadcast.getHostAddress();
+    val broadcastIpAddress: String?
+        /**
+         * 返回广播的ip地址。
+         *
+         * @return 广播的ip地址。
+         */
+        get() {
+            try {
+                val nis = NetworkInterface.getNetworkInterfaces()
+                val adds = LinkedList<InetAddress>()
+                while (nis.hasMoreElements()) {
+                    val ni = nis.nextElement()
+                    if (!ni.isUp || ni.isLoopback) {
+                        continue
+                    }
+                    val ias = ni.interfaceAddresses
+                    var i = 0
+                    val size = ias.size
+                    while (i < size) {
+                        val ia = ias[i]
+                        val broadcast = ia.broadcast
+                        if (broadcast != null) {
+                            return broadcast.hostAddress
+                        }
+                        i++
                     }
                 }
+            } catch (e: SocketException) {
+                e.printStackTrace()
             }
-        } catch (SocketException e) {
-            e.printStackTrace();
+            return ""
         }
-        return "";
-    }
 
     /**
      * 返回域地址。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * 必须持有 `<uses-permission android:name="android.permission.INTERNET" />`
      *
      * @param domain   域的名称
      * @param consumer consumer.
      * @return the task
      */
-    @RequiresPermission(INTERNET)
-    public static DawnBridge.Task<String> getDomainAddressAsync(final String domain,
-                                                                @NonNull final DawnBridge.Consumer<String> consumer) {
-        return DawnBridge.doAsync(new DawnBridge.Task<String>(consumer) {
-            @RequiresPermission(INTERNET)
-            @Override
-            public String doInBackground() {
-                return getDomainAddress(domain);
+    @RequiresPermission(permission.INTERNET)
+    fun getDomainAddressAsync(
+        domain: String?, consumer: DawnBridge.Consumer<String>
+    ): DawnBridge.Task<String> {
+        return doAsync(object : DawnBridge.Task<String>(consumer) {
+            @RequiresPermission(permission.INTERNET)
+            override fun doInBackground(): String {
+                return getDomainAddress(domain)
             }
-        });
+        })
     }
 
     /**
      * 返回域地址。
-     * <p>必须持有 {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * 必须持有 `<uses-permission android:name="android.permission.INTERNET" />`
      *
      * @param domain 域的名称
      * @return 域地址
      */
-    @RequiresPermission(INTERNET)
-    public static String getDomainAddress(final String domain) {
-        InetAddress inetAddress;
-        try {
-            inetAddress = InetAddress.getByName(domain);
-            return inetAddress.getHostAddress();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            return "";
+    @RequiresPermission(permission.INTERNET)
+    fun getDomainAddress(domain: String?): String {
+        val inetAddress: InetAddress
+        return try {
+            inetAddress = InetAddress.getByName(domain)
+            inetAddress.hostAddress?.toString() ?: ""
+        } catch (e: UnknownHostException) {
+            e.printStackTrace()
+            ""
         }
     }
 
-    /**
-     * 通过wifi返回IP地址。
-     *
-     * @return wifi的ip地址
-     */
-    @RequiresPermission(ACCESS_WIFI_STATE)
-    public static String getIpAddressByWifi() {
-        @SuppressLint("WifiManagerLeak")
-        WifiManager wm = (WifiManager) DawnBridge.getApp().getSystemService(Context.WIFI_SERVICE);
-        if (wm == null) {
-            return "";
+    @get:RequiresPermission(permission.ACCESS_WIFI_STATE)
+    val ipAddressByWifi: String
+        /**
+         * 通过wifi返回IP地址。
+         *
+         * @return wifi的ip地址
+         */
+        get() {
+            @SuppressLint("WifiManagerLeak") val wm =
+                app.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            return Formatter.formatIpAddress(wm.dhcpInfo.ipAddress)
         }
-        return Formatter.formatIpAddress(wm.getDhcpInfo().ipAddress);
-    }
 
-    /**
-     * 返回wifi的网关地址
-     *
-     * @return wifi的网关地址
-     */
-    @RequiresPermission(ACCESS_WIFI_STATE)
-    public static String getGatewayByWifi() {
-        @SuppressLint("WifiManagerLeak")
-        WifiManager wm = (WifiManager) DawnBridge.getApp().getSystemService(Context.WIFI_SERVICE);
-        if (wm == null) {
-            return "";
+    @get:RequiresPermission(permission.ACCESS_WIFI_STATE)
+    val gatewayByWifi: String
+        /**
+         * 返回wifi的网关地址
+         *
+         * @return wifi的网关地址
+         */
+        get() {
+            @SuppressLint("WifiManagerLeak") val wm =
+                app.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            return Formatter.formatIpAddress(wm.dhcpInfo.gateway)
         }
-        return Formatter.formatIpAddress(wm.getDhcpInfo().gateway);
-    }
 
-    /**
-     * 通过wifi返回网络掩码。
-     *
-     * @return wifi网络掩码。
-     */
-    @RequiresPermission(ACCESS_WIFI_STATE)
-    public static String getNetMaskByWifi() {
-        @SuppressLint("WifiManagerLeak")
-        WifiManager wm = (WifiManager) DawnBridge.getApp().getSystemService(Context.WIFI_SERVICE);
-        if (wm == null) {
-            return "";
+    @get:RequiresPermission(permission.ACCESS_WIFI_STATE)
+    val netMaskByWifi: String
+        /**
+         * 通过wifi返回网络掩码。
+         *
+         * @return wifi网络掩码。
+         */
+        get() {
+            @SuppressLint("WifiManagerLeak") val wm =
+                app.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            return Formatter.formatIpAddress(wm.dhcpInfo.netmask)
         }
-        return Formatter.formatIpAddress(wm.getDhcpInfo().netmask);
-    }
 
-    /**
-     * 通过wifi返回服务器地址。
-     *
-     * @return wifi服务器地址。
-     */
-    @RequiresPermission(ACCESS_WIFI_STATE)
-    public static String getServerAddressByWifi() {
-        @SuppressLint("WifiManagerLeak")
-        WifiManager wm = (WifiManager) DawnBridge.getApp().getSystemService(Context.WIFI_SERVICE);
-        if (wm == null) {
-            return "";
+    @get:RequiresPermission(permission.ACCESS_WIFI_STATE)
+    val serverAddressByWifi: String
+        /**
+         * 通过wifi返回服务器地址。
+         *
+         * @return wifi服务器地址。
+         */
+        get() {
+            @SuppressLint("WifiManagerLeak") val wm =
+                app.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            return Formatter.formatIpAddress(wm.dhcpInfo.serverAddress)
         }
-        return Formatter.formatIpAddress(wm.getDhcpInfo().serverAddress);
-    }
 
-    /**
-     * 返回 ssid。
-     *
-     * @return ssid.
-     */
-    @RequiresPermission(ACCESS_WIFI_STATE)
-    public static String getSSID() {
-        WifiManager wm = (WifiManager) DawnBridge.getApp().getApplicationContext().getSystemService(WIFI_SERVICE);
-        if (wm == null) {
-            return "";
+    @get:RequiresPermission(permission.ACCESS_WIFI_STATE)
+    val sSID: String
+        /**
+         * 返回 ssid。
+         *
+         * @return ssid.
+         */
+        get() {
+            val wm = app.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager ?: return ""
+            val wi = wm.connectionInfo ?: return ""
+            val ssid = wi.ssid
+            if (TextUtils.isEmpty(ssid)) {
+                return ""
+            }
+            return if (ssid.length > 2 && ssid[0] == '"' && ssid[ssid.length - 1] == '"') {
+                ssid.substring(1, ssid.length - 1)
+            } else ssid
         }
-        WifiInfo wi = wm.getConnectionInfo();
-        if (wi == null) {
-            return "";
-        }
-        String ssid = wi.getSSID();
-        if (TextUtils.isEmpty(ssid)) {
-            return "";
-        }
-        if (ssid.length() > 2 && ssid.charAt(0) == '"' && ssid.charAt(ssid.length() - 1) == '"') {
-            return ssid.substring(1, ssid.length() - 1);
-        }
-        return ssid;
-    }
 
     /**
      * 注册网络更改侦听器的状态。
      *
      * @param listener listener
      */
-    @RequiresPermission(ACCESS_NETWORK_STATE)
-    public static void registerNetworkStatusChangedListener(final OnNetworkStatusChangedListener listener) {
-        NetworkChangedReceiver.getInstance().registerListener(listener);
+    @RequiresPermission(permission.ACCESS_NETWORK_STATE)
+    fun registerNetworkStatusChangedListener(listener: OnNetworkStatusChangedListener?) {
+        NetworkChangedReceiver.instance.registerListener(listener)
     }
 
     /**
@@ -756,8 +697,8 @@ public final class NetworkUtils {
      * @param listener listener
      * @return true 是, false 否.
      */
-    public static boolean isRegisteredNetworkStatusChangedListener(final OnNetworkStatusChangedListener listener) {
-        return NetworkChangedReceiver.getInstance().isRegistered(listener);
+    fun isRegisteredNetworkStatusChangedListener(listener: OnNetworkStatusChangedListener?): Boolean {
+        return NetworkChangedReceiver.instance.isRegistered(listener)
     }
 
     /**
@@ -765,137 +706,125 @@ public final class NetworkUtils {
      *
      * @param listener listener.
      */
-    public static void unregisterNetworkStatusChangedListener(final OnNetworkStatusChangedListener listener) {
-        NetworkChangedReceiver.getInstance().unregisterListener(listener);
+    fun unregisterNetworkStatusChangedListener(listener: OnNetworkStatusChangedListener?) {
+        NetworkChangedReceiver.instance.unregisterListener(listener)
     }
 
-    @RequiresPermission(allOf = {ACCESS_WIFI_STATE, ACCESS_COARSE_LOCATION})
-    public static WifiScanResults getWifiScanResult() {
-        WifiScanResults result = new WifiScanResults();
-        if (!getWifiEnabled()) {
-            return result;
-        }
-        @SuppressLint("WifiManagerLeak")
-        WifiManager wm = (WifiManager) DawnBridge.getApp().getSystemService(WIFI_SERVICE);
-        //noinspection ConstantConditions
-        if (ActivityCompat.checkSelfPermission(DawnBridge.getApp(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return null;
-        }
-        List<ScanResult> results = wm.getScanResults();
-        if (results != null) {
-            result.setAllResults(results);
-        }
-        return result;
-    }
-
-    private static final long SCAN_PERIOD_MILLIS = 3000;
-    private static final Set<DawnBridge.Consumer<WifiScanResults>> SCAN_RESULT_CONSUMERS = new CopyOnWriteArraySet<>();
-    private static Timer sScanWifiTimer;
-    private static WifiScanResults sPreWifiScanResults;
-
-    @RequiresPermission(allOf = {ACCESS_WIFI_STATE, CHANGE_WIFI_STATE, ACCESS_COARSE_LOCATION})
-    public static void addOnWifiChangedConsumer(final DawnBridge.Consumer<WifiScanResults> consumer) {
-        if (consumer == null) {
-            return;
-        }
-        DawnBridge.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (SCAN_RESULT_CONSUMERS.isEmpty()) {
-                    SCAN_RESULT_CONSUMERS.add(consumer);
-                    startScanWifi();
-                    return;
-                }
-                consumer.accept(sPreWifiScanResults);
-                SCAN_RESULT_CONSUMERS.add(consumer);
+    @get:RequiresPermission(allOf = [permission.ACCESS_WIFI_STATE, permission.ACCESS_COARSE_LOCATION])
+    val wifiScanResult: WifiScanResults?
+        get() {
+            val result = WifiScanResults()
+            if (!wifiEnabled) {
+                return result
             }
-        });
+            @SuppressLint("WifiManagerLeak") val wm =
+                app.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            if (ActivityCompat.checkSelfPermission(
+                    app, permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return null
+            }
+            val results = wm.scanResults
+            if (results != null) {
+                result.allResults = results
+            }
+            return result
+        }
+    private const val SCAN_PERIOD_MILLIS: Long = 3000
+    private val SCAN_RESULT_CONSUMERS: MutableSet<DawnBridge.Consumer<WifiScanResults?>> =
+        CopyOnWriteArraySet()
+    private var sScanWifiTimer: Timer? = null
+    private var sPreWifiScanResults: WifiScanResults? = null
+
+    @RequiresPermission(allOf = [permission.ACCESS_WIFI_STATE, permission.CHANGE_WIFI_STATE, permission.ACCESS_COARSE_LOCATION])
+    fun addOnWifiChangedConsumer(consumer: DawnBridge.Consumer<WifiScanResults?>?) {
+        if (consumer == null) {
+            return
+        }
+        runOnUiThread(Runnable {
+            if (SCAN_RESULT_CONSUMERS.isEmpty()) {
+                SCAN_RESULT_CONSUMERS.add(consumer)
+                startScanWifi()
+                return@Runnable
+            }
+            consumer.accept(sPreWifiScanResults)
+            SCAN_RESULT_CONSUMERS.add(consumer)
+        })
     }
 
-    private static void startScanWifi() {
-        sPreWifiScanResults = new WifiScanResults();
-        sScanWifiTimer = new Timer();
-        sScanWifiTimer.schedule(new TimerTask() {
-            @RequiresPermission(allOf = {ACCESS_WIFI_STATE, CHANGE_WIFI_STATE, ACCESS_COARSE_LOCATION})
-            @Override
-            public void run() {
-                startScanWifiIfEnabled();
-                WifiScanResults scanResults = getWifiScanResult();
-                if (isSameScanResults(sPreWifiScanResults.getAllResults(), scanResults.getAllResults())) {
-                    return;
+    private fun startScanWifi() {
+        sPreWifiScanResults = WifiScanResults()
+        sScanWifiTimer = Timer()
+        sScanWifiTimer!!.schedule(object : TimerTask() {
+            @RequiresPermission(allOf = [permission.ACCESS_WIFI_STATE, permission.CHANGE_WIFI_STATE, permission.ACCESS_COARSE_LOCATION])
+            override fun run() {
+                startScanWifiIfEnabled()
+                val scanResults = wifiScanResult
+                if (isSameScanResults(sPreWifiScanResults!!.allResults, scanResults!!.allResults)) {
+                    return
                 }
-                sPreWifiScanResults = scanResults;
-                DawnBridge.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (DawnBridge.Consumer<WifiScanResults> consumer : SCAN_RESULT_CONSUMERS) {
-                            consumer.accept(sPreWifiScanResults);
-                        }
+                sPreWifiScanResults = scanResults
+                runOnUiThread {
+                    for (consumer in SCAN_RESULT_CONSUMERS) {
+                        consumer.accept(sPreWifiScanResults)
                     }
-                });
-            }
-        }, 0, SCAN_PERIOD_MILLIS);
-    }
-
-    @RequiresPermission(allOf = {ACCESS_WIFI_STATE, CHANGE_WIFI_STATE})
-    private static void startScanWifiIfEnabled() {
-        if (!getWifiEnabled()) {
-            return;
-        }
-        @SuppressLint("WifiManagerLeak")
-        WifiManager wm = (WifiManager) DawnBridge.getApp().getSystemService(WIFI_SERVICE);
-        //noinspection ConstantConditions
-        wm.startScan();
-    }
-
-    public static void removeOnWifiChangedConsumer(final DawnBridge.Consumer<WifiScanResults> consumer) {
-        if (consumer == null) {
-            return;
-        }
-        DawnBridge.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                SCAN_RESULT_CONSUMERS.remove(consumer);
-                if (SCAN_RESULT_CONSUMERS.isEmpty()) {
-                    stopScanWifi();
                 }
             }
-        });
+        }, 0, SCAN_PERIOD_MILLIS)
     }
 
-    private static void stopScanWifi() {
-        if (sScanWifiTimer != null) {
-            sScanWifiTimer.cancel();
-            sScanWifiTimer = null;
+    @RequiresPermission(allOf = [permission.ACCESS_WIFI_STATE, permission.CHANGE_WIFI_STATE])
+    private fun startScanWifiIfEnabled() {
+        if (!wifiEnabled) {
+            return
+        }
+        @SuppressLint("WifiManagerLeak") val wm = app.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        wm.startScan()
+    }
+
+    fun removeOnWifiChangedConsumer(consumer: DawnBridge.Consumer<WifiScanResults?>?) {
+        if (consumer == null) {
+            return
+        }
+        runOnUiThread {
+            SCAN_RESULT_CONSUMERS.remove(consumer)
+            if (SCAN_RESULT_CONSUMERS.isEmpty()) {
+                stopScanWifi()
+            }
         }
     }
 
-    private static boolean isSameScanResults(List<ScanResult> l1, List<ScanResult> l2) {
+    private fun stopScanWifi() {
+        if (sScanWifiTimer != null) {
+            sScanWifiTimer!!.cancel()
+            sScanWifiTimer = null
+        }
+    }
+
+    private fun isSameScanResults(l1: List<ScanResult>?, l2: List<ScanResult>?): Boolean {
         if (l1 == null && l2 == null) {
-            return true;
+            return true
         }
         if (l1 == null || l2 == null) {
-            return false;
+            return false
         }
-        if (l1.size() != l2.size()) {
-            return false;
+        if (l1.size != l2.size) {
+            return false
         }
-        for (int i = 0; i < l1.size(); i++) {
-            ScanResult r1 = l1.get(i);
-            ScanResult r2 = l2.get(i);
+        for (i in l1.indices) {
+            val r1 = l1[i]
+            val r2 = l2[i]
             if (!isSameScanResultContent(r1, r2)) {
-                return false;
+                return false
             }
         }
-        return true;
+        return true
     }
 
-    private static boolean isSameScanResultContent(ScanResult r1, ScanResult r2) {
-        return r1 != null && r2 != null && DawnBridge.equals(r1.BSSID, r2.BSSID)
-                && DawnBridge.equals(r1.SSID, r2.SSID)
-                && DawnBridge.equals(r1.capabilities, r2.capabilities)
-                && r1.level == r2.level;
+    private fun isSameScanResultContent(r1: ScanResult?, r2: ScanResult?): Boolean {
+        return (r1 != null && r2 != null && equals(r1.BSSID, r2.BSSID) && equals(r1.SSID, r2.SSID) && equals(
+            r1.capabilities, r2.capabilities
+        ) && r1.level == r2.level)
     }
-
-
 }

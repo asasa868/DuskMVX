@@ -65,7 +65,7 @@ object ConvertUtils {
      * @return bits
      */
     fun bytes2Bits(bytes: ByteArray?): String {
-        if (bytes == null || bytes.size == 0) {
+        if (bytes == null || bytes.isEmpty()) {
             return ""
         }
         val sb = StringBuilder()
@@ -132,7 +132,7 @@ object ConvertUtils {
      * @return bytes
      */
     fun chars2Bytes(chars: CharArray?): ByteArray? {
-        if (chars == null || chars.size <= 0) {
+        if (chars == null || chars.isEmpty()) {
             return null
         }
         val len = chars.size
@@ -149,14 +149,6 @@ object ConvertUtils {
      *
      * @param bytes       bytes.
      * @param isUpperCase True 使用大写，否则为 false。
-     * @return 16进制string.
-     */
-    /**
-     * Bytes 转 16进制string.
-     *
-     * e.g. bytes2HexString(new byte[] { 0, (byte) 0xa8 }) returns "00A8"
-     *
-     * @param bytes The bytes.
      * @return 16进制string.
      */
     @JvmOverloads
@@ -228,15 +220,12 @@ object ConvertUtils {
     @JvmStatic
     fun bytes2String(bytes: ByteArray, charsetName: String = ""): String? {
         return try {
-            String(bytes, getSafeCharset(charsetName) as Charset)
+            String(bytes, Charset.forName(getSafeCharset(charsetName)))
         } catch (e: UnsupportedEncodingException) {
             e.printStackTrace()
             String(bytes)
         }
     }
-    /**
-     * String 转 bytes.
-     */
     /**
      * String 转 bytes.
      */
@@ -304,7 +293,7 @@ object ConvertUtils {
      */
     @JvmStatic
     fun <T> bytes2Parcelable(
-        bytes: ByteArray?, creator: Parcelable.Creator<T>
+        bytes: ByteArray?, creator: Parcelable.Creator<T?>
     ): T? {
         if (bytes == null) {
             return null
@@ -385,42 +374,42 @@ object ConvertUtils {
     /**
      * Bytes 转 bitmap.
      */
-    fun bytes2Bitmap(bytes: ByteArray?): Bitmap {
+    fun bytes2Bitmap(bytes: ByteArray?): Bitmap? {
         return DawnBridge.bytes2Bitmap(bytes)
     }
 
     /**
      * Bitmap 转 bytes.
      */
-    fun bitmap2Bytes(bitmap: Bitmap?, format: CompressFormat?, quality: Int): ByteArray {
+    fun bitmap2Bytes(bitmap: Bitmap?, format: CompressFormat?, quality: Int): ByteArray? {
         return DawnBridge.bitmap2Bytes(bitmap, format, quality)
     }
 
     /**
      * Bitmap 转 bytes.
      */
-    fun bitmap2Bytes(bitmap: Bitmap?): ByteArray {
+    fun bitmap2Bytes(bitmap: Bitmap?): ByteArray? {
         return DawnBridge.bitmap2Bytes(bitmap)
     }
 
     /**
      * Bytes 转 drawable.
      */
-    fun bytes2Drawable(bytes: ByteArray?): Drawable {
+    fun bytes2Drawable(bytes: ByteArray?): Drawable? {
         return DawnBridge.bytes2Drawable(bytes)
     }
 
     /**
      * Drawable 转 bytes.
      */
-    fun drawable2Bytes(drawable: Drawable?): ByteArray {
+    fun drawable2Bytes(drawable: Drawable?): ByteArray? {
         return DawnBridge.drawable2Bytes(drawable)
     }
 
     /**
      * Drawable 转 bytes.
      */
-    fun drawable2Bytes(drawable: Drawable?, format: CompressFormat?, quality: Int): ByteArray {
+    fun drawable2Bytes(drawable: Drawable?, format: CompressFormat?, quality: Int): ByteArray? {
         return DawnBridge.drawable2Bytes(drawable, format, quality)
     }
 
@@ -562,7 +551,7 @@ object ConvertUtils {
      *
      * @return fit time span
      */
-    fun millis2FitTimeSpan(millis: Long, precision: Int): String {
+    fun millis2FitTimeSpan(millis: Long, precision: Int): String? {
         return DawnBridge.millis2FitTimeSpan(millis, precision)
     }
 
@@ -686,7 +675,7 @@ object ConvertUtils {
      */
     fun outputStream2String(out: OutputStream?, charsetName: String): String {
         return try {
-            String(outputStream2Bytes(out), getSafeCharset(charsetName) as Charset)
+            String(outputStream2Bytes(out),Charset.forName(getSafeCharset(charsetName)))
         } catch (e: UnsupportedEncodingException) {
             e.printStackTrace()
             ""
@@ -736,14 +725,14 @@ object ConvertUtils {
     /**
      * Drawable 转 bitmap.
      */
-    fun drawable2Bitmap(drawable: Drawable?): Bitmap {
+    fun drawable2Bitmap(drawable: Drawable?): Bitmap? {
         return DawnBridge.drawable2Bitmap(drawable)
     }
 
     /**
      * Bitmap 转 drawable.
      */
-    fun bitmap2Drawable(bitmap: Bitmap?): Drawable {
+    fun bitmap2Drawable(bitmap: Bitmap?): Drawable? {
         return DawnBridge.bitmap2Drawable(bitmap)
     }
 

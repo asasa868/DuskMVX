@@ -39,7 +39,7 @@ object TimeUtils {
          *
          * @return `true`: yes<br></br>`false`: no
          */
-        get() = Settings.Global.getInt(DawnBridge.getApp().contentResolver, Settings.Global.AUTO_TIME, 0) == 1
+        get() = Settings.Global.getInt(DawnBridge.app.contentResolver, Settings.Global.AUTO_TIME, 0) == 1
 
     @SuppressLint("SimpleDateFormat")
     fun getSafeDateFormat(pattern: String): SimpleDateFormat {

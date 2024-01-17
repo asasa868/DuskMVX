@@ -205,7 +205,7 @@ object FileIOUtils {
      */
     @JvmOverloads
     fun writeFileFromBytesByStream(
-        file: File, bytes: ByteArray?, append: Boolean = false, listener: OnProgressUpdateListener? = null
+        file: File?, bytes: ByteArray?, append: Boolean = false, listener: OnProgressUpdateListener? = null
     ): Boolean {
         return if (bytes == null) {
             false
@@ -239,7 +239,7 @@ object FileIOUtils {
      */
     @JvmOverloads
     fun writeFileFromIS(
-        file: File, `is`: InputStream?, append: Boolean = false, listener: OnProgressUpdateListener? = null
+        file: File?, `is`: InputStream?, append: Boolean = false, listener: OnProgressUpdateListener? = null
     ): Boolean {
         if (`is` == null || !DawnBridge.createOrExistsFile(file)) {
             Log.e("FileIOUtils", "create file <$file> failed.")
@@ -338,7 +338,7 @@ object FileIOUtils {
      * @return `true`: success<br></br>`false`: fail
      */
     fun writeFileFromBytesByChannel(
-        file: File, bytes: ByteArray?, append: Boolean, isForce: Boolean
+        file: File?, bytes: ByteArray?, append: Boolean, isForce: Boolean
     ): Boolean {
         if (bytes == null) {
             Log.e("FileIOUtils", "bytes is null.")
@@ -426,7 +426,7 @@ object FileIOUtils {
      * @return `true`: success<br></br>`false`: fail
      */
     fun writeFileFromBytesByMap(
-        file: File, bytes: ByteArray?, append: Boolean, isForce: Boolean
+        file: File?, bytes: ByteArray?, append: Boolean, isForce: Boolean
     ): Boolean {
         if (bytes == null || !DawnBridge.createOrExistsFile(file)) {
             Log.e("FileIOUtils", "create file <$file> failed.")
@@ -690,7 +690,7 @@ object FileIOUtils {
             String(bytes)
         } else {
             try {
-                String(bytes, charsetName as Charset)
+                String(bytes,Charset.forName(charsetName))
             } catch (e: UnsupportedEncodingException) {
                 e.printStackTrace()
                 ""

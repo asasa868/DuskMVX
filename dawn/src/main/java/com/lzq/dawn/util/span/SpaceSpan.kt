@@ -1,13 +1,11 @@
-package com.lzq.dawn.util.span;
+package com.lzq.dawn.util.span
 
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.text.style.ReplacementSpan;
-
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Paint.FontMetricsInt
+import android.text.style.ReplacementSpan
+import androidx.annotation.IntRange
 
 /**
  * @Name :SpaceSpan
@@ -15,36 +13,37 @@ import androidx.annotation.Nullable;
  * @Author :  Lzq
  * @Desc :
  */
- class SpaceSpan extends ReplacementSpan {
+internal class SpaceSpan(private val width: Int, color: Int) : ReplacementSpan() {
+    private val paint = Paint()
 
-    private final int   width;
-    private final Paint paint = new Paint();
+    private constructor(width: Int) : this(width, Color.TRANSPARENT)
 
-    private SpaceSpan(final int width) {
-        this(width, Color.TRANSPARENT);
+    init {
+        paint.color = color
+        paint.style = Paint.Style.FILL
     }
 
-    public SpaceSpan(final int width, final int color) {
-        super();
-        this.width = width;
-        paint.setColor(color);
-        paint.setStyle(Paint.Style.FILL);
+    override fun getSize(
+        paint: Paint,
+        text: CharSequence,
+        @IntRange(from = 0) start: Int,
+        @IntRange(from = 0) end: Int,
+        fm: FontMetricsInt?
+    ): Int {
+        return width
     }
 
-    @Override
-    public int getSize(@NonNull final Paint paint, final CharSequence text,
-                       @IntRange(from = 0) final int start,
-                       @IntRange(from = 0) final int end,
-                       @Nullable final Paint.FontMetricsInt fm) {
-        return width;
-    }
-
-    @Override
-    public void draw(@NonNull final Canvas canvas, final CharSequence text,
-                     @IntRange(from = 0) final int start,
-                     @IntRange(from = 0) final int end,
-                     final float x, final int top, final int y, final int bottom,
-                     @NonNull final Paint paint) {
-        canvas.drawRect(x, top, x + width, bottom, this.paint);
+    override fun draw(
+        canvas: Canvas,
+        text: CharSequence,
+        @IntRange(from = 0) start: Int,
+        @IntRange(from = 0) end: Int,
+        x: Float,
+        top: Int,
+        y: Int,
+        bottom: Int,
+        paint: Paint
+    ) {
+        canvas.drawRect(x, top.toFloat(), x + width, bottom.toFloat(), this.paint)
     }
 }

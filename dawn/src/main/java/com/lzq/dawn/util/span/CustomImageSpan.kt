@@ -1,18 +1,14 @@
-package com.lzq.dawn.util.span;
+package com.lzq.dawn.util.span
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.util.Log;
-
-import androidx.annotation.DrawableRes;
-import androidx.core.content.ContextCompat;
-
-import com.lzq.dawn.DawnBridge;
-
-import java.io.InputStream;
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.util.Log
+import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
+import com.lzq.dawn.DawnBridge.app
 
 /**
  * @Name :CustomImageSpan
@@ -20,68 +16,63 @@ import java.io.InputStream;
  * @Author :  Lzq
  * @Desc :
  */
- class CustomImageSpan extends CustomDynamicDrawableSpan {
-    private Drawable mDrawable;
-    private Uri mContentUri;
-    private int mResourceId;
+internal class CustomImageSpan : CustomDynamicDrawableSpan {
+    private var mDrawable: Drawable? = null
+    private var mContentUri: Uri? = null
+    private var mResourceId = 0
 
-    public CustomImageSpan(final Bitmap b, final int verticalAlignment) {
-        super(verticalAlignment);
-        mDrawable = new BitmapDrawable(DawnBridge.getApp().getResources(), b);
-        mDrawable.setBounds(
-                0, 0, mDrawable.getIntrinsicWidth(), mDrawable.getIntrinsicHeight()
-        );
+    constructor(b: Bitmap?, verticalAlignment: Int) : super(verticalAlignment) {
+        mDrawable = BitmapDrawable(app.resources, b)
+        mDrawable?.setBounds(
+            0, 0, mDrawable?.intrinsicWidth ?:0, mDrawable?.intrinsicHeight ?:0
+        )
     }
 
-    public CustomImageSpan(final Drawable d, final int verticalAlignment) {
-        super(verticalAlignment);
-        mDrawable = d;
-        mDrawable.setBounds(
-                0, 0, mDrawable.getIntrinsicWidth(), mDrawable.getIntrinsicHeight()
-        );
+    constructor(d: Drawable?, verticalAlignment: Int) : super(verticalAlignment) {
+        mDrawable = d
+        mDrawable?.setBounds(
+            0, 0, mDrawable?.intrinsicWidth?:0, mDrawable?.intrinsicHeight?:0
+        )
     }
 
-    public CustomImageSpan(final Uri uri, final int verticalAlignment) {
-        super(verticalAlignment);
-        mContentUri = uri;
+    constructor(uri: Uri?, verticalAlignment: Int) : super(verticalAlignment) {
+        mContentUri = uri
     }
 
-    public CustomImageSpan(@DrawableRes final int resourceId, final int verticalAlignment) {
-        super(verticalAlignment);
-        mResourceId = resourceId;
+    constructor(@DrawableRes resourceId: Int, verticalAlignment: Int) : super(verticalAlignment) {
+        mResourceId = resourceId
     }
 
-    @Override
-    public Drawable getDrawable() {
-        Drawable drawable = null;
-        if (mDrawable != null) {
-            drawable = mDrawable;
-        } else if (mContentUri != null) {
-            Bitmap bitmap;
-            try {
-                InputStream is =
-                        DawnBridge.getApp().getContentResolver().openInputStream(mContentUri);
-                bitmap = BitmapFactory.decodeStream(is);
-                drawable = new BitmapDrawable(DawnBridge.getApp().getResources(), bitmap);
-                drawable.setBounds(
+    override val drawable: Drawable?
+        get() {
+            var drawable: Drawable? = null
+            if (mDrawable != null) {
+                drawable = mDrawable
+            } else if (mContentUri != null) {
+                val bitmap: Bitmap
+                try {
+                    val `is` = app.contentResolver.openInputStream(
+                        mContentUri!!
+                    )
+                    bitmap = BitmapFactory.decodeStream(`is`)
+                    drawable = BitmapDrawable(app.resources, bitmap)
+                    drawable.setBounds(
                         0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight()
-                );
-                if (is != null) {
-                    is.close();
+                    )
+                    `is`?.close()
+                } catch (e: Exception) {
+                    Log.e("sms", "Failed to loaded content $mContentUri", e)
                 }
-            } catch (Exception e) {
-                Log.e("sms", "Failed to loaded content " + mContentUri, e);
+            } else {
+                try {
+                    drawable = ContextCompat.getDrawable(app, mResourceId)
+                    drawable!!.setBounds(
+                        0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight
+                    )
+                } catch (e: Exception) {
+                    Log.e("sms", "Unable to find resource: $mResourceId")
+                }
             }
-        } else {
-            try {
-                drawable = ContextCompat.getDrawable(DawnBridge.getApp(), mResourceId);
-                drawable.setBounds(
-                        0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight()
-                );
-            } catch (Exception e) {
-                Log.e("sms", "Unable to find resource: " + mResourceId);
-            }
+            return drawable
         }
-        return drawable;
-    }
 }

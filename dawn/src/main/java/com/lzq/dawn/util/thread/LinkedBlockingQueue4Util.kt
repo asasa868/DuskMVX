@@ -1,8 +1,6 @@
-package com.lzq.dawn.util.thread;
+package com.lzq.dawn.util.thread
 
-import androidx.annotation.NonNull;
-
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue
 
 /**
  * @Name :LinkedBlockingQueue4Util
@@ -10,43 +8,36 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @Author :  Lzq
  * @Desc :
  */
-public class LinkedBlockingQueue4Util extends LinkedBlockingQueue<Runnable> {
+class LinkedBlockingQueue4Util : LinkedBlockingQueue<Runnable> {
+    @Volatile
+    private var mPool: ThreadPoolExecutor4Util? = null
+    private var mCapacity = Int.MAX_VALUE
 
-    private volatile ThreadPoolExecutor4Util mPool;
-
-    private int mCapacity = Integer.MAX_VALUE;
-
-    LinkedBlockingQueue4Util() {
-        super();
-    }
-
-    LinkedBlockingQueue4Util(boolean isAddSubThreadFirstThenAddQueue) {
-        super();
+    internal constructor() : super()
+    internal constructor(isAddSubThreadFirstThenAddQueue: Boolean) : super() {
         if (isAddSubThreadFirstThenAddQueue) {
-            mCapacity = 0;
+            mCapacity = 0
         }
     }
 
-    LinkedBlockingQueue4Util(int capacity) {
-        super();
-        mCapacity = capacity;
+    internal constructor(capacity: Int) : super() {
+        mCapacity = capacity
     }
 
-    @Override
-    public boolean offer(@NonNull Runnable runnable) {
-        if (mCapacity <= size() &&
-                mPool != null && mPool.getPoolSize() < mPool.getMaximumPoolSize()) {
+    override fun offer(runnable: Runnable): Boolean {
+        return if (mCapacity <= size && mPool != null && mPool!!.poolSize < mPool!!.maximumPoolSize) {
             // create a non-core thread
-            return false;
-        }
-        return super.offer(runnable);
+            false
+        } else super.offer(
+            runnable
+        )
     }
 
-    public void setmPool(ThreadPoolExecutor4Util mPool) {
-        this.mPool = mPool;
+    fun setmPool(mPool: ThreadPoolExecutor4Util?) {
+        this.mPool = mPool
     }
 
-    public ThreadPoolExecutor4Util getmPool() {
-        return mPool;
+    fun getmPool(): ThreadPoolExecutor4Util? {
+        return mPool
     }
 }

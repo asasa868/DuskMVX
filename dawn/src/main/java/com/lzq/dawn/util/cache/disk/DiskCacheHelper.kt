@@ -1,6 +1,6 @@
-package com.lzq.dawn.util.cache.disk;
+package com.lzq.dawn.util.cache.disk
 
-import java.util.Locale;
+import java.util.Locale
 
 /**
  * @Name :DiskCacheHelper
@@ -8,16 +8,18 @@ import java.util.Locale;
  * @Author :  Lzq
  * @Desc : 磁盘缓存帮助类
  */
-public final class DiskCacheHelper {
+object DiskCacheHelper {
+    private const val TIME_INFO_LEN = 14
 
-    static final int TIME_INFO_LEN = 14;
-
-    static byte[] newByteArrayWithTime(final int second, final byte[] data) {
-        byte[] time = createDueTime(second).getBytes();
-        byte[] content = new byte[time.length + data.length];
-        System.arraycopy(time, 0, content, 0, time.length);
-        System.arraycopy(data, 0, content, time.length, data.length);
-        return content;
+    @JvmStatic
+    fun newByteArrayWithTime(second: Int, data: ByteArray?): ByteArray {
+        val time = createDueTime(second).toByteArray()
+        val content = ByteArray(time.size + (data?.size ?: 0))
+        System.arraycopy(time, 0, content, 0, time.size)
+        if (data != null) {
+            System.arraycopy(data, 0, content, time.size, data.size)
+        }
+        return content
     }
 
     /**
@@ -26,53 +28,48 @@ public final class DiskCacheHelper {
      * @param seconds 秒
      * @return 到期时间字符串。
      */
-    private static String createDueTime(final int seconds) {
+    private fun createDueTime(seconds: Int): String {
         return String.format(
-                Locale.getDefault(), "_$%010d$_",
-                System.currentTimeMillis() / 1000 + seconds
-        );
+            Locale.getDefault(), "_" + "$%010d$" + "_", System.currentTimeMillis() / 1000 + seconds
+        )
     }
 
-    static boolean isDue(final byte[] data) {
-        long millis = getDueTime(data);
-        return millis != -1 && System.currentTimeMillis() > millis;
+    @JvmStatic
+    fun isDue(data: ByteArray?): Boolean {
+        val millis = getDueTime(data)
+        return millis != -1L && System.currentTimeMillis() > millis
     }
 
-    private static long getDueTime(final byte[] data) {
+    private fun getDueTime(data: ByteArray?): Long {
         if (hasTimeInfo(data)) {
-            String millis = new String(copyOfRange(data, 2, 12));
-            try {
-                return Long.parseLong(millis) * 1000;
-            } catch (NumberFormatException e) {
-                return -1;
+            val millis = String(copyOfRange(data, 2, 12))
+            return try {
+                millis.toLong() * 1000
+            } catch (e: NumberFormatException) {
+                -1
             }
         }
-        return -1;
+        return -1
     }
 
-    static byte[] getDataWithoutDueTime(final byte[] data) {
-        if (hasTimeInfo(data)) {
-            return copyOfRange(data, TIME_INFO_LEN, data.length);
+    @JvmStatic
+    fun getDataWithoutDueTime(data: ByteArray?): ByteArray {
+        return if (hasTimeInfo(data)) {
+            copyOfRange(data, TIME_INFO_LEN, (data?.size ?: 0))
+        } else data ?: ByteArray(0)
+    }
+
+    private fun copyOfRange(original: ByteArray?, from: Int, to: Int): ByteArray {
+        val newLength = to - from
+        require(newLength >= 0) { "$from > $to" }
+        val copy = ByteArray(newLength)
+        if (original != null) {
+            System.arraycopy(original, from, copy, 0, (original.size - from).coerceAtMost(newLength))
         }
-        return data;
+        return copy
     }
 
-    private static byte[] copyOfRange(final byte[] original, final int from, final int to) {
-        int newLength = to - from;
-        if (newLength < 0) {
-            throw new IllegalArgumentException(from + " > " + to);
-        }
-        byte[] copy = new byte[newLength];
-        System.arraycopy(original, from, copy, 0, Math.min(original.length - from, newLength));
-        return copy;
-    }
-
-    private static boolean hasTimeInfo(final byte[] data) {
-        return data != null
-                && data.length >= TIME_INFO_LEN
-                && data[0] == '_'
-                && data[1] == '$'
-                && data[12] == '$'
-                && data[13] == '_';
+    private fun hasTimeInfo(data: ByteArray?): Boolean {
+        return data != null && data.size >= TIME_INFO_LEN && data[0] == '_'.code.toByte() && data[1] == '$'.code.toByte() && data[12] == '$'.code.toByte() && data[13] == '_'.code.toByte()
     }
 }

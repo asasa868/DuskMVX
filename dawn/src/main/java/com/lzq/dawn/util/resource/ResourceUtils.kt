@@ -25,7 +25,7 @@ object ResourceUtils {
      * @return drawable
      */
     fun getDrawable(@DrawableRes id: Int): Drawable? {
-        return ContextCompat.getDrawable(DawnBridge.getApp(), id)
+        return ContextCompat.getDrawable(DawnBridge.app, id)
     }
 
     /**
@@ -35,7 +35,7 @@ object ResourceUtils {
      * @return 按名称的 id 标识符
      */
     fun getIdByName(name: String?): Int {
-        return DawnBridge.getApp().resources.getIdentifier(name, "id", DawnBridge.getApp().packageName)
+        return DawnBridge.app.resources.getIdentifier(name, "id", DawnBridge.app.packageName)
     }
 
     /**
@@ -45,7 +45,7 @@ object ResourceUtils {
      * @return 按名称的字符串标识符
      */
     fun getStringIdByName(name: String?): Int {
-        return DawnBridge.getApp().resources.getIdentifier(name, "string", DawnBridge.getApp().packageName)
+        return DawnBridge.app.resources.getIdentifier(name, "string", DawnBridge.app.packageName)
     }
 
     /**
@@ -55,7 +55,7 @@ object ResourceUtils {
      * @return 名称的颜色标识符
      */
     fun getColorIdByName(name: String?): Int {
-        return DawnBridge.getApp().resources.getIdentifier(name, "color", DawnBridge.getApp().packageName)
+        return DawnBridge.app.resources.getIdentifier(name, "color", DawnBridge.app.packageName)
     }
 
     /**
@@ -65,7 +65,7 @@ object ResourceUtils {
      * @return 名称的dimen标识符
      */
     fun getDimenIdByName(name: String?): Int {
-        return DawnBridge.getApp().resources.getIdentifier(name, "dimen", DawnBridge.getApp().packageName)
+        return DawnBridge.app.resources.getIdentifier(name, "dimen", DawnBridge.app.packageName)
     }
 
     /**
@@ -75,7 +75,7 @@ object ResourceUtils {
      * @return 按名称绘制的Drawable标识符
      */
     fun getDrawableIdByName(name: String?): Int {
-        return DawnBridge.getApp().resources.getIdentifier(name, "drawable", DawnBridge.getApp().packageName)
+        return DawnBridge.app.resources.getIdentifier(name, "drawable", DawnBridge.app.packageName)
     }
 
     /**
@@ -85,7 +85,7 @@ object ResourceUtils {
      * @return 名称的 mipmap 标识符
      */
     fun getMipmapIdByName(name: String?): Int {
-        return DawnBridge.getApp().resources.getIdentifier(name, "mipmap", DawnBridge.getApp().packageName)
+        return DawnBridge.app.resources.getIdentifier(name, "mipmap", DawnBridge.app.packageName)
     }
 
     /**
@@ -95,7 +95,7 @@ object ResourceUtils {
      * @return 按名称排列的布局标识符
      */
     fun getLayoutIdByName(name: String?): Int {
-        return DawnBridge.getApp().resources.getIdentifier(name, "layout", DawnBridge.getApp().packageName)
+        return DawnBridge.app.resources.getIdentifier(name, "layout", DawnBridge.app.packageName)
     }
 
     /**
@@ -105,7 +105,7 @@ object ResourceUtils {
      * @return 按名称的样式标识符
      */
     fun getStyleIdByName(name: String?): Int {
-        return DawnBridge.getApp().resources.getIdentifier(name, "style", DawnBridge.getApp().packageName)
+        return DawnBridge.app.resources.getIdentifier(name, "style", DawnBridge.app.packageName)
     }
 
     /**
@@ -115,7 +115,7 @@ object ResourceUtils {
      * @return 动画标识符的名称
      */
     fun getAnimIdByName(name: String?): Int {
-        return DawnBridge.getApp().resources.getIdentifier(name, "anim", DawnBridge.getApp().packageName)
+        return DawnBridge.app.resources.getIdentifier(name, "anim", DawnBridge.app.packageName)
     }
 
     /**
@@ -125,7 +125,7 @@ object ResourceUtils {
      * @return 按名称的菜单标识符
      */
     fun getMenuIdByName(name: String?): Int {
-        return DawnBridge.getApp().resources.getIdentifier(name, "menu", DawnBridge.getApp().packageName)
+        return DawnBridge.app.resources.getIdentifier(name, "menu", DawnBridge.app.packageName)
     }
 
     /**
@@ -138,14 +138,14 @@ object ResourceUtils {
     fun copyFileFromAssets(assetsFilePath: String, destFilePath: String): Boolean {
         var res = true
         try {
-            val assets = DawnBridge.getApp().assets.list(assetsFilePath)
+            val assets = DawnBridge.app.assets.list(assetsFilePath)
             if (assets != null && assets.size > 0) {
                 for (asset in assets) {
                     res = res and copyFileFromAssets("$assetsFilePath/$asset", "$destFilePath/$asset")
                 }
             } else {
                 res = DawnBridge.writeFileFromIS(
-                    destFilePath, DawnBridge.getApp().assets.open(assetsFilePath)
+                    destFilePath, DawnBridge.app.assets.open(assetsFilePath)
                 )
             }
         } catch (e: IOException) {
@@ -170,13 +170,13 @@ object ResourceUtils {
     @JvmOverloads
     fun readAssets2String(assetsFilePath: String?, charsetName: String? = null): String {
         return try {
-            val `is` = DawnBridge.getApp().assets.open(assetsFilePath!!)
+            val `is` = DawnBridge.app.assets.open(assetsFilePath!!)
             val bytes = DawnBridge.inputStream2Bytes(`is`) ?: return ""
             if (DawnBridge.isSpace(charsetName)) {
                 String(bytes)
             } else {
                 try {
-                    String(bytes, charsetName as Charset)
+                    String(bytes, Charset.forName(charsetName))
                 } catch (e: UnsupportedEncodingException) {
                     e.printStackTrace()
                     ""
@@ -205,7 +205,7 @@ object ResourceUtils {
         assetsPath: String?, charsetName: String? = ""
     ): List<String> {
         return try {
-            DawnBridge.inputStream2Lines(DawnBridge.getApp().resources.assets.open(assetsPath!!), charsetName)
+            DawnBridge.inputStream2Lines(DawnBridge.app.resources.assets.open(assetsPath!!), charsetName)?:List(1){""}
         } catch (e: IOException) {
             e.printStackTrace()
             emptyList()
@@ -221,7 +221,7 @@ object ResourceUtils {
      */
     fun copyFileFromRaw(@RawRes resId: Int, destFilePath: String?): Boolean {
         return DawnBridge.writeFileFromIS(
-            destFilePath, DawnBridge.getApp().resources.openRawResource(resId)
+            destFilePath, DawnBridge.app.resources.openRawResource(resId)
         )
     }
     /**
@@ -239,13 +239,13 @@ object ResourceUtils {
      */
     @JvmOverloads
     fun readRaw2String(@RawRes resId: Int, charsetName: String? = null): String? {
-        val `is` = DawnBridge.getApp().resources.openRawResource(resId)
+        val `is` = DawnBridge.app.resources.openRawResource(resId)
         val bytes = DawnBridge.inputStream2Bytes(`is`) ?: return null
         return if (DawnBridge.isSpace(charsetName)) {
             String(bytes)
         } else {
             try {
-                 String(bytes, charsetName as Charset)
+                String(bytes, Charset.forName(charsetName))
             } catch (e: UnsupportedEncodingException) {
                 e.printStackTrace()
                 ""
@@ -269,6 +269,6 @@ object ResourceUtils {
     fun readRaw2List(
         @RawRes resId: Int, charsetName: String? = ""
     ): List<String> {
-        return DawnBridge.inputStream2Lines(DawnBridge.getApp().resources.openRawResource(resId), charsetName)
+        return DawnBridge.inputStream2Lines(DawnBridge.app.resources.openRawResource(resId), charsetName)?:List(0){""}
     }
 }
