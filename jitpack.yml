@@ -3,8 +3,8 @@ jdk:
 before_install:
   - sdk install java 17.0.9-oracle
   - sdk use java 17.0.9-oracle
-install:
-  - echo "Running a custom install command"
-  - echo " ./gradlew clean install -xtest "
+#install:
+#  - echo "Running a custom install command"
+#  - ./gradlew clean build
 env:
   MYVAR: "custom environment variable"
