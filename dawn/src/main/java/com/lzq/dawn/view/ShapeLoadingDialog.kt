@@ -2,7 +2,6 @@ package com.lzq.dawn.view
 
 import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import com.lzq.dawn.R
@@ -22,8 +21,7 @@ class ShapeLoadingDialog private constructor(val builder: Builder) : Dialog(
         setCancelable(builder.mCancelable)
         setCanceledOnTouchOutside(builder.mCanceledOnTouchOutside)
     }
-
-    override fun onCreate(savedInstanceState: Bundle) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.dawn_layout_dialog)
         mLoadingView = findViewById(R.id.loadView)
