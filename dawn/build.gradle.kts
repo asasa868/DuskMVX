@@ -167,6 +167,17 @@ if (secretPropsFile.exists()) {
     println("No props file, loading env vars")
 }
 
+val packagePropsFile = project.rootProject.file("gradle.properties")
+if (packagePropsFile.exists()) {
+    val p =  Properties()
+    p.load(FileInputStream(packagePropsFile))
+    p.forEach { name, value ->
+        extra[name.toString()] = value
+    }
+} else {
+    println("No props file, loading env vars")
+}
+
 var publishVersion    = extra["PUBLISH_VERSION"].toString()
 var mavenGroupId      = extra["PUBLISH_GROUP_ID"].toString()
 var mavenArtifactId   = extra["PUBLISH_ARTIFACT_ID"].toString()
