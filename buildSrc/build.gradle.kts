@@ -34,35 +34,13 @@ sourceSets {
     }
 }
 
-extra["PUBLISH_VERSION"]           = ""
-extra["PUBLISH_GROUP_ID"]          = ""
-extra["PUBLISH_ARTIFACT_ID"]       = ""
-
-// 遍历赋值
-val secretPropsFile = project.rootProject.file("local.properties")
-if (secretPropsFile.exists()) {
-    val p =  Properties()
-    p.load(FileInputStream(secretPropsFile))
-    p.forEach { name, value ->
-        extra[name.toString()] = value
-    }
-} else {
-    println("No props file, loading env vars")
-}
-
-var publishVersion    = extra["PUBLISH_VERSION"].toString()
-var mavenGroupId      = extra["PUBLISH_GROUP_ID"].toString()
-var mavenArtifactId   = extra["PUBLISH_ARTIFACT_ID"].toString()
-
 publishing{
     publications{
         create<MavenPublication>("release") {
-            from(components["java"])
-
-            groupId = mavenGroupId
-            artifactId = mavenArtifactId
-            version = publishVersion
-
+            groupId = "io.github.asasa868"
+            artifactId = "Dusk"
+            version = "0.0.6"
+            from(components.getByName("java"))
         }
     }
 }
