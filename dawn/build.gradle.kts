@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
+import groovy.util.Node
 import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 import java.io.FileInputStream
 import java.util.Properties
@@ -146,15 +148,15 @@ dependencies {
  * username                   sonatype密码
  * email                      自己的邮箱
  */
-extra["PUBLISH_VERSION"]           = ""
-extra["PUBLISH_GROUP_ID"]          = ""
-extra["PUBLISH_ARTIFACT_ID"]       = ""
-extra["signing.keyId"]             = ""
-extra["signing.password"]          = ""
+extra["PUBLISH_VERSION"] = ""
+extra["PUBLISH_GROUP_ID"] = ""
+extra["PUBLISH_ARTIFACT_ID"] = ""
+extra["signing.keyId"] = ""
+extra["signing.password"] = ""
 extra["signing.secretKeyRingFile"] = ""
-extra["username"]                  = ""
-extra["password"]                  = ""
-extra["email"]                     = ""
+extra["username"] = ""
+extra["password"] = ""
+extra["email"] = ""
 // 遍历赋值
 val secretPropsFile = project.rootProject.file("local.properties")
 if (secretPropsFile.exists()) {
@@ -169,7 +171,7 @@ if (secretPropsFile.exists()) {
 
 val packagePropsFile = project.rootProject.file("gradle.properties")
 if (packagePropsFile.exists()) {
-    val p =  Properties()
+    val p = Properties()
     p.load(FileInputStream(packagePropsFile))
     p.forEach { name, value ->
         extra[name.toString()] = value
@@ -178,15 +180,15 @@ if (packagePropsFile.exists()) {
     println("No props file, loading env vars")
 }
 
-var publishVersion    = extra["PUBLISH_VERSION"].toString()
-var mavenGroupId      = extra["PUBLISH_GROUP_ID"].toString()
-var mavenArtifactId   = extra["PUBLISH_ARTIFACT_ID"].toString()
-var signingKeyId      = extra["signing.keyId"].toString()
-var signingPassword   = extra["signing.password"].toString()
+var publishVersion = extra["PUBLISH_VERSION"].toString()
+var mavenGroupId = extra["PUBLISH_GROUP_ID"].toString()
+var mavenArtifactId = extra["PUBLISH_ARTIFACT_ID"].toString()
+var signingKeyId = extra["signing.keyId"].toString()
+var signingPassword = extra["signing.password"].toString()
 var secretKeyRingFile = extra["signing.secretKeyRingFile"].toString()
-var ossUsername       = extra["username"].toString()
-var ossPassword       = extra["password"].toString()
-var ossEmil           = extra["email"].toString()
+var ossUsername = extra["username"].toString()
+var ossPassword = extra["password"].toString()
+var ossEmil = extra["email"].toString()
 // 暂存库
 val releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
 // 快照库（版本名以 SNAPSHOT 结尾，就推送至快照库）
@@ -223,19 +225,21 @@ afterEvaluate {
 
         }
         publications {
-
             create<MavenPublication>("release") {
                 println("publish-maven Log-------> PUBLISH_GROUP_ID: $mavenGroupId; PUBLISH_ARTIFACT_ID: $mavenArtifactId; PUBLISH_VERSION: $publishVersion")
 
+                from(components.getByName("release"))
                 groupId = mavenGroupId
                 artifactId = mavenArtifactId
                 version = publishVersion
 
                 //生成的 aar 路径，修改成自己的aar地址名称
-                artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+                artifact("$buildDir/outputs/aar/${project.name}-release.aar"){
+                    classifier = "release"
+                }
                 //将源代码一起打包进aar
-                artifact(tasks["androidSourcesJar"]) //将源码打包进aar,这样使用方可以看到方法注释.
-                artifact(tasks["androidJavadocsJar"]) //将注释打包进aar
+                //artifact(tasks["androidSourcesJar"]) //将源码打包进aar,这样使用方可以看到方法注释.
+                //artifact(tasks["androidJavadocsJar"]) //将注释打包进aar
 
                 pom {
                     name.set(mavenArtifactId)
@@ -271,13 +275,25 @@ afterEvaluate {
                     }
 
                     withXml {
-                        val dependenciesNode = asNode().appendNode("dependencies")
-                        configurations["implementation"].dependencies.forEach { dependency ->
-                            if (dependency.version != "unspecified" && dependency.name != "unspecified") {
-                                val dependencyNode = dependenciesNode.appendNode("dependency")
-                                dependencyNode.appendNode("groupId", dependency.group)
-                                dependencyNode.appendNode("artifactId", dependency.name)
-                                dependencyNode.appendNode("version", dependency.version)
+                        withXml {
+                            // 检查是否已存在 <dependencies> 节点
+                            val rootNode = asNode()
+                            val existingDependenciesNode = rootNode.children().find {
+                                (it as Node).name() == "dependencies"
+                            }
+                            val dependenciesNode: Node = if (existingDependenciesNode == null) {
+                                // 如果不存在，则添加 <dependencies> 节点
+                                rootNode.appendNode("dependencies")
+                            } else {
+                                existingDependenciesNode as Node
+                            }
+                            configurations["implementation"].dependencies.forEach { dependency ->
+                                if (dependency.version != "unspecified" && dependency.name != "unspecified") {
+                                    val dependencyNode = dependenciesNode.appendNode("dependency")
+                                    dependencyNode.appendNode("groupId", dependency.group)
+                                    dependencyNode.appendNode("artifactId", dependency.name)
+                                    dependencyNode.appendNode("version", dependency.version)
+                                }
                             }
                         }
                     }
@@ -289,31 +305,33 @@ afterEvaluate {
         useGpgCmd()
         //sign(publishing.publications)
     }
+    tasks.named("generateMetadataFileForReleasePublication") {
+        inputs.files(tasks.named("androidSourcesJar"))
+    }
 }
 
-
 // 生成文档注释
-tasks.register("androidJavadocs",Javadoc::class) {
+tasks.register("androidJavadocs", Javadoc::class) {
     // 设置源码所在的位置
     source(android.sourceSets["main"].java.srcDirs)
 
 }
 
 // 将文档打包成jar,生成javadoc.jar
-tasks.register("androidJavadocsJar",Jar::class) {
+tasks.register("androidJavadocsJar", Jar::class) {
     // 指定文档名称
     archiveClassifier.set("javadoc")
     from(tasks["androidJavadocs"].outputs)
 }
 
 // 将源码打包 ，生成sources.jar
-tasks.register("androidSourcesJar",Jar::class) {
-    archiveClassifier.set("sources")
+tasks.register("androidSourcesJar", Jar::class) {
+
+    archiveClassifier.set("dawn-sources")
     from(android.sourceSets["main"].java.srcDirs)
 
-    exclude("**/R.class","**/BuildConfig.class")
+    exclude("**/R.class", "**/BuildConfig.class")
 }
-
 
 if (project.hasProperty("kotlin")) {
     // 禁用创建javadocs
@@ -321,8 +339,6 @@ if (project.hasProperty("kotlin")) {
         enabled = false
     }
 }
-
-
 
 tasks.withType<Javadoc> {
     options {
@@ -333,10 +349,11 @@ tasks.withType<Javadoc> {
     }
 }
 
-
 //配置需要上传到maven仓库的文件
 artifacts {
     archives(tasks["androidSourcesJar"]) //将源码打包进aar,这样使用方可以看到方法注释.
     archives(tasks["androidJavadocsJar"]) //将注释打包进aar
 }
+
+
 
