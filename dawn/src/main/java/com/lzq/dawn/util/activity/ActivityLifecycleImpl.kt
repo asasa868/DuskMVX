@@ -10,7 +10,6 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.lifecycle.Lifecycle
 import com.lzq.dawn.DawnBridge
-import java.lang.ref.WeakReference
 import java.util.LinkedList
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -97,7 +96,7 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
     }
 
     fun addActivityLifecycleCallbacks(listener: ActivityLifecycleCallbacks?) {
-        addActivityLifecycleCallbacks(STUB.get(), listener)
+        addActivityLifecycleCallbacks(STUB, listener)
     }
 
     fun addActivityLifecycleCallbacks(
@@ -128,7 +127,7 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
     }
 
     fun removeActivityLifecycleCallbacks(callbacks: ActivityLifecycleCallbacks?) {
-        removeActivityLifecycleCallbacks(STUB.get(), callbacks)
+        removeActivityLifecycleCallbacks(STUB, callbacks)
     }
 
     fun removeActivityLifecycleCallbacks(activity: Activity?) {
@@ -158,7 +157,7 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
 
     private fun consumeActivityLifecycleCallbacks(activity: Activity, event: Lifecycle.Event) {
         consumeLifecycle(activity, event, mActivityLifecycleCallbacksMap[activity])
-        consumeLifecycle(activity, event, mActivityLifecycleCallbacksMap[STUB.get()])
+        consumeLifecycle(activity, event, mActivityLifecycleCallbacksMap[STUB])
     }
 
     private fun consumeLifecycle(
@@ -417,7 +416,8 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
          */
         @JvmField
         val INSTANCE = ActivityLifecycleImpl()
-        private val STUB = WeakReference(Activity())
+
+        private val STUB = Activity()
 
         /**
          * 设置启用动画器。
