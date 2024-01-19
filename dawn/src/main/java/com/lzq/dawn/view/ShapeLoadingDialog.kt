@@ -24,7 +24,7 @@ class ShapeLoadingDialog private constructor(val builder: Builder) : Dialog(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.dawn_layout_dialog)
-        mLoadingView = findViewById(R.id.loadView)
+        mLoadingView = findViewById(R.id.dawn_loading_view)
         mLoadingView?.delay = builder.mDelay
         mLoadingView?.loadingText = builder.mLoadText
         setOnDismissListener { mLoadingView?.visibility = View.GONE }

@@ -15,7 +15,6 @@ import android.os.Parcelable
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
@@ -103,7 +102,6 @@ object DawnBridge {
     val app: Application
         get() =  mApp!!
     val topActivity: Activity?
-        ///////////////////////////////////////////////////////////////////////////
         get() = ActivityLifecycleImpl.INSTANCE.topActivity
 
     fun addOnAppStatusChangedListener(listener: OnAppStatusChangedListener) {
@@ -456,7 +454,7 @@ object DawnBridge {
     ///////////////////////////////////////////////////////////////////////////
     // ShellUtils
     ///////////////////////////////////////////////////////////////////////////
-    fun execCmd(command: String?, isRooted: Boolean): CommandResult {
+    fun execCmd(command: String, isRooted: Boolean): CommandResult {
         return ShellUtils.execCmd(command, isRooted)
     }
 
@@ -609,8 +607,8 @@ object DawnBridge {
             }
         }
 
-        private fun append2Host(host: MutableMap<String, String>, key: String, value: String) {
-            var key = key
+        private fun append2Host(host: MutableMap<String, String>, keyStr: String, value: String) {
+            var key = keyStr
             if (TextUtils.isEmpty(key) || TextUtils.isEmpty(value)) {
                 return
             }

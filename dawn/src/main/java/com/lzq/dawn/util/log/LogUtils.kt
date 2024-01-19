@@ -58,7 +58,7 @@ object LogUtils {
     private const val NULL = "null"
     private const val ARGS = "args"
     private const val PLACEHOLDER = " "
-    val config = Config()
+    private val config = Config()
     private var simpleDateFormat: SimpleDateFormat? = null
     private val EXECUTOR = Executors.newSingleThreadExecutor()
     private val I_FORMATTER_MAP = SimpleArrayMap<Class<*>?, IFormatter<*>>()
@@ -188,9 +188,11 @@ object LogUtils {
             if (!logDir.exists()) {
                 return ArrayList()
             }
-            val files = logDir.listFiles { dir, name -> isMatchLogFileName(name) }
+            val files = logDir.listFiles { _, name -> isMatchLogFileName(name) }
             val list: MutableList<File> = mutableListOf()
-            Collections.addAll(list, *files)
+            if (files != null) {
+                Collections.addAll(list, *files)
+            }
             return list
         }
 
@@ -266,7 +268,7 @@ object LogUtils {
         // "-keepattributes SourceFile,LineNumberTable" in proguard file.
         var className = targetElement.className
         val classNameInfo = className.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        if (classNameInfo.size > 0) {
+        if (classNameInfo.isNotEmpty()) {
             className = classNameInfo[classNameInfo.size - 1]
         }
         val index = className.indexOf('$')
@@ -277,24 +279,21 @@ object LogUtils {
     }
 
     private fun processBody(type: Int, vararg contents: Any?): String {
-        var body: String? = NULL
-        if (contents != null) {
-            body = if (contents.size == 1) {
-                formatObject(type, contents[0])
-            } else {
-                val sb = StringBuilder()
-                var i = 0
-                val len = contents.size
-                while (i < len) {
-                    val content = contents[i]
-                    sb.append(ARGS).append("[").append(i).append("]").append(" = ")
-                        .append(formatObject(content)).append(LINE_SEP)
-                    ++i
-                }
-                sb.toString()
+        val body: String? = if (contents.size == 1) {
+            formatObject(type, contents[0])
+        } else {
+            val sb = StringBuilder()
+            var i = 0
+            val len = contents.size
+            while (i < len) {
+                val content = contents[i]
+                sb.append(ARGS).append("[").append(i).append("]").append(" = ")
+                    .append(formatObject(content)).append(LINE_SEP)
+                ++i
             }
+            sb.toString()
         }
-        return if (body!!.length == 0) NOTHING else body
+        return if (body!!.isEmpty()) NOTHING else body
     }
 
     private fun formatObject(type: Int, `object`: Any?): String? {
@@ -374,7 +373,6 @@ object LogUtils {
             print2Console(type, tag, msg)
             return
         }
-        val sb = StringBuilder()
         val lines = msg.split(LINE_SEP.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         for (line in lines) {
             print2Console(type, tag, LEFT_BORDER + line)
@@ -518,7 +516,7 @@ object LogUtils {
         }
         val file = File(filePath)
         val parentFile = file.parentFile
-        val files = parentFile?.listFiles { dir, name -> isMatchLogFileName(name) }
+        val files = parentFile?.listFiles { _, name -> isMatchLogFileName(name) }
         if (files.isNullOrEmpty()) {
             return
         }
@@ -634,7 +632,7 @@ object LogUtils {
     annotation class TYPE
      class Config {
         // 日志的默认存储目录
-        var defaultDir: String? = null
+        private var defaultDir: String? = null
 
         // 日志的存放目录。
         private var mDir: String? = null
@@ -844,16 +842,16 @@ object LogUtils {
         }
 
         val processName: String
-            get() = mProcessName?.replace(":", "_") ?: ""
+            get() = mProcessName.replace(":", "_")
         val dir: String?
             get() = if (mDir == null) defaultDir else mDir
         val globalTag: String
             get() = if (DawnBridge.isSpace(mGlobalTag)) {
                 ""
             } else mGlobalTag
-        val consoleFilter: Char
+        private val consoleFilter: Char
             get() = T[mConsoleFilter - V]
-        val fileFilter: Char
+        private val fileFilter: Char
             get() = T[mFileFilter - V]
 
         fun haveSetOnConsoleOutputListener(): Boolean {

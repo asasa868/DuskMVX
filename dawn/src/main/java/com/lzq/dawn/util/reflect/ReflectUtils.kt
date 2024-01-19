@@ -193,13 +193,13 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
     fun method(name: String, vararg args: Any?): ReflectUtils {
         val types = getArgsType(*args)
 
-        try {
+        return try {
             val method = exactMethod(name, types)
-            return methods(method, objects, *args)
+            methods(method, objects, *args)
         } catch (e: NoSuchMethodException) {
             try {
                 val method = similarMethod(name, types)
-                return methods(method, objects, *args)
+                methods(method, objects, *args)
             } catch (e1: NoSuchMethodException) {
                 throw ReflectException(e1)
             }
@@ -247,7 +247,7 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
                 methods.add(method)
             }
         }
-        if (!methods.isEmpty()) {
+        if (methods.isNotEmpty()) {
             sortMethods(methods)
             return methods[0]
         }
@@ -257,14 +257,14 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
                     methods.add(method)
                 }
             }
-            if (!methods.isEmpty()) {
+            if (methods.isNotEmpty()) {
                 sortMethods(methods)
                 return methods[0]
             }
             type = type.superclass
         } while (type != null)
         throw NoSuchMethodException(
-            "No similar method " + name + " with params " + Arrays.toString(types) + " could be found on type " + type() + "."
+            "No similar method " + name + " with params " + types.contentToString() + " could be found on type " + type() + "."
         )
     }
 
@@ -337,7 +337,7 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
      */
     fun <P> proxy(proxyType: Class<P>): P {
         val isMap = objects is Map<*, *>
-        val handler = InvocationHandler { proxy, method, args ->
+        val handler = InvocationHandler { _, method, args ->
             val name = method.name
             try {
                 return@InvocationHandler reflect(objects).method(name, *args).get<Any>()!!

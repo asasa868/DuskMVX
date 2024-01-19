@@ -22,9 +22,6 @@ object LanguageUtils {
      *
      * @param isRelaunchApp true 重新启动应用程序，false 重新创建所有活动。
      */
-    /**
-     * 应用系统语言。
-     */
     @JvmOverloads
     fun applySystemLanguage(isRelaunchApp: Boolean = false) {
         applyLanguageReal(null, isRelaunchApp)
@@ -34,11 +31,6 @@ object LanguageUtils {
      *
      * @param locale        语言环境的语言。
      * @param isRelaunchApp true 重新启动应用程序，false 重新创建所有活动。
-     */
-    /**
-     * 应用语言
-     *
-     * @param locale 语言环境的语言。
      */
     @JvmOverloads
     fun applyLanguage(
@@ -88,7 +80,7 @@ object LanguageUtils {
          *
          * @return 返回 applicationContext 的语言环境。
          */
-        get() = getContextLanguage(DawnBridge.app!!)
+        get() = getContextLanguage(DawnBridge.app)
     val systemLanguage: Locale
         /**
          * 返回系统的语言环境
@@ -108,11 +100,11 @@ object LanguageUtils {
     }
 
     fun pollCheckAppContextLocal(destLocale: Locale, index: Int, consumer: DawnBridge.Consumer<Boolean?>?) {
-        val appResources = DawnBridge.app?.resources
+        val appResources = DawnBridge.app.resources
         val appConfig = appResources!!.configuration
         val appLocal = getLocal(appConfig)
         setLocal(appConfig, destLocale)
-        DawnBridge.app?.resources!!.updateConfiguration(appConfig, appResources.displayMetrics)
+        DawnBridge.app.resources!!.updateConfiguration(appConfig, appResources.displayMetrics)
         if (consumer == null) {
             return
         }

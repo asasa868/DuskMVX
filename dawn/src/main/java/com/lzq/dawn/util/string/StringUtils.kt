@@ -184,12 +184,16 @@ object StringUtils {
         var i = 0
         val len = chars.size
         while (i < len) {
-            if (chars[i].code == 12288) {
-                chars[i] = ' '
-            } else if (chars[i].code in 65281..65374) {
-                chars[i] = (chars[i].code - 65248).toChar()
-            } else {
-                chars[i] = chars[i]
+            when (chars[i].code) {
+                12288 -> {
+                    chars[i] = ' '
+                }
+                in 65281..65374 -> {
+                    chars[i] = (chars[i].code - 65248).toChar()
+                }
+                else -> {
+                    chars[i] = chars[i]
+                }
             }
             i++
         }
@@ -230,7 +234,7 @@ object StringUtils {
      */
     @JvmStatic
     fun getString(@StringRes id: Int): String? {
-        return getString(id, *(null as Array<Any?>?)!!)
+        return getString(id, null as Array<Any?>?)
     }
 
     /**
@@ -243,7 +247,7 @@ object StringUtils {
     @JvmStatic
     fun getString(@StringRes id: Int, vararg formatArgs: Any?): String? {
         return try {
-            format(DawnBridge.app?.getString(id), *formatArgs)
+            format(DawnBridge.app.getString(id), *formatArgs)
         } catch (e: Resources.NotFoundException) {
             e.printStackTrace()
             id.toString()
@@ -258,7 +262,7 @@ object StringUtils {
      */
     fun getStringArray(@ArrayRes id: Int): Array<String> {
         return try {
-            DawnBridge.app?.resources!!.getStringArray(id)
+            DawnBridge.app.resources!!.getStringArray(id)
         } catch (e: Resources.NotFoundException) {
             e.printStackTrace()
             arrayOf(id.toString())

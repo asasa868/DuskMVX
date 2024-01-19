@@ -1,4 +1,4 @@
-package com.lzq.dawn.util.shell;
+package com.lzq.dawn.util.shell
 
 /**
  * @Name :CommandResult
@@ -6,22 +6,12 @@ package com.lzq.dawn.util.shell;
  * @Author :  Lzq
  * @Desc :
  */
-public class CommandResult {
-
-    public int    result;
-    public String successMsg;
-    public String errorMsg;
-
-    public CommandResult(final int result, final String successMsg, final String errorMsg) {
-        this.result = result;
-        this.successMsg = successMsg;
-        this.errorMsg = errorMsg;
-    }
-
-    @Override
-    public String toString() {
-        return "result: " + result + "\n" +
-                "successMsg: " + successMsg + "\n" +
-                "errorMsg: " + errorMsg;
+class CommandResult(var result: Int, private var successMsg: String, private var errorMsg: String) {
+    override fun toString(): String {
+        return """
+              result: $result
+              successMsg: $successMsg
+              errorMsg: $errorMsg
+              """.trimIndent()
     }
 }

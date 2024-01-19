@@ -1,9 +1,11 @@
 package com.lzq.dawn.util.file
 
 import android.content.Intent
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.StatFs
+import android.provider.MediaStore
 import android.text.TextUtils
 import com.lzq.dawn.DawnBridge
 import java.io.BufferedInputStream
@@ -37,7 +39,7 @@ object FileUtils {
      */
     @JvmStatic
     fun getFileByPath(filePath: String?): File? {
-        return if (DawnBridge.isSpace(filePath)) null else File(filePath)
+        return if (DawnBridge.isSpace(filePath)) null else filePath?.let { File(it) }
     }
 
     /**
@@ -122,7 +124,7 @@ object FileUtils {
         if (newName == file.name) {
             return true
         }
-        val newFile = File(file.parent + File.separator + newName)
+        val newFile = File((file.parent?.plus(File.separator) ?: "") + newName)
         // the new name of file exists then return false
         return (!newFile.exists() && file.renameTo(newFile))
     }
@@ -283,19 +285,13 @@ object FileUtils {
     ): Boolean {
         return copy(getFileByPath(srcPath), getFileByPath(destPath), listener)
     }
+
     /**
      * 复制目录或文件
      *
      * @param src      源。
      * @param dest     目的地。
      * @param listener 替换侦听器
-     * @return `true`: success<br></br>`false`: fail
-     */
-    /**
-     * 复制目录或文件
-     *
-     * @param src  源。
-     * @param dest 目的地。
      * @return `true`: success<br></br>`false`: fail
      */
     @JvmOverloads
@@ -364,19 +360,13 @@ object FileUtils {
     ): Boolean {
         return move(getFileByPath(srcPath), getFileByPath(destPath), listener)
     }
+
     /**
      * 移动目录或文件
      *
      * @param src      源
      * @param dest     目的
      * @param listener 替换侦听器
-     * @return `true`: success<br></br>`false`: fail
-     */
-    /**
-     * 移动目录或文件
-     *
-     * @param src  源
-     * @param dest 目的
      * @return `true`: success<br></br>`false`: fail
      */
     @JvmOverloads
@@ -482,8 +472,7 @@ object FileUtils {
             false
         } else try {
             (DawnBridge.writeFileFromIS(
-                destFile.absolutePath,
-                FileInputStream(srcFile)
+                destFile.absolutePath, FileInputStream(srcFile)
             ) && !(isMove && !deleteFile(srcFile)))
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
@@ -652,6 +641,7 @@ object FileUtils {
         }
         return true
     }
+
     /**
      * 返回目录中的文件。
      *
@@ -661,18 +651,11 @@ object FileUtils {
      * @param comparator 用于确定列表顺序的比较器。
      * @return 目录中的文件
      */
-    /**
-     * 返回目录中的文件。
-     *
-     * 不遍历子目录
-     *
-     * @param dirPath 目录的路径。
-     * @return 目录中的文件
-     */
     @JvmOverloads
     fun listFilesInDir(dirPath: String?, comparator: Comparator<File?>? = null): List<File?> {
         return listFilesInDir(getFileByPath(dirPath), false, comparator)
     }
+
     /**
      * 返回目录中的文件。
      *
@@ -680,14 +663,6 @@ object FileUtils {
      *
      * @param dir        目录
      * @param comparator 用于确定列表顺序的比较器。
-     * @return 目录中的文件
-     */
-    /**
-     * 返回目录中的文件。
-     *
-     * 不遍历子目录
-     *
-     * @param dir 目录.
      * @return 目录中的文件
      */
     @JvmOverloads
@@ -719,19 +694,13 @@ object FileUtils {
     ): List<File?> {
         return listFilesInDir(getFileByPath(dirPath), isRecursive, comparator)
     }
+
     /**
      * 返回目录中的文件。
      *
      * @param dir         目录
      * @param isRecursive True遍历子目录，否则为false。
      * @param comparator  用于确定列表顺序的比较器。
-     * @return 目录中的文件
-     */
-    /**
-     * 返回目录中的文件。
-     *
-     * @param dir         目录
-     * @param isRecursive True遍历子目录，否则为false。
      * @return 目录中的文件
      */
     @JvmOverloads
@@ -816,6 +785,7 @@ object FileUtils {
     ): List<File?> {
         return listFilesInDirWithFilter(getFileByPath(dirPath), filter, isRecursive, comparator)
     }
+
     /**
      * 返回目录中满足筛选器的文件。
      *
@@ -823,23 +793,6 @@ object FileUtils {
      * @param filter      过滤器
      * @param isRecursive True遍历子目录，否则为false。
      * @param comparator  用于确定列表顺序的比较器
-     * @return 目录中满足筛选器的文件
-     */
-    /**
-     * 返回目录中满足筛选器的文件
-     *
-     * 不遍历子目录
-     *
-     * @param dir    目录
-     * @param filter 过滤器
-     * @return 目录中满足筛选器的文件
-     */
-    /**
-     * 返回目录中满足筛选器的文件。
-     *
-     * @param dir         目录
-     * @param filter      过滤器
-     * @param isRecursive True遍历子目录，否则为false。
      * @return 目录中满足筛选器的文件
      */
     @JvmOverloads
@@ -1084,7 +1037,7 @@ object FileUtils {
             `is` = BufferedInputStream(FileInputStream(file))
             val buffer = ByteArray(1024)
             var readChars: Int
-            if (LINE_SEP.endsWith("\n")) {
+            if (LINE_SEP!!.endsWith("\n")) {
                 while (`is`.read(buffer, 0, 1024).also { readChars = it } != -1) {
                     for (i in 0 until readChars) {
                         if (buffer[i] == '\n'.code.toByte()) {
@@ -1251,7 +1204,7 @@ object FileUtils {
      * @return 返回文件的 MD5
      */
     fun getFileMD5ToString(filePath: String?): String {
-        val file = if (DawnBridge.isSpace(filePath)) null else File(filePath)
+        val file = if (DawnBridge.isSpace(filePath)) null else filePath?.let { File(it) }
         return getFileMD5ToString(file)
     }
 
@@ -1444,9 +1397,20 @@ object FileUtils {
         if (file == null || !file.exists()) {
             return
         }
-        val intent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-        intent.data = Uri.parse("file://" + file.absolutePath)
-        DawnBridge.app.sendBroadcast(intent)
+        MediaScannerConnection.scanFile(DawnBridge.app, arrayOf(file.absolutePath), null, null)
+    }
+
+    /**
+     * 通知系统扫描文件。
+     *
+     * @param file  file.
+     */
+    @JvmStatic
+    fun notifySystemToScan(file: File?, callback: MediaScannerConnection.OnScanCompletedListener) {
+        if (file == null || !file.exists()) {
+            return
+        }
+        MediaScannerConnection.scanFile(DawnBridge.app, arrayOf(file.absolutePath), null, callback)
     }
 
     /**
@@ -1461,10 +1425,8 @@ object FileUtils {
             return 0
         }
         val statFs = StatFs(anyPathInFs)
-        val blockSize: Long
-        val totalSize: Long
-        blockSize = statFs.blockSizeLong
-        totalSize = statFs.blockCountLong
+        val blockSize: Long = statFs.blockSizeLong
+        val totalSize: Long = statFs.blockCountLong
         return blockSize * totalSize
     }
 
@@ -1480,10 +1442,8 @@ object FileUtils {
             return 0
         }
         val statFs = StatFs(anyPathInFs)
-        val blockSize: Long
-        val availableSize: Long
-        blockSize = statFs.blockSizeLong
-        availableSize = statFs.availableBlocksLong
+        val blockSize: Long = statFs.blockSizeLong
+        val availableSize: Long = statFs.availableBlocksLong
         return blockSize * availableSize
     }
 }

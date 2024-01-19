@@ -106,8 +106,8 @@ class DiskCacheManager internal constructor(
     }
 
     fun clear(): Boolean {
-        val files = cacheDir.listFiles { dir, name -> name.startsWith(CacheConstants.CACHE_PREFIX) }
-        if (files == null || files.size <= 0) {
+        val files = cacheDir.listFiles { _, name -> name.startsWith(CacheConstants.CACHE_PREFIX) }
+        if (files == null || files.isEmpty()) {
             return true
         }
         var flag = true

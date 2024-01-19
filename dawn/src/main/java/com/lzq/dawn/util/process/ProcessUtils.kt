@@ -18,7 +18,6 @@ import com.lzq.dawn.DawnBridge
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
-import java.util.Arrays
 import java.util.Collections
 
 /**
@@ -80,14 +79,12 @@ object ProcessUtils {
                 val usageStatsManager =
                     DawnBridge.app.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
                 var usageStatsList: List<UsageStats>? = null
-                if (usageStatsManager != null) {
-                    val endTime = System.currentTimeMillis()
-                    val beginTime = endTime - 86400000 * 7
-                    usageStatsList = usageStatsManager.queryUsageStats(
-                            UsageStatsManager.INTERVAL_BEST, beginTime, endTime
-                        )
-                }
-                if (usageStatsList == null || usageStatsList.isEmpty()) {
+                val endTime = System.currentTimeMillis()
+                val beginTime = endTime - 86400000 * 7
+                usageStatsList = usageStatsManager.queryUsageStats(
+                        UsageStatsManager.INTERVAL_BEST, beginTime, endTime
+                    )
+                if (usageStatsList.isNullOrEmpty()) {
                     return ""
                 }
                 var recentStats: UsageStats? = null
@@ -170,7 +167,7 @@ object ProcessUtils {
             return true
         }
         for (aInfo in info) {
-            if (Arrays.asList(*aInfo.pkgList).contains(packageName)) {
+            if (listOf(*aInfo.pkgList).contains(packageName)) {
                 am.killBackgroundProcesses(packageName)
             }
         }
@@ -179,7 +176,7 @@ object ProcessUtils {
             return true
         }
         for (aInfo in info) {
-            if (Arrays.asList(*aInfo.pkgList).contains(packageName)) {
+            if (listOf(*aInfo.pkgList).contains(packageName)) {
                 return false
             }
         }
@@ -214,7 +211,7 @@ object ProcessUtils {
             return name
         }
     private val currentProcessNameByFile: String
-        private get() = try {
+        get() = try {
             val file = File("/proc/" + Process.myPid() + "/" + "cmdline")
             val mBufferedReader = BufferedReader(FileReader(file))
             val processName = mBufferedReader.readLine().trim { it <= ' ' }
@@ -225,10 +222,9 @@ object ProcessUtils {
             ""
         }
     private val currentProcessNameByAms: String
-        private get() {
+        get() {
             try {
                 val am = DawnBridge.app.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                    ?: return ""
                 val info = am.runningAppProcesses
                 if (info == null || info.size == 0) {
                     return ""
@@ -247,7 +243,7 @@ object ProcessUtils {
             return ""
         }
     private val currentProcessNameByReflect: String
-        private get() {
+        get() {
             var processName = ""
             try {
                 val app = DawnBridge.app

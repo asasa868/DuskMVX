@@ -143,15 +143,13 @@ object LogFormatter {
             first = false
             sb.append("bnds=").append(mSourceBounds.toShortString())
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            val mClipData = intent.clipData
-            if (mClipData != null) {
-                if (!first) {
-                    sb.append(' ')
-                }
-                first = false
-                clipData2String(mClipData, sb)
+        val mClipData = intent.clipData
+        if (mClipData != null) {
+            if (!first) {
+                sb.append(' ')
             }
+            first = false
+            clipData2String(mClipData, sb)
         }
         val mExtras = intent.extras
         if (mExtras != null) {
@@ -168,7 +166,6 @@ object LogFormatter {
             if (!first) {
                 sb.append(' ')
             }
-            first = false
             sb.append("sel={")
             sb.append(if (mSelector === intent) "(this Intent)" else intent2String(mSelector))
             sb.append("}")
@@ -244,8 +241,8 @@ object LogFormatter {
         return json
     }
 
-    private fun formatXml(xml: String): String {
-        var xml = xml
+    private fun formatXml(xmlStr: String): String {
+        var xml = xmlStr
         try {
             val xmlInput: Source = StreamSource(StringReader(xml))
             val xmlOutput = StreamResult(StringWriter())

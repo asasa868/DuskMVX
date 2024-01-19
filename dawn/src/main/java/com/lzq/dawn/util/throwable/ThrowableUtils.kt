@@ -16,12 +16,12 @@ object ThrowableUtils {
     /**
      * 获取完整堆栈跟踪
      *
-     * @param throwable throwable
+     * @param throwableError throwable
      * @return 完整堆栈跟踪
      */
     @JvmStatic
-    fun getFullStackTrace(throwable: Throwable?): String {
-        var throwable = throwable
+    fun getFullStackTrace(throwableError: Throwable?): String {
+        var throwable = throwableError
         val throwableList: MutableList<Throwable> = ArrayList()
         while (throwable != null && !throwableList.contains(throwable)) {
             throwableList.add(throwable)

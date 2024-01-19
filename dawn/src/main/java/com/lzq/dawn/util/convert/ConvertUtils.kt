@@ -80,11 +80,11 @@ object ConvertUtils {
     /**
      * Bits  转 bytes.
      *
-     * @param bits bits.
+     * @param bitStr bits.
      * @return bytes
      */
-    fun bits2Bytes(bits: String): ByteArray {
-        var bits = bits
+    fun bits2Bytes(bitStr: String): ByteArray {
+        var bits = bitStr
         val lenMod = bits.length % 8
         var byteLen = bits.length / 8
         // add "0" until length to 8 times
@@ -178,12 +178,12 @@ object ConvertUtils {
      *
      * e.g. hexString2Bytes("00A8") returns { 0, (byte) 0xA8 }
      *
-     * @param hexString 16进制string
+     * @param hexStr 16进制string
      * @return bytes
      */
     @JvmStatic
-    fun hexString2Bytes(hexString: String): ByteArray {
-        var hexString = hexString
+    fun hexString2Bytes(hexStr: String): ByteArray {
+        var hexString = hexStr
         if (DawnBridge.isSpace(hexString)) {
             return ByteArray(0)
         }

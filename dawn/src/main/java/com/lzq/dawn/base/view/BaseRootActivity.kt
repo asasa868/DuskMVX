@@ -69,7 +69,6 @@ abstract class BaseRootActivity : AppCompatActivity(), IBaseRootView, OnNetworkS
      * 隐藏弹窗
      */
     override fun hideLoading() {
-        if (loadingDialog == null) return
         loadingDialog.dismiss()
     }
 

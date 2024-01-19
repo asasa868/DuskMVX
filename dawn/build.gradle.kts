@@ -36,7 +36,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile(ProjectConfigs.proguardName), ProjectConfigs.proguardRules)
         }
@@ -237,9 +237,6 @@ afterEvaluate {
                 artifact("$buildDir/outputs/aar/${project.name}-release.aar"){
                     classifier = "release"
                 }
-                //将源代码一起打包进aar
-                //artifact(tasks["androidSourcesJar"]) //将源码打包进aar,这样使用方可以看到方法注释.
-                //artifact(tasks["androidJavadocsJar"]) //将注释打包进aar
 
                 pom {
                     name.set(mavenArtifactId)

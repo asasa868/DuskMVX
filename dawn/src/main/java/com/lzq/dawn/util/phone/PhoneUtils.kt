@@ -151,14 +151,14 @@ object PhoneUtils {
                 if (id0 != null && id0.length < 15) {
                     id0 = ""
                 }
-                if (id1 != null && id1.length < 15) {
+                if (id1.length < 15) {
                     id1 = ""
                 }
             } else {
                 if (id0 != null && id0.length == 14) {
                     id0 = ""
                 }
-                if (id1 != null && id1.length == 14) {
+                if (id1.length == 14) {
                     id1 = ""
                 }
             }
@@ -300,5 +300,5 @@ object PhoneUtils {
     }
 
     private val telephonyManager: TelephonyManager
-        private get() = DawnBridge.app.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        get() = DawnBridge.app.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 }

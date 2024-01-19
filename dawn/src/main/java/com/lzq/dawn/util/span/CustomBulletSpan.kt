@@ -36,8 +36,7 @@ internal class CustomBulletSpan(private val color: Int, private val radius: Int,
     ) {
         if ((text as Spanned).getSpanStart(this) == start) {
             val style = p.style
-            var oldColor = 0
-            oldColor = p.color
+            val oldColor: Int = p.color
             p.color = color
             p.style = Paint.Style.FILL
             if (c.isHardwareAccelerated) {

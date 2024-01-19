@@ -1,14 +1,12 @@
-package com.lzq.dawn.util.shell;
+package com.lzq.dawn.util.shell
 
-import androidx.annotation.NonNull;
-
-import com.lzq.dawn.DawnBridge;
-
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.List;
+import com.lzq.dawn.DawnBridge
+import com.lzq.dawn.DawnBridge.doAsync
+import java.io.BufferedReader
+import java.io.DataOutputStream
+import java.io.IOException
+import java.io.InputStreamReader
+import java.nio.charset.StandardCharsets
 
 /**
  * @Name :ShellUtils
@@ -16,13 +14,8 @@ import java.util.List;
  * @Author :  Lzq
  * @Desc : shell
  */
-public final class ShellUtils {
-
-    private static final String LINE_SEP = System.getProperty("line.separator");
-
-    private ShellUtils() {
-
-    }
+object ShellUtils {
+    private val LINE_SEP = System.getProperty("line.separator")
 
     /**
      * 异步执行命令。
@@ -32,24 +25,10 @@ public final class ShellUtils {
      * @param consumer 消费者。
      * @return task
      */
-    public static DawnBridge.Task<CommandResult> execCmdAsync(final String command,
-                                                            final boolean isRooted,
-                                                            final DawnBridge.Consumer<CommandResult> consumer) {
-        return execCmdAsync(new String[]{command}, isRooted, true, consumer);
-    }
-
-    /**
-     * 异步执行命令。
-     *
-     * @param commands 命令
-     * @param isRooted 使用root时为True，否则为false。
-     * @param consumer 消费者。
-     * @return task
-     */
-    public static DawnBridge.Task<CommandResult> execCmdAsync(final List<String> commands,
-                                                            final boolean isRooted,
-                                                            final DawnBridge.Consumer<CommandResult> consumer) {
-        return execCmdAsync(commands == null ? null : commands.toArray(new String[]{}), isRooted, true, consumer);
+    fun execCmdAsync(
+        command: String, isRooted: Boolean, consumer: DawnBridge.Consumer<CommandResult>
+    ): DawnBridge.Task<CommandResult> {
+        return execCmdAsync(arrayOf(command), isRooted, true, consumer)
     }
 
     /**
@@ -60,10 +39,10 @@ public final class ShellUtils {
      * @param consumer 消费者。
      * @return task
      */
-    public static DawnBridge.Task<CommandResult> execCmdAsync(final String[] commands,
-                                                            final boolean isRooted,
-                                                            final DawnBridge.Consumer<CommandResult> consumer) {
-        return execCmdAsync(commands, isRooted, true, consumer);
+    fun execCmdAsync(
+        commands: Array<String>?, isRooted: Boolean, consumer: DawnBridge.Consumer<CommandResult>
+    ): DawnBridge.Task<CommandResult> {
+        return execCmdAsync(commands, isRooted, true, consumer)
     }
 
     /**
@@ -75,11 +54,13 @@ public final class ShellUtils {
      * @param consumer        消费者
      * @return task
      */
-    public static DawnBridge.Task<CommandResult> execCmdAsync(final String command,
-                                                            final boolean isRooted,
-                                                            final boolean isNeedResultMsg,
-                                                            final DawnBridge.Consumer<CommandResult> consumer) {
-        return execCmdAsync(new String[]{command}, isRooted, isNeedResultMsg, consumer);
+    fun execCmdAsync(
+        command: String,
+        isRooted: Boolean,
+        isNeedResultMsg: Boolean,
+        consumer: DawnBridge.Consumer<CommandResult>
+    ): DawnBridge.Task<CommandResult> {
+        return execCmdAsync(arrayOf(command), isRooted, isNeedResultMsg, consumer)
     }
 
     /**
@@ -91,35 +72,17 @@ public final class ShellUtils {
      * @param consumer        消费者
      * @return task
      */
-    public static DawnBridge.Task<CommandResult> execCmdAsync(final List<String> commands,
-                                                            final boolean isRooted,
-                                                            final boolean isNeedResultMsg,
-                                                            final DawnBridge.Consumer<CommandResult> consumer) {
-        return execCmdAsync(commands == null ? null : commands.toArray(new String[]{}),
-                isRooted,
-                isNeedResultMsg,
-                consumer);
-    }
-
-    /**
-     * 异步执行命令
-     *
-     * @param commands        命令
-     * @param isRooted        使用root时为True，否则为false。
-     * @param isNeedResultMsg True返回结果消息，否则为false。
-     * @param consumer        消费者
-     * @return task
-     */
-    public static DawnBridge.Task<CommandResult> execCmdAsync(final String[] commands,
-                                                            final boolean isRooted,
-                                                            final boolean isNeedResultMsg,
-                                                            @NonNull final DawnBridge.Consumer<CommandResult> consumer) {
-        return DawnBridge.doAsync(new DawnBridge.Task<CommandResult>(consumer) {
-            @Override
-            public CommandResult doInBackground() {
-                return execCmd(commands, isRooted, isNeedResultMsg);
+    fun execCmdAsync(
+        commands: Array<String>?,
+        isRooted: Boolean,
+        isNeedResultMsg: Boolean,
+        consumer: DawnBridge.Consumer<CommandResult>
+    ): DawnBridge.Task<CommandResult> {
+        return doAsync(object : DawnBridge.Task<CommandResult>(consumer) {
+            override fun doInBackground(): CommandResult {
+                return execCmd(commands, isRooted, isNeedResultMsg)
             }
-        });
+        })
     }
 
     /**
@@ -127,64 +90,10 @@ public final class ShellUtils {
      *
      * @param command  命令
      * @param isRooted 使用root时为True，否则为false。
-     * @return {@link CommandResult} instance
+     * @return [CommandResult] instance
      */
-    public static CommandResult execCmd(final String command, final boolean isRooted) {
-        return execCmd(new String[]{command}, isRooted, true);
-    }
-
-    /**
-     * 执行命令。
-     *
-     * @param command  命令
-     * @param envp     环境变量设置。
-     * @param isRooted 使用root时为True，否则为false。
-     * @return {@link CommandResult} instance
-     */
-    public static CommandResult execCmd(final String command, final List<String> envp, final boolean isRooted) {
-        return execCmd(new String[]{command},
-                envp == null ? null : envp.toArray(new String[]{}),
-                isRooted,
-                true);
-    }
-
-    /**
-     * 执行命令。
-     *
-     * @param commands 命令
-     * @param isRooted 使用root时为True，否则为false。
-     * @return {@link CommandResult} instance
-     */
-    public static CommandResult execCmd(final List<String> commands, final boolean isRooted) {
-        return execCmd(commands == null ? null : commands.toArray(new String[]{}), isRooted, true);
-    }
-
-    /**
-     * 执行命令。
-     *
-     * @param commands 命令
-     * @param envp     环境变量设置。
-     * @param isRooted 使用root时为True，否则为false。
-     * @return {@link CommandResult} instance
-     */
-    public static CommandResult execCmd(final List<String> commands,
-                                        final List<String> envp,
-                                        final boolean isRooted) {
-        return execCmd(commands == null ? null : commands.toArray(new String[]{}),
-                envp == null ? null : envp.toArray(new String[]{}),
-                isRooted,
-                true);
-    }
-
-    /**
-     * 执行命令。
-     *
-     * @param commands 命令
-     * @param isRooted 使用root时为True，否则为false。
-     * @return {@link CommandResult} instance
-     */
-    public static CommandResult execCmd(final String[] commands, final boolean isRooted) {
-        return execCmd(commands, isRooted, true);
+    fun execCmd(command: String, isRooted: Boolean): CommandResult {
+        return execCmd(arrayOf(command), isRooted, true)
     }
 
     /**
@@ -193,12 +102,12 @@ public final class ShellUtils {
      * @param command         命令
      * @param isRooted        使用root时为True，否则为false。
      * @param isNeedResultMsg True返回结果消息，否则为false。
-     * @return {@link CommandResult} instance
+     * @return [CommandResult] instance
      */
-    public static CommandResult execCmd(final String command,
-                                        final boolean isRooted,
-                                        final boolean isNeedResultMsg) {
-        return execCmd(new String[]{command}, isRooted, isNeedResultMsg);
+    fun execCmd(
+        command: String, isRooted: Boolean, isNeedResultMsg: Boolean
+    ): CommandResult {
+        return execCmd(arrayOf(command), isRooted, isNeedResultMsg)
     }
 
     /**
@@ -208,31 +117,12 @@ public final class ShellUtils {
      * @param envp            环境变量设置。
      * @param isRooted        使用root时为True，否则为false。
      * @param isNeedResultMsg True返回结果消息，否则为false。
-     * @return {@link CommandResult} instance
+     * @return [CommandResult] instance
      */
-    public static CommandResult execCmd(final String command,
-                                        final List<String> envp,
-                                        final boolean isRooted,
-                                        final boolean isNeedResultMsg) {
-        return execCmd(new String[]{command}, envp == null ? null : envp.toArray(new String[]{}),
-                isRooted,
-                isNeedResultMsg);
-    }
-
-    /**
-     * 执行命令。
-     *
-     * @param command         命令
-     * @param envp            环境变量设置。
-     * @param isRooted        使用root时为True，否则为false。
-     * @param isNeedResultMsg True返回结果消息，否则为false。
-     * @return {@link CommandResult} instance
-     */
-    public static CommandResult execCmd(final String command,
-                                        final String[] envp,
-                                        final boolean isRooted,
-                                        final boolean isNeedResultMsg) {
-        return execCmd(new String[]{command}, envp, isRooted, isNeedResultMsg);
+    fun execCmd(
+        command: String, envp: Array<String?>?, isRooted: Boolean, isNeedResultMsg: Boolean
+    ): CommandResult {
+        return execCmd(arrayOf(command), envp, isRooted, isNeedResultMsg)
     }
 
     /**
@@ -241,28 +131,13 @@ public final class ShellUtils {
      * @param commands        命令
      * @param isRooted        使用root时为True，否则为false。
      * @param isNeedResultMsg True返回结果消息，否则为false。
-     * @return {@link CommandResult} instance
+     * @return [CommandResult] instance
      */
-    public static CommandResult execCmd(final List<String> commands,
-                                        final boolean isRooted,
-                                        final boolean isNeedResultMsg) {
-        return execCmd(commands == null ? null : commands.toArray(new String[]{}),
-                isRooted,
-                isNeedResultMsg);
-    }
-
-    /**
-     * 执行命令。
-     *
-     * @param commands        命令
-     * @param isRooted        使用root时为True，否则为false。
-     * @param isNeedResultMsg True返回结果消息，否则为false。
-     * @return {@link CommandResult} instance
-     */
-    public static CommandResult execCmd(final String[] commands,
-                                        final boolean isRooted,
-                                        final boolean isNeedResultMsg) {
-        return execCmd(commands, null, isRooted, isNeedResultMsg);
+    @JvmOverloads
+    fun execCmd(
+        commands: Array<String>?, isRooted: Boolean, isNeedResultMsg: Boolean = true
+    ): CommandResult {
+        return execCmd(commands, null, isRooted, isNeedResultMsg)
     }
 
     /**
@@ -270,95 +145,81 @@ public final class ShellUtils {
      *
      * @param commands        命令
      * @param envp            字符串数组，其中每个元素的环境变量设置格式为
-     *                        ＜i＞name＜i＞＝＜i＞value＜i＞或＜tt＞null＜tt＞
-     *                        如果子进程应继承当前进程的环境。
+     * ＜i＞name＜i＞＝＜i＞value＜i＞或＜tt＞null＜tt＞
+     * 如果子进程应继承当前进程的环境。
      * @param isRooted        使用root时为True，否则为false。
      * @param isNeedResultMsg True返回结果消息，否则为false。
-     * @return {@link CommandResult} instance
+     * @return [CommandResult] instance
      */
-    public static CommandResult execCmd(final String[] commands,
-                                        final String[] envp,
-                                        final boolean isRooted,
-                                        final boolean isNeedResultMsg) {
-        int result = -1;
-        if (commands == null || commands.length == 0) {
-            return new CommandResult(result, "", "");
+    fun execCmd(
+        commands: Array<String>?, envp: Array<String?>?, isRooted: Boolean, isNeedResultMsg: Boolean
+    ): CommandResult {
+        var result = -1
+        if (commands.isNullOrEmpty()) {
+            return CommandResult(result, "", "")
         }
-        Process process = null;
-        BufferedReader successResult = null;
-        BufferedReader errorResult = null;
-        StringBuilder successMsg = null;
-        StringBuilder errorMsg = null;
-        DataOutputStream os = null;
+        var process: Process? = null
+        var successResult: BufferedReader? = null
+        var errorResult: BufferedReader? = null
+        var successMsg: StringBuilder? = null
+        var errorMsg: StringBuilder? = null
+        var os: DataOutputStream? = null
         try {
-            process = Runtime.getRuntime().exec(isRooted ? "su" : "sh", envp, null);
-            os = new DataOutputStream(process.getOutputStream());
-            for (String command : commands) {
-                if (command == null) {
-                    continue;
-                }
-                os.write(command.getBytes());
-                os.writeBytes(LINE_SEP);
-                os.flush();
+            process = Runtime.getRuntime().exec(if (isRooted) "su" else "sh", envp, null)
+            os = DataOutputStream(process.outputStream)
+            for (command in commands) {
+                os.write(command.toByteArray())
+                os.writeBytes(LINE_SEP)
+                os.flush()
             }
-            os.writeBytes("exit" + LINE_SEP);
-            os.flush();
-            result = process.waitFor();
+            os.writeBytes("exit$LINE_SEP")
+            os.flush()
+            result = process.waitFor()
             if (isNeedResultMsg) {
-                successMsg = new StringBuilder();
-                errorMsg = new StringBuilder();
-                successResult = new BufferedReader(
-                        new InputStreamReader(process.getInputStream(), "UTF-8")
-                );
-                errorResult = new BufferedReader(
-                        new InputStreamReader(process.getErrorStream(), "UTF-8")
-                );
-                String line;
-                if ((line = successResult.readLine()) != null) {
-                    successMsg.append(line);
-                    while ((line = successResult.readLine()) != null) {
-                        successMsg.append(LINE_SEP).append(line);
+                successMsg = StringBuilder()
+                errorMsg = StringBuilder()
+                successResult = BufferedReader(
+                    InputStreamReader(process.inputStream, StandardCharsets.UTF_8)
+                )
+                errorResult = BufferedReader(
+                    InputStreamReader(process.errorStream, StandardCharsets.UTF_8)
+                )
+                var line: String?
+                if (successResult.readLine().also { line = it } != null) {
+                    successMsg.append(line)
+                    while (successResult.readLine().also { line = it } != null) {
+                        successMsg.append(LINE_SEP).append(line)
                     }
                 }
-                if ((line = errorResult.readLine()) != null) {
-                    errorMsg.append(line);
-                    while ((line = errorResult.readLine()) != null) {
-                        errorMsg.append(LINE_SEP).append(line);
+                if (errorResult.readLine().also { line = it } != null) {
+                    errorMsg.append(line)
+                    while (errorResult.readLine().also { line = it } != null) {
+                        errorMsg.append(LINE_SEP).append(line)
                     }
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (e: Exception) {
+            e.printStackTrace()
         } finally {
             try {
-                if (os != null) {
-                    os.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                os?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
             try {
-                if (successResult != null) {
-                    successResult.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                successResult?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
             try {
-                if (errorResult != null) {
-                    errorResult.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                errorResult?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
-            if (process != null) {
-                process.destroy();
-            }
+            process?.destroy()
         }
-        return new CommandResult(
-                result,
-                successMsg == null ? "" : successMsg.toString(),
-                errorMsg == null ? "" : errorMsg.toString()
-        );
+        return CommandResult(
+            result, successMsg?.toString() ?: "", errorMsg?.toString() ?: ""
+        )
     }
 }

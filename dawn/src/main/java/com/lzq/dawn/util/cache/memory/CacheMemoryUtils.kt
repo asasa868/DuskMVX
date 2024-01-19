@@ -49,9 +49,9 @@ class CacheMemoryUtils private constructor(
      * @return 缓存存在时的值，否则为defaultValue
     </T> */
     operator fun <T> get(key: String, defaultValue: T): T {
-        val `val` = mMemoryCache[key] ?: return defaultValue
-        if (`val`.dueTime == -1L || `val`.dueTime >= System.currentTimeMillis()) {
-            return `val`.value as T
+        val value = mMemoryCache[key] ?: return defaultValue
+        if (value.dueTime == -1L || value.dueTime >= System.currentTimeMillis()) {
+            return value.value as T
         }
         mMemoryCache.remove(key)
         return defaultValue

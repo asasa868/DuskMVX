@@ -33,7 +33,7 @@ class UtilsThreadFactory @JvmOverloads internal constructor(
             }
         }
         t.isDaemon = isDaemon
-        t.uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { t, e -> println(e) }
+        t.uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e -> println(e) }
         t.priority = priority
         return t
     }

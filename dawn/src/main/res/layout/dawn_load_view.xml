@@ -4,14 +4,14 @@
   >
 
     <com.lzq.dawn.view.ShapeLoadingView
-        android:id="@+id/shapeLoadingView"
+        android:id="@+id/dawn_loading_dialog"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="2dp" />
 
     <ImageView
-        android:id="@+id/indication"
+        android:id="@+id/dawn_iv_indication"
         android:layout_width="23dp"
         android:layout_height="3dp"
         android:layout_gravity="center_horizontal"
@@ -19,7 +19,7 @@
         android:src="@drawable/dawn_shadow" />
 
     <TextView
-        android:id="@+id/promptTV"
+        android:id="@+id/dawn_tv_prompt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"

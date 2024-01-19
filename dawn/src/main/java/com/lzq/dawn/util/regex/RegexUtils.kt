@@ -263,7 +263,7 @@ object RegexUtils {
      * @return `true`: yes<br></br>`false`: no
      */
     fun isMatch(regex: String?, input: CharSequence?): Boolean {
-        return input != null && input.length > 0 && Pattern.matches(regex, input)
+        return !input.isNullOrEmpty() && Pattern.matches(regex, input)
     }
 
     /**

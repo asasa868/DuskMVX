@@ -115,7 +115,7 @@ object UriUtils {
         val path = uri.path
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && path != null) {
             val externals = arrayOf("/external/", "/external_path/")
-            var file: File? = null
+            var file: File?
             for (external in externals) {
                 if (path.startsWith(external)) {
                     file = File(
@@ -138,14 +138,14 @@ object UriUtils {
                 )
             } else if (path.startsWith("/external_files_path/")) {
                 file = File(
-                    DawnBridge.app
-                        .getExternalFilesDir(null)!!.absolutePath + path.replace("/external_files_path/", "/")
+                    DawnBridge.app.getExternalFilesDir(null)!!.absolutePath + path.replace(
+                        "/external_files_path/", "/"
+                    )
                 )
             } else if (path.startsWith("/external_cache_path/")) {
                 file = File(
                     DawnBridge.app.externalCacheDir!!.absolutePath + path.replace(
-                        "/external_cache_path/",
-                        "/"
+                        "/external_cache_path/", "/"
                     )
                 )
             }
@@ -161,9 +161,8 @@ object UriUtils {
             Log.d("UriUtils", "$uri parse failed. -> 0")
             null
         } // end 0
-        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(
-                DawnBridge.app,
-                uri
+        else if (DocumentsContract.isDocumentUri(
+                DawnBridge.app, uri
             )
         ) {
             if ("com.android.externalstorage.documents" == authority) {
@@ -188,7 +187,7 @@ object UriUtils {
                         val result = getVolumeList.invoke(mStorageManager)
                         val length = java.lang.reflect.Array.getLength(result)
                         for (i in 0 until length) {
-                            val storageVolumeElement = java.lang.reflect.Array.get(result, i)
+                            val storageVolumeElement = result?.let { java.lang.reflect.Array.get(it, i) }
                             //String uuid = (String) getUuid.invoke(storageVolumeElement);
                             val mounted =
                                 Environment.MEDIA_MOUNTED == getState.invoke(storageVolumeElement) || Environment.MEDIA_MOUNTED_READ_ONLY == getState.invoke(
@@ -208,7 +207,7 @@ object UriUtils {
                                 continue
                             }
                             val uuid = getUuid.invoke(storageVolumeElement) as String
-                            if (uuid != null && uuid == type) {
+                            if (uuid == type) {
                                 return File(getPath.invoke(storageVolumeElement).toString() + "/" + split[1])
                             }
                         }
@@ -230,8 +229,7 @@ object UriUtils {
                 } else if (id.startsWith("msf:")) {
                     id = id.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
                 }
-                var availableId: Long = 0
-                availableId = try {
+                val availableId: Long = try {
                     id.toLong()
                 } catch (e: Exception) {
                     return null
@@ -258,8 +256,7 @@ object UriUtils {
                 val docId = DocumentsContract.getDocumentId(uri)
                 val split = docId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 val type = split[0]
-                val contentUri: Uri
-                contentUri = if ("image" == type) {
+                val contentUri: Uri = if ("image" == type) {
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                 } else if ("video" == type) {
                     MediaStore.Video.Media.EXTERNAL_CONTENT_URI
@@ -299,7 +296,7 @@ object UriUtils {
     ): File? {
         if ("com.google.android.apps.photos.content" == uri.authority) {
             if (!TextUtils.isEmpty(uri.lastPathSegment)) {
-                return File(uri.lastPathSegment)
+                return uri.lastPathSegment?.let { File(it) }
             }
         } else if ("com.tencent.mtt.fileprovider" == uri.authority) {
             val path = uri.path
