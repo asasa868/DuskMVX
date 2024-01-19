@@ -1,0 +1,17 @@
+name: publish JitPack
+on:
+  push:
+    tags:
+      - "v*"
+
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+    steps:
+      - uses: ncipollo/release-action@v1
+        with:
+          generateReleaseNotes: true
