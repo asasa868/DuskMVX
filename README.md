@@ -10,6 +10,8 @@
 >
 > 项目地址：[DuskMVX](https://github.com/asasa868/DuskMVX)
 
+[![](https://jitpack.io/v/asasa868/DuskMVX.svg)](https://jitpack.io/#asasa868/DuskMVX)
+
 
 ## 具体用法
 架构中封装了两种架构分别是MVVM，和MVI。

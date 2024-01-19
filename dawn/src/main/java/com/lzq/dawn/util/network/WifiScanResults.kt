@@ -15,12 +15,11 @@ class WifiScanResults {
             field = allResults
             filterResults = filterScanResult(allResults)
         }
-    var filterResults: List<ScanResult> = ArrayList()
-        private set
+    private var filterResults: List<ScanResult> = ArrayList()
 
     companion object {
         private fun filterScanResult(results: List<ScanResult>?): List<ScanResult> {
-            if (results == null || results.isEmpty()) {
+            if (results.isNullOrEmpty()) {
                 return ArrayList()
             }
             val map = LinkedHashMap<String, ScanResult>(results.size)

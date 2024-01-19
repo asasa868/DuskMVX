@@ -204,9 +204,9 @@ class SpanUtils() {
      * @param lineHeight 线条高度，以像素为单位。
      * @param align      对准。
      *
-     *  * [Align.ALIGN_TOP]
-     *  * [Align.ALIGN_CENTER]
-     *  * [Align.ALIGN_BOTTOM]
+     *  * [SpanUtils.ALIGN_TOP]
+     *  * [SpanUtils.ALIGN_CENTER]
+     *  * [SpanUtils.ALIGN_BOTTOM]
      *
      * @return the single [SpanUtils] instance
      */
@@ -456,10 +456,10 @@ class SpanUtils() {
      *
      * @param align The alignment.
      *
-     *  * [Align.ALIGN_TOP]
-     *  * [Align.ALIGN_CENTER]
-     *  * [Align.ALIGN_BASELINE]
-     *  * [Align.ALIGN_BOTTOM]
+     *  * [SpanUtils.ALIGN_TOP]
+     *  * [SpanUtils.ALIGN_CENTER]
+     *  * [SpanUtils.ALIGN_BASELINE]
+     *  * [SpanUtils.ALIGN_BOTTOM]
      *
      * @return the single [SpanUtils] instance
      */
@@ -619,7 +619,7 @@ class SpanUtils() {
      */
     fun appendLine(): SpanUtils {
         apply(mTypeCharSequence)
-        mText = LINE_SEPARATOR
+        mText = LINE_SEPARATOR!!
         return this
     }
 
@@ -639,10 +639,10 @@ class SpanUtils() {
      * @param bitmap bitmap.
      * @param align  对准
      *
-     *  * [Align.ALIGN_TOP]
-     *  * [Align.ALIGN_CENTER]
-     *  * [Align.ALIGN_BASELINE]
-     *  * [Align.ALIGN_BOTTOM]
+     *  * [SpanUtils.ALIGN_TOP]
+     *  * [SpanUtils.ALIGN_CENTER]
+     *  * [SpanUtils.ALIGN_BASELINE]
+     *  * [SpanUtils.ALIGN_BOTTOM]
      *
      * @return the single [SpanUtils] instance
      */
@@ -659,10 +659,10 @@ class SpanUtils() {
      * @param drawable drawable
      * @param align    对准
      *
-     *  * [Align.ALIGN_TOP]
-     *  * [Align.ALIGN_CENTER]
-     *  * [Align.ALIGN_BASELINE]
-     *  * [Align.ALIGN_BOTTOM]
+     *  * [SpanUtils.ALIGN_TOP]
+     *  * [SpanUtils.ALIGN_CENTER]
+     *  * [SpanUtils.ALIGN_BASELINE]
+     *  * [SpanUtils.ALIGN_BOTTOM]
      *
      * @return the single [SpanUtils] instance
      */
@@ -679,10 +679,10 @@ class SpanUtils() {
      * @param uri   图像的uri
      * @param align 对准
      *
-     *  * [Align.ALIGN_TOP]
-     *  * [Align.ALIGN_CENTER]
-     *  * [Align.ALIGN_BASELINE]
-     *  * [Align.ALIGN_BOTTOM]
+     *  * [SpanUtils.ALIGN_TOP]
+     *  * [SpanUtils.ALIGN_CENTER]
+     *  * [SpanUtils.ALIGN_BASELINE]
+     *  * [SpanUtils.ALIGN_BOTTOM]
      *
      * @return the single [SpanUtils] instance
      */
@@ -699,10 +699,10 @@ class SpanUtils() {
      * @param resourceId resource id
      * @param align      对准
      *
-     *  * [Align.ALIGN_TOP]
-     *  * [Align.ALIGN_CENTER]
-     *  * [Align.ALIGN_BASELINE]
-     *  * [Align.ALIGN_BOTTOM]
+     *  * [SpanUtils.ALIGN_TOP]
+     *  * [SpanUtils.ALIGN_CENTER]
+     *  * [SpanUtils.ALIGN_BASELINE]
+     *  * [SpanUtils.ALIGN_BOTTOM]
      *
      * @return the single [SpanUtils] instance
      */

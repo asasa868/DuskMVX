@@ -1,6 +1,5 @@
 package com.lzq.dawn.util.image
 
-import android.Manifest
 import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
@@ -39,7 +38,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.FloatRange
 import androidx.annotation.IntRange
 import androidx.core.content.ContextCompat
-import androidx.core.content.PermissionChecker.PermissionResult
 import androidx.exifinterface.media.ExifInterface
 import com.lzq.dawn.DawnBridge
 import java.io.BufferedOutputStream
@@ -52,6 +50,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.Locale
+import kotlin.math.abs
 
 /**
  * @Name :ImageUtils
@@ -395,13 +394,6 @@ object ImageUtils {
      * @param recycle True 回收位图的来源，否则为 false。
      * @return 具有指定颜色的位图。
      */
-    /**
-     * 返回具有指定颜色的位图。
-     *
-     * @param src   位图的来源。
-     * @param color color.
-     * @return 具有指定颜色的位图。
-     */
     @JvmOverloads
     fun drawColor(
         src: Bitmap, @ColorInt color: Int, recycle: Boolean = false
@@ -422,14 +414,6 @@ object ImageUtils {
      * @param newHeight 新的高度。
      * @param recycle   True 回收位图的来源，否则为 false。
      * @return the scaled bitmap
-     */
-    /**
-     * 返回缩放的位图。
-     *
-     * @param src       位图的来源
-     * @param newWidth  新的宽度。
-     * @param newHeight 新的高度。
-     * @return 缩放的位图。
      */
     @JvmOverloads
     fun scale(
@@ -620,7 +604,7 @@ object ImageUtils {
         }
         val width = src.width
         val height = src.height
-        val size = Math.min(width, height)
+        val size = width.coerceAtMost(height)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         val ret = Bitmap.createBitmap(width, height, src.config)
         val center = size / 2f
@@ -897,7 +881,7 @@ object ImageUtils {
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = borderSize
         if (isCircle) {
-            val radius = Math.min(width, height) / 2f - borderSize / 2f
+            val radius = width.coerceAtMost(height) / 2f - borderSize / 2f
             canvas.drawCircle(width / 2f, height / 2f, radius, paint)
         } else {
             val rectF = RectF(0f, 0f, width.toFloat(), height.toFloat())
@@ -1223,8 +1207,7 @@ object ImageUtils {
         var p: Int
         var yp: Int
         var yi: Int
-        var yw: Int
-        val vmin = IntArray(Math.max(w, h))
+        val vmin = IntArray(w.coerceAtLeast(h))
         var divsum = div + 1 shr 1
         divsum *= divsum
         val dv = IntArray(256 * divsum)
@@ -1234,7 +1217,7 @@ object ImageUtils {
             i++
         }
         yi = 0
-        yw = yi
+        var yw: Int = yi
         val stack = Array(div) { IntArray(3) }
         var stackpointer: Int
         var stackstart: Int
@@ -1260,12 +1243,12 @@ object ImageUtils {
             rinsum = ginsum
             i = -radius
             while (i <= radius) {
-                p = pix[yi + Math.min(wm, Math.max(i, 0))]
+                p = pix[yi + wm.coerceAtMost(i.coerceAtLeast(0))]
                 sir = stack[i + radius]
                 sir[0] = p and 0xff0000 shr 16
                 sir[1] = p and 0x00ff00 shr 8
                 sir[2] = p and 0x0000ff
-                rbs = r1 - Math.abs(i)
+                rbs = r1 - abs(i)
                 rsum += sir[0] * rbs
                 gsum += sir[1] * rbs
                 bsum += sir[2] * rbs
@@ -1295,7 +1278,7 @@ object ImageUtils {
                 goutsum -= sir[1]
                 boutsum -= sir[2]
                 if (y == 0) {
-                    vmin[x] = Math.min(x + radius + 1, wm)
+                    vmin[x] = (x + radius + 1).coerceAtMost(wm)
                 }
                 p = pix[yw + vmin[x]]
                 sir[0] = p and 0xff0000 shr 16
@@ -1335,12 +1318,12 @@ object ImageUtils {
             yp = -radius * w
             i = -radius
             while (i <= radius) {
-                yi = Math.max(0, yp) + x
+                yi = 0.coerceAtLeast(yp) + x
                 sir = stack[i + radius]
                 sir[0] = r[yi]
                 sir[1] = g[yi]
                 sir[2] = b[yi]
-                rbs = r1 - Math.abs(i)
+                rbs = r1 - abs(i)
                 rsum += r[yi] * rbs
                 gsum += g[yi] * rbs
                 bsum += b[yi] * rbs
@@ -1374,7 +1357,7 @@ object ImageUtils {
                 goutsum -= sir[1]
                 boutsum -= sir[2]
                 if (x == 0) {
-                    vmin[y] = Math.min(y + r1, hm) * w
+                    vmin[y] = (y + r1).coerceAtMost(hm) * w
                 }
                 p = x + vmin[y]
                 sir[0] = r[p]
@@ -1603,8 +1586,7 @@ object ImageUtils {
             val contentValues = ContentValues()
             contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
             contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/*")
-            val contentUri: Uri
-            contentUri = if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
+            val contentUri: Uri = if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI
             } else {
                 MediaStore.Images.Media.INTERNAL_CONTENT_URI

@@ -104,9 +104,9 @@ class SnackbarUtils private constructor(parent: View) {
      *
      * @param duration 持续时间
      *
-     *  * [Duration.LENGTH_INDEFINITE]
-     *  * [Duration.LENGTH_SHORT]
-     *  * [Duration.LENGTH_LONG]
+     *   [SnackbarUtils.LENGTH_INDEFINITE]
+     *   [SnackbarUtils.LENGTH_SHORT]
+     *   [SnackbarUtils.LENGTH_LONG]
      *
      * @return [SnackbarUtils] instance
      */
@@ -154,16 +154,14 @@ class SnackbarUtils private constructor(parent: View) {
         this.bottomMargin = bottomMargin
         return this
     }
+
     /**
      * 显示snackbar。
      *
      * @param isShowTop 如果为True，则在顶部显示 snackbar，否则为false。
      */
-    /**
-     * 显示snackbar。
-     */
     @JvmOverloads
-    fun show(isShowTop: Boolean = false): Snackbar? {
+    fun show(isShowTop: Boolean = false): Snackbar {
         var view: View = view
         if (isShowTop) {
             val suitableParent = findSuitableParentCopyFromSnackbar(view)
@@ -183,15 +181,15 @@ class SnackbarUtils private constructor(parent: View) {
             }
             view = topSnackBarContainer
         }
-        if (messageColor != COLOR_DEFAULT) {
+        sWeakSnackbar = if (messageColor != COLOR_DEFAULT) {
             val spannableString = SpannableString(message)
             val colorSpan = ForegroundColorSpan(messageColor)
             spannableString.setSpan(
                 colorSpan, 0, spannableString.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
             )
-            sWeakSnackbar = WeakReference(Snackbar.make(view, spannableString, duration))
+            WeakReference(Snackbar.make(view, spannableString, duration))
         } else {
-            sWeakSnackbar = WeakReference(Snackbar.make(view, message!!, duration))
+            WeakReference(Snackbar.make(view, message!!, duration))
         }
         val snackbar = sWeakSnackbar!!.get()
         val snackbarView = snackbar!!.view as Snackbar.SnackbarLayout
@@ -219,13 +217,11 @@ class SnackbarUtils private constructor(parent: View) {
         snackbar.show()
         return snackbar
     }
+
     /**
      * 以成功风格显示snackbar。
      *
      * @param isShowTop 如果为True，则在顶部显示snackbar，否则为false。
-     */
-    /**
-     * 以成功风格显示snackbar。
      */
     @JvmOverloads
     fun showSuccess(isShowTop: Boolean = false) {
@@ -234,13 +230,11 @@ class SnackbarUtils private constructor(parent: View) {
         actionTextColor = COLOR_MESSAGE
         show(isShowTop)
     }
+
     /**
      * 显示带有警告样式的snackbar。
      *
      * @param isShowTop 如果为True，则在顶部显示snackbar，否则为false。
-     */
-    /**
-     * 显示带有警告样式的snackbar。
      */
     @JvmOverloads
     fun showWarning(isShowTop: Boolean = false) {
@@ -249,13 +243,11 @@ class SnackbarUtils private constructor(parent: View) {
         actionTextColor = COLOR_MESSAGE
         show(isShowTop)
     }
+
     /**
      * 显示带有错误样式的snackbar。
      *
      * @param isShowTop 如果为True，则在顶部显示snackbar，否则为false。
-     */
-    /**
-     * 显示带有错误样式的snackbar。
      */
     @JvmOverloads
     fun showError(isShowTop: Boolean = false) {
@@ -302,8 +294,8 @@ class SnackbarUtils private constructor(parent: View) {
          * @return view
          */
         fun getView(): View? {
-            val snackbar = sWeakSnackbar!!.get() ?: return null
-            return snackbar.view
+            val snackBar = sWeakSnackbar!!.get() ?: return null
+            return snackBar.view
         }
 
         /**
@@ -349,8 +341,8 @@ class SnackbarUtils private constructor(parent: View) {
             }
         }
 
-        private fun findSuitableParentCopyFromSnackbar(view: View): ViewGroup? {
-            var view: View? = view
+        private fun findSuitableParentCopyFromSnackbar(v: View): ViewGroup? {
+            var view: View? = v
             var fallback: ViewGroup? = null
             do {
                 if (view is CoordinatorLayout) {

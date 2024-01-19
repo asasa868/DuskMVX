@@ -105,7 +105,7 @@ object SDCardUtils {
                 return path
             }
             for (cardInfo in sdCardInfo) {
-                val state = cardInfo.state ?: continue
+                val state = cardInfo.state
                 if ("mounted" == state.lowercase(Locale.getDefault())) {
                     path.add(cardInfo.path)
                 }

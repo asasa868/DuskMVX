@@ -12,15 +12,15 @@ import android.text.style.ReplacementSpan
  * @Desc : 垂直对齐
  */
 internal class VerticalAlignSpan(val mVerticalAlignment: Int) : ReplacementSpan() {
-    override fun getSize(paint: Paint, text: CharSequence, start: Int, end: Int, fm: FontMetricsInt?): Int {
-        var text = text
+    override fun getSize(paint: Paint, textStr: CharSequence, start: Int, end: Int, fm: FontMetricsInt?): Int {
+        var text = textStr
         text = text.subSequence(start, end)
         return paint.measureText(text.toString()).toInt()
     }
 
     override fun draw(
         canvas: Canvas,
-        text: CharSequence,
+        textStr: CharSequence,
         start: Int,
         end: Int,
         x: Float,
@@ -29,7 +29,7 @@ internal class VerticalAlignSpan(val mVerticalAlignment: Int) : ReplacementSpan(
         bottom: Int,
         paint: Paint
     ) {
-        var text = text
+        var text = textStr
         text = text.subSequence(start, end)
         val fm = paint.fontMetricsInt
         canvas.drawText(

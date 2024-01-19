@@ -644,7 +644,7 @@ object TimeUtils {
     }
 
     private val weeOfToday: Long
-        private get() {
+        get() {
             val cal = Calendar.getInstance()
             cal[Calendar.HOUR_OF_DAY] = 0
             cal[Calendar.SECOND] = 0
@@ -1114,7 +1114,9 @@ object TimeUtils {
      */
     fun isLeapYear(date: Date?): Boolean {
         val cal = Calendar.getInstance()
-        cal.time = date
+        if (date != null) {
+            cal.time = date
+        }
         val year = cal[Calendar.YEAR]
         return isLeapYear(year)
     }
@@ -1169,7 +1171,7 @@ object TimeUtils {
      * @return 星期几。
      */
     fun getChineseWeek(date: Date?): String {
-        return SimpleDateFormat("E", Locale.CHINA).format(date)
+        return date?.let { SimpleDateFormat("E", Locale.CHINA).format(it) } ?: ""
     }
 
     /**
@@ -1212,7 +1214,7 @@ object TimeUtils {
      * @return 美国的星期几。
      */
     fun getUSWeek(date: Date?): String {
-        return SimpleDateFormat("EEEE", Locale.US).format(date)
+        return date?.let { SimpleDateFormat("EEEE", Locale.US).format(it) } ?:""
     }
 
     /**
@@ -1225,7 +1227,7 @@ object TimeUtils {
         return getUSWeek(Date(millis))
     }
 
-    val isAm: Boolean
+    private val isAm: Boolean
         /**
          * 返回是否是 am。
          *
@@ -1409,7 +1411,9 @@ object TimeUtils {
      */
     fun getValueByCalendarField(date: Date?, field: Int): Int {
         val cal = Calendar.getInstance()
-        cal.time = date
+        if (date != null) {
+            cal.time = date
+        }
         return cal[field]
     }
 
@@ -1467,7 +1471,9 @@ object TimeUtils {
      */
     fun getChineseZodiac(date: Date?): String {
         val cal = Calendar.getInstance()
-        cal.time = date
+        if (date != null) {
+            cal.time = date
+        }
         return CHINESE_ZODIAC[cal[Calendar.YEAR] % 12]
     }
 
@@ -1538,7 +1544,9 @@ object TimeUtils {
      */
     fun getZodiac(date: Date?): String {
         val cal = Calendar.getInstance()
-        cal.time = date
+        if (date != null) {
+            cal.time = date
+        }
         val month = cal[Calendar.MONTH] + 1
         val day = cal[Calendar.DAY_OF_MONTH]
         return getZodiac(month, day)
@@ -1574,9 +1582,9 @@ object TimeUtils {
     }
 
     @JvmStatic
-    fun millis2FitTimeSpan(milli: Long, precision: Int): String? {
+    fun millis2FitTimeSpan(milli: Long, precisionInt: Int): String? {
         var millis = milli
-        var precision = precision
+        var precision = precisionInt
         if (precision <= 0) {
             return null
         }

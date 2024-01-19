@@ -315,8 +315,8 @@ object NetworkUtils {
          * @return `true`: enabled<br></br>`false`: disabled
          */
         get() {
-            @SuppressLint("WifiManagerLeak")
-            val manager = app.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            @SuppressLint("WifiManagerLeak") val manager =
+                app.getSystemService(Context.WIFI_SERVICE) as WifiManager
             return manager.isWifiEnabled
         }
         /**
@@ -327,8 +327,8 @@ object NetworkUtils {
          * @param enabled True to enabled, false otherwise.
          */
         set(enabled) {
-            @SuppressLint("WifiManagerLeak")
-            val manager = app.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            @SuppressLint("WifiManagerLeak") val manager =
+                app.getSystemService(Context.WIFI_SERVICE) as WifiManager
             if (enabled == manager.isWifiEnabled) {
                 return
             }
@@ -513,19 +513,21 @@ object NetworkUtils {
             for (add in adds) {
                 if (!add.isLoopbackAddress) {
                     val hostAddress = add.hostAddress
-                    val isIPv4 = hostAddress.indexOf(':') < 0
+                    val isIPv4 = (hostAddress?.indexOf(':') ?: 0) < 0
                     if (useIPv4) {
                         if (isIPv4) {
-                            return hostAddress
+                            return hostAddress ?: ""
                         }
                     } else {
                         if (!isIPv4) {
-                            val index = hostAddress.indexOf('%')
-                            return if (index < 0) hostAddress.uppercase(Locale.getDefault()) else hostAddress.substring(
-                                0, index
-                            ).uppercase(
-                                Locale.getDefault()
-                            )
+                            val index = hostAddress?.indexOf('%') ?: 0
+                            if (hostAddress != null) {
+                                return if (index < 0) hostAddress.uppercase(Locale.getDefault()) else hostAddress.substring(
+                                    0, index
+                                ).uppercase(
+                                    Locale.getDefault()
+                                )
+                            }
                         }
                     }
                 }
@@ -545,7 +547,6 @@ object NetworkUtils {
         get() {
             try {
                 val nis = NetworkInterface.getNetworkInterfaces()
-                val adds = LinkedList<InetAddress>()
                 while (nis.hasMoreElements()) {
                     val ni = nis.nextElement()
                     if (!ni.isUp || ni.isLoopback) {
@@ -670,7 +671,7 @@ object NetworkUtils {
          * @return ssid.
          */
         get() {
-            val wm = app.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager ?: return ""
+            val wm = app.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
             val wi = wm.connectionInfo ?: return ""
             val ssid = wi.ssid
             if (TextUtils.isEmpty(ssid)) {

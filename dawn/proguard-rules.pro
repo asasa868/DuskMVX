@@ -135,4 +135,3 @@ public boolean *(android.webkit.WebView, java.lang.String); }
 # -keepclassmembers class com.jasonwu.demo.Test { public <init>(); }
 # 不混淆某个类的特定的方法
 # -keepclassmembers class com.jasonwu.demo.Test { public void test(java.lang.String); }
--dontwarn java.lang.invoke.StringConcatFactory

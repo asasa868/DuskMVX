@@ -33,7 +33,7 @@ class ThreadPoolExecutor4Util internal constructor(
     }
 
     private val submittedCount: Int
-        private get() = mSubmittedCount.get()
+        get() = mSubmittedCount.get()
 
     override fun afterExecute(r: Runnable, t: Throwable) {
         mSubmittedCount.decrementAndGet()

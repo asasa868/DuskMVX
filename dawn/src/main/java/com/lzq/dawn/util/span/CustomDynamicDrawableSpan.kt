@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference
  * @Desc :
  */
 internal abstract class CustomDynamicDrawableSpan : ReplacementSpan {
-    val mVerticalAlignment: Int
+    private val mVerticalAlignment: Int
 
     constructor() {
         mVerticalAlignment = ALIGN_BOTTOM
@@ -31,22 +31,21 @@ internal abstract class CustomDynamicDrawableSpan : ReplacementSpan {
         val d = cachedDrawable
         val rect = d!!.bounds
         if (fm != null) {
-//                LogUtils.d("fm.top: " + fm.top,
-//                        "fm.ascent: " + fm.ascent,
-//                        "fm.descent: " + fm.descent,
-//                        "fm.bottom: " + fm.bottom,
-//                        "lineHeight: " + (fm.bottom - fm.top));
             val lineHeight = fm.bottom - fm.top
             if (lineHeight < rect.height()) {
-                if (mVerticalAlignment == ALIGN_TOP) {
-                    fm.top = fm.top
-                    fm.bottom = rect.height() + fm.top
-                } else if (mVerticalAlignment == ALIGN_CENTER) {
-                    fm.top = -rect.height() / 2 - lineHeight / 4
-                    fm.bottom = rect.height() / 2 - lineHeight / 4
-                } else {
-                    fm.top = -rect.height() + fm.bottom
-                    fm.bottom = fm.bottom
+                when (mVerticalAlignment) {
+                    ALIGN_TOP -> {
+                        fm.top = fm.top
+                        fm.bottom = rect.height() + fm.top
+                    }
+                    ALIGN_CENTER -> {
+                        fm.top = -rect.height() / 2 - lineHeight / 4
+                        fm.bottom = rect.height() / 2 - lineHeight / 4
+                    }
+                    else -> {
+                        fm.top = -rect.height() + fm.bottom
+                        fm.bottom = fm.bottom
+                    }
                 }
                 fm.ascent = fm.top
                 fm.descent = fm.bottom
@@ -74,14 +73,19 @@ internal abstract class CustomDynamicDrawableSpan : ReplacementSpan {
         //            LogUtils.d("rectHeight: " + rect.height(),
 //                    "lineHeight: " + (bottom - top));
         if (rect.height() < lineHeight) {
-            transY = if (mVerticalAlignment == ALIGN_TOP) {
-                top.toFloat()
-            } else if (mVerticalAlignment == ALIGN_CENTER) {
-                ((bottom + top - rect.height()) / 2).toFloat()
-            } else if (mVerticalAlignment == ALIGN_BASELINE) {
-                (y - rect.height()).toFloat()
-            } else {
-                (bottom - rect.height()).toFloat()
+            transY = when (mVerticalAlignment) {
+                ALIGN_TOP -> {
+                    top.toFloat()
+                }
+                ALIGN_CENTER -> {
+                    ((bottom + top - rect.height()) / 2).toFloat()
+                }
+                ALIGN_BASELINE -> {
+                    (y - rect.height()).toFloat()
+                }
+                else -> {
+                    (bottom - rect.height()).toFloat()
+                }
             }
             canvas.translate(x, transY)
         } else {
@@ -92,7 +96,7 @@ internal abstract class CustomDynamicDrawableSpan : ReplacementSpan {
     }
 
     private val cachedDrawable: Drawable?
-        private get() {
+        get() {
             val wr = mDrawableRef
             var d: Drawable? = null
             if (wr != null) {

@@ -58,9 +58,9 @@ class LoadingView : LinearLayout {
         orientation = VERTICAL
         mDistance = dip2px(context).toFloat()
         LayoutInflater.from(context).inflate(R.layout.dawn_load_view, this, true)
-        mShapeLoadingView = findViewById(R.id.shapeLoadingView)
-        mIndicationIm = findViewById(R.id.indication)
-        mLoadTextView = findViewById(R.id.promptTV)
+        mShapeLoadingView = findViewById(R.id.dawn_loading_dialog)
+        mIndicationIm = findViewById(R.id.dawn_iv_indication)
+        mLoadTextView = findViewById(R.id.dawn_tv_prompt)
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.dawn_LoadingView)
         val loadText = typedArray.getString(R.styleable.dawn_LoadingView_dawn_loadingText)
         val textAppearance = typedArray.getResourceId(R.styleable.dawn_LoadingView_dawn_loadingText, -1)
