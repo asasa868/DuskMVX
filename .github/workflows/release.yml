@@ -12,6 +12,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: deploy file to server
+        uses: ./  #这里要注意我们直接引用此repo下的action
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -22,8 +25,10 @@ jobs:
       - name: jitpack lookup and get
         run: |
           tag=$(git describe --tags --abbrev=0)
-          
+          echo "tag: $tag"
           response=$(curl -s "https://jitpack.io/api/builds/com/github/asasa868/DuskMVX/$tag")
+          echo "Response: $response"
+          echo "Commit: $commit"
           
           commit=$(echo $response | jq -r .commit)
           
