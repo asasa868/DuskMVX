@@ -169,7 +169,7 @@ if (secretPropsFile.exists()) {
     println("No props file, loading env vars")
 }
 
-val packagePropsFile = project.rootProject.file("gradle.properties")
+val packagePropsFile = project.rootProject.file("local.properties")
 if (packagePropsFile.exists()) {
     val p = Properties()
     p.load(FileInputStream(packagePropsFile))
