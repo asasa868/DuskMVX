@@ -26,10 +26,8 @@ jobs:
         run: |
           tag=$(git describe --tags --abbrev=0)
           echo "tag: $tag"
-          response=$(curl -s "https://jitpack.io/api/builds/com/github/asasa868/DuskMVX/$tag")
+          response=$(curl -s "https://jitpack.io/api/builds/io.github.asasa868/DuskMVX/$tag")
           echo "Response: $response"
-          echo "Commit: $commit"
-          
           commit=$(echo $response | jq -r .commit)
-          
-          curl -s "https://jitpack.io/com/github/asasa868/DuskMVX/$commit/build.log" | grep "BUILD SUCCESS"
+          echo "Commit: $commit"
+          curl -s "https://jitpack.io/io.github.asasa868/DuskMVX/$commit/build.log" | grep "BUILD SUCCESS"
