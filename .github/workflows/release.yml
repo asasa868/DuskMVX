@@ -12,8 +12,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: deploy file to server
-        uses: ./  #这里要注意我们直接引用此repo下的action
+    #  - name: deploy file to server
+    #   uses: ./  #这里要注意我们直接引用此repo下的action
 
       - name: Checkout repository
         uses: actions/checkout@v2
