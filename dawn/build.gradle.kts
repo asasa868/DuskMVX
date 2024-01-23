@@ -1,4 +1,3 @@
-import com.android.build.gradle.internal.tasks.factory.dependsOn
 import groovy.util.Node
 import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 import java.io.FileInputStream
@@ -28,10 +27,6 @@ android {
                 arguments["AROUTER_MODULE_NAME"] = project.name
             }
         }
-    }
-
-    testFixtures {
-        enable = true
     }
 
     buildTypes {
@@ -169,6 +164,17 @@ if (secretPropsFile.exists()) {
     println("No props file, loading env vars")
 }
 
+val versionFile = project.rootProject.file("gradle.properties")
+if (versionFile.exists()) {
+    val p = Properties()
+    p.load(FileInputStream(versionFile))
+    p.forEach { name, value ->
+        extra[name.toString()] = value
+    }
+} else {
+    println("No props file, loading env vars")
+}
+
 var publishVersion = extra["PUBLISH_VERSION"].toString()
 var mavenGroupId = extra["PUBLISH_GROUP_ID"].toString()
 var mavenArtifactId = extra["PUBLISH_ARTIFACT_ID"].toString()
@@ -223,7 +229,7 @@ afterEvaluate {
                 version = publishVersion
 
                 //生成的 aar 路径，修改成自己的aar地址名称
-                artifact("$buildDir/outputs/aar/${project.name}-release.aar"){
+                artifact("$buildDir/outputs/aar/${project.name}-release.aar") {
                     classifier = "release"
                 }
 
@@ -298,6 +304,12 @@ afterEvaluate {
 
 // 生成文档注释
 tasks.register("androidJavadocs", Javadoc::class) {
+    description = "Generates the Javadoc documentation for this project."
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
+    title = "project docs"
+    outputs.dirs().also {
+        layout.buildDirectory.dir("docs")
+    }
     // 设置源码所在的位置
     source(android.sourceSets["main"].java.srcDirs)
 
@@ -305,6 +317,11 @@ tasks.register("androidJavadocs", Javadoc::class) {
 
 // 将文档打包成jar,生成javadoc.jar
 tasks.register("androidJavadocsJar", Jar::class) {
+    description = "Generates the JavadocsJar for this project."
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
+    outputs.dirs().also {
+        layout.buildDirectory.dir("docs")
+    }
     // 指定文档名称
     archiveClassifier.set("javadoc")
     from(tasks["androidJavadocs"].outputs)
@@ -312,6 +329,8 @@ tasks.register("androidJavadocsJar", Jar::class) {
 
 // 将源码打包 ，生成sources.jar
 tasks.register("androidSourcesJar", Jar::class) {
+    description = "Generates the SourcesJar for this project."
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
 
     archiveClassifier.set("dawn-sources")
     from(android.sourceSets["main"].java.srcDirs)
