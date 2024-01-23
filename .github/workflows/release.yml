@@ -26,7 +26,7 @@ jobs:
           echo "打包版本: $tag"
           curl -s "https://jitpack.io/api/builds/io.github.asasa868/DuskMVX/$tag"
           
-          sleep 230
+          sleep 30
           response=$(curl -s "https://jitpack.io/api/builds/io.github.asasa868/DuskMVX/$tag")
           echo "Response: $response."
           response_status=$(echo "$response" | jq -r '.status')
