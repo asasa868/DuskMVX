@@ -42,6 +42,14 @@ jobs:
           echo "打包编译中，未发布 $retry_time秒后重新获取结果"
           sleep $retry_time
           response=$(curl -s "https://jitpack.io/api/builds/io.github.asasa868/DuskMVX/$tag")
+          response_status=$(echo "$response" | jq -r '.status')
+          echo "获取到的jitpack仓库的版本$tag 状态:$response_status"
+           if [ "$response_status" == "ok" ]; then
+            build_log=$(curl -s "https://jitpack.io/com/github/asasa868/DuskMVX/$tag/build.log" | grep "BUILD SUCCESS")
+            echo "结果:$build_log"
+           else
+            echo "打包失败，详情查看 https://jitpack.io/com/github/asasa868/DuskMVX/$tag/build.log"
+           fi
          else
           echo "打包失败，详情查看 https://jitpack.io/com/github/asasa868/DuskMVX/$tag/build.log"
          fi
