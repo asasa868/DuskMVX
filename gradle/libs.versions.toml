@@ -1,4 +1,8 @@
 [versions]
+auto-service = "1.1.1"
+com-alibaba-arouter-api = "1.5.1"
+eventbus = "3.2.0"
+gson = "2.10.1"
 kotlin = "1.9.10"
 network-okhttp = "5.0.0-alpha.11"
 network-retrofit = "2.9.0"
@@ -46,10 +50,25 @@ appcompat = "1.6.1"
 material = "1.8.0"
 org-jetbrains-kotlin-android = "1.9.0"
 constraintlayout = "2.1.4"
+toaster = "12.6"
 
 
 [libraries]
+auto-service-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "auto-service" }
+auto-service = { module = "com.google.auto.service:auto-service", version.ref = "auto-service" }
+
+arouter-compiler = { module = "com.alibaba:arouter-compiler", version.ref = "com-alibaba-arouter-api" }
+arouter-api = { module = "com.alibaba:arouter-api", version.ref = "com-alibaba-arouter-api" }
+
+eventbus = { module = "org.greenrobot:eventbus", version.ref = "eventbus" }
+eventbus-annotation = { module = "org.greenrobot:eventbus-annotation-processor", version.ref = "eventbus" }
+
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+
+toaster = { module = "com.github.getActivity:Toaster", version.ref = "toaster" }
+
 kotlin-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlin-coroutines-core" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlin-coroutines-core" }
 kotlin-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlin-datetime" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
 kotlin-stdlib-common = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-common", version.ref = "kotlin" }
@@ -63,15 +82,15 @@ retrofit-converter-scalar = { group = "com.squareup.retrofit2", name = "converte
 retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "network-retrofit" }
 retrofit-converter-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "network-retrofit" }
 
-okhttp = {group = "com.squareup.okhttp3", name = "okhttp", version.ref = "network-okhttp"}
-okhttp-urlconnection = {group = "com.squareup.okhttp3", name = "okhttp-urlconnection", version.ref = "network-okhttp"}
-okhttp-logging-interceptor = {group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "network-okhttp"}
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "network-okhttp" }
+okhttp-urlconnection = { group = "com.squareup.okhttp3", name = "okhttp-urlconnection", version.ref = "network-okhttp" }
+okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "network-okhttp" }
 
 moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "json-moshi" }
 moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "json-moshi" }
 moshi-kotlin-codegen = { group = "com.squareup.moshi", name = "moshi-kotlin-codegen", version.ref = "json-moshi" }
 
-logger = {group = "com.orhanobut", name = "logger", version.ref = "logger" }
+logger = { group = "com.orhanobut", name = "logger", version.ref = "logger" }
 
 loading-button = { group = "com.github.leandroborgesferreira", name = "loading-button-android", version.ref = "loading-button" }
 
@@ -103,8 +122,10 @@ glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", versi
 glide-ksp = { group = "com.github.bumptech.glide", name = "ksp", version.ref = "glide" }
 glide-annotations = { group = "com.github.bumptech.glide", name = "annotations", version.ref = "glide" }
 glide-okhttp3-integration = { group = "com.github.bumptech.glide", name = "okhttp3-integration", version.ref = "glide" }
+
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
 [plugins]
 org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }

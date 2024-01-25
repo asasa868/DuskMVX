@@ -107,8 +107,7 @@ object NotificationUtils {
             val nm = DawnBridge.app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             nm.createNotificationChannel(channelConfig.notificationChannel!!)
         }
-        val builder: NotificationCompat.Builder
-        builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val builder: NotificationCompat.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationCompat.Builder(DawnBridge.app, channelConfig.notificationChannel!!.id)
         } else {
             NotificationCompat.Builder(DawnBridge.app)
@@ -154,11 +153,10 @@ object NotificationUtils {
      */
     @RequiresPermission(permission.EXPAND_STATUS_BAR)
     fun setNotificationBarVisibility(isVisible: Boolean) {
-        val methodName: String
-        methodName = if (isVisible) {
-            if (Build.VERSION.SDK_INT <= 16) "expand" else "expandNotificationsPanel"
+        val methodName: String = if (isVisible) {
+            "expandNotificationsPanel"
         } else {
-            if (Build.VERSION.SDK_INT <= 16) "collapse" else "collapsePanels"
+            "collapsePanels"
         }
         invokePanels(methodName)
     }

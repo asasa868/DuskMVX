@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
+import android.graphics.Point
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
@@ -15,6 +16,7 @@ import android.os.Parcelable
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
+import android.view.WindowManager
 import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
@@ -43,7 +45,6 @@ import com.lzq.dawn.util.notification.NotificationUtils
 import com.lzq.dawn.util.process.ProcessUtils
 import com.lzq.dawn.util.rom.RomUtils
 import com.lzq.dawn.util.rom.RomUtils.romInfo
-import com.lzq.dawn.util.screen.ScreenUtils
 import com.lzq.dawn.util.sdcard.SDCardUtils
 import com.lzq.dawn.util.service.ServiceUtils
 import com.lzq.dawn.util.shell.CommandResult
@@ -439,7 +440,12 @@ object DawnBridge {
         get() = RomUtils.isSamsung
     val appScreenWidth: Int
         ///////////////////////////////////////////////////////////////////////////
-        get() = ScreenUtils.appScreenWidth
+        get() {
+            val wm = DawnBridge.app.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            val point = Point()
+            wm.defaultDisplay.getSize(point)
+            return point.x
+        }
     val isSDCardEnableByEnvironment: Boolean
         ///////////////////////////////////////////////////////////////////////////
         get() = SDCardUtils.isSDCardEnableByEnvironment

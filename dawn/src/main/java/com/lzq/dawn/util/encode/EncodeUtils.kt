@@ -21,15 +21,9 @@ object EncodeUtils {
      * @param charsetName 字符集的名称。
      * @return url 编码 字符串。
      */
-    /**
-     * 返回 url 编码 字符串。
-     *
-     * @param input input.
-     * @return url 编码 字符串。
-     */
     @JvmOverloads
     fun urlEncode(input: String?, charsetName: String? = "UTF-8"): String {
-        return if (input == null || input.length == 0) {
+        return if (input.isNullOrEmpty()) {
             ""
         } else try {
             URLEncoder.encode(input, charsetName)
@@ -44,15 +38,9 @@ object EncodeUtils {
      * @param charsetName 字符集的名称。
      * @return 解码 url encoded 字符串的字符串。
      */
-    /**
-     * 返回解码 url encoded 字符串的字符串。
-     *
-     * @param input input.
-     * @return 解码 url encoded 字符串的字符串。
-     */
     @JvmOverloads
     fun urlDecode(input: String?, charsetName: String? = "UTF-8"): String {
-        return if (input == null || input.length == 0) {
+        return if (input.isNullOrEmpty()) {
             ""
         } else try {
             val safeInput =
@@ -81,7 +69,7 @@ object EncodeUtils {
      */
     @JvmStatic
     fun base64Encode(input: ByteArray?): ByteArray {
-        return if (input == null || input.size == 0) {
+        return if (input == null || input.isEmpty()) {
             ByteArray(0)
         } else Base64.encode(input, Base64.NO_WRAP)
     }
@@ -93,7 +81,7 @@ object EncodeUtils {
      * @return Base64 编码字符串。
      */
     fun base64Encode2String(input: ByteArray?): String {
-        return if (input == null || input.size == 0) {
+        return if (input == null || input.isEmpty()) {
             ""
         } else Base64.encodeToString(input, Base64.NO_WRAP)
     }
@@ -105,7 +93,7 @@ object EncodeUtils {
      * @return 解码 Base64 编码字符串的字节。
      */
     fun base64Decode(input: String?): ByteArray {
-        return if (input == null || input.length == 0) {
+        return if (input.isNullOrEmpty()) {
             ByteArray(0)
         } else Base64.decode(input, Base64.NO_WRAP)
     }
@@ -118,7 +106,7 @@ object EncodeUtils {
      */
     @JvmStatic
     fun base64Decode(input: ByteArray?): ByteArray {
-        return if (input == null || input.size == 0) {
+        return if (input == null || input.isEmpty()) {
             ByteArray(0)
         } else Base64.decode(input, Base64.NO_WRAP)
     }
@@ -130,7 +118,7 @@ object EncodeUtils {
      * @return html 编码字符串。
      */
     fun htmlEncode(input: CharSequence?): String {
-        if (input == null || input.length == 0) {
+        if (input.isNullOrEmpty()) {
             return ""
         }
         val sb = StringBuilder()
@@ -164,7 +152,7 @@ object EncodeUtils {
      * @return 解码 html-编码 字符串的字符串。
      */
     fun htmlDecode(input: String?): CharSequence {
-        if (input == null || input.length == 0) {
+        if (input.isNullOrEmpty()) {
             return ""
         }
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -181,7 +169,7 @@ object EncodeUtils {
      * @return 二进制字符串
      */
     fun binaryEncode(input: String?): String {
-        if (input == null || input.length == 0) {
+        if (input.isNullOrEmpty()) {
             return ""
         }
         val sb = StringBuilder()
@@ -198,7 +186,7 @@ object EncodeUtils {
      * @return UTF-8 字符串
      */
     fun binaryDecode(input: String?): String {
-        if (input == null || input.length == 0) {
+        if (input.isNullOrEmpty()) {
             return ""
         }
         val splits = input.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()

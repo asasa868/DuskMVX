@@ -55,7 +55,7 @@ object GsonUtils {
         return GSONS[key]
     }
 
-    val gson: Gson?
+    private val gson: Gson
         get() {
             val gsonDelegate = GSONS[KEY_DELEGATE]
             if (gsonDelegate != null) {
@@ -77,7 +77,7 @@ object GsonUtils {
      */
     @JvmStatic
     fun toJson(`object`: Any?): String {
-        return toJson(gson!!, `object`)
+        return toJson(gson, `object`)
     }
 
     /**
@@ -88,7 +88,7 @@ object GsonUtils {
      * @return 对象序列化为 json。
      */
     fun toJson(src: Any?, typeOfSrc: Type): String {
-        return toJson(gson!!, src, typeOfSrc)
+        return toJson(gson, src, typeOfSrc)
     }
 
     /**
@@ -122,7 +122,7 @@ object GsonUtils {
      * @return 类型的实例
      */
     fun <T> fromJson(json: String?, type: Class<T>): T {
-        return fromJson(gson!!, json, type)
+        return fromJson(gson, json, type)
     }
 
     /**
@@ -134,7 +134,7 @@ object GsonUtils {
      */
     @JvmStatic
     fun <T> fromJson(json: String?, type: Type): T {
-        return fromJson(gson!!, json, type)
+        return fromJson(gson, json, type)
     }
 
     /**
@@ -145,7 +145,7 @@ object GsonUtils {
      * @return 类型的实例
      */
     fun <T> fromJson(reader: Reader, type: Class<T>): T {
-        return fromJson(gson!!, reader, type)
+        return fromJson(gson, reader, type)
     }
 
     /**
@@ -156,7 +156,7 @@ object GsonUtils {
      * @return 类型的实例
      */
     fun <T> fromJson(reader: Reader, type: Type): T {
-        return fromJson(gson!!, reader, type)
+        return fromJson(gson, reader, type)
     }
 
     /**
