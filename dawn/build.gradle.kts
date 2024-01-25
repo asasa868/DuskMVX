@@ -1,4 +1,5 @@
 import groovy.util.Node
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 import java.io.FileInputStream
 import java.util.Properties
@@ -80,17 +81,18 @@ android {
 dependencies {
 
     //---------------------------依赖---------------------------
-    api(AndroidX.appcompat)
-    api(AndroidX.coreKtx)
-    api(AndroidX.exifInterface)
-    api(AndroidX.multiDex)
+    api(app.androidx.appcompat)
+    api(app.androidx.core.ktx)
+    api(app.androidx.exifinterface)
+    api(app.androidx.multidex)
 
-    api(Google.autoService)
-    api(Google.material)
+    api(libs.auto.service)
+    api(app.androidx.material)
 
-    api(JetPack.viewModel)
-    api(JetPack.liveData)
-    api(JetPack.lifecycle)
+    api(app.androidx.lifecycle.viewmodel.ktx)
+    api(app.androidx.lifecycle.livedata.ktx)
+    api(app.androidx.lifecycle.runtime.ktx)
+
     api(platform(compose.bom))
     api(compose.androidx.activity)
     api(compose.androidx.material3)
@@ -101,30 +103,29 @@ dependencies {
     api(compose.accompanist.themeadapter)
     api(compose.accompanist.systemuicontroller)
 
+    api(libs.kotlin.stdlib)
+    api(libs.kotlin.coroutines.core)
+    api(libs.kotlinx.coroutines.android)
 
-    api(Kotlin.stdlibJdk)
-    api(Kotlin.CoroutinesCore)
-    api(Kotlin.CoroutinesAnd)
-
-    api(ThirdParty.gson)
-    api(ThirdParty.toaster)
-    api(ThirdParty.aRouter)
-    api(ThirdParty.eventbus)
-    api(ThirdParty.rxjava3)
-    api(ThirdParty.rxandroid)
+    api(libs.gson)
+    api(libs.toaster)
+    api(libs.arouter.api)
+    api(libs.eventbus)
+    api(libs.reactivex.rxjava3)
+    api(libs.reactivex.rxjava3.rxandroid)
+    api(libs.retrofit)
     //---------------------------依赖---------------------------
 
     //-------------------------注解依赖--------------------------
-    kapt(Google.autoAnnotations)
-    kapt(ThirdParty.aRouterCompiler)
-    kapt(ThirdParty.eventbusAPT)
-    kapt(JetPack.lifecycleAPT)
+    kapt(libs.auto.service.annotations)
+    kapt(libs.arouter.compiler)
+    kapt(libs.eventbus.annotation)
+    kapt(app.androidx.lifecycle.common.compiler)
 
 
     //-------------------------注解依赖--------------------------
 }
 
-//-------------------------注解依赖--------------------------
 
 /**
  * 以下打包上传部分可以独立放在单独的.gradle.kts脚本文件中，但是遇到了问题：

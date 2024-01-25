@@ -469,7 +469,7 @@ object EncryptUtils {
      * @return HmacSHA224 加密的十六进制字符串。
      */
     fun encryptHmacSHA224ToString(data: String?, key: String?): String {
-        return if (data == null || data.length == 0 || key == null || key.length == 0) {
+        return if (data.isNullOrEmpty() || key.isNullOrEmpty()) {
             ""
         } else encryptHmacSHA224ToString(data.toByteArray(), key.toByteArray())
     }
@@ -504,7 +504,7 @@ object EncryptUtils {
      * @return HmacSHA256 加密的十六进制字符串。
      */
     fun encryptHmacSHA256ToString(data: String?, key: String?): String {
-        return if (data == null || data.length == 0 || key == null || key.length == 0) {
+        return if (data.isNullOrEmpty() || key.isNullOrEmpty()) {
             ""
         } else encryptHmacSHA256ToString(data.toByteArray(), key.toByteArray())
     }
@@ -539,7 +539,7 @@ object EncryptUtils {
      * @return HmacSHA384加密的十六进制字符串
      */
     fun encryptHmacSHA384ToString(data: String?, key: String?): String {
-        return if (data == null || data.length == 0 || key == null || key.length == 0) {
+        return if (data.isNullOrEmpty() || key.isNullOrEmpty()) {
             ""
         } else encryptHmacSHA384ToString(
             data.toByteArray(), key.toByteArray()
@@ -576,7 +576,7 @@ object EncryptUtils {
      * @return HmacSHA512 加密的十六进制字符串。
      */
     fun encryptHmacSHA512ToString(data: String?, key: String?): String {
-        return if (data == null || data.length == 0 || key == null || key.length == 0) {
+        return if (data.isNullOrEmpty() || key.isNullOrEmpty()) {
             ""
         } else encryptHmacSHA512ToString(data.toByteArray(), key.toByteArray())
     }
@@ -614,7 +614,7 @@ object EncryptUtils {
     private fun hmacTemplate(
         data: ByteArray?, key: ByteArray?, algorithm: String
     ): ByteArray? {
-        return if (data == null || data.size == 0 || key == null || key.size == 0) {
+        return if (data == null || data.isEmpty() || key == null || key.isEmpty()) {
             null
         } else try {
             val secretKey = SecretKeySpec(key, algorithm)
@@ -918,11 +918,10 @@ object EncryptUtils {
         iv: ByteArray?,
         isEncrypt: Boolean
     ): ByteArray? {
-        return if (data == null || data.size == 0 || key == null || key.size == 0) {
+        return if (data == null || data.isEmpty() || key == null || key.isEmpty()) {
             null
         } else try {
-            val secretKey: SecretKey
-            secretKey = if ("DES" == algorithm) {
+            val secretKey: SecretKey = if ("DES" == algorithm) {
                 val desKey = DESKeySpec(key)
                 val keyFactory = SecretKeyFactory.getInstance(algorithm)
                 keyFactory.generateSecret(desKey)
@@ -930,7 +929,7 @@ object EncryptUtils {
                 SecretKeySpec(key, algorithm)
             }
             val cipher = Cipher.getInstance(transformation)
-            if (iv == null || iv.size == 0) {
+            if (iv == null || iv.isEmpty()) {
                 cipher.init(if (isEncrypt) Cipher.ENCRYPT_MODE else Cipher.DECRYPT_MODE, secretKey)
             } else {
                 val params: AlgorithmParameterSpec = IvParameterSpec(iv)
@@ -1046,13 +1045,12 @@ object EncryptUtils {
     private fun rsaTemplate(
         data: ByteArray?, key: ByteArray?, keySize: Int, transformation: String, isEncrypt: Boolean
     ): ByteArray? {
-        if (data == null || data.size == 0 || key == null || key.size == 0) {
+        if (data == null || data.isEmpty() || key == null || key.isEmpty()) {
             return null
         }
         try {
             val rsaKey: Key
-            val keyFactory: KeyFactory
-            keyFactory = if (Build.VERSION.SDK_INT < 28) {
+            val keyFactory: KeyFactory = if (Build.VERSION.SDK_INT < 28) {
                 KeyFactory.getInstance("RSA", "BC")
             } else {
                 KeyFactory.getInstance("RSA")
@@ -1063,9 +1061,6 @@ object EncryptUtils {
             } else {
                 val keySpec = PKCS8EncodedKeySpec(key)
                 keyFactory.generatePrivate(keySpec)
-            }
-            if (rsaKey == null) {
-                return null
             }
             val cipher = Cipher.getInstance(transformation)
             cipher.init(if (isEncrypt) Cipher.ENCRYPT_MODE else Cipher.DECRYPT_MODE, rsaKey)
@@ -1110,10 +1105,10 @@ object EncryptUtils {
      * @param key  key.
      */
     fun rc4(data: ByteArray?, key: ByteArray?): ByteArray? {
-        if (data == null || data.size == 0 || key == null) {
+        if (data == null || data.isEmpty() || key == null) {
             return null
         }
-        require(!(key.size < 1 || key.size > 256)) { "key must be between 1 and 256 bytes" }
+        require(!(key.isEmpty() || key.size > 256)) { "key must be between 1 and 256 bytes" }
         val iS = ByteArray(256)
         val iK = ByteArray(256)
         val keyLen = key.size

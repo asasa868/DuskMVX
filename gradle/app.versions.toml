@@ -44,6 +44,7 @@ androidx-swiperefreshlayout = "1.2.0-alpha01"
 androidx-navigation = "2.7.4"
 androidx-media3 = "1.1.1"
 androidx-multidex = "2.0.1"
+androidx-exifinterface = "1.3.6"
 
 [libraries]
 
@@ -76,6 +77,7 @@ androidx-appcompat-resources = { module = "androidx.appcompat:appcompat-resource
 # 访问基于 Activity 构建的可组合 API
 androidx-activity = { module = "androidx.activity:activity", version.ref = "androidx-activity" }
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activity" }
+androidx-exifinterface = { module = "androidx.exifinterface:exifinterface", version.ref = "androidx-exifinterface" }
 
 # Androidce测试组件
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test-core" }
