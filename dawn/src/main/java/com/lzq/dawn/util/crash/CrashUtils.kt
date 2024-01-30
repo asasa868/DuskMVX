@@ -4,6 +4,7 @@ import com.lzq.dawn.DawnBridge
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 /**
  * @Name :CrashUtils
@@ -52,8 +53,7 @@ object CrashUtils {
     @JvmOverloads
     fun init(crashDirPath: String = "", onCrashListener: OnCrashListener? = null) {
         val dirPath: String = if (DawnBridge.isSpace(crashDirPath)) {
-            if (DawnBridge.isSDCardEnableByEnvironment && DawnBridge.app.getExternalFilesDir(null) != null
-            ) {
+            if (DawnBridge.isSDCardEnableByEnvironment && DawnBridge.app.getExternalFilesDir(null) != null) {
                 DawnBridge.app.getExternalFilesDir(null).toString() + FILE_SEP + "crash" + FILE_SEP
             } else {
                 DawnBridge.app.filesDir.toString() + FILE_SEP + "crash" + FILE_SEP
@@ -70,7 +70,7 @@ object CrashUtils {
         dirPath: String, onCrashListener: OnCrashListener?
     ): Thread.UncaughtExceptionHandler {
         return Thread.UncaughtExceptionHandler { t: Thread?, e: Throwable? ->
-            val time = SimpleDateFormat("yyyy_MM_dd-HH_mm_ss").format(Date())
+            val time = SimpleDateFormat("yyyy_MM_dd-HH_mm_ss", Locale.getDefault()).format(Date())
             val info = CrashInfo(time, e)
             val crashFile = "$dirPath$time.txt"
             DawnBridge.writeFileFromString(crashFile, info.toString(), true)

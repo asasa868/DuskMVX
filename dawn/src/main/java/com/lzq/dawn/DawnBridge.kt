@@ -43,7 +43,6 @@ import com.lzq.dawn.util.intent.IntentUtils
 import com.lzq.dawn.util.notification.ChannelConfig
 import com.lzq.dawn.util.notification.NotificationUtils
 import com.lzq.dawn.util.process.ProcessUtils
-import com.lzq.dawn.util.rom.RomUtils
 import com.lzq.dawn.util.rom.RomUtils.romInfo
 import com.lzq.dawn.util.sdcard.SDCardUtils
 import com.lzq.dawn.util.service.ServiceUtils
@@ -396,25 +395,25 @@ object DawnBridge {
         return IntentUtils.getInstallAppIntent(uri)
     }
 
-    fun getUninstallAppIntent(pkgName: String?): Intent {
-        return IntentUtils.getUninstallAppIntent(pkgName!!)
+    fun getUninstallAppIntent(pkgName: String): Intent {
+        return IntentUtils.getUninstallAppIntent(pkgName)
     }
 
-    fun getDialIntent(phoneNumber: String?): Intent {
-        return IntentUtils.getDialIntent(phoneNumber!!)
+    fun getDialIntent(phoneNumber: String): Intent {
+        return IntentUtils.getDialIntent(phoneNumber)
     }
 
     @RequiresPermission(permission.CALL_PHONE)
-    fun getCallIntent(phoneNumber: String?): Intent {
-        return IntentUtils.getCallIntent(phoneNumber!!)
+    fun getCallIntent(phoneNumber: String): Intent {
+        return IntentUtils.getCallIntent(phoneNumber)
     }
 
-    fun getSendSmsIntent(phoneNumber: String?, content: String?): Intent {
-        return IntentUtils.getSendSmsIntent(phoneNumber!!, content)
+    fun getSendSmsIntent(phoneNumber: String, content: String?): Intent {
+        return IntentUtils.getSendSmsIntent(phoneNumber, content)
     }
 
-    fun getLaunchAppDetailsSettingsIntent(pkgName: String?, isNewTask: Boolean): Intent {
-        return IntentUtils.getLaunchAppDetailsSettingsIntent(pkgName!!, isNewTask)
+    fun getLaunchAppDetailsSettingsIntent(pkgName: String, isNewTask: Boolean): Intent {
+        return IntentUtils.getLaunchAppDetailsSettingsIntent(pkgName, isNewTask)
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -429,25 +428,19 @@ object DawnBridge {
     val isGrantedDrawOverlays: Boolean
         get() = Settings.canDrawOverlays(app)
     val isMainProcess: Boolean
-        ///////////////////////////////////////////////////////////////////////////
         get() = ProcessUtils.isMainProcess
     val foregroundProcessName: String?
         get() = ProcessUtils.foregroundProcessName
     val currentProcessName: String
         get() = ProcessUtils.currentProcessName
-    val isSamsung: Boolean
-        ///////////////////////////////////////////////////////////////////////////
-        get() = RomUtils.isSamsung
     val appScreenWidth: Int
-        ///////////////////////////////////////////////////////////////////////////
         get() {
-            val wm = DawnBridge.app.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            val wm = app.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             val point = Point()
             wm.defaultDisplay.getSize(point)
             return point.x
         }
     val isSDCardEnableByEnvironment: Boolean
-        ///////////////////////////////////////////////////////////////////////////
         get() = SDCardUtils.isSDCardEnableByEnvironment
 
     ///////////////////////////////////////////////////////////////////////////

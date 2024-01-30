@@ -1,4 +1,4 @@
-package com.lzq.dusk
+package com.lzq.dusk.mainMvvm
 
 
 import android.content.Intent
@@ -23,7 +23,7 @@ class MainActivity : BaseMvvmActivity<ActivityMainBinding, MainViewModel>() {
        lifecycleScope.launch {
            flow {
                var time = 0
-               while (time < 5) {
+               while (time < 2) {
                    delay(1000)
                    time++
                }

@@ -1,4 +1,4 @@
-package com.lzq.dusk
+package com.lzq.dusk.mainMvvm
 
 import com.lzq.dawn.mvvm.m.BaseMvvmRepository
 

@@ -55,7 +55,7 @@ object AppUtils {
      * @param packageName 包名
      */
     @JvmStatic
-    fun uninstallApp(packageName: String?) {
+    fun uninstallApp(packageName: String) {
         if (DawnBridge.isSpace(packageName)) {
             return
         }
@@ -215,7 +215,7 @@ object AppUtils {
         if (DawnBridge.isSpace(pkgName)) {
             return
         }
-        val intent: Intent = DawnBridge.getLaunchAppDetailsSettingsIntent(pkgName, true)
+        val intent: Intent = DawnBridge.getLaunchAppDetailsSettingsIntent(pkgName!!, true)
         if (!DawnBridge.isIntentAvailable(intent)) {
             return
         }
@@ -237,7 +237,7 @@ object AppUtils {
         if (activity == null || DawnBridge.isSpace(pkgName)) {
             return
         }
-        val intent: Intent = DawnBridge.getLaunchAppDetailsSettingsIntent(pkgName, false)
+        val intent: Intent = DawnBridge.getLaunchAppDetailsSettingsIntent(pkgName!!, false)
         if (!DawnBridge.isIntentAvailable(intent)) {
             return
         }

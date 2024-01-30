@@ -1,5 +1,4 @@
 import groovy.util.Node
-import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 import java.io.FileInputStream
 import java.util.Properties
@@ -114,6 +113,8 @@ dependencies {
     api(libs.reactivex.rxjava3)
     api(libs.reactivex.rxjava3.rxandroid)
     api(libs.retrofit)
+    api(libs.retrofit.converter.gson)
+    api(libs.okhttp.logging.interceptor)
     //---------------------------依赖---------------------------
 
     //-------------------------注解依赖--------------------------
