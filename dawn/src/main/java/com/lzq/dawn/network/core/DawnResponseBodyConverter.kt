@@ -1,10 +1,10 @@
 package com.lzq.dawn.network.core
 
 import com.google.gson.Gson
-import com.google.gson.JsonIOException
 import com.google.gson.JsonObject
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonToken
+import com.lzq.dawn.DawnConstants
 import com.lzq.dawn.DawnConstants.NetWorkConstants.RESPONSE_ANALYZE_CODE
 import com.lzq.dawn.network.error.DawnException
 import com.lzq.dawn.network.error.IErrorHandler
@@ -33,7 +33,10 @@ class DawnResponseBodyConverter<T>(
             return value.use {
                 val result = adapter.read(jsonReader)
                 if (jsonReader.peek() != JsonToken.END_DOCUMENT) {
-                    throw JsonIOException("JSON document was not fully consumed.")
+                    throw DawnException(
+                        DawnConstants.NetWorkConstants.JSON_IO_CODE,
+                        "JSON document was not fully consumed."
+                    )
                 }
                 result
             }
@@ -79,11 +82,10 @@ class DawnResponseBodyConverter<T>(
             } else {
                 exception.handleError(
                     DawnException(
-                        code.asInt,
-                        message.asString
+                        code.asInt, message.asString
                     )
                 )
-               null
+                null
             }
         }
     }

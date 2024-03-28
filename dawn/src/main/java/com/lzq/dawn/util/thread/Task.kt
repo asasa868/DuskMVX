@@ -56,10 +56,11 @@ abstract class Task<T>() : Runnable {
      * @param t Throwable
      */
     abstract fun onFail(t: Throwable)
+
     override fun run() {
         if (isSchedule) {
             if (runner == null) {
-                //如果当前值 {@code ==} 是预期值，则自动将值设置为给定的更新值。
+                // 如果当前值 {@code ==} 是预期值，则自动将值设置为给定的更新值。
                 if (!state.compareAndSet(NEW, RUNNING)) {
                     return
                 }
@@ -73,22 +74,25 @@ abstract class Task<T>() : Runnable {
                 }
             }
         } else {
-            //如果当前值 {@code ==} 是预期值，则自动将值设置为给定的更新值。
+            // 如果当前值 {@code ==} 是预期值，则自动将值设置为给定的更新值。
             if (!state.compareAndSet(NEW, RUNNING)) {
                 return
             }
             runner = Thread.currentThread()
             if (mTimeoutListener != null) {
                 mTimer = Timer()
-                mTimer!!.schedule(object : TimerTask() {
-                    override fun run() {
-                        if (!isDone && mTimeoutListener != null) {
-                            timeout()
-                            mTimeoutListener!!.onTimeout()
-                            onDone()
+                mTimer!!.schedule(
+                    object : TimerTask() {
+                        override fun run() {
+                            if (!isDone && mTimeoutListener != null) {
+                                timeout()
+                                mTimeoutListener!!.onTimeout()
+                                onDone()
+                            }
                         }
-                    }
-                }, mTimeoutMillis)
+                    },
+                    mTimeoutMillis,
+                )
             }
         }
     }
@@ -106,10 +110,10 @@ abstract class Task<T>() : Runnable {
                 runner!!.interrupt()
             }
         }
-        getDeliver().execute(Runnable {
+        getDeliver().execute {
             onCancel()
             onDone()
-        })
+        }
     }
 
     val isCanceled: Boolean
@@ -125,7 +129,10 @@ abstract class Task<T>() : Runnable {
     /**
      * Scheduled task doesn't support timeout.
      */
-    fun setTimeout(timeoutMillis: Long, listener: OnTimeoutListener?): Task<T> {
+    fun setTimeout(
+        timeoutMillis: Long,
+        listener: OnTimeoutListener?,
+    ): Task<T> {
         mTimeoutMillis = timeoutMillis
         mTimeoutListener = listener
         return this

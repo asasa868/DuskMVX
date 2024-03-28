@@ -1,7 +1,7 @@
 package com.lzq.dawn.base.controller
 
-
 import androidx.lifecycle.ViewModel
+import com.lzq.dawn.base.model.IBaseRootRepository
 
 /**
  * @projectName com.lzq.dawn
@@ -10,4 +10,4 @@ import androidx.lifecycle.ViewModel
  * @version 0.0.1
  * @description: 最初始的ViewModel
  */
-abstract class BaseRootViewModel : ViewModel(), IBaseRootViewModel
+abstract class BaseRootViewModel<M : IBaseRootRepository> : ViewModel(), IBaseRootViewModel<M>

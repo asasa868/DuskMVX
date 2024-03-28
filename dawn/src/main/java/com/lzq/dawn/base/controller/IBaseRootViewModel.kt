@@ -9,11 +9,9 @@ import com.lzq.dawn.base.model.IBaseRootRepository
  * @version 0.0.1
  * @description: 最初始的ViewModel接口
  */
-interface IBaseRootViewModel {
-
+interface IBaseRootViewModel<M : IBaseRootRepository> {
     /**
      * 创建model对象
      */
-    fun createModel(): IBaseRootRepository
-
+    fun createModel(): M
 }

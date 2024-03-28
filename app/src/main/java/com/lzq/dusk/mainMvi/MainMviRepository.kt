@@ -1,6 +1,9 @@
 package com.lzq.dusk.mainMvi
 
-import com.lzq.dawn.mvi.m.BaseMviRepository
+import com.lzq.dawn.mvi.view.m.BaseMviRepository
+import com.lzq.dawn.network.bean.DawnHttpResult
+import com.lzq.dusk.network.MainService
+import com.lzq.dusk.network.bean.BannerBean
 
 /**
  * @projectName com.lzq.dusk.mainMvi
@@ -9,4 +12,8 @@ import com.lzq.dawn.mvi.m.BaseMviRepository
  * @version
  * @description:
  */
-class MainMviRepository:BaseMviRepository() {}
+class MainMviRepository : BaseMviRepository() {
+    suspend fun getBanner(): DawnHttpResult<List<BannerBean>> {
+        return MainService.getApiService().getBanner()
+    }
+}

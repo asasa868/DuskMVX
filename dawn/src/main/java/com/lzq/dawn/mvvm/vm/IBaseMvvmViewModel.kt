@@ -14,28 +14,27 @@ import kotlinx.coroutines.flow.Flow
  * @description: MVVM架构模式的ViewModel接口
  */
 interface IBaseMvvmViewModel {
-
     fun getViewState(): MutableLiveData<BaseViewState>
 
     fun <T> launchCallBackFlow(
         flow: Flow<T>,
         success: IViewModelResultCallBack.OnSuccess<T>,
-        failure: IViewModelResultCallBack.OnFailure<Throwable>
+        failure: IViewModelResultCallBack.OnFailure<Throwable>,
     )
 
     fun <T> launchCallBackFlow(
         flow: Flow<T>,
-        success: IViewModelResultCallBack.OnSuccess<T>
+        success: IViewModelResultCallBack.OnSuccess<T>,
     )
 
     fun <T : Any> launchCallBackRxjava(
         observable: Observable<T>,
         success: IViewModelResultCallBack.OnSuccess<T>,
-        failure: IViewModelResultCallBack.OnFailure<Throwable>
+        failure: IViewModelResultCallBack.OnFailure<Throwable>,
     )
 
     fun <T : Any> launchCallBackRxjava(
-        observable: Observable<T>, success: IViewModelResultCallBack.OnSuccess<T>
+        observable: Observable<T>,
+        success: IViewModelResultCallBack.OnSuccess<T>,
     )
-
 }

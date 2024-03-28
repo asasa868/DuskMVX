@@ -21,11 +21,11 @@ fun interface LifecycleStateCallBack {
 }
 
 fun AppCompatActivity.repeatOnLifecycle(
-    state: Lifecycle.State = Lifecycle.State.STARTED, lifecycleStateCallBack: LifecycleStateCallBack
+    state: Lifecycle.State = Lifecycle.State.STARTED,
+    lifecycleStateCallBack: LifecycleStateCallBack,
 ) {
     lifecycleScope.launch { repeatOnLifecycle(state) { lifecycleStateCallBack.onLifeCycle(this) } }
 }
-
 
 inline fun <reified T : ViewModel> AppCompatActivity.viewModel(modelClass: Class<T>): T {
     return ViewModelProvider(this)[modelClass]

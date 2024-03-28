@@ -51,6 +51,10 @@ class DawnConstants {
         const val RESPONSE_BODY_NULL_CODE        = 1100
         const val RESPONSE_EXCEPTION_NULL_CODE   = 1200
         const val RESPONSE_CODE_NOT_SUCCESS_CODE = 1300
+        const val GSON_NULL_CODE                 = 10000
+        const val JSON_IO_CODE                   = 10001
+        const val JSON_PARSE_CODE                = 10002
+
 
         /**
          * http状态码

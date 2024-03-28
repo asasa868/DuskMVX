@@ -25,6 +25,7 @@ object SDCardUtils {
          * @return `true`: enabled<br></br>`false`: disabled
          */
         get() = Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()
+
     @JvmStatic
     val sDCardPathByEnvironment: String
         /**
@@ -32,9 +33,12 @@ object SDCardUtils {
          *
          * @return SD卡的路径。
          */
-        get() = if (isSDCardEnableByEnvironment) {
-            Environment.getExternalStorageDirectory().absolutePath
-        } else ""
+        get() =
+            if (isSDCardEnableByEnvironment) {
+                Environment.getExternalStorageDirectory().absolutePath
+            } else {
+                ""
+            }
 
     @JvmStatic
     val sDCardInfo: List<SDCardInfo>
@@ -68,7 +72,8 @@ object SDCardUtils {
                     val storageVolumeClazz = Class.forName("android.os.storage.StorageVolume")
                     val getPathMethod = storageVolumeClazz.getMethod("getPath")
                     val isRemovableMethod = storageVolumeClazz.getMethod("isRemovable")
-                    val getVolumeStateMethod = StorageManager::class.java.getMethod("getVolumeState", String::class.java)
+                    val getVolumeStateMethod =
+                        StorageManager::class.java.getMethod("getVolumeState", String::class.java)
                     val getVolumeListMethod = StorageManager::class.java.getMethod("getVolumeList")
                     val result = getVolumeListMethod.invoke(sm)
                     val length = Array.getLength(result)
@@ -91,6 +96,7 @@ object SDCardUtils {
             }
             return paths
         }
+
     @JvmStatic
     val mountedSDCardPath: List<String>
         /**

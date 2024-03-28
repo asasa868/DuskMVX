@@ -73,7 +73,10 @@ object ThrowableUtils {
         return list
     }
 
-    private fun removeCommonFrames(causeFrames: MutableList<String>, wrapperFrames: List<String>) {
+    private fun removeCommonFrames(
+        causeFrames: MutableList<String>,
+        wrapperFrames: List<String>,
+    ) {
         var causeFrameIndex = causeFrames.size - 1
         var wrapperFrameIndex = wrapperFrames.size - 1
         while (causeFrameIndex >= 0 && wrapperFrameIndex >= 0) {

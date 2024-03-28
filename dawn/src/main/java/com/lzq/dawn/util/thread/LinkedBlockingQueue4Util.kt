@@ -28,12 +28,14 @@ class LinkedBlockingQueue4Util : LinkedBlockingQueue<Runnable> {
         return if (mCapacity <= size && mPool != null && mPool!!.poolSize < mPool!!.maximumPoolSize) {
             // create a non-core thread
             false
-        } else super.offer(
-            runnable
-        )
+        } else {
+            super.offer(
+                runnable,
+            )
+        }
     }
 
-    fun setmPool(mPool: ThreadPoolExecutor4Util?) {
+    fun setPool(mPool: ThreadPoolExecutor4Util?) {
         this.mPool = mPool
     }
 

@@ -19,12 +19,12 @@ object VibrateUtils {
     private var vibrator: Vibrator? = null
         get() {
             if (field == null) {
-                field = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
-                    (DawnBridge.app
-                        .getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
-                } else {
-                    DawnBridge.app.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                }
+                field =
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+                        (DawnBridge.app.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+                    } else {
+                        DawnBridge.app.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                    }
             }
             return field
         }
@@ -55,7 +55,10 @@ object VibrateUtils {
      * @param repeat  索引到要重复的模式，如果不想重复，则为 -1。
      */
     @RequiresPermission(permission.VIBRATE)
-    fun vibrate(pattern: LongArray?, repeat: Int) {
+    fun vibrate(
+        pattern: LongArray?,
+        repeat: Int,
+    ) {
         val vibrator = vibrator ?: return
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator.vibrate(VibrationEffect.createWaveform(pattern, repeat))

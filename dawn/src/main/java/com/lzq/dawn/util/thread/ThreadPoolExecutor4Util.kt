@@ -20,22 +20,30 @@ class ThreadPoolExecutor4Util internal constructor(
     keepAliveTime: Long,
     unit: TimeUnit?,
     workQueue: LinkedBlockingQueue4Util,
-    threadFactory: ThreadFactory?
+    threadFactory: ThreadFactory?,
 ) : ThreadPoolExecutor(
-    corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory
-) {
+        corePoolSize,
+        maximumPoolSize,
+        keepAliveTime,
+        unit,
+        workQueue,
+        threadFactory,
+    ) {
     private val mSubmittedCount = AtomicInteger()
     private val mWorkQueue: LinkedBlockingQueue4Util
 
     init {
-        workQueue.setmPool(this)
+        workQueue.setPool(this)
         mWorkQueue = workQueue
     }
 
     private val submittedCount: Int
         get() = mSubmittedCount.get()
 
-    override fun afterExecute(r: Runnable, t: Throwable) {
+    override fun afterExecute(
+        r: Runnable,
+        t: Throwable,
+    ) {
         mSubmittedCount.decrementAndGet()
         super.afterExecute(r, t)
     }
@@ -57,52 +65,60 @@ class ThreadPoolExecutor4Util internal constructor(
 
     companion object {
         @JvmStatic
-        fun createPool(type: Int, priority: Int): ExecutorService {
+        fun createPool(
+            type: Int,
+            priority: Int,
+        ): ExecutorService {
             return when (type) {
-                ThreadUtils.TYPE_SINGLE.toInt() -> ThreadPoolExecutor4Util(
-                    1,
-                    1,
-                    0L,
-                    TimeUnit.MILLISECONDS,
-                    LinkedBlockingQueue4Util(),
-                    UtilsThreadFactory("single", priority)
-                )
+                ThreadUtils.TYPE_SINGLE.toInt() ->
+                    ThreadPoolExecutor4Util(
+                        1,
+                        1,
+                        0L,
+                        TimeUnit.MILLISECONDS,
+                        LinkedBlockingQueue4Util(),
+                        UtilsThreadFactory("single", priority),
+                    )
 
-                ThreadUtils.TYPE_CACHED.toInt() -> ThreadPoolExecutor4Util(
-                    0,
-                    128,
-                    60L,
-                    TimeUnit.SECONDS,
-                    LinkedBlockingQueue4Util(true),
-                    UtilsThreadFactory("cached", priority)
-                )
+                ThreadUtils.TYPE_CACHED.toInt() ->
+                    ThreadPoolExecutor4Util(
+                        0,
+                        128,
+                        60L,
+                        TimeUnit.SECONDS,
+                        LinkedBlockingQueue4Util(true),
+                        UtilsThreadFactory("cached", priority),
+                    )
 
-                ThreadUtils.TYPE_IO.toInt() -> ThreadPoolExecutor4Util(
-                    2 * ThreadUtils.CPU_COUNT + 1,
-                    2 * ThreadUtils.CPU_COUNT + 1,
-                    30,
-                    TimeUnit.SECONDS,
-                    LinkedBlockingQueue4Util(),
-                    UtilsThreadFactory("io", priority)
-                )
+                ThreadUtils.TYPE_IO.toInt() ->
+                    ThreadPoolExecutor4Util(
+                        2 * ThreadUtils.CPU_COUNT + 1,
+                        2 * ThreadUtils.CPU_COUNT + 1,
+                        30,
+                        TimeUnit.SECONDS,
+                        LinkedBlockingQueue4Util(),
+                        UtilsThreadFactory("io", priority),
+                    )
 
-                ThreadUtils.TYPE_CPU.toInt() -> ThreadPoolExecutor4Util(
-                    ThreadUtils.CPU_COUNT + 1,
-                    2 * ThreadUtils.CPU_COUNT + 1,
-                    30,
-                    TimeUnit.SECONDS,
-                    LinkedBlockingQueue4Util(true),
-                    UtilsThreadFactory("cpu", priority)
-                )
+                ThreadUtils.TYPE_CPU.toInt() ->
+                    ThreadPoolExecutor4Util(
+                        ThreadUtils.CPU_COUNT + 1,
+                        2 * ThreadUtils.CPU_COUNT + 1,
+                        30,
+                        TimeUnit.SECONDS,
+                        LinkedBlockingQueue4Util(true),
+                        UtilsThreadFactory("cpu", priority),
+                    )
 
-                else -> ThreadPoolExecutor4Util(
-                    type,
-                    type,
-                    0L,
-                    TimeUnit.MILLISECONDS,
-                    LinkedBlockingQueue4Util(),
-                    UtilsThreadFactory("fixed($type)", priority)
-                )
+                else ->
+                    ThreadPoolExecutor4Util(
+                        type,
+                        type,
+                        0L,
+                        TimeUnit.MILLISECONDS,
+                        LinkedBlockingQueue4Util(),
+                        UtilsThreadFactory("fixed($type)", priority),
+                    )
             }
         }
     }

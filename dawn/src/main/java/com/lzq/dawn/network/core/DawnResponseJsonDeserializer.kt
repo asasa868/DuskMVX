@@ -3,9 +3,10 @@ package com.lzq.dawn.network.core
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
-import com.google.gson.JsonParseException
 import com.google.gson.reflect.TypeToken
+import com.lzq.dawn.DawnConstants
 import com.lzq.dawn.network.bean.DawnHttpResult
+import com.lzq.dawn.network.error.DawnException
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
@@ -18,10 +19,10 @@ import java.lang.reflect.Type
  */
 class DawnResponseJsonDeserializer<T>(
     private val responseCode: IResponseCode?
-) : JsonDeserializer<DawnHttpResult<T>> {
+) : JsonDeserializer<T> {
     override fun deserialize(
         json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?
-    ): DawnHttpResult<T> {
+    ): T {
         val jsonObject = json?.asJsonObject
 
         /**
@@ -34,15 +35,10 @@ class DawnResponseJsonDeserializer<T>(
         val dataType = if (type is ParameterizedType) {
             type.actualTypeArguments.firstOrNull()
         } else {
-            throw JsonParseException("Type must be parameterized")
+            throw DawnException(DawnConstants.NetWorkConstants.JSON_PARSE_CODE, "Type must be parameterized")
         }
 
-        /**
-         * 将data解析成对应的类型
-         */
-        val responseData: T = context!!.deserialize(data, dataType)
-
-        return DawnHttpResult.Success(responseData)
+        return context!!.deserialize(data, dataType)
     }
 
 }

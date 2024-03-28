@@ -137,6 +137,7 @@ object RomUtils {
          * @return `true`: yes<br></br>`false`: no
          */
         get() = ROM_GOOGLE[0] == romInfo!!.name
+
     @JvmStatic
     val isSamsung: Boolean
         /**
@@ -194,6 +195,7 @@ object RomUtils {
          * @return `true`: yes<br></br>`false`: no
          */
         get() = ROM_MOTOROLA[0] == romInfo!!.name
+
     @JvmStatic
     val romInfo: RomInfo?
         /**
@@ -288,7 +290,11 @@ object RomUtils {
             return bean
         }
 
-    private fun isRightRom(brand: String, manufacturer: String, vararg names: String): Boolean {
+    private fun isRightRom(
+        brand: String,
+        manufacturer: String,
+        vararg names: String,
+    ): Boolean {
         for (name in names) {
             if (brand.contains(name) || manufacturer.contains(name)) {
                 return true
@@ -304,7 +310,8 @@ object RomUtils {
                 if (!TextUtils.isEmpty(manufacturer)) {
                     return manufacturer.lowercase(Locale.getDefault())
                 }
-            } catch (ignore: Throwable) { /**/
+            } catch (ignore: Throwable) {
+                //
             }
             return UNKNOWN
         }
@@ -315,7 +322,8 @@ object RomUtils {
                 if (!TextUtils.isEmpty(brand)) {
                     return brand.lowercase(Locale.getDefault())
                 }
-            } catch (ignore: Throwable) { /**/
+            } catch (ignore: Throwable) {
+                //
             }
             return UNKNOWN
         }
@@ -331,12 +339,15 @@ object RomUtils {
                 if (!TextUtils.isEmpty(display)) {
                     ret = display.lowercase(Locale.getDefault())
                 }
-            } catch (ignore: Throwable) { /**/
+            } catch (ignore: Throwable) {
+                //
             }
         }
         return if (TextUtils.isEmpty(ret)) {
             UNKNOWN
-        } else ret
+        } else {
+            ret
+        }
     }
 
     private fun getSystemProperty(name: String): String {
@@ -350,7 +361,9 @@ object RomUtils {
         }
         return if (Build.VERSION.SDK_INT < 28) {
             getSystemPropertyByReflect(name)
-        } else prop
+        } else {
+            prop
+        }
     }
 
     private fun getSystemPropertyByShell(propName: String): String {
@@ -368,7 +381,8 @@ object RomUtils {
             if (input != null) {
                 try {
                     input.close()
-                } catch (ignore: IOException) { /**/
+                } catch (ignore: IOException) {
+                    //
                 }
             }
         }
@@ -378,22 +392,26 @@ object RomUtils {
     private fun getSystemPropertyByStream(key: String): String {
         try {
             val prop = Properties()
-            val `is` = FileInputStream(
-                File(Environment.getRootDirectory(), "build.prop")
-            )
+            val `is` =
+                FileInputStream(
+                    File(Environment.getRootDirectory(), "build.prop"),
+                )
             prop.load(`is`)
             return prop.getProperty(key, "")
-        } catch (ignore: Exception) { /**/
+        } catch (ignore: Exception) {
+            //
         }
         return ""
     }
 
     private fun getSystemPropertyByReflect(key: String): String {
         try {
-            @SuppressLint("PrivateApi") val clz = Class.forName("android.os.SystemProperties")
+            @SuppressLint("PrivateApi")
+            val clz = Class.forName("android.os.SystemProperties")
             val getMethod = clz.getMethod("get", String::class.java, String::class.java)
             return getMethod.invoke(clz, key, "") as String
-        } catch (e: Exception) { /**/
+        } catch (e: Exception) {
+            //
         }
         return ""
     }

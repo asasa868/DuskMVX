@@ -22,20 +22,26 @@ import java.util.concurrent.TimeUnit
  * @description: dawn网络框架
  */
 abstract class DawnNetWork<T>(private val clazz: Class<T>) {
-
     /**
      * 通过懒加载的方式创建Retrofit
      */
     private val mRetrofit: Retrofit by lazy {
-        Retrofit
-            .Builder()
+        Retrofit.Builder()
             .baseUrl(getBaseUrl())
             .client(createOkhttpClient())
-            .addConverterFactory(DawnConverterFactory.create(getHttpResponseCode(),getErrorExceptionHandler()))
-            .addCallAdapterFactory(DawnCallAdapterFactory.create(getErrorExceptionHandler()))
+            .addConverterFactory(
+                DawnConverterFactory.create(
+                    getHttpResponseCode(),
+                    getErrorExceptionHandler()
+                )
+            )
+            .addCallAdapterFactory(
+                DawnCallAdapterFactory.create(
+                    getErrorExceptionHandler()
+                )
+            )
             .build()
     }
-
 
     /**
      * 创建OkhttpClient
@@ -118,6 +124,4 @@ abstract class DawnNetWork<T>(private val clazz: Class<T>) {
      * 子类必须重写，指定请求头
      */
     protected abstract fun createRequestHeader(builder: Request.Builder): Request.Builder?
-
-
 }

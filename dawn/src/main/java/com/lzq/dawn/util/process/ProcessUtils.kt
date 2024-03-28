@@ -53,26 +53,33 @@ object ProcessUtils {
             Log.i("ProcessUtils", list.toString())
             if (list.size <= 0) {
                 Log.i(
-                    "ProcessUtils", "getForegroundProcessName: noun of access to usage information."
+                    "ProcessUtils",
+                    "getForegroundProcessName: noun of access to usage information.",
                 )
                 return ""
             }
-            try { // Access to usage information.
+            try {
+                // Access to usage information.
                 val info = pm.getApplicationInfo(DawnBridge.app.packageName, 0)
                 val aom = DawnBridge.app.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
                 if (aom.checkOpNoThrow(
-                        AppOpsManager.OPSTR_GET_USAGE_STATS, info.uid, info.packageName
+                        AppOpsManager.OPSTR_GET_USAGE_STATS,
+                        info.uid,
+                        info.packageName,
                     ) != AppOpsManager.MODE_ALLOWED
                 ) {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     DawnBridge.app.startActivity(intent)
                 }
                 if (aom.checkOpNoThrow(
-                        AppOpsManager.OPSTR_GET_USAGE_STATS, info.uid, info.packageName
+                        AppOpsManager.OPSTR_GET_USAGE_STATS,
+                        info.uid,
+                        info.packageName,
                     ) != AppOpsManager.MODE_ALLOWED
                 ) {
                     Log.i(
-                        "ProcessUtils", "getForegroundProcessName: refuse to device usage stats."
+                        "ProcessUtils",
+                        "getForegroundProcessName: refuse to device usage stats.",
                     )
                     return ""
                 }
@@ -81,8 +88,11 @@ object ProcessUtils {
                 var usageStatsList: List<UsageStats>? = null
                 val endTime = System.currentTimeMillis()
                 val beginTime = endTime - 86400000 * 7
-                usageStatsList = usageStatsManager.queryUsageStats(
-                        UsageStatsManager.INTERVAL_BEST, beginTime, endTime
+                usageStatsList =
+                    usageStatsManager.queryUsageStats(
+                        UsageStatsManager.INTERVAL_BEST,
+                        beginTime,
+                        endTime,
                     )
                 if (usageStatsList.isNullOrEmpty()) {
                     return ""
@@ -191,6 +201,7 @@ object ProcessUtils {
          * @return `true`: yes<br></br>`false`: no
          */
         get() = DawnBridge.app.packageName == currentProcessName
+
     @JvmStatic
     val currentProcessName: String
         /**
@@ -211,16 +222,17 @@ object ProcessUtils {
             return name
         }
     private val currentProcessNameByFile: String
-        get() = try {
-            val file = File("/proc/" + Process.myPid() + "/" + "cmdline")
-            val mBufferedReader = BufferedReader(FileReader(file))
-            val processName = mBufferedReader.readLine().trim { it <= ' ' }
-            mBufferedReader.close()
-            processName
-        } catch (e: Exception) {
-            e.printStackTrace()
-            ""
-        }
+        get() =
+            try {
+                val file = File("/proc/" + Process.myPid() + "/" + "cmdline")
+                val mBufferedReader = BufferedReader(FileReader(file))
+                val processName = mBufferedReader.readLine().trim { it <= ' ' }
+                mBufferedReader.close()
+                processName
+            } catch (e: Exception) {
+                e.printStackTrace()
+                ""
+            }
     private val currentProcessNameByAms: String
         get() {
             try {

@@ -1,10 +1,10 @@
 package com.lzq.dawn.mvvm.vm
 
-
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.lzq.dawn.base.controller.BaseRootViewModel
+import com.lzq.dawn.base.model.IBaseRootRepository
 import com.lzq.dawn.base.state.BaseViewState
 import com.lzq.dawn.mvvm.IViewModelResultCallBack
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -26,8 +26,7 @@ import kotlinx.coroutines.launch
  * @version 0.0.1
  * @description: MVVM架构模式的ViewModel基类
  */
-abstract class BaseMvvmViewModel : BaseRootViewModel(), IBaseMvvmViewModel {
-
+abstract class BaseMvvmViewModel<M : IBaseRootRepository> : BaseRootViewModel<M>(), IBaseMvvmViewModel {
     protected val mModel by lazy { createModel() }
 
     private var _baseViewState = MutableLiveData<BaseViewState>()
@@ -38,7 +37,7 @@ abstract class BaseMvvmViewModel : BaseRootViewModel(), IBaseMvvmViewModel {
 
     override fun <T> launchCallBackFlow(
         flow: Flow<T>,
-        success: IViewModelResultCallBack.OnSuccess<T>
+        success: IViewModelResultCallBack.OnSuccess<T>,
     ) {
         viewModelScope.launch {
             try {
@@ -57,7 +56,7 @@ abstract class BaseMvvmViewModel : BaseRootViewModel(), IBaseMvvmViewModel {
     override fun <T> launchCallBackFlow(
         flow: Flow<T>,
         success: IViewModelResultCallBack.OnSuccess<T>,
-        failure: IViewModelResultCallBack.OnFailure<Throwable>
+        failure: IViewModelResultCallBack.OnFailure<Throwable>,
     ) {
         viewModelScope.launch {
             try {
@@ -79,58 +78,59 @@ abstract class BaseMvvmViewModel : BaseRootViewModel(), IBaseMvvmViewModel {
 
     override fun <T : Any> launchCallBackRxjava(
         observable: Observable<T>,
-        success: IViewModelResultCallBack.OnSuccess<T>
+        success: IViewModelResultCallBack.OnSuccess<T>,
     ) {
         observable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : Observer<T> {
-                override fun onSubscribe(d: Disposable) {
-                    _baseViewState.value = BaseViewState.Loading
-                }
+            .subscribe(
+                object : Observer<T> {
+                    override fun onSubscribe(d: Disposable) {
+                        _baseViewState.value = BaseViewState.Loading
+                    }
 
-                override fun onError(e: Throwable) {
-                    _baseViewState.value = BaseViewState.Error(msg = e.localizedMessage)
-                }
+                    override fun onError(e: Throwable) {
+                        _baseViewState.value = BaseViewState.Error(msg = e.localizedMessage)
+                    }
 
-                override fun onComplete() {
-                    _baseViewState.value = BaseViewState.Success
-                }
+                    override fun onComplete() {
+                        _baseViewState.value = BaseViewState.Success
+                    }
 
-                override fun onNext(t: T) {
-                    success.onSuccess(t)
-                }
-
-            })
+                    override fun onNext(t: T) {
+                        success.onSuccess(t)
+                    }
+                },
+            )
     }
 
     override fun <T : Any> launchCallBackRxjava(
         observable: Observable<T>,
         success: IViewModelResultCallBack.OnSuccess<T>,
-        failure: IViewModelResultCallBack.OnFailure<Throwable>
+        failure: IViewModelResultCallBack.OnFailure<Throwable>,
     ) {
         observable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : Observer<T> {
-                override fun onSubscribe(d: Disposable) {
-                    _baseViewState.value = BaseViewState.Loading
-                }
+            .subscribe(
+                object : Observer<T> {
+                    override fun onSubscribe(d: Disposable) {
+                        _baseViewState.value = BaseViewState.Loading
+                    }
 
-                override fun onError(e: Throwable) {
-                    _baseViewState.value = BaseViewState.Error(msg = e.localizedMessage)
-                    failure.onFailure(e)
-                }
+                    override fun onError(e: Throwable) {
+                        _baseViewState.value = BaseViewState.Error(msg = e.localizedMessage)
+                        failure.onFailure(e)
+                    }
 
-                override fun onComplete() {
-                    _baseViewState.value = BaseViewState.Success
-                }
+                    override fun onComplete() {
+                        _baseViewState.value = BaseViewState.Success
+                    }
 
-                override fun onNext(t: T) {
-                    success.onSuccess(t)
-                }
-
-            })
+                    override fun onNext(t: T) {
+                        success.onSuccess(t)
+                    }
+                },
+            )
     }
-
 }

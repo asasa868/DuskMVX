@@ -26,7 +26,9 @@ object ShellUtils {
      * @return task
      */
     fun execCmdAsync(
-        command: String, isRooted: Boolean, consumer: DawnBridge.Consumer<CommandResult>
+        command: String,
+        isRooted: Boolean,
+        consumer: DawnBridge.Consumer<CommandResult>,
     ): DawnBridge.Task<CommandResult> {
         return execCmdAsync(arrayOf(command), isRooted, true, consumer)
     }
@@ -40,7 +42,9 @@ object ShellUtils {
      * @return task
      */
     fun execCmdAsync(
-        commands: Array<String>?, isRooted: Boolean, consumer: DawnBridge.Consumer<CommandResult>
+        commands: Array<String>?,
+        isRooted: Boolean,
+        consumer: DawnBridge.Consumer<CommandResult>,
     ): DawnBridge.Task<CommandResult> {
         return execCmdAsync(commands, isRooted, true, consumer)
     }
@@ -58,7 +62,7 @@ object ShellUtils {
         command: String,
         isRooted: Boolean,
         isNeedResultMsg: Boolean,
-        consumer: DawnBridge.Consumer<CommandResult>
+        consumer: DawnBridge.Consumer<CommandResult>,
     ): DawnBridge.Task<CommandResult> {
         return execCmdAsync(arrayOf(command), isRooted, isNeedResultMsg, consumer)
     }
@@ -76,13 +80,15 @@ object ShellUtils {
         commands: Array<String>?,
         isRooted: Boolean,
         isNeedResultMsg: Boolean,
-        consumer: DawnBridge.Consumer<CommandResult>
+        consumer: DawnBridge.Consumer<CommandResult>,
     ): DawnBridge.Task<CommandResult> {
-        return doAsync(object : DawnBridge.Task<CommandResult>(consumer) {
-            override fun doInBackground(): CommandResult {
-                return execCmd(commands, isRooted, isNeedResultMsg)
-            }
-        })
+        return doAsync(
+            object : DawnBridge.Task<CommandResult>(consumer) {
+                override fun doInBackground(): CommandResult {
+                    return execCmd(commands, isRooted, isNeedResultMsg)
+                }
+            },
+        )
     }
 
     /**
@@ -92,7 +98,10 @@ object ShellUtils {
      * @param isRooted 使用root时为True，否则为false。
      * @return [CommandResult] instance
      */
-    fun execCmd(command: String, isRooted: Boolean): CommandResult {
+    fun execCmd(
+        command: String,
+        isRooted: Boolean,
+    ): CommandResult {
         return execCmd(arrayOf(command), isRooted, true)
     }
 
@@ -105,7 +114,9 @@ object ShellUtils {
      * @return [CommandResult] instance
      */
     fun execCmd(
-        command: String, isRooted: Boolean, isNeedResultMsg: Boolean
+        command: String,
+        isRooted: Boolean,
+        isNeedResultMsg: Boolean,
     ): CommandResult {
         return execCmd(arrayOf(command), isRooted, isNeedResultMsg)
     }
@@ -120,7 +131,10 @@ object ShellUtils {
      * @return [CommandResult] instance
      */
     fun execCmd(
-        command: String, envp: Array<String?>?, isRooted: Boolean, isNeedResultMsg: Boolean
+        command: String,
+        envp: Array<String?>?,
+        isRooted: Boolean,
+        isNeedResultMsg: Boolean,
     ): CommandResult {
         return execCmd(arrayOf(command), envp, isRooted, isNeedResultMsg)
     }
@@ -135,7 +149,9 @@ object ShellUtils {
      */
     @JvmOverloads
     fun execCmd(
-        commands: Array<String>?, isRooted: Boolean, isNeedResultMsg: Boolean = true
+        commands: Array<String>?,
+        isRooted: Boolean,
+        isNeedResultMsg: Boolean = true,
     ): CommandResult {
         return execCmd(commands, null, isRooted, isNeedResultMsg)
     }
@@ -152,7 +168,10 @@ object ShellUtils {
      * @return [CommandResult] instance
      */
     fun execCmd(
-        commands: Array<String>?, envp: Array<String?>?, isRooted: Boolean, isNeedResultMsg: Boolean
+        commands: Array<String>?,
+        envp: Array<String?>?,
+        isRooted: Boolean,
+        isNeedResultMsg: Boolean,
     ): CommandResult {
         var result = -1
         if (commands.isNullOrEmpty()) {
@@ -178,12 +197,14 @@ object ShellUtils {
             if (isNeedResultMsg) {
                 successMsg = StringBuilder()
                 errorMsg = StringBuilder()
-                successResult = BufferedReader(
-                    InputStreamReader(process.inputStream, StandardCharsets.UTF_8)
-                )
-                errorResult = BufferedReader(
-                    InputStreamReader(process.errorStream, StandardCharsets.UTF_8)
-                )
+                successResult =
+                    BufferedReader(
+                        InputStreamReader(process.inputStream, StandardCharsets.UTF_8),
+                    )
+                errorResult =
+                    BufferedReader(
+                        InputStreamReader(process.errorStream, StandardCharsets.UTF_8),
+                    )
                 var line: String?
                 if (successResult.readLine().also { line = it } != null) {
                     successMsg.append(line)
@@ -219,7 +240,9 @@ object ShellUtils {
             process?.destroy()
         }
         return CommandResult(
-            result, successMsg?.toString() ?: "", errorMsg?.toString() ?: ""
+            result,
+            successMsg?.toString() ?: "",
+            errorMsg?.toString() ?: "",
         )
     }
 }
