@@ -9,10 +9,39 @@
 > 欢迎大家来Star和Issues。🎆🎆🎆
 >
 > 项目地址：[DuskMVX](https://github.com/asasa868/DuskMVX)
+> [![](https://jitpack.io/v/asasa868/DuskMVX.svg)](https://jitpack.io/#asasa868/DuskMVX)
 
-[![](https://jitpack.io/v/asasa868/DuskMVX.svg)](https://jitpack.io/#asasa868/DuskMVX)
 
 
+## 引入
+**使用jitpack仓库**
+1.在项目的根目录的build.gradle中添加
+```groovy
+dependencyResolutionManagement {
+		repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+		repositories {
+			mavenCentral()
+			maven { url 'https://jitpack.io' }
+		}
+	}
+```
+2.在项目的build.gradle中添加
+```groovy
+       implementation 'com.github.asasa868:DuskMVX:xxx'
+```
+**使用maven仓库**
+1.在项目的根目录的build.gradle中添加
+```groovy
+dependencyResolutionManagement {
+		repositories {
+			mavenCentral()
+		}
+	}
+```
+2.在项目的build.gradle中添加
+```groovy
+       implementation 'com.github.asasa868:DuskMVX:xxx'
+```
 ## 具体用法
 架构中封装了两种架构分别是MVVM，和MVI。
 使用MVVM架构可以继承**BaseMvvmActivity**，使用MVI架构可以继承**BaseMviActivity**，

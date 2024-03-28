@@ -298,8 +298,7 @@ afterEvaluate {
         }
     }
     signing {
-        useGpgCmd()
-        // sign(publishing.publications)
+        sign(publishing.publications["release"])
     }
     tasks.named("generateMetadataFileForReleasePublication") {
         inputs.files(tasks.named("androidSourcesJar"))
