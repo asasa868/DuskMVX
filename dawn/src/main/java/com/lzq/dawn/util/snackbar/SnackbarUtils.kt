@@ -72,7 +72,9 @@ class SnackbarUtils private constructor(parent: View) {
      * @param color color
      * @return [SnackbarUtils] instance
      */
-    fun setMessageColor(@ColorInt color: Int): SnackbarUtils {
+    fun setMessageColor(
+        @ColorInt color: Int,
+    ): SnackbarUtils {
         messageColor = color
         return this
     }
@@ -83,7 +85,9 @@ class SnackbarUtils private constructor(parent: View) {
      * @param color color
      * @return{@link SnackbarUtils} instance
      */
-    fun setBgColor(@ColorInt color: Int): SnackbarUtils {
+    fun setBgColor(
+        @ColorInt color: Int,
+    ): SnackbarUtils {
         bgColor = color
         return this
     }
@@ -94,7 +98,9 @@ class SnackbarUtils private constructor(parent: View) {
      * @param bgResource 背景资源。
      * @return [SnackbarUtils] instance
      */
-    fun setBgResource(@DrawableRes bgResource: Int): SnackbarUtils {
+    fun setBgResource(
+        @DrawableRes bgResource: Int,
+    ): SnackbarUtils {
         this.bgResource = bgResource
         return this
     }
@@ -110,7 +116,9 @@ class SnackbarUtils private constructor(parent: View) {
      *
      * @return [SnackbarUtils] instance
      */
-    fun setDuration(@Duration duration: Int): SnackbarUtils {
+    fun setDuration(
+        @Duration duration: Int,
+    ): SnackbarUtils {
         this.duration = duration
         return this
     }
@@ -123,7 +131,8 @@ class SnackbarUtils private constructor(parent: View) {
      * @return [SnackbarUtils] instance
      */
     fun setAction(
-        text: CharSequence, listener: View.OnClickListener
+        text: CharSequence,
+        listener: View.OnClickListener,
     ): SnackbarUtils {
         return setAction(text, COLOR_DEFAULT, listener)
     }
@@ -137,7 +146,9 @@ class SnackbarUtils private constructor(parent: View) {
      * @return [SnackbarUtils] instance
      */
     fun setAction(
-        text: CharSequence, @ColorInt color: Int, listener: View.OnClickListener
+        text: CharSequence,
+        @ColorInt color: Int,
+        listener: View.OnClickListener,
     ): SnackbarUtils {
         actionText = text
         actionTextColor = color
@@ -150,7 +161,9 @@ class SnackbarUtils private constructor(parent: View) {
      *
      * @param bottomMargin 底部边距的大小，以像素为单位。
      */
-    fun setBottomMargin(@IntRange(from = 1) bottomMargin: Int): SnackbarUtils {
+    fun setBottomMargin(
+        @IntRange(from = 1) bottomMargin: Int,
+    ): SnackbarUtils {
         this.bottomMargin = bottomMargin
         return this
     }
@@ -175,22 +188,26 @@ class SnackbarUtils private constructor(parent: View) {
                 suitableParent.addView(
                     topSnackBarCoordinatorLayout,
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
+                    ViewGroup.LayoutParams.MATCH_PARENT,
                 )
                 topSnackBarContainer = topSnackBarCoordinatorLayout
             }
             view = topSnackBarContainer
         }
-        sWeakSnackbar = if (messageColor != COLOR_DEFAULT) {
-            val spannableString = SpannableString(message)
-            val colorSpan = ForegroundColorSpan(messageColor)
-            spannableString.setSpan(
-                colorSpan, 0, spannableString.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-            WeakReference(Snackbar.make(view, spannableString, duration))
-        } else {
-            WeakReference(Snackbar.make(view, message!!, duration))
-        }
+        sWeakSnackbar =
+            if (messageColor != COLOR_DEFAULT) {
+                val spannableString = SpannableString(message)
+                val colorSpan = ForegroundColorSpan(messageColor)
+                spannableString.setSpan(
+                    colorSpan,
+                    0,
+                    spannableString.length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+                )
+                WeakReference(Snackbar.make(view, spannableString, duration))
+            } else {
+                WeakReference(Snackbar.make(view, message!!, duration))
+            }
         val snackbar = sWeakSnackbar!!.get()
         val snackbarView = snackbar!!.view as Snackbar.SnackbarLayout
         if (isShowTop) {
@@ -309,7 +326,8 @@ class SnackbarUtils private constructor(parent: View) {
          * @param params   params.
          */
         fun addView(
-            @LayoutRes layoutId: Int, params: ViewGroup.LayoutParams
+            @LayoutRes layoutId: Int,
+            params: ViewGroup.LayoutParams,
         ) {
             val view = getView()
             if (view != null) {
@@ -331,7 +349,8 @@ class SnackbarUtils private constructor(parent: View) {
          * @param params  params.
          */
         fun addView(
-            child: View, params: ViewGroup.LayoutParams
+            child: View,
+            params: ViewGroup.LayoutParams,
         ) {
             val view = getView()
             if (view != null) {

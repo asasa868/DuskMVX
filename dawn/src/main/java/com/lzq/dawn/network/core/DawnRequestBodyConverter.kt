@@ -27,7 +27,6 @@ class DawnRequestBodyConverter<T : Any>(private var gson: Gson?, private var ada
         val jsonWriter = gson!!.newJsonWriter(writer)
         adapter!!.write(jsonWriter, value)
         jsonWriter.close()
-
         return buffer.readByteString().toRequestBody(MEDIA_TYPE)
     }
 }

@@ -11,43 +11,46 @@ import java.util.concurrent.atomic.AtomicLong
  * @Author :  Lzq
  * @Desc :
  */
-class UtilsThreadFactory @JvmOverloads internal constructor(
-    prefix: String,
-    private val priority: Int,
-    private val isDaemon: Boolean = false
-) : AtomicLong(), ThreadFactory {
-    private val namePrefix: String
+class UtilsThreadFactory
+    @JvmOverloads
+    internal constructor(
+        prefix: String,
+        private val priority: Int,
+        private val isDaemon: Boolean = false,
+    ) : AtomicLong(), ThreadFactory {
+        private val namePrefix: String
 
-    init {
-        namePrefix = prefix + "-pool-" + POOL_NUMBER.getAndIncrement() + "-thread-"
-    }
-
-    override fun newThread(r: Runnable): Thread {
-        val t: Thread = object : Thread(r, namePrefix + andIncrement) {
-            override fun run() {
-                try {
-                    super.run()
-                } catch (t: Throwable) {
-                    Log.e("ThreadUtils", "Request threw uncaught throwable", t)
-                }
-            }
+        init {
+            namePrefix = prefix + "-pool-" + POOL_NUMBER.getAndIncrement() + "-thread-"
         }
-        t.isDaemon = isDaemon
-        t.uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e -> println(e) }
-        t.priority = priority
-        return t
-    }
 
-    companion object {
-        private val POOL_NUMBER = AtomicInteger(1)
-        private const val serialVersionUID = -9209200509960368598L
-    }
+        override fun newThread(r: Runnable): Thread {
+            val t: Thread =
+                object : Thread(r, namePrefix + andIncrement) {
+                    override fun run() {
+                        try {
+                            super.run()
+                        } catch (t: Throwable) {
+                            Log.e("ThreadUtils", "Request threw uncaught throwable", t)
+                        }
+                    }
+                }
+            t.isDaemon = isDaemon
+            t.uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e -> println(e) }
+            t.priority = priority
+            return t
+        }
 
-    override fun toByte(): Byte {
-        return super.get().toByte()
-    }
+        companion object {
+            private val POOL_NUMBER = AtomicInteger(1)
+            private const val serialVersionUID = -9209200509960368598L
+        }
 
-    override fun toShort(): Short {
-     return super.get().toShort()
+        override fun toByte(): Byte {
+            return super.get().toByte()
+        }
+
+        override fun toShort(): Short {
+            return super.get().toShort()
+        }
     }
-}

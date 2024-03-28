@@ -1,4 +1,4 @@
-package com.lzq.dawn.mvi.i
+package com.lzq.dawn.mvi.view.i
 
 import com.lzq.dawn.base.state.BaseViewState
 

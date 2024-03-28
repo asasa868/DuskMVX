@@ -58,7 +58,11 @@ object VolumeUtils {
      *  * [AudioManager.FLAG_VIBRATE]
      *
      */
-    fun setVolume(streamType: Int, volume: Int, flags: Int) {
+    fun setVolume(
+        streamType: Int,
+        volume: Int,
+        flags: Int,
+    ) {
         val am = DawnBridge.app.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         try {
             am.setStreamVolume(streamType, volume, flags)
@@ -107,6 +111,8 @@ object VolumeUtils {
         val am = DawnBridge.app.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             am.getStreamMinVolume(streamType)
-        } else 0
+        } else {
+            0
+        }
     }
 }

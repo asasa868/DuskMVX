@@ -3,7 +3,9 @@ package com.lzq.dawn.network.core
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.lzq.dawn.DawnConstants
 import com.lzq.dawn.network.bean.DawnHttpResult
+import com.lzq.dawn.network.error.DawnException
 import com.lzq.dawn.network.error.IErrorHandler
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
@@ -42,7 +44,9 @@ class DawnConverterFactory(
             responseCode: IResponseCode?,
             exception: IErrorHandler
         ): DawnConverterFactory {
-            if (gson == null) throw NullPointerException("gson == null")
+            if (gson == null){
+                throw DawnException(DawnConstants.NetWorkConstants.GSON_NULL_CODE, "Gson is null")
+            }
             return DawnConverterFactory(gson, responseCode, exception)
         }
     }

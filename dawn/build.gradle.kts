@@ -79,7 +79,7 @@ android {
 
 dependencies {
 
-    //---------------------------依赖---------------------------
+    // ---------------------------依赖---------------------------
     api(app.androidx.appcompat)
     api(app.androidx.core.ktx)
     api(app.androidx.exifinterface)
@@ -115,18 +115,16 @@ dependencies {
     api(libs.retrofit)
     api(libs.retrofit.converter.gson)
     api(libs.okhttp.logging.interceptor)
-    //---------------------------依赖---------------------------
+    // ---------------------------依赖---------------------------
 
-    //-------------------------注解依赖--------------------------
+    // -------------------------注解依赖--------------------------
     kapt(libs.auto.service.annotations)
     kapt(libs.arouter.compiler)
     kapt(libs.eventbus.annotation)
     kapt(app.androidx.lifecycle.common.compiler)
 
-
-    //-------------------------注解依赖--------------------------
+    // -------------------------注解依赖--------------------------
 }
-
 
 /**
  * 以下打包上传部分可以独立放在单独的.gradle.kts脚本文件中，但是遇到了问题：
@@ -155,7 +153,7 @@ extra["username"] = ""
 extra["password"] = ""
 extra["email"] = ""
 // 遍历赋值
-val secretPropsFile = project.rootProject.file("local.properties")
+val secretPropsFile: File = project.rootProject.file("local.properties")
 if (secretPropsFile.exists()) {
     val p = Properties()
     p.load(FileInputStream(secretPropsFile))
@@ -166,7 +164,7 @@ if (secretPropsFile.exists()) {
     println("No props file, loading env vars")
 }
 
-val versionFile = project.rootProject.file("gradle.properties")
+val versionFile: File = project.rootProject.file("gradle.properties")
 if (versionFile.exists()) {
     val p = Properties()
     p.load(FileInputStream(versionFile))
@@ -202,11 +200,12 @@ afterEvaluate {
                 isAllowInsecureProtocol = false
                 name = mavenArtifactId
 
-                url = if (publishVersion.endsWith("SNAPSHOT")) {
-                    uri(snapshotsRepoUrl)
-                } else {
-                    uri(releasesRepoUrl)
-                }
+                url =
+                    if (publishVersion.endsWith("SNAPSHOT")) {
+                        uri(snapshotsRepoUrl)
+                    } else {
+                        uri(releasesRepoUrl)
+                    }
 
                 credentials {
                     username = ossUsername
@@ -219,52 +218,53 @@ afterEvaluate {
                 name = "Local"
                 url = uri("../maven")
             }
-
         }
         publications {
             create<MavenPublication>("release") {
-                println("publish-maven Log-------> PUBLISH_GROUP_ID: $mavenGroupId; PUBLISH_ARTIFACT_ID: $mavenArtifactId; PUBLISH_VERSION: $publishVersion")
+                println(
+                    "publish-maven Log-------> " + "PUBLISH_GROUP_ID: $mavenGroupId; " + "PUBLISH_ARTIFACT_ID: $mavenArtifactId; " + "PUBLISH_VERSION: $publishVersion",
+                )
 
                 from(components.getByName("release"))
                 groupId = mavenGroupId
                 artifactId = mavenArtifactId
                 version = publishVersion
 
-                //生成的 aar 路径，修改成自己的aar地址名称
+                // 生成的 aar 路径，修改成自己的aar地址名称
                 artifact("$buildDir/outputs/aar/${project.name}-release.aar") {
                     classifier = "release"
                 }
 
                 pom {
                     name.set(mavenArtifactId)
-                    //项目描述
+                    // 项目描述
                     description.set("An Android application development framework")
-                    //项目github链接
+                    // 项目github链接
                     url.set("https://github.com/asasa868/DuskMVX")
                     licenses {
                         license {
-                            //协议类型，一般默认Apache License2.0
+                            // 协议类型，一般默认Apache License2.0
                             name.set("The Apache License, Version 2.0")
                             url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
                         }
                     }
                     developers {
                         developer {
-                            //修改对应的用户名、邮箱
-                            //sonatype用户名
+                            // 修改对应的用户名、邮箱
+                            // sonatype用户名
                             id.set(ossUsername)
-                            //你的sonatype用户名
+                            // 你的sonatype用户名
                             name.set(ossPassword)
-                            //你的sonatype注册邮箱
+                            // 你的sonatype注册邮箱
                             email.set(ossEmil)
                         }
                     }
                     // 版本控制信息，如果使用的是GitHub，按照下面的格式
                     scm {
-                        //你的Git地址：
+                        // 你的Git地址：
                         connection.set("scm:git@github.com:asasa868/DuskMVX.git")
                         developerConnection.set("scm:git@github.com:asasa868/DuskMVX.git")
-                        //分支地址：
+                        // 分支地址：
                         url.set("https://github.com/asasa868/DuskMVX/tree/master")
                     }
 
@@ -272,15 +272,17 @@ afterEvaluate {
                         withXml {
                             // 检查是否已存在 <dependencies> 节点
                             val rootNode = asNode()
-                            val existingDependenciesNode = rootNode.children().find {
-                                (it as Node).name() == "dependencies"
-                            }
-                            val dependenciesNode: Node = if (existingDependenciesNode == null) {
-                                // 如果不存在，则添加 <dependencies> 节点
-                                rootNode.appendNode("dependencies")
-                            } else {
-                                existingDependenciesNode as Node
-                            }
+                            val existingDependenciesNode =
+                                rootNode.children().find {
+                                    (it as Node).name() == "dependencies"
+                                }
+                            val dependenciesNode: Node =
+                                if (existingDependenciesNode == null) {
+                                    // 如果不存在，则添加 <dependencies> 节点
+                                    rootNode.appendNode("dependencies")
+                                } else {
+                                    existingDependenciesNode as Node
+                                }
                             configurations["implementation"].dependencies.forEach { dependency ->
                                 if (dependency.version != "unspecified" && dependency.name != "unspecified") {
                                     val dependencyNode = dependenciesNode.appendNode("dependency")
@@ -297,7 +299,7 @@ afterEvaluate {
     }
     signing {
         useGpgCmd()
-        //sign(publishing.publications)
+        // sign(publishing.publications)
     }
     tasks.named("generateMetadataFileForReleasePublication") {
         inputs.files(tasks.named("androidSourcesJar"))
@@ -314,7 +316,6 @@ tasks.register("androidJavadocs", Javadoc::class) {
     }
     // 设置源码所在的位置
     source(android.sourceSets["main"].java.srcDirs)
-
 }
 
 // 将文档打包成jar,生成javadoc.jar
@@ -356,11 +357,8 @@ tasks.withType<Javadoc> {
     }
 }
 
-//配置需要上传到maven仓库的文件
+// 配置需要上传到maven仓库的文件
 artifacts {
-    archives(tasks["androidSourcesJar"]) //将源码打包进aar,这样使用方可以看到方法注释.
-    archives(tasks["androidJavadocsJar"]) //将注释打包进aar
+    archives(tasks["androidSourcesJar"]) // 将源码打包进aar,这样使用方可以看到方法注释.
+    archives(tasks["androidJavadocsJar"]) // 将注释打包进aar
 }
-
-
-

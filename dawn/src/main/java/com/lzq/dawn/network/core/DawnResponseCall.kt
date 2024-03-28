@@ -129,7 +129,6 @@ internal class DawnResponseCall<T : Any>(
                                 )
                             )
                         }
-
                     }
                 }
             }
@@ -138,14 +137,23 @@ internal class DawnResponseCall<T : Any>(
                 when (t) {
                     is DawnException -> {
                         errorHandler?.handleError(t)
-                    }
-
-                    else -> {
-                        DawnHttpResult.Failure<Nothing>(
-                            RESPONSE_EXCEPTION_NULL_CODE, t.message ?: "Throwable message is null"
+                        callback.onResponse(
+                            this@DawnResponseCall, Response.success(
+                                DawnHttpResult.Failure<Nothing>(
+                                    RESPONSE_EXCEPTION_NULL_CODE, t.message ?: "Throwable message is null"
+                                )
+                            )
                         )
                     }
                 }
+
+                callback.onResponse(
+                    this@DawnResponseCall, Response.success(
+                        DawnHttpResult.Failure<Nothing>(
+                            RESPONSE_EXCEPTION_NULL_CODE, t.message ?: "Throwable message is null"
+                        )
+                    )
+                )
             }
         })
 

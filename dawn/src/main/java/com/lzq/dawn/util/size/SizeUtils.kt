@@ -69,7 +69,10 @@ object SizeUtils {
      * @param unit  要从中转换的单位。
      * @return 复浮点值乘以取决于其单位的适当度量。
      */
-    fun applyDimension(value: Float, unit: Int): Float {
+    fun applyDimension(
+        value: Float,
+        unit: Int,
+    ): Float {
         val metrics = Resources.getSystem().displayMetrics
         return when (unit) {
             TypedValue.COMPLEX_UNIT_PX -> value
@@ -93,12 +96,15 @@ object SizeUtils {
      * view.getWidth();
      * }
      * });
-    </pre> *
+     </pre> *
      *
      * @param view     view.
      * @param listener 获取大小侦听器。
      */
-    fun forceGetViewSize(view: View, listener: OnGetSizeListener?) {
+    fun forceGetViewSize(
+        view: View,
+        listener: OnGetSizeListener?,
+    ) {
         view.post { listener?.onGetSize(view) }
     }
 
@@ -131,17 +137,20 @@ object SizeUtils {
     fun measureView(view: View): IntArray {
         var lp = view.layoutParams
         if (lp == null) {
-            lp = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-            )
+            lp =
+                ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                )
         }
         val widthSpec = ViewGroup.getChildMeasureSpec(0, 0, lp.width)
         val lpHeight = lp.height
-        val heightSpec: Int = if (lpHeight > 0) {
-            View.MeasureSpec.makeMeasureSpec(lpHeight, View.MeasureSpec.EXACTLY)
-        } else {
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        }
+        val heightSpec: Int =
+            if (lpHeight > 0) {
+                View.MeasureSpec.makeMeasureSpec(lpHeight, View.MeasureSpec.EXACTLY)
+            } else {
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            }
         view.measure(widthSpec, heightSpec)
         return intArrayOf(view.measuredWidth, view.measuredHeight)
     }

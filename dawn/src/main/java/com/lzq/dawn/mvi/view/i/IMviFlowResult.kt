@@ -1,4 +1,4 @@
-package com.lzq.dawn.mvi.i
+package com.lzq.dawn.mvi.view.i
 
 /**
  * @projectName com.lzq.dawn.mvi.i
@@ -11,8 +11,6 @@ fun interface IMviViewStateFlowResult<T> {
     suspend fun onResult(value: T)
 }
 
-
 fun interface IMviFlowResult<I : BaseMviIntent, T> {
-
     suspend fun onResult(value: T): I
 }

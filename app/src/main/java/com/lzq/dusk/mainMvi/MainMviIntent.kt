@@ -1,6 +1,6 @@
 package com.lzq.dusk.mainMvi
 
-import com.lzq.dawn.mvi.i.BaseMviIntent
+import com.lzq.dawn.mvi.view.i.BaseMviIntent
 
 /**
  * @projectName com.lzq.dusk.mainMvi
@@ -9,4 +9,8 @@ import com.lzq.dawn.mvi.i.BaseMviIntent
  * @version
  * @description:
  */
-open class MainMviIntent : BaseMviIntent() {}
+open class MainMviIntent : BaseMviIntent() {
+    data class LoginViewState(val userName: String, val password: String) : MainMviIntent()
+
+    class BannerIntent : MainMviIntent()
+}

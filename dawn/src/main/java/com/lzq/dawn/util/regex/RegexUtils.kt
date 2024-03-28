@@ -52,7 +52,10 @@ object RegexUtils {
      * @param emailProvider 要作证的电子邮件提供商。
      * @return `true`: yes<br></br>`false`: no
      */
-    fun isFromEmailProvider(email: String, emailProvider: String?): Boolean {
+    fun isFromEmailProvider(
+        email: String,
+        emailProvider: String?,
+    ): Boolean {
         return extractEmailProvider(email).equals(emailProvider, ignoreCase = true)
     }
 
@@ -73,7 +76,10 @@ object RegexUtils {
      * @param newSegments 新的手机号码段。
      * @return `true`: yes<br></br>`false`: no
      */
-    fun isMobileExact(input: CharSequence?, newSegments: List<String?>?): Boolean {
+    fun isMobileExact(
+        input: CharSequence?,
+        newSegments: List<String?>?,
+    ): Boolean {
         val match = isMatch(RegexConstants.REGEX_MOBILE_EXACT, input)
         if (match) {
             return true
@@ -262,7 +268,10 @@ object RegexUtils {
      * @param input input.
      * @return `true`: yes<br></br>`false`: no
      */
-    fun isMatch(regex: String?, input: CharSequence?): Boolean {
+    fun isMatch(
+        regex: String?,
+        input: CharSequence?,
+    ): Boolean {
         return !input.isNullOrEmpty() && Pattern.matches(regex, input)
     }
 
@@ -273,7 +282,10 @@ object RegexUtils {
      * @param input input.
      * @return 输入列表与正则表达式匹配
      */
-    fun getMatches(regex: String?, input: CharSequence?): List<String> {
+    fun getMatches(
+        regex: String,
+        input: CharSequence?,
+    ): List<String> {
         if (input == null) {
             return emptyList()
         }
@@ -293,9 +305,12 @@ object RegexUtils {
      * @param regex 正则表达式
      * @return 通过围绕正则表达式的匹配拆分输入计算的字符串数组
      */
-    fun getSplits(input: String?, regex: String): Array<String?> {
+    fun getSplits(
+        input: String?,
+        regex: String,
+    ): Array<String?> {
         return input?.split(regex.toRegex())?.dropLastWhile { it.isEmpty() }?.toTypedArray() ?: arrayOfNulls(
-            0
+            0,
         )
     }
 
@@ -308,11 +323,15 @@ object RegexUtils {
      * @return 通过用替换字符串替换第一个匹配子序列构造的字符串，根据需要替换捕获的子序列
      */
     fun getReplaceFirst(
-        input: String?, regex: String?, replacement: String?
+        input: String?,
+        regex: String,
+        replacement: String,
     ): String {
         return if (input == null) {
             ""
-        } else Pattern.compile(regex).matcher(input).replaceFirst(replacement)
+        } else {
+            Pattern.compile(regex).matcher(input).replaceFirst(replacement)
+        }
     }
 
     /**
@@ -324,10 +343,14 @@ object RegexUtils {
      * @return 通过用替换字符串替换每个匹配的子序列构造的字符串，根据需要替换捕获的子序列
      */
     fun getReplaceAll(
-        input: String?, regex: String?, replacement: String?
+        input: String?,
+        regex: String,
+        replacement: String,
     ): String {
         return if (input == null) {
             ""
-        } else Pattern.compile(regex).matcher(input).replaceAll(replacement)
+        } else {
+            Pattern.compile(regex).matcher(input).replaceAll(replacement)
+        }
     }
 }

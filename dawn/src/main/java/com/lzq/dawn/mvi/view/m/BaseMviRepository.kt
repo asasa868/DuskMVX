@@ -1,4 +1,4 @@
-package com.lzq.dawn.mvi.m
+package com.lzq.dawn.mvi.view.m
 
 import com.lzq.dawn.base.model.BaseRootRepository
 

@@ -24,7 +24,9 @@ object ResourceUtils {
      * @param id 标识符
      * @return drawable
      */
-    fun getDrawable(@DrawableRes id: Int): Drawable? {
+    fun getDrawable(
+        @DrawableRes id: Int,
+    ): Drawable? {
         return ContextCompat.getDrawable(DawnBridge.app, id)
     }
 
@@ -135,18 +137,23 @@ object ResourceUtils {
      * @param destFilePath   目标文件的路径。
      * @return `true`: success<br></br>`false`: fail
      */
-    fun copyFileFromAssets(assetsFilePath: String, destFilePath: String): Boolean {
+    fun copyFileFromAssets(
+        assetsFilePath: String,
+        destFilePath: String,
+    ): Boolean {
         var res = true
         try {
             val assets = DawnBridge.app.assets.list(assetsFilePath)
-            if (assets != null && assets.size > 0) {
+            if (!assets.isNullOrEmpty()) {
                 for (asset in assets) {
                     res = res and copyFileFromAssets("$assetsFilePath/$asset", "$destFilePath/$asset")
                 }
             } else {
-                res = DawnBridge.writeFileFromIS(
-                    destFilePath, DawnBridge.app.assets.open(assetsFilePath)
-                )
+                res =
+                    DawnBridge.writeFileFromIS(
+                        destFilePath,
+                        DawnBridge.app.assets.open(assetsFilePath),
+                    )
             }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -161,6 +168,7 @@ object ResourceUtils {
      * @param charsetName    字符集的名称。
      * @return assets的内容。
      */
+
     /**
      * 返回assets的内容。
      *
@@ -168,7 +176,10 @@ object ResourceUtils {
      * @return assets的内容。
      */
     @JvmOverloads
-    fun readAssets2String(assetsFilePath: String?, charsetName: String? = null): String {
+    fun readAssets2String(
+        assetsFilePath: String?,
+        charsetName: String? = null,
+    ): String {
         return try {
             val `is` = DawnBridge.app.assets.open(assetsFilePath!!)
             val bytes = DawnBridge.inputStream2Bytes(`is`) ?: return ""
@@ -194,6 +205,7 @@ object ResourceUtils {
      * @param charsetName 字符集的名称。
      * @return assets的内容
      */
+
     /**
      * 返回assets的内容
      *
@@ -202,10 +214,12 @@ object ResourceUtils {
      */
     @JvmOverloads
     fun readAssets2List(
-        assetsPath: String?, charsetName: String? = ""
+        assetsPath: String?,
+        charsetName: String? = "",
     ): List<String> {
         return try {
-            DawnBridge.inputStream2Lines(DawnBridge.app.resources.assets.open(assetsPath!!), charsetName)?:List(1){""}
+            DawnBridge.inputStream2Lines(DawnBridge.app.resources.assets.open(assetsPath!!), charsetName)
+                ?: List(1) { "" }
         } catch (e: IOException) {
             e.printStackTrace()
             emptyList()
@@ -219,11 +233,16 @@ object ResourceUtils {
      * @param destFilePath 目标文件的路径。
      * @return `true`: success<br></br>`false`: fail
      */
-    fun copyFileFromRaw(@RawRes resId: Int, destFilePath: String?): Boolean {
+    fun copyFileFromRaw(
+        @RawRes resId: Int,
+        destFilePath: String?,
+    ): Boolean {
         return DawnBridge.writeFileFromIS(
-            destFilePath, DawnBridge.app.resources.openRawResource(resId)
+            destFilePath,
+            DawnBridge.app.resources.openRawResource(resId),
         )
     }
+
     /**
      * 返回原始资源的内容
      *
@@ -231,14 +250,11 @@ object ResourceUtils {
      * @param charsetName 字符集的名称。
      * @return 原始资源的内容
      */
-    /**
-     * 返回原始资源的内容。
-     *
-     * @param resId 资源id。
-     * @return 原始资源的内容。
-     */
     @JvmOverloads
-    fun readRaw2String(@RawRes resId: Int, charsetName: String? = null): String? {
+    fun readRaw2String(
+        @RawRes resId: Int,
+        charsetName: String? = null,
+    ): String? {
         val `is` = DawnBridge.app.resources.openRawResource(resId)
         val bytes = DawnBridge.inputStream2Bytes(`is`) ?: return null
         return if (DawnBridge.isSpace(charsetName)) {
@@ -252,6 +268,7 @@ object ResourceUtils {
             }
         }
     }
+
     /**
      * 返回原始资源的内容。
      *
@@ -259,16 +276,12 @@ object ResourceUtils {
      * @param charsetName 字符集的名称。
      * @return 中文件的内容
      */
-    /**
-     * 返回原始资源的内容
-     *
-     * @param resId 资源id
-     * @return 原始资源的内容
-     */
     @JvmOverloads
     fun readRaw2List(
-        @RawRes resId: Int, charsetName: String? = ""
+        @RawRes resId: Int,
+        charsetName: String? = "",
     ): List<String> {
-        return DawnBridge.inputStream2Lines(DawnBridge.app.resources.openRawResource(resId), charsetName)?:List(0){""}
+        return DawnBridge.inputStream2Lines(DawnBridge.app.resources.openRawResource(resId), charsetName)
+            ?: List(0) { "" }
     }
 }

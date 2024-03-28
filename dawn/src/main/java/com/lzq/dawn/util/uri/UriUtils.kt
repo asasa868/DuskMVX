@@ -77,7 +77,7 @@ object UriUtils {
      * uri 转 input stream.
      *
      * @param uri  uri.
-     * @return  input stream
+     * @return input stream
      */
     fun uri2Bytes(uri: Uri?): ByteArray? {
         if (uri == null) {
@@ -118,9 +118,10 @@ object UriUtils {
             var file: File?
             for (external in externals) {
                 if (path.startsWith(external)) {
-                    file = File(
-                        Environment.getExternalStorageDirectory().absolutePath + path.replace(external, "/")
-                    )
+                    file =
+                        File(
+                            Environment.getExternalStorageDirectory().absolutePath + path.replace(external, "/"),
+                        )
                     if (file.exists()) {
                         Log.d("UriUtils", "$uri -> $external")
                         return file
@@ -129,25 +130,33 @@ object UriUtils {
             }
             file = null
             if (path.startsWith("/files_path/")) {
-                file = File(
-                    DawnBridge.app.filesDir.absolutePath + path.replace("/files_path/", "/")
-                )
+                file =
+                    File(
+                        DawnBridge.app.filesDir.absolutePath + path.replace("/files_path/", "/"),
+                    )
             } else if (path.startsWith("/cache_path/")) {
-                file = File(
-                    DawnBridge.app.cacheDir.absolutePath + path.replace("/cache_path/", "/")
-                )
+                file =
+                    File(
+                        DawnBridge.app.cacheDir.absolutePath + path.replace("/cache_path/", "/"),
+                    )
             } else if (path.startsWith("/external_files_path/")) {
-                file = File(
-                    DawnBridge.app.getExternalFilesDir(null)!!.absolutePath + path.replace(
-                        "/external_files_path/", "/"
+                file =
+                    File(
+                        DawnBridge.app.getExternalFilesDir(null)!!.absolutePath +
+                            path.replace(
+                                "/external_files_path/",
+                                "/",
+                            ),
                     )
-                )
             } else if (path.startsWith("/external_cache_path/")) {
-                file = File(
-                    DawnBridge.app.externalCacheDir!!.absolutePath + path.replace(
-                        "/external_cache_path/", "/"
+                file =
+                    File(
+                        DawnBridge.app.externalCacheDir!!.absolutePath +
+                            path.replace(
+                                "/external_cache_path/",
+                                "/",
+                            ),
                     )
-                )
             }
             if (file != null && file.exists()) {
                 Log.d("UriUtils", "$uri -> $path")
@@ -160,9 +169,9 @@ object UriUtils {
             }
             Log.d("UriUtils", "$uri parse failed. -> 0")
             null
-        } // end 0
-        else if (DocumentsContract.isDocumentUri(
-                DawnBridge.app, uri
+        } else if (DocumentsContract.isDocumentUri(
+                DawnBridge.app,
+                uri,
             )
         ) {
             if ("com.android.externalstorage.documents" == authority) {
@@ -188,20 +197,22 @@ object UriUtils {
                         val length = java.lang.reflect.Array.getLength(result)
                         for (i in 0 until length) {
                             val storageVolumeElement = result?.let { java.lang.reflect.Array.get(it, i) }
-                            //String uuid = (String) getUuid.invoke(storageVolumeElement);
+                            // String uuid = (String) getUuid.invoke(storageVolumeElement);
                             val mounted =
-                                Environment.MEDIA_MOUNTED == getState.invoke(storageVolumeElement) || Environment.MEDIA_MOUNTED_READ_ONLY == getState.invoke(
-                                    storageVolumeElement
-                                )
+                                Environment.MEDIA_MOUNTED == getState.invoke(storageVolumeElement) || Environment.MEDIA_MOUNTED_READ_ONLY ==
+                                    getState.invoke(
+                                        storageVolumeElement,
+                                    )
 
-                            //if the media is not mounted, we need not get the volume details
+                            // if the media is not mounted, we need not get the volume details
                             if (!mounted) {
                                 continue
                             }
 
-                            //Primary storage is already handled.
-                            if (isPrimary.invoke(storageVolumeElement) as Boolean && isEmulated.invoke(
-                                    storageVolumeElement
+                            // Primary storage is already handled.
+                            if (isPrimary.invoke(storageVolumeElement) as Boolean &&
+                                isEmulated.invoke(
+                                    storageVolumeElement,
                                 ) as Boolean
                             ) {
                                 continue
@@ -217,8 +228,7 @@ object UriUtils {
                 }
                 Log.d("UriUtils", "$uri parse failed. -> 1_0")
                 null
-            } // end 1_0
-            else if ("com.android.providers.downloads.documents" == authority) {
+            } else if ("com.android.providers.downloads.documents" == authority) {
                 var id = DocumentsContract.getDocumentId(uri)
                 if (TextUtils.isEmpty(id)) {
                     Log.d("UriUtils", "$uri parse failed(id is null). -> 1_1")
@@ -229,16 +239,18 @@ object UriUtils {
                 } else if (id.startsWith("msf:")) {
                     id = id.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
                 }
-                val availableId: Long = try {
-                    id.toLong()
-                } catch (e: Exception) {
-                    return null
-                }
-                val contentUriPrefixesToTry = arrayOf(
-                    "content://downloads/public_downloads",
-                    "content://downloads/all_downloads",
-                    "content://downloads/my_downloads"
-                )
+                val availableId: Long =
+                    try {
+                        id.toLong()
+                    } catch (e: Exception) {
+                        return null
+                    }
+                val contentUriPrefixesToTry =
+                    arrayOf(
+                        "content://downloads/public_downloads",
+                        "content://downloads/all_downloads",
+                        "content://downloads/my_downloads",
+                    )
                 for (contentUriPrefix in contentUriPrefixesToTry) {
                     val contentUri = ContentUris.withAppendedId(Uri.parse(contentUriPrefix), availableId)
                     try {
@@ -251,48 +263,50 @@ object UriUtils {
                 }
                 Log.d("UriUtils", "$uri parse failed. -> 1_1")
                 null
-            } // end 1_1
-            else if ("com.android.providers.media.documents" == authority) {
+            } else if ("com.android.providers.media.documents" == authority) {
                 val docId = DocumentsContract.getDocumentId(uri)
                 val split = docId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 val type = split[0]
-                val contentUri: Uri = if ("image" == type) {
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                } else if ("video" == type) {
-                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                } else if ("audio" == type) {
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-                } else {
-                    Log.d("UriUtils", "$uri parse failed. -> 1_2")
-                    return null
-                }
+                val contentUri: Uri =
+                    if ("image" == type) {
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    } else if ("video" == type) {
+                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                    } else if ("audio" == type) {
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                    } else {
+                        Log.d("UriUtils", "$uri parse failed. -> 1_2")
+                        return null
+                    }
                 val selection = "_id=?"
                 val selectionArgs = arrayOf(split[1])
                 getFileFromUri(contentUri, selection, selectionArgs, "1_2")
-            } // end 1_2
-            else if (ContentResolver.SCHEME_CONTENT == scheme) {
+            } else if (ContentResolver.SCHEME_CONTENT == scheme) {
                 getFileFromUri(uri, "1_3")
-            } // end 1_3
-            else {
+            } else {
                 Log.d("UriUtils", "$uri parse failed. -> 1_4")
                 null
             } // end 1_4
-        } // end 1
-        else if (ContentResolver.SCHEME_CONTENT == scheme) {
+        } else if (ContentResolver.SCHEME_CONTENT == scheme) {
             getFileFromUri(uri, "2")
-        } // end 2
-        else {
+        } else {
             Log.d("UriUtils", "$uri parse failed. -> 3")
             null
-        } // end 3
+        }
     }
 
-    private fun getFileFromUri(uri: Uri, code: String): File? {
+    private fun getFileFromUri(
+        uri: Uri,
+        code: String,
+    ): File? {
         return getFileFromUri(uri, null, null, code)
     }
 
     private fun getFileFromUri(
-        uri: Uri, selection: String?, selectionArgs: Array<String>?, code: String
+        uri: Uri,
+        selection: String?,
+        selectionArgs: Array<String>?,
+        code: String,
     ): File? {
         if ("com.google.android.apps.photos.content" == uri.authority) {
             if (!TextUtils.isEmpty(uri.lastPathSegment)) {
@@ -310,9 +324,14 @@ object UriUtils {
                 return File(path!!.replace("/root", ""))
             }
         }
-        val cursor = DawnBridge.app.contentResolver.query(
-            uri, arrayOf("_data"), selection, selectionArgs, null
-        )
+        val cursor =
+            DawnBridge.app.contentResolver.query(
+                uri,
+                arrayOf("_data"),
+                selection,
+                selectionArgs,
+                null,
+            )
         if (cursor == null) {
             Log.d("UriUtils", "$uri parse failed(cursor is null). -> $code")
             return null

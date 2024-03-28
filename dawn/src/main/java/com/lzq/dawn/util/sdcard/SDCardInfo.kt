@@ -12,14 +12,16 @@ import com.lzq.dawn.DawnBridge
 class SDCardInfo internal constructor(
     @JvmField var path: String,
     @JvmField var state: String,
-    private var isRemovable: Boolean
+    private var isRemovable: Boolean,
 ) {
     private var totalSize: Long = DawnBridge.getFsTotalSize(path)
     private var availableSize: Long = DawnBridge.getFsAvailableSize(path)
 
     override fun toString(): String {
-        return "SDCardInfo {path = $path, state = $state, isRemovable = $isRemovable, totalSize = " + Formatter.formatFileSize(
-            DawnBridge.app, totalSize
-        ) + ", availableSize = " + Formatter.formatFileSize(DawnBridge.app, availableSize) + '}'
+        return "SDCardInfo {path = $path, state = $state, isRemovable = $isRemovable, totalSize = " +
+            Formatter.formatFileSize(
+                DawnBridge.app,
+                totalSize,
+            ) + ", availableSize = " + Formatter.formatFileSize(DawnBridge.app, availableSize) + '}'
     }
 }

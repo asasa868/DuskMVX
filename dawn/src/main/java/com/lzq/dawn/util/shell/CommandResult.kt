@@ -9,9 +9,9 @@ package com.lzq.dawn.util.shell
 class CommandResult(var result: Int, private var successMsg: String, private var errorMsg: String) {
     override fun toString(): String {
         return """
-              result: $result
-              successMsg: $successMsg
-              errorMsg: $errorMsg
-              """.trimIndent()
+            result: $result
+            successMsg: $successMsg
+            errorMsg: $errorMsg
+            """.trimIndent()
     }
 }

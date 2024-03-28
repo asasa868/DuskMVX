@@ -8,7 +8,6 @@ import java.lang.reflect.Member
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.lang.reflect.Proxy
-import java.util.Arrays
 import java.util.Collections
 import java.util.Locale
 
@@ -19,9 +18,8 @@ import java.util.Locale
  * @Desc : 反射
  */
 class ReflectUtils private constructor(private val type: Class<*>, private val objects: Any? = type) {
-    ///////////////////////////////////////////////////////////////////////////
     // newInstance
-    ///////////////////////////////////////////////////////////////////////////
+
     /**
      * 创建并初始化一个新实例
      *
@@ -68,35 +66,43 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
     }
 
     private fun sortConstructors(list: List<Constructor<*>>) {
-        Collections.sort(list, java.util.Comparator { o1, o2 ->
-            val types1 = o1.parameterTypes
-            val types2 = o2.parameterTypes
-            val len = types1.size
-            for (i in 0 until len) {
-                if (types1[i] != types2[i]) {
-                    return@Comparator if (wrapper(types1[i])!!.isAssignableFrom(wrapper(types2[i]))) {
-                        1
-                    } else {
-                        -1
+        Collections.sort(
+            list,
+            java.util.Comparator { o1, o2 ->
+                val types1 = o1.parameterTypes
+                val types2 = o2.parameterTypes
+                val len = types1.size
+                for (i in 0 until len) {
+                    if (types1[i] != types2[i]) {
+                        return@Comparator if (wrapper(types1[i])!!.isAssignableFrom(wrapper(types2[i]))) {
+                            1
+                        } else {
+                            -1
+                        }
                     }
                 }
-            }
-            0
-        })
+                0
+            },
+        )
     }
 
-    private fun newInstance(constructor: Constructor<*>, vararg args: Any): ReflectUtils {
+    private fun newInstance(
+        constructor: Constructor<*>,
+        vararg args: Any,
+    ): ReflectUtils {
         return try {
             ReflectUtils(
-                constructor.declaringClass, accessible(constructor)!!.newInstance(*args)
+                constructor.declaringClass,
+                accessible(constructor)!!.newInstance(*args),
             )
         } catch (e: Exception) {
             throw ReflectException(e)
         }
     }
-    ///////////////////////////////////////////////////////////////////////////
+    // /////////////////////////////////////////////////////////////////////////
     // field
-    ///////////////////////////////////////////////////////////////////////////
+    // /////////////////////////////////////////////////////////////////////////
+
     /**
      * 获得字段。
      *
@@ -119,7 +125,10 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
      * @param value value.
      * @return [ReflectUtils] 实例
      */
-    fun field(name: String, value: Any): ReflectUtils {
+    fun field(
+        name: String,
+        value: Any,
+    ): ReflectUtils {
         return try {
             val field = getField(name)
             field[objects] = unwrap(value)
@@ -164,11 +173,14 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
     private fun unwrap(`object`: Any): Any {
         return if (`object` is ReflectUtils) {
             `object`.get<Any>()!!
-        } else `object`
+        } else {
+            `object`
+        }
     }
-    ///////////////////////////////////////////////////////////////////////////
+    // /////////////////////////////////////////////////////////////////////////
     // method
-    ///////////////////////////////////////////////////////////////////////////
+    // /////////////////////////////////////////////////////////////////////////
+
     /**
      * 调用方法
      *
@@ -190,7 +202,10 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
      * @throws ReflectException 如果反射不成功
      */
     @Throws(ReflectException::class)
-    fun method(name: String, vararg args: Any?): ReflectUtils {
+    fun method(
+        name: String,
+        vararg args: Any?,
+    ): ReflectUtils {
         val types = getArgsType(*args)
 
         return try {
@@ -204,10 +219,13 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
                 throw ReflectException(e1)
             }
         }
-
     }
 
-    private fun methods(method: Method, obj: Any?, vararg args: Any?): ReflectUtils {
+    private fun methods(
+        method: Method,
+        obj: Any?,
+        vararg args: Any?,
+    ): ReflectUtils {
         return try {
             accessible(method)
             if (method.returnType == Void.TYPE) {
@@ -222,7 +240,10 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
     }
 
     @Throws(NoSuchMethodException::class)
-    private fun exactMethod(name: String, types: Array<Class<*>?>): Method {
+    private fun exactMethod(
+        name: String,
+        types: Array<Class<*>?>,
+    ): Method {
         var type: Class<*>? = type()
         return try {
             type!!.getMethod(name, *types)
@@ -239,7 +260,10 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
     }
 
     @Throws(NoSuchMethodException::class)
-    private fun similarMethod(name: String, types: Array<Class<*>?>): Method {
+    private fun similarMethod(
+        name: String,
+        types: Array<Class<*>?>,
+    ): Method {
         var type: Class<*>? = type()
         val methods: MutableList<Method> = ArrayList()
         for (method in type!!.methods) {
@@ -264,41 +288,52 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
             type = type.superclass
         } while (type != null)
         throw NoSuchMethodException(
-            "No similar method " + name + " with params " + types.contentToString() + " could be found on type " + type() + "."
+            "No similar method " + name + " with params " + types.contentToString() + " could be found on type " + type() + ".",
         )
     }
 
     private fun sortMethods(methods: List<Method>) {
-        Collections.sort(methods, java.util.Comparator { o1, o2 ->
-            val types1 = o1.parameterTypes
-            val types2 = o2.parameterTypes
-            val len = types1.size
-            for (i in 0 until len) {
-                if (types1[i] != types2[i]) {
-                    return@Comparator if (wrapper(types1[i])!!.isAssignableFrom(wrapper(types2[i]))) {
-                        1
-                    } else {
-                        -1
+        Collections.sort(
+            methods,
+            java.util.Comparator { o1, o2 ->
+                val types1 = o1.parameterTypes
+                val types2 = o2.parameterTypes
+                val len = types1.size
+                for (i in 0 until len) {
+                    if (types1[i] != types2[i]) {
+                        return@Comparator if (wrapper(types1[i])!!.isAssignableFrom(wrapper(types2[i]))) {
+                            1
+                        } else {
+                            -1
+                        }
                     }
                 }
-            }
-            0
-        })
-    }
-
-    private fun isSimilarSignature(
-        possiblyMatchingMethod: Method, desiredMethodName: String, desiredParamTypes: Array<Class<*>?>
-    ): Boolean {
-        return possiblyMatchingMethod.name == desiredMethodName && match(
-            possiblyMatchingMethod.parameterTypes, desiredParamTypes
+                0
+            },
         )
     }
 
-    private fun match(declaredTypes: Array<Class<*>>, actualTypes: Array<Class<*>?>): Boolean {
+    private fun isSimilarSignature(
+        possiblyMatchingMethod: Method,
+        desiredMethodName: String,
+        desiredParamTypes: Array<Class<*>?>,
+    ): Boolean {
+        return possiblyMatchingMethod.name == desiredMethodName &&
+            match(
+                possiblyMatchingMethod.parameterTypes,
+                desiredParamTypes,
+            )
+    }
+
+    private fun match(
+        declaredTypes: Array<Class<*>>,
+        actualTypes: Array<Class<*>?>,
+    ): Boolean {
         return if (declaredTypes.size == actualTypes.size) {
             for (i in actualTypes.indices) {
-                if (actualTypes[i] == NULL::class.java || wrapper(declaredTypes[i])!!.isAssignableFrom(
-                        wrapper(actualTypes[i])
+                if (actualTypes[i] == NULL::class.java ||
+                    wrapper(declaredTypes[i])!!.isAssignableFrom(
+                        wrapper(actualTypes[i]),
                     )
                 ) {
                     continue
@@ -326,9 +361,10 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
         }
         return accessible
     }
-    ///////////////////////////////////////////////////////////////////////////
+    // /////////////////////////////////////////////////////////////////////////
     // proxy
-    ///////////////////////////////////////////////////////////////////////////
+    // /////////////////////////////////////////////////////////////////////////
+
     /**
      * 为包装对象创建一个代理，允许使用自定义接口在其上安全地调用方法。
      *
@@ -337,28 +373,31 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
      */
     fun <P> proxy(proxyType: Class<P>): P {
         val isMap = objects is Map<*, *>
-        val handler = InvocationHandler { _, method, args ->
-            val name = method.name
-            try {
-                return@InvocationHandler reflect(objects).method(name, *args).get<Any>()!!
-            } catch (e: ReflectException) {
-                if (isMap) {
-                    val map = objects as MutableMap<String, Any>?
-                    val length = args?.size ?: 0
-                    if (length == 0 && name.startsWith("get")) {
-                        return@InvocationHandler map!![property(name.substring(3))]!!
-                    } else if (length == 0 && name.startsWith("is")) {
-                        return@InvocationHandler map!![property(name.substring(2))]!!
-                    } else if (length == 1 && name.startsWith("set")) {
-                        map!![property(name.substring(3))] = args[0]
-                        return@InvocationHandler null
+        val handler =
+            InvocationHandler { _, method, args ->
+                val name = method.name
+                try {
+                    return@InvocationHandler reflect(objects).method(name, *args).get<Any>()!!
+                } catch (e: ReflectException) {
+                    if (isMap) {
+                        val map = objects as MutableMap<String, Any>?
+                        val length = args?.size ?: 0
+                        if (length == 0 && name.startsWith("get")) {
+                            return@InvocationHandler map!![property(name.substring(3))]!!
+                        } else if (length == 0 && name.startsWith("is")) {
+                            return@InvocationHandler map!![property(name.substring(2))]!!
+                        } else if (length == 1 && name.startsWith("set")) {
+                            map!![property(name.substring(3))] = args[0]
+                            return@InvocationHandler null
+                        }
                     }
+                    throw e
                 }
-                throw e
             }
-        }
         return Proxy.newProxyInstance(
-            proxyType.classLoader, arrayOf<Class<*>>(proxyType), handler
+            proxyType.classLoader,
+            arrayOf<Class<*>>(proxyType),
+            handler,
         ) as P
     }
 
@@ -398,7 +437,7 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
      *
      * @param <T> 值类型
      * @return result
-    </T> */
+     </T> */
     fun <T> get(): T? {
         return objects as T?
     }
@@ -416,10 +455,10 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
     }
 
     private class NULL
+
     companion object {
-        ///////////////////////////////////////////////////////////////////////////
         // reflect
-        ///////////////////////////////////////////////////////////////////////////
+
         /**
          * 反射class
          *
@@ -441,7 +480,10 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
          * @throws ReflectException 如果反射不成功
          */
         @Throws(ReflectException::class)
-        fun reflect(className: String, classLoader: ClassLoader): ReflectUtils {
+        fun reflect(
+            className: String,
+            classLoader: ClassLoader,
+        ): ReflectUtils {
             return reflect(forName(className, classLoader))
         }
 
@@ -477,7 +519,10 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
             }
         }
 
-        private fun forName(name: String, classLoader: ClassLoader): Class<*> {
+        private fun forName(
+            name: String,
+            classLoader: ClassLoader,
+        ): Class<*> {
             return try {
                 Class.forName(name, true, classLoader)
             } catch (e: ClassNotFoundException) {
@@ -489,13 +534,16 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
          * 获取 getter/setter 的 POJO 属性名称
          */
         private fun property(string: String): String {
-            val length = string.length
-            return if (length == 0) {
-                ""
-            } else if (length == 1) {
-                string.lowercase(Locale.getDefault())
-            } else {
-                string.substring(0, 1).lowercase(Locale.getDefault()) + string.substring(1)
+            return when (string.length) {
+                0 -> {
+                    ""
+                }
+                1 -> {
+                    string.lowercase(Locale.getDefault())
+                }
+                else -> {
+                    string.substring(0, 1).lowercase(Locale.getDefault()) + string.substring(1)
+                }
             }
         }
     }

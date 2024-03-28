@@ -34,7 +34,8 @@ object ZipUtils {
      */
     @Throws(IOException::class)
     fun zipFiles(
-        srcFiles: Collection<String?>?, zipFilePath: String?
+        srcFiles: Collection<String?>?,
+        zipFilePath: String?,
     ): Boolean {
         return zipFiles(srcFiles, zipFilePath, null)
     }
@@ -50,7 +51,9 @@ object ZipUtils {
      */
     @Throws(IOException::class)
     fun zipFiles(
-        srcFilePaths: Collection<String?>?, zipFilePath: String?, comment: String?
+        srcFilePaths: Collection<String?>?,
+        zipFilePath: String?,
+        comment: String?,
     ): Boolean {
         if (srcFilePaths == null || zipFilePath == null) {
             return false
@@ -71,6 +74,7 @@ object ZipUtils {
             }
         }
     }
+
     /**
      * 压缩文件
      *
@@ -83,7 +87,9 @@ object ZipUtils {
     @JvmOverloads
     @Throws(IOException::class)
     fun zipFiles(
-        srcFiles: Collection<File>?, zipFile: File?, comment: String? = null
+        srcFiles: Collection<File>?,
+        zipFile: File?,
+        comment: String? = null,
     ): Boolean {
         if (srcFiles == null || zipFile == null) {
             return false
@@ -115,7 +121,8 @@ object ZipUtils {
      */
     @Throws(IOException::class)
     fun zipFile(
-        srcFilePath: String?, zipFilePath: String?
+        srcFilePath: String?,
+        zipFilePath: String?,
     ): Boolean {
         return zipFile(DawnBridge.getFileByPath(srcFilePath), DawnBridge.getFileByPath(zipFilePath), null)
     }
@@ -131,7 +138,9 @@ object ZipUtils {
      */
     @Throws(IOException::class)
     fun zipFile(
-        srcFilePath: String?, zipFilePath: String?, comment: String?
+        srcFilePath: String?,
+        zipFilePath: String?,
+        comment: String?,
     ): Boolean {
         return zipFile(DawnBridge.getFileByPath(srcFilePath), DawnBridge.getFileByPath(zipFilePath), comment)
     }
@@ -147,7 +156,9 @@ object ZipUtils {
     @JvmOverloads
     @Throws(IOException::class)
     fun zipFile(
-        srcFile: File?, zipFile: File?, comment: String? = null
+        srcFile: File?,
+        zipFile: File?,
+        comment: String? = null,
     ): Boolean {
         if (srcFile == null || zipFile == null) {
             return false
@@ -163,7 +174,10 @@ object ZipUtils {
 
     @Throws(IOException::class)
     private fun zipFile(
-        srcFile: File?, rootPathStr: String, zos: ZipOutputStream, comment: String?
+        srcFile: File?,
+        rootPathStr: String,
+        zos: ZipOutputStream,
+        comment: String?,
     ): Boolean {
         var rootPath = rootPathStr
         rootPath = rootPath + (if (DawnBridge.isSpace(rootPath)) "" else File.separator) + srcFile?.name
@@ -211,7 +225,8 @@ object ZipUtils {
      */
     @Throws(IOException::class)
     fun unzipFile(
-        zipFilePath: String?, destDirPath: String?
+        zipFilePath: String?,
+        destDirPath: String?,
     ): List<File>? {
         return unzipFileByKeyword(zipFilePath, destDirPath, null)
     }
@@ -226,7 +241,8 @@ object ZipUtils {
      */
     @Throws(IOException::class)
     fun unzipFile(
-        zipFile: File?, destDir: File?
+        zipFile: File?,
+        destDir: File?,
     ): List<File>? {
         return unzipFileByKeyword(zipFile, destDir, null)
     }
@@ -242,12 +258,14 @@ object ZipUtils {
      */
     @Throws(IOException::class)
     fun unzipFileByKeyword(
-        zipFilePath: String?, destDirPath: String?, keyword: String?
+        zipFilePath: String?,
+        destDirPath: String?,
+        keyword: String?,
     ): List<File>? {
         return unzipFileByKeyword(
             DawnBridge.getFileByPath(zipFilePath),
             DawnBridge.getFileByPath(destDirPath),
-            keyword
+            keyword,
         )
     }
 
@@ -262,7 +280,9 @@ object ZipUtils {
      */
     @Throws(IOException::class)
     fun unzipFileByKeyword(
-        zipFile: File?, destDir: File?, keyword: String?
+        zipFile: File?,
+        destDir: File?,
+        keyword: String?,
     ): List<File>? {
         if (zipFile == null || destDir == null) {
             return null
@@ -304,7 +324,11 @@ object ZipUtils {
 
     @Throws(IOException::class)
     private fun unzipChildFile(
-        destDir: File, files: MutableList<File>, zip: ZipFile, entry: ZipEntry, name: String
+        destDir: File,
+        files: MutableList<File>,
+        zip: ZipFile,
+        entry: ZipEntry,
+        name: String,
     ): Boolean {
         val file = File(destDir, name)
         files.add(file)

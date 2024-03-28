@@ -14,7 +14,6 @@ import com.lzq.dawn.DawnBridge
  * @Desc : Service 服务
  */
 object ServiceUtils {
-
     /**
      * 启动服务
      *
@@ -112,7 +111,9 @@ object ServiceUtils {
      *
      */
     fun bindService(
-        className: String, conn: ServiceConnection, flags: Int
+        className: String,
+        conn: ServiceConnection,
+        flags: Int,
     ) {
         try {
             bindService(Class.forName(className), conn, flags)
@@ -138,7 +139,9 @@ object ServiceUtils {
      *
      */
     fun bindService(
-        cls: Class<*>, conn: ServiceConnection, flags: Int
+        cls: Class<*>,
+        conn: ServiceConnection,
+        flags: Int,
     ) {
         bindService(Intent(DawnBridge.app, cls), conn, flags)
     }
@@ -160,7 +163,9 @@ object ServiceUtils {
      *
      */
     fun bindService(
-        intent: Intent, conn: ServiceConnection, flags: Int
+        intent: Intent,
+        conn: ServiceConnection,
+        flags: Int,
     ) {
         try {
             DawnBridge.app.bindService(intent, conn, flags)

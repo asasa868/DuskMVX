@@ -18,7 +18,6 @@ import java.util.Locale
  * @Desc : time
  */
 object TimeUtils {
-
     class TimeThreadLocal : ThreadLocal<Map<String, SimpleDateFormat>>() {
         override fun initialValue(): Map<String, SimpleDateFormat> {
             return mutableMapOf()
@@ -59,9 +58,13 @@ object TimeUtils {
      * @param pattern 日期格式的模式，如 yyyy/MM/dd HH:mm
      * @return 格式化的时间字符串
      */
-    fun millis2String(millis: Long, pattern: String): String {
+    fun millis2String(
+        millis: Long,
+        pattern: String,
+    ): String {
         return millis2String(millis, getSafeDateFormat(pattern))
     }
+
     /**
      * 格式化时间字符串的毫秒数
      *
@@ -70,7 +73,10 @@ object TimeUtils {
      * @return 格式化的时间字符串
      */
     @JvmOverloads
-    fun millis2String(millis: Long, format: DateFormat = defaultFormat): String {
+    fun millis2String(
+        millis: Long,
+        format: DateFormat = defaultFormat,
+    ): String {
         return format.format(Date(millis))
     }
 
@@ -81,9 +87,13 @@ object TimeUtils {
      * @param pattern 日期格式的模式，如 yyyy/MM/dd HH:mm
      * @return 毫秒
      */
-    fun string2Millis(time: String?, pattern: String): Long {
+    fun string2Millis(
+        time: String?,
+        pattern: String,
+    ): Long {
         return string2Millis(time, getSafeDateFormat(pattern))
     }
+
     /**
      * 以毫秒为单位的格式化时间字符串。
      *
@@ -92,7 +102,10 @@ object TimeUtils {
      * @return 毫秒
      */
     @JvmOverloads
-    fun string2Millis(time: String? , format: DateFormat = defaultFormat): Long {
+    fun string2Millis(
+        time: String?,
+        format: DateFormat = defaultFormat,
+    ): Long {
         try {
             return time?.let { format.parse(it)?.time } ?: 0L
         } catch (e: ParseException) {
@@ -108,9 +121,13 @@ object TimeUtils {
      * @param pattern 日期格式的模式，如 yyyy/MM/dd HH:mm
      * @return the date
      */
-    fun string2Date(time: String?, pattern: String): Date? {
+    fun string2Date(
+        time: String?,
+        pattern: String,
+    ): Date? {
         return string2Date(time, getSafeDateFormat(pattern))
     }
+
     /**
      * 格式化的时间字符串到日期。
      *
@@ -119,9 +136,12 @@ object TimeUtils {
      * @return date
      */
     @JvmOverloads
-    fun string2Date(time: String?, format: DateFormat = defaultFormat): Date? {
+    fun string2Date(
+        time: String?,
+        format: DateFormat = defaultFormat,
+    ): Date? {
         try {
-            return format.parse(time?:"")
+            return format.parse(time ?: "")
         } catch (e: ParseException) {
             e.printStackTrace()
         }
@@ -135,9 +155,13 @@ object TimeUtils {
      * @param pattern 日期格式的模式，如 yyyy/MM/dd HH:mm
      * @return 格式化时间字符串。
      */
-    fun date2String(date: Date?, pattern: String): String {
-        return getSafeDateFormat(pattern).format(date?:Date())
+    fun date2String(
+        date: Date?,
+        pattern: String,
+    ): String {
+        return getSafeDateFormat(pattern).format(date ?: Date())
     }
+
     /**
      * 日期到格式化时间字符串
      *
@@ -146,8 +170,11 @@ object TimeUtils {
      * @return 格式化时间字符串。
      */
     @JvmOverloads
-    fun date2String(date: Date?, format: DateFormat = defaultFormat): String {
-        return format.format(date?:Date())
+    fun date2String(
+        date: Date?,
+        format: DateFormat = defaultFormat,
+    ): String {
+        return format.format(date ?: Date())
     }
 
     /**
@@ -188,7 +215,9 @@ object TimeUtils {
      * @return the time span, in unit
      */
     fun getTimeSpan(
-        time1: String?, time2: String?, @TimeConstants.Unit unit: Int
+        time1: String?,
+        time2: String?,
+        @TimeConstants.Unit unit: Int,
     ): Long {
         return getTimeSpan(time1, time2, defaultFormat, unit)
     }
@@ -209,8 +238,11 @@ object TimeUtils {
      *
      * @return the time span, in unit
      */
-     fun getTimeSpan(
-        time1: String?, time2: String?, format: DateFormat, @TimeConstants.Unit unit: Int
+    fun getTimeSpan(
+        time1: String?,
+        time2: String?,
+        format: DateFormat,
+        @TimeConstants.Unit unit: Int,
     ): Long {
         return millis2TimeSpan(string2Millis(time1, format) - string2Millis(time2, format), unit)
     }
@@ -230,8 +262,10 @@ object TimeUtils {
      *
      * @return the time span, in unit
      */
-     fun getTimeSpan(
-        date1: Date, date2: Date, @TimeConstants.Unit unit: Int
+    fun getTimeSpan(
+        date1: Date,
+        date2: Date,
+        @TimeConstants.Unit unit: Int,
     ): Long {
         return millis2TimeSpan(date2Millis(date1) - date2Millis(date2), unit)
     }
@@ -252,7 +286,9 @@ object TimeUtils {
      * @return the time span, in unit
      */
     fun getTimeSpan(
-        millis1: Long, millis2: Long, @TimeConstants.Unit unit: Int
+        millis1: Long,
+        millis2: Long,
+        @TimeConstants.Unit unit: Int,
     ): Long {
         return millis2TimeSpan(millis1 - millis2, unit)
     }
@@ -276,7 +312,9 @@ object TimeUtils {
      * @return the fit time span
      */
     fun getFitTimeSpan(
-        time1: String?, time2: String?, precision: Int
+        time1: String?,
+        time2: String?,
+        precision: Int,
     ): String? {
         val delta = string2Millis(time1, defaultFormat) - string2Millis(time2, defaultFormat)
         return millis2FitTimeSpan(delta, precision)
@@ -300,7 +338,10 @@ object TimeUtils {
      * @return the fit time span
      */
     fun getFitTimeSpan(
-        time1: String?, time2: String?, format: DateFormat, precision: Int
+        time1: String?,
+        time2: String?,
+        format: DateFormat,
+        precision: Int,
     ): String? {
         val delta = string2Millis(time1, format) - string2Millis(time2, format)
         return millis2FitTimeSpan(delta, precision)
@@ -322,7 +363,11 @@ object TimeUtils {
      *
      * @return the fit time span
      */
-    fun getFitTimeSpan(date1: Date, date2: Date, precision: Int): String? {
+    fun getFitTimeSpan(
+        date1: Date,
+        date2: Date,
+        precision: Int,
+    ): String? {
         return millis2FitTimeSpan(date2Millis(date1) - date2Millis(date2), precision)
     }
 
@@ -343,7 +388,9 @@ object TimeUtils {
      * @return the fit time span
      */
     fun getFitTimeSpan(
-        millis1: Long, millis2: Long, precision: Int
+        millis1: Long,
+        millis2: Long,
+        precision: Int,
     ): String? {
         return millis2FitTimeSpan(millis1 - millis2, precision)
     }
@@ -399,7 +446,10 @@ object TimeUtils {
      *
      * @return the time span by now, in unit
      */
-    fun getTimeSpanByNow(time: String?, @TimeConstants.Unit unit: Int): Long {
+    fun getTimeSpanByNow(
+        time: String?,
+        @TimeConstants.Unit unit: Int,
+    ): Long {
         return getTimeSpan(time, nowString, defaultFormat, unit)
     }
 
@@ -419,7 +469,9 @@ object TimeUtils {
      * @return the time span by now, in unit
      */
     fun getTimeSpanByNow(
-        time: String?, format: DateFormat, @TimeConstants.Unit unit: Int
+        time: String?,
+        format: DateFormat,
+        @TimeConstants.Unit unit: Int,
     ): Long {
         return getTimeSpan(time, getNowString(format), format, unit)
     }
@@ -438,7 +490,10 @@ object TimeUtils {
      *
      * @return the time span by now, in unit
      */
-    fun getTimeSpanByNow(date: Date, @TimeConstants.Unit unit: Int): Long {
+    fun getTimeSpanByNow(
+        date: Date,
+        @TimeConstants.Unit unit: Int,
+    ): Long {
         return getTimeSpan(date, Date(), unit)
     }
 
@@ -456,7 +511,10 @@ object TimeUtils {
      *
      * @return the time span by now, in unit
      */
-    fun getTimeSpanByNow(millis: Long, @TimeConstants.Unit unit: Int): Long {
+    fun getTimeSpanByNow(
+        millis: Long,
+        @TimeConstants.Unit unit: Int,
+    ): Long {
         return getTimeSpan(millis, System.currentTimeMillis(), unit)
     }
 
@@ -477,7 +535,10 @@ object TimeUtils {
      *
      * @return the fit time span by now
      */
-    fun getFitTimeSpanByNow(time: String?, precision: Int): String? {
+    fun getFitTimeSpanByNow(
+        time: String?,
+        precision: Int,
+    ): String? {
         return getFitTimeSpan(time, nowString, defaultFormat, precision)
     }
 
@@ -498,7 +559,9 @@ object TimeUtils {
      * @return the fit time span by now
      */
     fun getFitTimeSpanByNow(
-        time: String?, format: DateFormat, precision: Int
+        time: String?,
+        format: DateFormat,
+        precision: Int,
     ): String? {
         return getFitTimeSpan(time, getNowString(format), format, precision)
     }
@@ -518,7 +581,10 @@ object TimeUtils {
      *
      * @return the fit time span by now
      */
-    fun getFitTimeSpanByNow(date: Date, precision: Int): String? {
+    fun getFitTimeSpanByNow(
+        date: Date,
+        precision: Int,
+    ): String? {
         return getFitTimeSpan(date, nowDate, precision)
     }
 
@@ -537,7 +603,10 @@ object TimeUtils {
      *
      * @return the fit time span by now
      */
-    fun getFitTimeSpanByNow(millis: Long, precision: Int): String? {
+    fun getFitTimeSpanByNow(
+        millis: Long,
+        precision: Int,
+    ): String? {
         return getFitTimeSpan(millis, System.currentTimeMillis(), precision)
     }
 
@@ -579,7 +648,8 @@ object TimeUtils {
      *
      */
     fun getFriendlyTimeSpanByNow(
-        time: String?, format: DateFormat
+        time: String?,
+        format: DateFormat,
     ): String {
         return getFriendlyTimeSpanByNow(string2Millis(time, format))
     }
@@ -669,7 +739,9 @@ object TimeUtils {
      * @return the milliseconds differ time span
      */
     fun getMillis(
-        millis: Long, timeSpan: Long, @TimeConstants.Unit unit: Int
+        millis: Long,
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
     ): Long {
         return millis + timeSpan2Millis(timeSpan, unit)
     }
@@ -692,7 +764,9 @@ object TimeUtils {
      * @return the milliseconds differ time span
      */
     fun getMillis(
-        time: String?, timeSpan: Long, @TimeConstants.Unit unit: Int
+        time: String?,
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
     ): Long {
         return getMillis(time, defaultFormat, timeSpan, unit)
     }
@@ -714,7 +788,10 @@ object TimeUtils {
      * @return the milliseconds differ time span.
      */
     fun getMillis(
-        time: String?, format: DateFormat, timeSpan: Long, @TimeConstants.Unit unit: Int
+        time: String?,
+        format: DateFormat,
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
     ): Long {
         return string2Millis(time, format) + timeSpan2Millis(timeSpan, unit)
     }
@@ -735,7 +812,9 @@ object TimeUtils {
      * @return the milliseconds differ time span.
      */
     fun getMillis(
-        date: Date, timeSpan: Long, @TimeConstants.Unit unit: Int
+        date: Date,
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
     ): Long {
         return date2Millis(date) + timeSpan2Millis(timeSpan, unit)
     }
@@ -758,7 +837,9 @@ object TimeUtils {
      * @return the formatted time string differ time span
      */
     fun getString(
-        millis: Long, timeSpan: Long, @TimeConstants.Unit unit: Int
+        millis: Long,
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
     ): String {
         return getString(millis, defaultFormat, timeSpan, unit)
     }
@@ -780,7 +861,10 @@ object TimeUtils {
      * @return the formatted time string differ time span
      */
     fun getString(
-        millis: Long, format: DateFormat, timeSpan: Long, @TimeConstants.Unit unit: Int
+        millis: Long,
+        format: DateFormat,
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
     ): String {
         return millis2String(millis + timeSpan2Millis(timeSpan, unit), format)
     }
@@ -803,7 +887,9 @@ object TimeUtils {
      * @return the formatted time string differ time span
      */
     fun getString(
-        time: String?, timeSpan: Long, @TimeConstants.Unit unit: Int
+        time: String?,
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
     ): String {
         return getString(time, defaultFormat, timeSpan, unit)
     }
@@ -825,7 +911,10 @@ object TimeUtils {
      * @return the formatted time string differ time span
      */
     fun getString(
-        time: String?, format: DateFormat, timeSpan: Long, @TimeConstants.Unit unit: Int
+        time: String?,
+        format: DateFormat,
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
     ): String {
         return millis2String(string2Millis(time, format) + timeSpan2Millis(timeSpan, unit), format)
     }
@@ -848,7 +937,9 @@ object TimeUtils {
      * @return the formatted time string differ time span
      */
     fun getString(
-        date: Date, timeSpan: Long, @TimeConstants.Unit unit: Int
+        date: Date,
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
     ): String {
         return getString(date, defaultFormat, timeSpan, unit)
     }
@@ -870,7 +961,10 @@ object TimeUtils {
      * @return the formatted time string differ time span
      */
     fun getString(
-        date: Date, format: DateFormat, timeSpan: Long, @TimeConstants.Unit unit: Int
+        date: Date,
+        format: DateFormat,
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
     ): String {
         return millis2String(date2Millis(date) + timeSpan2Millis(timeSpan, unit), format)
     }
@@ -891,7 +985,9 @@ object TimeUtils {
      * @return the date differ time span
      */
     fun getDate(
-        millis: Long, timeSpan: Long, @TimeConstants.Unit unit: Int
+        millis: Long,
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
     ): Date {
         return millis2Date(millis + timeSpan2Millis(timeSpan, unit))
     }
@@ -914,7 +1010,9 @@ object TimeUtils {
      * @return the date differ time span
      */
     fun getDate(
-        time: String?, timeSpan: Long, @TimeConstants.Unit unit: Int
+        time: String?,
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
     ): Date {
         return getDate(time, defaultFormat, timeSpan, unit)
     }
@@ -936,7 +1034,10 @@ object TimeUtils {
      * @return the date differ time span
      */
     fun getDate(
-        time: String?, format: DateFormat, timeSpan: Long, @TimeConstants.Unit unit: Int
+        time: String?,
+        format: DateFormat,
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
     ): Date {
         return millis2Date(string2Millis(time, format) + timeSpan2Millis(timeSpan, unit))
     }
@@ -957,7 +1058,9 @@ object TimeUtils {
      * @return the date differ time span
      */
     fun getDate(
-        date: Date, timeSpan: Long, @TimeConstants.Unit unit: Int
+        date: Date,
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
     ): Date {
         return millis2Date(date2Millis(date) + timeSpan2Millis(timeSpan, unit))
     }
@@ -976,7 +1079,10 @@ object TimeUtils {
      *
      * @return the milliseconds differ time span by now
      */
-    fun getMillisByNow(timeSpan: Long, @TimeConstants.Unit unit: Int): Long {
+    fun getMillisByNow(
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
+    ): Long {
         return getMillis(nowMills, timeSpan, unit)
     }
 
@@ -996,7 +1102,10 @@ object TimeUtils {
      *
      * @return the formatted time string differ time span by now
      */
-    fun getStringByNow(timeSpan: Long, @TimeConstants.Unit unit: Int): String {
+    fun getStringByNow(
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
+    ): String {
         return getStringByNow(timeSpan, defaultFormat, unit)
     }
 
@@ -1016,7 +1125,9 @@ object TimeUtils {
      * @return the formatted time string differ time span by now
      */
     fun getStringByNow(
-        timeSpan: Long, format: DateFormat, @TimeConstants.Unit unit: Int
+        timeSpan: Long,
+        format: DateFormat,
+        @TimeConstants.Unit unit: Int,
     ): String {
         return getString(nowMills, format, timeSpan, unit)
     }
@@ -1035,7 +1146,10 @@ object TimeUtils {
      *
      * @return the date differ time span by now
      */
-    fun getDateByNow(timeSpan: Long, @TimeConstants.Unit unit: Int): Date {
+    fun getDateByNow(
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
+    ): Date {
         return getDate(nowMills, timeSpan, unit)
     }
 
@@ -1058,7 +1172,10 @@ object TimeUtils {
      * @param format 格式
      * @return `true`: yes<br></br>`false`: no
      */
-    fun isToday(time: String?, format: DateFormat): Boolean {
+    fun isToday(
+        time: String?,
+        format: DateFormat,
+    ): Boolean {
         return isToday(string2Millis(time, format))
     }
 
@@ -1102,7 +1219,10 @@ object TimeUtils {
      * @param format 格式
      * @return `true`: yes<br></br>`false`: no
      */
-    fun isLeapYear(time: String?, format: DateFormat): Boolean {
+    fun isLeapYear(
+        time: String?,
+        format: DateFormat,
+    ): Boolean {
         return isLeapYear(string2Date(time, format))
     }
 
@@ -1160,7 +1280,10 @@ object TimeUtils {
      * @param format 格式
      * @return 星期几。
      */
-    fun getChineseWeek(time: String?, format: DateFormat): String {
+    fun getChineseWeek(
+        time: String?,
+        format: DateFormat,
+    ): String {
         return getChineseWeek(string2Date(time, format))
     }
 
@@ -1203,7 +1326,10 @@ object TimeUtils {
      * @param format 格式
      * @return 美国的星期几。
      */
-    fun getUSWeek(time: String?, format: DateFormat): String {
+    fun getUSWeek(
+        time: String?,
+        format: DateFormat,
+    ): String {
         return getUSWeek(string2Date(time, format))
     }
 
@@ -1214,7 +1340,7 @@ object TimeUtils {
      * @return 美国的星期几。
      */
     fun getUSWeek(date: Date?): String {
-        return date?.let { SimpleDateFormat("EEEE", Locale.US).format(it) } ?:""
+        return date?.let { SimpleDateFormat("EEEE", Locale.US).format(it) } ?: ""
     }
 
     /**
@@ -1258,7 +1384,8 @@ object TimeUtils {
      * @return `true`: yes<br></br>`false`: no
      */
     fun isAm(
-        time: String?, format: DateFormat
+        time: String?,
+        format: DateFormat,
     ): Boolean {
         return getValueByCalendarField(time, format, GregorianCalendar.AM_PM) == 0
     }
@@ -1311,7 +1438,8 @@ object TimeUtils {
      * @return `true`: yes<br></br>`false`: no
      */
     fun isPm(
-        time: String?, format: DateFormat
+        time: String?,
+        format: DateFormat,
     ): Boolean {
         return !isAm(time, format)
     }
@@ -1370,7 +1498,10 @@ object TimeUtils {
      *
      * @return 给定日历字段的值。
      */
-    fun getValueByCalendarField(time: String?, field: Int): Int {
+    fun getValueByCalendarField(
+        time: String?,
+        field: Int,
+    ): Int {
         return getValueByCalendarField(string2Date(time, defaultFormat), field)
     }
 
@@ -1390,7 +1521,9 @@ object TimeUtils {
      * @return 给定日历字段的值。
      */
     fun getValueByCalendarField(
-        time: String?, format: DateFormat, field: Int
+        time: String?,
+        format: DateFormat,
+        field: Int,
     ): Int {
         return getValueByCalendarField(string2Date(time, format), field)
     }
@@ -1409,7 +1542,10 @@ object TimeUtils {
      *
      * @return 给定日历字段的值。
      */
-    fun getValueByCalendarField(date: Date?, field: Int): Int {
+    fun getValueByCalendarField(
+        date: Date?,
+        field: Int,
+    ): Int {
         val cal = Calendar.getInstance()
         if (date != null) {
             cal.time = date
@@ -1431,7 +1567,10 @@ object TimeUtils {
      *
      * @return 给定日历字段的值。
      */
-    fun getValueByCalendarField(millis: Long, field: Int): Int {
+    fun getValueByCalendarField(
+        millis: Long,
+        field: Int,
+    ): Int {
         val cal = Calendar.getInstance()
         cal.timeInMillis = millis
         return cal[field]
@@ -1459,7 +1598,10 @@ object TimeUtils {
      * @param format 格式
      * @return 中国十二生肖。
      */
-    fun getChineseZodiac(time: String?, format: DateFormat): String {
+    fun getChineseZodiac(
+        time: String?,
+        format: DateFormat,
+    ): String {
         return getChineseZodiac(string2Date(time, format))
     }
 
@@ -1498,20 +1640,21 @@ object TimeUtils {
     }
 
     private val ZODIAC_FLAGS = intArrayOf(20, 19, 21, 21, 21, 22, 23, 23, 23, 24, 23, 22)
-    private val ZODIAC = arrayOf(
-        "水瓶座",
-        "双鱼座",
-        "白羊座",
-        "金牛座",
-        "双子座",
-        "巨蟹座",
-        "狮子座",
-        "处女座",
-        "天秤座",
-        "天蝎座",
-        "射手座",
-        "摩羯座"
-    )
+    private val ZODIAC =
+        arrayOf(
+            "水瓶座",
+            "双鱼座",
+            "白羊座",
+            "金牛座",
+            "双子座",
+            "巨蟹座",
+            "狮子座",
+            "处女座",
+            "天秤座",
+            "天蝎座",
+            "射手座",
+            "摩羯座",
+        )
 
     /**
      * 返回十二星座。
@@ -1532,7 +1675,10 @@ object TimeUtils {
      * @param format 格式
      * @return 十二星座。
      */
-    fun getZodiac(time: String?, format: DateFormat): String {
+    fun getZodiac(
+        time: String?,
+        format: DateFormat,
+    ): String {
         return getZodiac(string2Date(time, format))
     }
 
@@ -1569,20 +1715,32 @@ object TimeUtils {
      * @param day   day.
      * @return 十二星座。
      */
-    fun getZodiac(month: Int, day: Int): String {
+    fun getZodiac(
+        month: Int,
+        day: Int,
+    ): String {
         return ZODIAC[if (day >= ZODIAC_FLAGS[month - 1]) month - 1 else (month + 10) % 12]
     }
 
-    private fun timeSpan2Millis(timeSpan: Long, @TimeConstants.Unit unit: Int): Long {
+    private fun timeSpan2Millis(
+        timeSpan: Long,
+        @TimeConstants.Unit unit: Int,
+    ): Long {
         return timeSpan * unit
     }
 
-    private fun millis2TimeSpan(millis: Long, @TimeConstants.Unit unit: Int): Long {
+    private fun millis2TimeSpan(
+        millis: Long,
+        @TimeConstants.Unit unit: Int,
+    ): Long {
         return millis / unit
     }
 
     @JvmStatic
-    fun millis2FitTimeSpan(milli: Long, precisionInt: Int): String? {
+    fun millis2FitTimeSpan(
+        milli: Long,
+        precisionInt: Int,
+    ): String? {
         var millis = milli
         var precision = precisionInt
         if (precision <= 0) {

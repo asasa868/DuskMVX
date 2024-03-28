@@ -18,20 +18,16 @@ import kotlinx.coroutines.flow.flowOn
  * @version 0.0.1
  * @description: 最初始的Model
  */
-abstract class BaseRootRepository :IBaseRootRepository {
-
-
-
+abstract class BaseRootRepository : IBaseRootRepository {
     override fun <T> requestToFlow(requestBlock: suspend FlowCollector<T>.() -> Unit): Flow<T> {
         return flow(block = requestBlock).flowOn(Dispatchers.IO)
     }
-
 
     override fun <T : Any> requestToRxjava(
         requestBlock: () -> T,
         onSuccess: (T) -> Unit,
         onError: (Throwable) -> Unit,
-        onComplete: () -> Unit
+        onComplete: () -> Unit,
     ) {
         Observable.create { emitter ->
             try {
@@ -41,10 +37,9 @@ abstract class BaseRootRepository :IBaseRootRepository {
             } catch (e: Exception) {
                 emitter.onError(e)
             }
-        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : Observer<T> {
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(
+            object : Observer<T> {
                 override fun onSubscribe(d: Disposable) {
-
                 }
 
                 override fun onError(e: Throwable) {
@@ -58,7 +53,7 @@ abstract class BaseRootRepository :IBaseRootRepository {
                 override fun onNext(t: T) {
                     onSuccess(t)
                 }
-
-            })
+            },
+        )
     }
 }

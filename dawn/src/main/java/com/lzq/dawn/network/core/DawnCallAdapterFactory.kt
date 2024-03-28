@@ -47,7 +47,6 @@ class DawnCallAdapterFactory(private val exception: IErrorHandler? = null) : Cal
             override fun adapt(call: Call<Any>): Call<*> {
                 return DawnResponseCall(call, exception)
             }
-
         }
     }
 

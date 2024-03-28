@@ -9,6 +9,7 @@ package com.lzq.dawn.util.rom
 class RomInfo {
     var name: String? = null
     var version: String? = null
+
     override fun toString(): String {
         return "RomInfo{name=$name, version=$version}"
     }
