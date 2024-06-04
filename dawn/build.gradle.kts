@@ -142,6 +142,7 @@ dependencies {
  * username                   sonatype用户名
  * username                   sonatype密码
  * email                      自己的邮箱
+ * isJitpack                  是否是jitpack仓库，仓库不同使用的签名不同,详情查看signing{}
  */
 extra["PUBLISH_VERSION"] = ""
 extra["PUBLISH_GROUP_ID"] = ""
@@ -152,6 +153,7 @@ extra["signing.secretKeyRingFile"] = ""
 extra["username"] = ""
 extra["password"] = ""
 extra["email"] = ""
+extra["isJitpack"] = ""
 // 遍历赋值
 val secretPropsFile: File = project.rootProject.file("local.properties")
 if (secretPropsFile.exists()) {
@@ -184,6 +186,7 @@ var secretKeyRingFile = extra["signing.secretKeyRingFile"].toString()
 var ossUsername = extra["username"].toString()
 var ossPassword = extra["password"].toString()
 var ossEmil = extra["email"].toString()
+var isJitpack = extra["isJitpack"].toString()
 // 暂存库
 val releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
 // 快照库（版本名以 SNAPSHOT 结尾，就推送至快照库）
@@ -200,12 +203,11 @@ afterEvaluate {
                 isAllowInsecureProtocol = false
                 name = mavenArtifactId
 
-                url =
-                    if (publishVersion.endsWith("SNAPSHOT")) {
-                        uri(snapshotsRepoUrl)
-                    } else {
-                        uri(releasesRepoUrl)
-                    }
+                url = if (publishVersion.endsWith("SNAPSHOT")) {
+                    uri(snapshotsRepoUrl)
+                } else {
+                    uri(releasesRepoUrl)
+                }
 
                 credentials {
                     username = ossUsername
@@ -221,9 +223,10 @@ afterEvaluate {
         }
         publications {
             create<MavenPublication>("release") {
-                println(
-                    "publish-maven Log-------> " + "PUBLISH_GROUP_ID: $mavenGroupId; " + "PUBLISH_ARTIFACT_ID: $mavenArtifactId; " + "PUBLISH_VERSION: $publishVersion",
-                )
+                println("publish-maven Log-------> "
+                        + "PUBLISH_GROUP_ID: $mavenGroupId; "
+                        + "PUBLISH_ARTIFACT_ID: $mavenArtifactId; "
+                        + "PUBLISH_VERSION: $publishVersion")
 
                 from(components.getByName("release"))
                 groupId = mavenGroupId
@@ -272,17 +275,15 @@ afterEvaluate {
                         withXml {
                             // 检查是否已存在 <dependencies> 节点
                             val rootNode = asNode()
-                            val existingDependenciesNode =
-                                rootNode.children().find {
-                                    (it as Node).name() == "dependencies"
-                                }
-                            val dependenciesNode: Node =
-                                if (existingDependenciesNode == null) {
-                                    // 如果不存在，则添加 <dependencies> 节点
-                                    rootNode.appendNode("dependencies")
-                                } else {
-                                    existingDependenciesNode as Node
-                                }
+                            val existingDependenciesNode = rootNode.children().find {
+                                (it as Node).name() == "dependencies"
+                            }
+                            val dependenciesNode: Node = if (existingDependenciesNode == null) {
+                                // 如果不存在，则添加 <dependencies> 节点
+                                rootNode.appendNode("dependencies")
+                            } else {
+                                existingDependenciesNode as Node
+                            }
                             configurations["implementation"].dependencies.forEach { dependency ->
                                 if (dependency.version != "unspecified" && dependency.name != "unspecified") {
                                     val dependencyNode = dependenciesNode.appendNode("dependency")
@@ -298,7 +299,11 @@ afterEvaluate {
         }
     }
     signing {
-        sign(publishing.publications["release"])
+        if (isJitpack == "true") {
+            useGpgCmd()
+        } else {
+            sign(publishing.publications["release"])
+        }
     }
     tasks.named("generateMetadataFileForReleasePublication") {
         inputs.files(tasks.named("androidSourcesJar"))
