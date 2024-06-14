@@ -20,12 +20,14 @@ import kotlin.system.measureTimeMillis
  * 1.先依赖谷歌的AutoService库，@link[Google.autoService]
  * 2.在创建一个Application的实现类实现@link[BaseApplicationLifecycle]
  * 3.在实现类上面使用注解 @AutoService(BaseApplicationLifecycle::class)
+ * 注意，每个模块都需要导入autoService库，{ kapt(libs.auto.service.annotations) }
+ *
  */
 
 
- open class RootApplication internal constructor(): MultiDexApplication() {
+open class RootApplication internal constructor(): MultiDexApplication() {
 
-    private val applicationProxy by lazy(mode = LazyThreadSafetyMode.NONE) { ModuleApplicationProxy() }
+    private val applicationProxy by lazy(mode = LazyThreadSafetyMode.NONE) { ModuleApplicationProxy.getInstance() }
 
     private val mainScope by lazy(mode = LazyThreadSafetyMode.NONE) { MainScope() }
 
