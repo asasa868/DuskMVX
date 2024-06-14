@@ -15,3 +15,4 @@
 local.properties
 /maven
 /.idea/sonarlint
+/buildSrc/build

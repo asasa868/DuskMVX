@@ -14,6 +14,18 @@ import java.util.ServiceLoader
  */
 internal class ModuleApplicationProxy : BaseApplicationLifecycle {
 
+    companion object {
+        private var instance: ModuleApplicationProxy? = null
+
+        @Synchronized
+        fun getInstance(): ModuleApplicationProxy {
+            if (instance == null) {
+                instance = ModuleApplicationProxy()
+            }
+            return instance!!
+        }
+    }
+
     private var moduleApplications: ServiceLoader<BaseApplicationLifecycle> =
         ServiceLoader.load(BaseApplicationLifecycle::class.java)
 

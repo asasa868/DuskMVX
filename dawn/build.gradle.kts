@@ -115,6 +115,15 @@ dependencies {
     api(libs.retrofit)
     api(libs.retrofit.converter.gson)
     api(libs.okhttp.logging.interceptor)
+
+    api(libs.core.ktx)
+    api(libs.appcompat)
+    api(libs.material)
+    api(libs.activity)
+    api(libs.constraintlayout)
+    testApi(libs.junit)
+    androidTestApi(libs.ext.junit)
+    androidTestApi(libs.espresso.core)
     // ---------------------------依赖---------------------------
 
     // -------------------------注解依赖--------------------------

@@ -38,4 +38,4 @@ dependencyResolutionManagement {
 rootProject.name = "Dusk"
 include(":app")
 include(":dawn")
-
+include(":login")

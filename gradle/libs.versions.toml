@@ -51,6 +51,12 @@ material = "1.8.0"
 org-jetbrains-kotlin-android = "1.9.0"
 constraintlayout = "2.1.4"
 toaster = "12.6"
+agp = "8.1.3"
+core-ktx = "1.10.1"
+junit = "4.13.2"
+androidx-junit = "1.1.5"
+espresso-core = "3.5.1"
+activity = "1.8.0"
 
 
 [libraries]
@@ -126,6 +132,12 @@ glide-okhttp3-integration = { group = "com.github.bumptech.glide", name = "okhtt
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-junit" }
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 
 [plugins]
 org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }

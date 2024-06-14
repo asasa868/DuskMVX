@@ -30,12 +30,12 @@ import java.util.regex.Pattern
  * @Desc : log
  */
 object LogUtils {
-    const val V = Log.VERBOSE
-    const val D = Log.DEBUG
-    const val I = Log.INFO
-    const val W = Log.WARN
-    const val E = Log.ERROR
-    const val A = Log.ASSERT
+    private const val V = Log.VERBOSE
+    private const val D = Log.DEBUG
+    private const val I = Log.INFO
+    private const val W = Log.WARN
+    private const val E = Log.ERROR
+    private const val A = Log.ASSERT
     private val T = charArrayOf('V', 'D', 'I', 'W', 'E', 'A')
     const val FILE = 0x10
     const val JSON = 0x20
