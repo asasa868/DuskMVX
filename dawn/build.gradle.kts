@@ -232,10 +232,9 @@ afterEvaluate {
         }
         publications {
             create<MavenPublication>("release") {
-                println("publish-maven Log-------> "
-                        + "PUBLISH_GROUP_ID: $mavenGroupId; "
-                        + "PUBLISH_ARTIFACT_ID: $mavenArtifactId; "
-                        + "PUBLISH_VERSION: $publishVersion")
+                println(
+                    "publish-maven Log-------> " + "PUBLISH_GROUP_ID: $mavenGroupId; " + "PUBLISH_ARTIFACT_ID: $mavenArtifactId; " + "PUBLISH_VERSION: $publishVersion"
+                )
 
                 from(components.getByName("release"))
                 groupId = mavenGroupId
@@ -308,7 +307,7 @@ afterEvaluate {
         }
     }
     signing {
-        if (isJitpack == "true") {
+        if (isJitpack.isEmpty() || isJitpack == "null" || isJitpack == "true") {
             useGpgCmd()
         } else {
             sign(publishing.publications["release"])
