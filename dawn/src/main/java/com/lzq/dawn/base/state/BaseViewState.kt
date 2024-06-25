@@ -44,6 +44,7 @@ sealed class BaseViewState {
      */
     data object Result : BaseViewState()
 
+    var data: Any? = null
 }
 
 class ViewStateException(msg: String?, throwable: Throwable? = null) : Exception(msg, throwable)

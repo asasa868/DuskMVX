@@ -31,8 +31,8 @@ abstract class BaseMviActivity<M : IBaseRootRepository, out VM : IBaseMviViewMod
 
     override fun onOutput(state: Lifecycle.State) {
         repeatOnLifecycle(state) {
-            _viewModel.outputViewState { intent ->
-                outputViewIntent(intent)
+            _viewModel.outputIntent { intent ->
+                outputIntentModel(intent)
                 observerViewState(intent)
             }
         }
@@ -60,6 +60,6 @@ abstract class BaseMviActivity<M : IBaseRootRepository, out VM : IBaseMviViewMod
     /**
      *获取viewModel的intent
      */
-    abstract fun outputViewIntent(intent: I)
+    abstract fun outputIntentModel(intent: I)
 
 }

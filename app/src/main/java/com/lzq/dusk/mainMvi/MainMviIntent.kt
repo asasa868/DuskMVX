@@ -10,7 +10,6 @@ import com.lzq.dawn.mvi.view.i.BaseMviIntent
  * @description:
  */
 open class MainMviIntent : BaseMviIntent() {
-    data class LoginViewState(val userName: String, val password: String) : MainMviIntent()
 
     class BannerIntent : MainMviIntent()
 }

@@ -15,10 +15,10 @@ interface IBaseMviViewModel<I, M : IBaseRootRepository> : IBaseRootViewModel<M> 
     /**
      * view层发送intent
      */
-    fun inputViewState(intent: I)
+    fun inputIntent(intent: I)
 
     /**
      * 观察intent的改变并回调
      */
-    suspend fun outputViewState(result: IMviViewStateFlowResult<I>)
+    suspend fun outputIntent(result: IMviViewStateFlowResult<I>)
 }

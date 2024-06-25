@@ -1,6 +1,7 @@
 package com.lzq.dawn.tools.extensions
 
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -21,6 +22,13 @@ fun interface LifecycleStateCallBack {
 }
 
 fun AppCompatActivity.repeatOnLifecycle(
+    state: Lifecycle.State = Lifecycle.State.STARTED,
+    lifecycleStateCallBack: LifecycleStateCallBack,
+) {
+    lifecycleScope.launch { repeatOnLifecycle(state) { lifecycleStateCallBack.onLifeCycle(this) } }
+}
+
+fun Fragment.repeatOnLifecycle(
     state: Lifecycle.State = Lifecycle.State.STARTED,
     lifecycleStateCallBack: LifecycleStateCallBack,
 ) {

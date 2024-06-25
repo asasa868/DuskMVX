@@ -4,6 +4,10 @@ import com.lzq.dawn.mvi.view.m.BaseMviRepository
 import com.lzq.dawn.network.bean.DawnHttpResult
 import com.lzq.dusk.network.MainService
 import com.lzq.dusk.network.bean.BannerBean
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 /**
  * @projectName com.lzq.dusk.mainMvi
@@ -13,7 +17,9 @@ import com.lzq.dusk.network.bean.BannerBean
  * @description:
  */
 class MainMviRepository : BaseMviRepository() {
-    suspend fun getBanner(): DawnHttpResult<List<BannerBean>> {
-        return MainService.getApiService().getBanner()
+    fun getBanner(): Flow<DawnHttpResult<List<BannerBean>>> {
+        return flow {
+            emit(MainService.getApiService().getBanner())
+        }.flowOn(Dispatchers.IO)
     }
 }

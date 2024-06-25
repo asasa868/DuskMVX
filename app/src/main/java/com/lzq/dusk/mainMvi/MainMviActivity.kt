@@ -2,6 +2,7 @@ package com.lzq.dusk.mainMvi
 
 import androidx.lifecycle.Lifecycle
 import com.hjq.toast.Toaster
+import com.lzq.dawn.base.state.doOnResult
 import com.lzq.dawn.mvi.view.v.BaseMviActivity
 import com.lzq.dawn.tools.extensions.repeatOnLifecycle
 import com.lzq.dawn.tools.extensions.viewModel
@@ -10,18 +11,7 @@ import com.lzq.dusk.databinding.ActivityMainMviBinding
 class MainMviActivity :
     BaseMviActivity<MainMviRepository, MainMviViewModel, ActivityMainMviBinding, MainMviIntent>() {
     override fun initView() {
-//        lifecycleScope.launch {
-//            when (val banner = MainService.getApiService().getBanner()) {
-//                is DawnHttpResult.Success -> {
-//                    Toaster.show(banner.data.toString())
-//                }
-//
-//                is DawnHttpResult.Failure -> {
-//                    Toaster.show("${banner.code}:${banner.message}")
-//                }
-//            }
-//        }
-        mViewModel.handleViewState(MainMviIntent.BannerIntent())
+        mViewModel.inputIntent(MainMviIntent.BannerIntent())
     }
 
     override fun initData() {
@@ -31,17 +21,14 @@ class MainMviActivity :
     }
 
     override fun initObserver() {
-        repeatOnLifecycle(state = Lifecycle.State.CREATED) {
-            mViewModel.bannerList.collect {
-                Toaster.show(it.toString())
-            }
-        }
     }
 
-    override fun outputViewIntent(intent: MainMviIntent) {
+    override fun outputIntentModel(intent: MainMviIntent) {
         when (intent) {
             is MainMviIntent.BannerIntent -> {
-                //    Toaster.show(intent)
+               intent.mViewState.doOnResult {
+                   Toaster.show(intent.mViewState.data.toString())
+               }
             }
         }
     }

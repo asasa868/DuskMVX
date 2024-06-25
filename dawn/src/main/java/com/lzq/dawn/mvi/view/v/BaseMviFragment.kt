@@ -1,9 +1,13 @@
 package com.lzq.dawn.mvi.view.v
 
 import android.content.Context
+import android.os.Bundle
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewbinding.ViewBinding
 import com.hjq.toast.Toaster
 import com.lzq.dawn.base.model.IBaseRootRepository
@@ -11,6 +15,7 @@ import com.lzq.dawn.base.state.doOnError
 import com.lzq.dawn.base.state.doOnLoading
 import com.lzq.dawn.base.state.doOnSuccess
 import com.lzq.dawn.base.view.BaseRootActivity
+import com.lzq.dawn.base.view.BaseRootFragment
 import com.lzq.dawn.mvi.view.i.BaseMviIntent
 import com.lzq.dawn.tools.extensions.repeatOnLifecycle
 
@@ -22,7 +27,7 @@ import com.lzq.dawn.tools.extensions.repeatOnLifecycle
  * @description: MVI架构模式Fragment的基类
  */
 abstract class BaseMviFragment<M : IBaseRootRepository, out VM : IBaseMviViewModel<I, M>, out VB : ViewBinding, I : BaseMviIntent> :
-    BaseRootActivity(), IBaseMviView<M, VB, VM, I> {
+    BaseRootFragment(), IBaseMviView<M, VB, VM, I> {
     private val _viewBinding: VB by lazy { createBinding() }
 
     private val _viewModel: VM by lazy { createViewModel() }
@@ -33,7 +38,7 @@ abstract class BaseMviFragment<M : IBaseRootRepository, out VM : IBaseMviViewMod
 
     override fun onOutput(state: Lifecycle.State) {
         repeatOnLifecycle(state) {
-            _viewModel.outputViewState { intent ->
+            _viewModel.outputIntent { intent ->
                 outputViewIntent(intent)
                 observerViewState(intent)
             }
@@ -41,9 +46,9 @@ abstract class BaseMviFragment<M : IBaseRootRepository, out VM : IBaseMviViewMod
     }
 
     override fun onCreateView(
-        name: String,
-        context: Context,
-        attrs: AttributeSet,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         onOutput()
         return _viewBinding.root
