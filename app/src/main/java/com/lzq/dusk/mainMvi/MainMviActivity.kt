@@ -1,10 +1,8 @@
 package com.lzq.dusk.mainMvi
 
-import androidx.lifecycle.Lifecycle
 import com.hjq.toast.Toaster
 import com.lzq.dawn.base.state.doOnResult
 import com.lzq.dawn.mvi.view.v.BaseMviActivity
-import com.lzq.dawn.tools.extensions.repeatOnLifecycle
 import com.lzq.dawn.tools.extensions.viewModel
 import com.lzq.dusk.databinding.ActivityMainMviBinding
 
