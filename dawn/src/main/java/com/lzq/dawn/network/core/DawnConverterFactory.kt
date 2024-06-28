@@ -32,7 +32,7 @@ class DawnConverterFactory(
                 GsonBuilder()
                     .serializeNulls()
                     .disableHtmlEscaping()
-                    .registerTypeAdapter(DawnHttpResult::class.java, DawnResponseJsonDeserializer<Any>(responseCode))
+                    .registerTypeAdapter(DawnHttpResult::class.java, DawnResponseJsonDeserializer<Any>())
                     .create(),
                 responseCode,
                 exception

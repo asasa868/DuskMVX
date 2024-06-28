@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
  */
 abstract class BaseMviViewModel<I : BaseMviIntent, M : IBaseRootRepository> : ViewModel(),
     IBaseMviViewModel<I, M> {
-    private val _viewStateFlow: MutableSharedFlow<I> = MutableSharedFlow(1, 3, BufferOverflow.DROP_OLDEST)
+    private val _viewStateFlow: MutableSharedFlow<I> = MutableSharedFlow(0, 64, BufferOverflow.DROP_LATEST)
 
     /**
      * 外部可访问的viewState
@@ -70,26 +70,18 @@ abstract class BaseMviViewModel<I : BaseMviIntent, M : IBaseRootRepository> : Vi
             flow.onStart { _viewStateFlow.emit(intent.also { it.mViewState = BaseViewState.Loading }) }
                 .onCompletion { _viewStateFlow.emit(intent.also { it.mViewState = BaseViewState.Success }) }
                 .catch { catch ->
-                    if (catch is ViewStateException) {
-                        _viewStateFlow.emit(
-                            intent.also {
-                                it.mViewState =
-                                    BaseViewState.Error(BaseViewState.Error.VIEW_STATE, msg = catch.message)
-                            },
-                        )
-                    } else {
-                        _viewStateFlow.emit(
-                            intent.also {
-                                it.mViewState =
-                                    BaseViewState.Error(BaseViewState.Error.DEFAULT, msg = catch.message)
-                            },
-                        )
+                    val viewState = intent.also {
+                        it.mViewState = if (catch is ViewStateException) {
+                            BaseViewState.Error(BaseViewState.Error.VIEW_STATE, msg = catch.message)
+                        } else {
+                            BaseViewState.Error(BaseViewState.Error.DEFAULT, msg = catch.message)
+                        }
                     }
-                }
-                .flowOn(Dispatchers.Main)
-                .collect {
+                    _viewStateFlow.emit(viewState)
+                }.flowOn(Dispatchers.Main).collect {
+                    intent.mViewState.data = null
                     val resultIntent = result.onResult(it)
-                    val also = resultIntent.also { intent->
+                    val also = resultIntent.also { intent ->
                         intent.mViewState = BaseViewState.Result.apply {
                             data = resultIntent.mViewState.data
                         }

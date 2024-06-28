@@ -5,7 +5,6 @@ import com.google.gson.JsonObject
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonToken
 import com.lzq.dawn.DawnConstants
-import com.lzq.dawn.DawnConstants.NetWorkConstants.RESPONSE_ANALYZE_CODE
 import com.lzq.dawn.network.error.DawnException
 import com.lzq.dawn.network.error.IErrorHandler
 import okhttp3.ResponseBody
@@ -44,48 +43,25 @@ class DawnResponseBodyConverter<T>(
             val jsonReader = gson.newJsonReader(value.charStream())
             val jsonObject = gson.fromJson<JsonObject>(jsonReader, JsonObject::class.java)
 
-            /**
-             * 服务端返回的数据
-             * 使用[IResponseCode]其中的字段进行解析
-             *
-             */
-            if (jsonObject.get(responseCode?.getCodeName()) == null) {
-                exception.handleError(
-                    DawnException(
-                        RESPONSE_ANALYZE_CODE, "${responseCode?.getCodeName()} Field not present"
-                    )
-                )
-            }
-            if (jsonObject.get(responseCode?.getMessageName()) == null) {
-                exception.handleError(
-                    DawnException(
-                        RESPONSE_ANALYZE_CODE, "${responseCode?.getMessageName()} Field not present"
-                    )
-                )
-            }
-            if (jsonObject.get(responseCode?.getDataName()) == null) {
-                exception.handleError(
-                    DawnException(
-                        RESPONSE_ANALYZE_CODE, "${responseCode?.getDataName()} Field not present"
-                    )
-                )
-            }
             val code = jsonObject.get(responseCode?.getCodeName())
             val message = jsonObject.get(responseCode?.getMessageName())
+            val data = jsonObject.get(responseCode?.getDataName())
 
 
             /**
              * 如果code为不是成功的code，那么就抛出异常，统一处理
              */
-            return if (responseCode?.isSuccessCode() == code.asInt) {
-                adapter.fromJson(jsonObject.toString()) as T
-            } else {
-                exception.handleError(
-                    DawnException(
-                        code.asInt, message.asString
-                    )
-                )
-                null
+            return try {
+                if (responseCode?.isSuccessCode() == code.asInt) {
+                    adapter.fromJsonTree(data)
+                } else {
+                    throw DawnException(code.asInt, message.asString)
+                }
+            } catch (e: DawnException) {
+                exception.handleError(DawnException(e.code, e.message))
+                throw e
+            } finally {
+                value.close()
             }
         }
     }
