@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.devtools.ksp'
+    id 'androidx.room'
 }
 
 android {
@@ -31,11 +33,11 @@ android {
     lintOptions {
         baseline file("lint-baseline.xml")
     }
-    viewBinding{
+    viewBinding {
         enable true
     }
 
-    packagingOptions{
+    packagingOptions {
         resources.excludes.add("META-INF/gradle/incremental.annotation.processors")
     }
     namespace 'com.lzq.dusk'
@@ -53,12 +55,18 @@ android {
     }
 }
 
+room {
+    schemaDirectory("${projectDir}/schemas")
+}
+
 dependencies {
 
     implementation project(path: ':dawn')
     implementation project(path: ':login')
    // implementation 'com.github.asasa868:DuskMVX:0.0.21'
 
-
+    implementation libs.room.runtime
+    implementation libs.room.ktx
+    ksp libs.room.compiler
 
 }

@@ -9,6 +9,7 @@ plugins {
     id("kotlin-kapt")
     id("maven-publish")
     id("signing")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -24,7 +25,7 @@ android {
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments["AROUTER_MODULE_NAME"] = project.name
+                arguments["AROUTER_MODULE_NAME"] = "dawn"
             }
         }
     }
@@ -92,6 +93,9 @@ dependencies {
     api(app.androidx.lifecycle.livedata.ktx)
     api(app.androidx.lifecycle.runtime.ktx)
 
+    api(libs.room.runtime)
+    api(libs.room.ktx)
+
     api(platform(compose.bom))
     api(compose.androidx.activity)
     api(compose.androidx.material3)
@@ -127,10 +131,11 @@ dependencies {
     // ---------------------------依赖---------------------------
 
     // -------------------------注解依赖--------------------------
-    kapt(libs.auto.service.annotations)
+    ksp(libs.auto.service.annotations)
     kapt(libs.arouter.compiler)
-    kapt(libs.eventbus.annotation)
-    kapt(app.androidx.lifecycle.common.compiler)
+    ksp(libs.eventbus.annotation)
+    ksp(app.androidx.lifecycle.common.compiler)
+    ksp(libs.room.compiler)
 
     // -------------------------注解依赖--------------------------
 }

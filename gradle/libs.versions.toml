@@ -30,6 +30,8 @@ glance = "1.1.0"
 lucksiege-pictureselector = "v3.11.1"
 
 # [ https://github.com/ReactiveX/RxAndroid --- https://github.com/ReactiveX/RxJava ]
+room = "2.6.1"
+
 rxjava3 = "3.1.8"
 rxjava3-android = "3.0.2"
 
@@ -71,6 +73,9 @@ eventbus-annotation = { module = "org.greenrobot:eventbus-annotation-processor",
 
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 toaster = { module = "com.github.getActivity:Toaster", version.ref = "toaster" }
 
 kotlin-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlin-coroutines-core" }
