@@ -9,6 +9,7 @@ import android.os.Parcelable
 import com.lzq.dawn.DawnBridge
 import com.lzq.dawn.DawnConstants
 import com.lzq.dawn.DawnConstants.MemoryConstants
+import com.lzq.dawn.util.time.TimeConstants
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -504,15 +505,15 @@ object ConvertUtils {
      * @param timeSpan 时间跨度
      * @param unit     单位
      *
-     *  * [DawnConstants.TimeConstants.MSEC]
-     *  * [DawnConstants.TimeConstants.SEC]
-     *  * [DawnConstants.TimeConstants.MIN]
-     *  * [DawnConstants.TimeConstants.HOUR]
-     *  * [DawnConstants.TimeConstants.DAY]
+     *  * [TimeConstants.MSEC]
+     *  * [TimeConstants.SEC]
+     *  * [TimeConstants.MIN]
+     *  * [TimeConstants.HOUR]
+     *  * [TimeConstants.DAY]
      *
      * @return 毫秒
      */
-    fun timeSpan2Millis(timeSpan: Long, @DawnConstants.TimeConstants.Unit unit: Int): Long {
+    fun timeSpan2Millis(timeSpan: Long, @TimeConstants.Unit unit: Int): Long {
         return timeSpan * unit
     }
 
@@ -522,15 +523,15 @@ object ConvertUtils {
      * @param millis 毫秒。
      * @param unit   单位
      *
-     *  * [DawnConstants.TimeConstants.MSEC]
-     *  * [DawnConstants.TimeConstants.SEC]
-     *  * [DawnConstants.TimeConstants.MIN]
-     *  * [DawnConstants.TimeConstants.HOUR]
-     *  * [DawnConstants.TimeConstants.DAY]
+     *  * [TimeConstants.MSEC]
+     *  * [TimeConstants.SEC]
+     *  * [TimeConstants.MIN]
+     *  * [TimeConstants.HOUR]
+     *  * [TimeConstants.DAY]
      *
      * @return time span in unit
      */
-    fun millis2TimeSpan(millis: Long, @DawnConstants.TimeConstants.Unit unit: Int): Long {
+    fun millis2TimeSpan(millis: Long, @TimeConstants.Unit unit: Int): Long {
         return millis / unit
     }
 

@@ -23,18 +23,6 @@ class DawnConstants {
         annotation class Unit
     }
 
-    object TimeConstants {
-        const val MSEC  = 1
-        const val SEC   = 1000
-        const val MIN   = 60000
-        const val HOUR  = 3600000
-        const val DAY   = 86400000
-
-        @IntDef(MSEC, SEC, MIN, HOUR, DAY)
-        @Retention(AnnotationRetention.SOURCE)
-        annotation class Unit
-    }
-
     object NetWorkConstants {
         const val CONNECT_TIMEOUT  = 60 * 1000L
         const val READ_TIMEOUT     = 60 * 1000L
