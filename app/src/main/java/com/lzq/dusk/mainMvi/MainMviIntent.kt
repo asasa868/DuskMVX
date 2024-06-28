@@ -12,4 +12,6 @@ import com.lzq.dawn.mvi.view.i.BaseMviIntent
 open class MainMviIntent : BaseMviIntent() {
 
     class BannerIntent : MainMviIntent()
+
+    class HarmonyIntent : MainMviIntent()
 }

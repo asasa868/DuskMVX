@@ -1,6 +1,6 @@
 package com.lzq.dusk.mainMvi
 
-import com.hjq.toast.Toaster
+
 import com.lzq.dawn.base.state.doOnResult
 import com.lzq.dawn.mvi.view.v.BaseMviActivity
 import com.lzq.dawn.tools.extensions.viewModel
@@ -10,6 +10,7 @@ class MainMviActivity :
     BaseMviActivity<MainMviRepository, MainMviViewModel, ActivityMainMviBinding, MainMviIntent>() {
     override fun initView() {
         mViewModel.inputIntent(MainMviIntent.BannerIntent())
+        mViewModel.inputIntent(MainMviIntent.HarmonyIntent())
     }
 
     override fun initData() {
@@ -24,9 +25,17 @@ class MainMviActivity :
     override fun outputIntentModel(intent: MainMviIntent) {
         when (intent) {
             is MainMviIntent.BannerIntent -> {
-               intent.mViewState.doOnResult {
-                   Toaster.show(intent.mViewState.data.toString())
-               }
+                intent.mViewState.doOnResult {
+                    mViewBinding.tvContent.text =
+                        "${mViewBinding.tvContent.text}${intent.mViewState.data.toString()}"
+                }
+            }
+
+            is MainMviIntent.HarmonyIntent -> {
+                intent.mViewState.doOnResult {
+                    mViewBinding.tvContent.text =
+                        "${mViewBinding.tvContent.text}  ${intent.mViewState.data.toString()}"
+                }
             }
         }
     }
