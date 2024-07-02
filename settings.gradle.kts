@@ -1,5 +1,11 @@
 import org.gradle.api.initialization.resolve.RepositoriesMode
 
+rootProject.name = "Dusk"
+include(":app")
+include(":dawn")
+include(":login")
+include(":main_compose")
+
 pluginManagement {
     repositories {
         google()
@@ -34,8 +40,3 @@ dependencyResolutionManagement {
         maven { setUrl("https://jitpack.io") }
     }
 }
-
-rootProject.name = "Dusk"
-include(":app")
-include(":dawn")
-include(":login")

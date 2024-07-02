@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dusk.login"
+    namespace = "com.example.main_compose"
     compileSdk = ProjectConfigs.compileSdk
 
     defaultConfig {
@@ -15,6 +15,9 @@ android {
 
         testInstrumentationRunner = ProjectConfigs.testRunner
         consumerProguardFiles(ProjectConfigs.consumerRules, ProjectConfigs.proguardRules)
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
 
     buildTypes {
@@ -36,6 +39,17 @@ android {
     kotlinOptions {
         jvmTarget = ProjectConfigs.jvmTarget
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = ProjectConfigs.kotlinCompiler
+    }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
     sourceSets.named("main") {
         java.srcDirs(ProjectConfigs.javaSrc)
         kotlin.srcDirs(ProjectConfigs.ktSrc)
@@ -56,6 +70,13 @@ android {
 
 dependencies {
 
+    implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.activity.compose)
+    implementation(platform(libs.compose.bom))
+    implementation(libs.ui)
+    implementation(libs.ui.graphics)
+    implementation(libs.ui.tooling.preview)
+    implementation(libs.material3)
     kapt(libs.auto.service.annotations)
     implementation(project(":dawn"))
 }

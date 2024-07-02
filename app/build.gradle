@@ -63,6 +63,7 @@ dependencies {
 
     implementation project(path: ':dawn')
     implementation project(path: ':login')
+    implementation project(path: ':main_compose')
    // implementation 'com.github.asasa868:DuskMVX:0.0.21'
 
     implementation libs.room.runtime

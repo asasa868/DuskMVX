@@ -25,7 +25,7 @@ android {
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments["AROUTER_MODULE_NAME"] = "dawn"
+                arguments["AROUTER_MODULE_NAME"] = project.name
             }
         }
     }

@@ -5,6 +5,8 @@ import android.content.Intent
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.dusk.login.LoginActivity
+import com.example.main_compose.MainActivity
 import com.lzq.dawn.mvvm.v.BaseMvvmActivity
 import com.lzq.dusk.databinding.ActivityMainBinding
 import com.lzq.dusk.mainMvi.MainMviActivity
@@ -18,32 +20,13 @@ import kotlinx.coroutines.launch
 class MainActivity : BaseMvvmActivity<ActivityMainBinding, MainViewModel>() {
 
 
-    override fun initView() {
-
-       lifecycleScope.launch {
-           flow {
-               var time = 0
-               while (time < 2) {
-                   delay(1000)
-                   time++
-               }
-               emit(time)
-           }
-               .flowOn(Dispatchers.IO)
-               .flowOn(AndroidUiDispatcher.Main)
-               .collect{
-                 startActivity(Intent(this@MainActivity,MainMviActivity::class.java))
-               }
-       }
-    }
+    override fun initView() {}
 
     override fun initData() {}
 
     override fun initRequest() {}
 
-    override fun initObserver() {
-        obText()
-    }
+    override fun initObserver() { obText() }
 
     override fun createBinding() = ActivityMainBinding.inflate(layoutInflater)
 
@@ -64,6 +47,16 @@ class MainActivity : BaseMvvmActivity<ActivityMainBinding, MainViewModel>() {
         }
         mViewModel.successOrFailureRxjavaTime.observe(this) {
             mViewBinding.tvSuccessOrFailureRxjavaTime.text = "successOrFailureRxjavaTime:$it"
+        }
+
+        mViewBinding.btnMviActivity.setOnClickListener {
+            startActivity(Intent(this@MainActivity,MainMviActivity::class.java))
+        }
+        mViewBinding.btnLoginActivity.setOnClickListener {
+            startActivity(Intent(this@MainActivity,LoginActivity::class.java))
+        }
+        mViewBinding.btnComposeActivity.setOnClickListener {
+            startActivity(Intent(this@MainActivity,MainActivity::class.java))
         }
     }
 

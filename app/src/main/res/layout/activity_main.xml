@@ -6,6 +6,35 @@
     android:layout_height="match_parent"
     tools:context=".mainMvvm.MainActivity">
 
+  <LinearLayout
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btn_mviActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text="to_MVIActivity"/>
+
+    <Button
+        android:id="@+id/btn_loginActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text="to_LoginActivity"/>
+
+    <Button
+        android:id="@+id/btn_composeActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text="to_ComposeMainActivity"/>
+  </LinearLayout>
+
   <TextView
       android:id="@+id/tv_successTime"
       app:layout_constraintTop_toTopOf="parent"
