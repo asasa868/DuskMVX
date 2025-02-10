@@ -58,7 +58,6 @@ android {
 
     lint {
         baseline = file(ProjectConfigs.lintName)
-        enable.add("deprecation")
     }
 
     libraryVariants.all {

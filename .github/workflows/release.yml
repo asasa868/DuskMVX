@@ -13,43 +13,22 @@ jobs:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
+      - name: Create Release with Release Notes
       - uses: ncipollo/release-action@v1
         with:
           generateReleaseNotes: true
 
-      - name: jitpack lookup and get
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Trigger JitPack lookup
         run: |
-         retry_time=250
-         tag=$(git describe --tags --abbrev=0)
-          echo "打包版本: $tag"
-          curl -s "https://jitpack.io/api/builds/io.github.asasa868/DuskMVX/$tag"
-          
-          sleep 30
-          response=$(curl -s "https://jitpack.io/api/builds/io.github.asasa868/DuskMVX/$tag")
-          echo "Response: $response."
-          response_status=$(echo "$response" | jq -r '.status')
-          echo "获取到的jitpack仓库的版本$tag 状态:$response_status"
-  
-         if [ "$response_status" == "ok" ]; then
-          echo "打包编译成功，已发布"
-          commit=$(echo "$response" | jq -r .commit)
-          echo "提交版本$tag的Commit: $commit"
-          build_log=$(curl -s "https://jitpack.io/com/github/asasa868/DuskMVX/$tag/build.log" | grep "BUILD SUCCESS")
-          echo "结果:$build_log"
-         elif [ "$response_status" == "Building" ]; then
-          echo "打包编译中，未发布 $retry_time秒后重新获取结果"
-          sleep $retry_time
-          response=$(curl -s "https://jitpack.io/api/builds/io.github.asasa868/DuskMVX/$tag")
-          response_status=$(echo "$response" | jq -r '.status')
-          echo "获取到的jitpack仓库的版本$tag 状态:$response_status"
-           if [ "$response_status" == "ok" ]; then
-            build_log=$(curl -s "https://jitpack.io/com/github/asasa868/DuskMVX/$tag/build.log" | grep "BUILD SUCCESS")
-            echo "结果:$build_log"
-           else
-            echo "打包失败，详情查看 https://jitpack.io/com/github/asasa868/DuskMVX/$tag/build.log"
-           fi
-         else
-          echo "打包失败，详情查看 https://jitpack.io/com/github/asasa868/DuskMVX/$tag/build.log"
-         fi
+          echo "打包版本: ${{ github.repository }}&tag=${{ github.ref_name }}"
+          curl -X GET "https://jitpack.io/api/builds/lookup?repo=github.com/${{ github.repository }}&tag=${{ github.ref_name }}"

@@ -1,6 +1,6 @@
 [versions]
 auto-service = "1.1.1"
-com-alibaba-arouter-api = "1.5.1"
+com-alibaba-arouter-api = "1.5.2"
 eventbus = "3.2.0"
 gson = "2.10.1"
 kotlin = "1.9.10"
