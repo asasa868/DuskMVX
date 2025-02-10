@@ -25,9 +25,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
-
-      - name: Build with Gradle
-        run: ./gradlew build
+          distribution: 'adopt'
 
       - name: Trigger JitPack lookup
         run: |

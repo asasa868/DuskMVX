@@ -79,3 +79,10 @@ dependencies {
     kapt(libs.auto.service.annotations)
     implementation(project(":dawn"))
 }
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions {
+        // 设置为 true 以忽略警告
+        freeCompilerArgs += "-Xlint:none"
+    }
+}
