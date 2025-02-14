@@ -22,15 +22,17 @@ import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import com.google.gson.Gson
 import com.hjq.toast.Toaster
-import com.lzq.dawn.util.activity.ActivityLifecycleCallbacks
-import com.lzq.dawn.util.activity.ActivityLifecycleImpl
-import com.lzq.dawn.util.activity.ActivityUtils
-import com.lzq.dawn.util.activity.OnAppStatusChangedListener
+import com.lzq.dawn.di.DuskComponentUtils
+import com.lzq.dawn.util.components.acivity.ActivityLifecycleCallbacks
+import com.lzq.dawn.util.components.acivity.ActivityLifecycleImpl
+import com.lzq.dawn.util.components.acivity.ActivityUtils
+import com.lzq.dawn.util.components.acivity.OnAppStatusChangedListener
 import com.lzq.dawn.util.app.AppUtils
 import com.lzq.dawn.util.app.AppUtils.appVersionCode
 import com.lzq.dawn.util.app.AppUtils.appVersionName
 import com.lzq.dawn.util.convert.ConvertUtils
 import com.lzq.dawn.util.convert.ConvertUtils.bytes2String
+import com.lzq.dawn.util.app.CrashUtils
 import com.lzq.dawn.util.encode.EncodeUtils
 import com.lzq.dawn.util.encrypt.EncryptUtils
 import com.lzq.dawn.util.file.FileIOUtils
@@ -39,22 +41,23 @@ import com.lzq.dawn.util.file.FileIOUtils.writeFileFromBytesByChannel
 import com.lzq.dawn.util.file.FileUtils
 import com.lzq.dawn.util.gson.GsonUtils
 import com.lzq.dawn.util.image.ImageUtils
-import com.lzq.dawn.util.intent.IntentUtils
+import com.lzq.dawn.util.components.intent.IntentUtils
 import com.lzq.dawn.util.notification.ChannelConfig
 import com.lzq.dawn.util.notification.NotificationUtils
-import com.lzq.dawn.util.process.ProcessUtils
-import com.lzq.dawn.util.rom.RomUtils.romInfo
-import com.lzq.dawn.util.sdcard.SDCardUtils
-import com.lzq.dawn.util.service.ServiceUtils
-import com.lzq.dawn.util.shell.CommandResult
-import com.lzq.dawn.util.shell.ShellUtils
+import com.lzq.dawn.util.execution.process.ProcessUtils
+import com.lzq.dawn.util.device.RomUtils.romInfo
+import com.lzq.dawn.util.file.SDCardUtils
+import com.lzq.dawn.util.components.service.ServiceUtils
+import com.lzq.dawn.util.execution.shell.CommandResult
+import com.lzq.dawn.util.execution.shell.ShellUtils
 import com.lzq.dawn.util.size.SizeUtils
 import com.lzq.dawn.util.string.StringUtils
-import com.lzq.dawn.util.thread.SimpleTask
-import com.lzq.dawn.util.thread.ThreadUtils
+import com.lzq.dawn.util.execution.thread.SimpleTask
+import com.lzq.dawn.util.execution.thread.ThreadUtils
 import com.lzq.dawn.util.throwable.ThrowableUtils
 import com.lzq.dawn.util.time.TimeUtils
-import com.lzq.dawn.util.uri.UriUtils
+import com.lzq.dawn.util.components.uri.UriUtils
+import com.lzq.dawn.util.log.LogUtils
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
@@ -72,12 +75,14 @@ import java.lang.reflect.Type
 object DawnBridge {
     private var mApp: Application? = null
 
+    private var mIsDebug = true
+
     /**
      * 初始化工具类
      *
      * @param app app application
      */
-    fun init(app: Application?) {
+    fun init(app: Application?, isDebug: Boolean = true) {
         if (app == null) {
             Log.e("DawnUtil", "app is null.")
             return
@@ -95,7 +100,11 @@ object DawnBridge {
         }
         ActivityLifecycleImpl.INSTANCE.unInit(mApp!!)
         mApp = app
+        this.mIsDebug = isDebug
         ActivityLifecycleImpl.INSTANCE.init(mApp!!)
+        CrashUtils.init()
+        LogUtils.init()
+        DuskComponentUtils.init()
     }
 
     @JvmStatic
@@ -103,6 +112,8 @@ object DawnBridge {
         get() =  mApp!!
     val topActivity: Activity?
         get() = ActivityLifecycleImpl.INSTANCE.topActivity
+    val isDebug: Boolean
+        get() = mIsDebug
 
     fun addOnAppStatusChangedListener(listener: OnAppStatusChangedListener) {
         ActivityLifecycleImpl.INSTANCE.addOnAppStatusChangedListener(listener)

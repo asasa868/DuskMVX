@@ -6,10 +6,10 @@ import java.util.Properties
 plugins {
     id("com.android.library")
     id("kotlin-android")
-    id("kotlin-kapt")
     id("maven-publish")
     id("signing")
     id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -96,6 +96,8 @@ dependencies {
     api(libs.room.runtime)
     api(libs.room.ktx)
 
+    implementation(libs.hilt.android)
+
     api(platform(compose.bom))
     api(compose.androidx.activity)
     api(compose.androidx.material3)
@@ -132,10 +134,11 @@ dependencies {
 
     // -------------------------注解依赖--------------------------
     ksp(libs.auto.service.annotations)
-    kapt(libs.arouter.compiler)
+    ksp(libs.arouter.compiler)
     ksp(libs.eventbus.annotation)
     ksp(app.androidx.lifecycle.common.compiler)
     ksp(libs.room.compiler)
+    ksp(libs.hilt.android.compiler)
 
     // -------------------------注解依赖--------------------------
 }

@@ -22,7 +22,7 @@ import com.lzq.dawn.DawnBridge.app
 import com.lzq.dawn.DawnBridge.doAsync
 import com.lzq.dawn.DawnBridge.equals
 import com.lzq.dawn.DawnBridge.runOnUiThread
-import com.lzq.dawn.util.shell.ShellUtils
+import com.lzq.dawn.util.execution.shell.ShellUtils
 import java.net.InetAddress
 import java.net.NetworkInterface
 import java.net.SocketException

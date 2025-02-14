@@ -58,10 +58,16 @@ object LogUtils {
     private const val NULL = "null"
     private const val ARGS = "args"
     private const val PLACEHOLDER = " "
-    private val config = Config()
+    private lateinit var config: Config
     private var simpleDateFormat: SimpleDateFormat? = null
     private val EXECUTOR = Executors.newSingleThreadExecutor()
     private val I_FORMATTER_MAP = SimpleArrayMap<Class<*>?, IFormatter<*>>()
+
+    @JvmOverloads
+    internal fun init(config: Config = Config()){
+        this.config = config.setLogSwitch(DawnBridge.isDebug)
+    }
+
     fun v(vararg contents: Any?) {
         log(V, config.globalTag, *contents)
     }
@@ -162,19 +168,19 @@ object LogUtils {
         if (!config.isLogSwitch) {
             return
         }
-        val type_low = type and 0x0f
-        val type_high = type and 0xf0
-        if (config.isLog2ConsoleSwitch || config.isLog2FileSwitch || type_high == FILE) {
-            if (type_low < config.mConsoleFilter && type_low < config.mFileFilter) {
+        val typeLow = type and 0x0f
+        val typeHigh = type and 0xf0
+        if (config.isLog2ConsoleSwitch || config.isLog2FileSwitch || typeHigh == FILE) {
+            if (typeLow < config.mConsoleFilter && typeLow < config.mFileFilter) {
                 return
             }
             val tagHead = processTagAndHead(tag)
-            val body = processBody(type_high, *contents)
-            if (config.isLog2ConsoleSwitch && type_high != FILE && type_low >= config.mConsoleFilter) {
-                print2Console(type_low, tagHead.tag, tagHead.consoleHead, body)
+            val body = processBody(typeHigh, *contents)
+            if (config.isLog2ConsoleSwitch && typeHigh != FILE && typeLow >= config.mConsoleFilter) {
+                print2Console(typeLow, tagHead.tag, tagHead.consoleHead, body)
             }
-            if ((config.isLog2FileSwitch || type_high == FILE) && type_low >= config.mFileFilter) {
-                EXECUTOR.execute { print2File(type_low, tagHead.tag, tagHead.fileHead + body) }
+            if ((config.isLog2FileSwitch || typeHigh == FILE) && typeLow >= config.mFileFilter) {
+                EXECUTOR.execute { print2File(typeLow, tagHead.tag, tagHead.fileHead + body) }
             }
         }
     }
@@ -630,7 +636,8 @@ object LogUtils {
     @IntDef(V, D, I, W, E, A)
     @Retention(AnnotationRetention.SOURCE)
     annotation class TYPE
-     class Config {
+
+    class Config {
         // 日志的默认存储目录
         private var defaultDir: String? = null
 
@@ -699,12 +706,18 @@ object LogUtils {
         val mFileHead = DawnBridge.FileHead("Log")
 
         init {
-            defaultDir = if (DawnBridge.isSDCardEnableByEnvironment && DawnBridge.app.getExternalFilesDir(null) != null
-            ) {
-                DawnBridge.app.getExternalFilesDir(null).toString() + FILE_SEP + "log" + FILE_SEP
-            } else {
-                DawnBridge.app.filesDir.toString() + FILE_SEP + "log" + FILE_SEP
-            }
+            defaultDir =
+                if (DawnBridge.isSDCardEnableByEnvironment &&
+                    DawnBridge.app.getExternalFilesDir(
+                        null,
+                    ) != null
+                ) {
+                    DawnBridge.app
+                        .getExternalFilesDir(null)
+                        .toString() + FILE_SEP + "log" + FILE_SEP
+                } else {
+                    DawnBridge.app.filesDir.toString() + FILE_SEP + "log" + FILE_SEP
+                }
         }
 
         fun setLogSwitch(logSwitch: Boolean): Config {
@@ -739,11 +752,12 @@ object LogUtils {
         }
 
         fun setDir(dir: String): Config {
-            mDir = if (DawnBridge.isSpace(dir)) {
-                null
-            } else {
-                if (dir.endsWith(FILE_SEP)) dir else dir + FILE_SEP
-            }
+            mDir =
+                if (DawnBridge.isSpace(dir)) {
+                    null
+                } else {
+                    if (dir.endsWith(FILE_SEP)) dir else dir + FILE_SEP
+                }
             return this
         }
 
@@ -784,27 +798,37 @@ object LogUtils {
             return this
         }
 
-        fun setConsoleFilter(@TYPE consoleFilter: Int): Config {
+        fun setConsoleFilter(
+            @TYPE consoleFilter: Int,
+        ): Config {
             mConsoleFilter = consoleFilter
             return this
         }
 
-        fun setFileFilter(@TYPE fileFilter: Int): Config {
+        fun setFileFilter(
+            @TYPE fileFilter: Int,
+        ): Config {
             mFileFilter = fileFilter
             return this
         }
 
-        fun setStackDeep(@IntRange(from = 1) stackDeep: Int): Config {
+        fun setStackDeep(
+            @IntRange(from = 1) stackDeep: Int,
+        ): Config {
             this.stackDeep = stackDeep
             return this
         }
 
-        fun setStackOffset(@IntRange(from = 0) stackOffset: Int): Config {
+        fun setStackOffset(
+            @IntRange(from = 0) stackOffset: Int,
+        ): Config {
             this.stackOffset = stackOffset
             return this
         }
 
-        fun setSaveDays(@IntRange(from = 1) saveDays: Int): Config {
+        fun setSaveDays(
+            @IntRange(from = 1) saveDays: Int,
+        ): Config {
             this.saveDays = saveDays
             return this
         }
@@ -836,7 +860,10 @@ object LogUtils {
             return this
         }
 
-        fun addFileExtraHead(key: String, value: String): Config {
+        fun addFileExtraHead(
+            key: String,
+            value: String,
+        ): Config {
             mFileHead.append(key, value)
             return this
         }
@@ -846,24 +873,79 @@ object LogUtils {
         val dir: String?
             get() = if (mDir == null) defaultDir else mDir
         val globalTag: String
-            get() = if (DawnBridge.isSpace(mGlobalTag)) {
-                ""
-            } else mGlobalTag
+            get() =
+                if (DawnBridge.isSpace(mGlobalTag)) {
+                    ""
+                } else {
+                    mGlobalTag
+                }
         private val consoleFilter: Char
             get() = T[mConsoleFilter - V]
         private val fileFilter: Char
             get() = T[mFileFilter - V]
 
-        fun haveSetOnConsoleOutputListener(): Boolean {
-            return mOnConsoleOutputListener != null
-        }
+        fun haveSetOnConsoleOutputListener(): Boolean = mOnConsoleOutputListener != null
 
-        fun haveSetOnFileOutputListener(): Boolean {
-            return mOnFileOutputListener != null
-        }
+        fun haveSetOnFileOutputListener(): Boolean = mOnFileOutputListener != null
 
-        override fun toString(): String {
-            return ("process: " + processName + LINE_SEP + "logSwitch: " + isLogSwitch + LINE_SEP + "consoleSwitch: " + isLog2ConsoleSwitch + LINE_SEP + "tag: " + (if (globalTag == "") "null" else globalTag) + LINE_SEP + "headSwitch: " + isLogHeadSwitch + LINE_SEP + "fileSwitch: " + isLog2FileSwitch + LINE_SEP + "dir: " + dir + LINE_SEP + "filePrefix: " + filePrefix + LINE_SEP + "borderSwitch: " + isLogBorderSwitch + LINE_SEP + "singleTagSwitch: " + isSingleTagSwitch + LINE_SEP + "consoleFilter: " + consoleFilter + LINE_SEP + "fileFilter: " + fileFilter + LINE_SEP + "stackDeep: " + stackDeep + LINE_SEP + "stackOffset: " + stackOffset + LINE_SEP + "saveDays: " + saveDays + LINE_SEP + "formatter: " + I_FORMATTER_MAP + LINE_SEP + "fileWriter: " + mFileWriter + LINE_SEP + "onConsoleOutputListener: " + mOnConsoleOutputListener + LINE_SEP + "onFileOutputListener: " + mOnFileOutputListener + LINE_SEP + "fileExtraHeader: " + mFileHead.appended)
-        }
+        override fun toString(): String =
+            (
+                    "process: " + processName +
+                            LINE_SEP +
+                            "logSwitch: " + isLogSwitch +
+                            LINE_SEP +
+                            "consoleSwitch: " + isLog2ConsoleSwitch +
+                            LINE_SEP +
+                            "tag: " +
+                            (if (globalTag == "") "null" else globalTag) +
+                            LINE_SEP +
+                            "headSwitch: " +
+                            isLogHeadSwitch +
+                            LINE_SEP +
+                            "fileSwitch: " +
+                            isLog2FileSwitch +
+                            LINE_SEP +
+                            "dir: " +
+                            dir +
+                            LINE_SEP +
+                            "filePrefix: " +
+                            filePrefix +
+                            LINE_SEP +
+                            "borderSwitch: " +
+                            isLogBorderSwitch +
+                            LINE_SEP +
+                            "singleTagSwitch: " +
+                            isSingleTagSwitch +
+                            LINE_SEP +
+                            "consoleFilter: " +
+                            consoleFilter +
+                            LINE_SEP +
+                            "fileFilter: " +
+                            fileFilter +
+                            LINE_SEP +
+                            "stackDeep: " +
+                            stackDeep +
+                            LINE_SEP +
+                            "stackOffset: " +
+                            stackOffset +
+                            LINE_SEP +
+                            "saveDays: " +
+                            saveDays +
+                            LINE_SEP +
+                            "formatter: " +
+                            I_FORMATTER_MAP +
+                            LINE_SEP +
+                            "fileWriter: " +
+                            mFileWriter +
+                            LINE_SEP +
+                            "onConsoleOutputListener: " +
+                            mOnConsoleOutputListener +
+                            LINE_SEP +
+                            "onFileOutputListener: " +
+                            mOnFileOutputListener +
+                            LINE_SEP +
+                            "fileExtraHeader: " +
+                            mFileHead.appended
+                    )
     }
 }

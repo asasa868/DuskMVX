@@ -9,7 +9,6 @@ import com.lzq.dawn.BuildConfig
 import com.lzq.dawn.DawnBridge
 import com.lzq.dawn.base.app.BaseApplicationLifecycle
 import com.lzq.dawn.util.log.LogUtils
-import com.lzq.dawn.util.process.ProcessUtils
 
 /**
  * @projectName com.dusk.login

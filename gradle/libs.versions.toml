@@ -3,6 +3,7 @@ auto-service = "1.1.1"
 com-alibaba-arouter-api = "1.5.2"
 eventbus = "3.2.0"
 gson = "2.10.1"
+hilt-android-compiler = "2.51.1"
 kotlin = "1.9.10"
 network-okhttp = "5.0.0-alpha.11"
 network-retrofit = "2.9.0"
@@ -76,6 +77,8 @@ eventbus-annotation = { module = "org.greenrobot:eventbus-annotation-processor",
 
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt-android-compiler" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt-android-compiler" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }

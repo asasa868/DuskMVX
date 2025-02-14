@@ -6,7 +6,7 @@ import android.content.res.Configuration
 import com.alibaba.android.arouter.launcher.ARouter
 import com.google.auto.service.AutoService
 import com.lzq.dawn.base.app.BaseApplicationLifecycle
-import com.lzq.dawn.util.process.ProcessUtils
+import com.lzq.dawn.util.execution.process.ProcessUtils
 
 /**
  * @projectName com.lzq.dawn
@@ -56,7 +56,7 @@ class DawnApplication : BaseApplicationLifecycle {
      */
     private fun initARouter(): String {
         // 测试环境下打开ARouter的日志和调试模式 正式环境需要关闭
-        if (BuildConfig.DEBUG) {
+        if (DawnBridge.isDebug) {
             ARouter.openLog()     // 打印日志
             ARouter.openDebug()   // 开启调试模式(如果在InstantRun模式下运行，必须开启调试模式！线上版本需要关闭,否则有安全风险)
         }

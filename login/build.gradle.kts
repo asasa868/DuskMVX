@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 plugins {
     id("com.android.library")
     id("kotlin-android")
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -55,7 +55,7 @@ android {
 
 dependencies {
 
-    kapt(libs.auto.service.annotations)
+    ksp(libs.auto.service.annotations)
     implementation(project(":dawn"))
 }
 
