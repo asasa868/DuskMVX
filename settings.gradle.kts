@@ -5,6 +5,7 @@ include(":app")
 include(":dawn")
 include(":login")
 include(":main_compose")
+include(":auto-service-ksp")
 
 pluginManagement {
     repositories {
@@ -27,10 +28,6 @@ buildscript {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 
-    versionCatalogs {
-        create("app") { from(files("gradle/app.versions.toml")) }
-        create("compose") { from(files("gradle/compose.versions.toml")) }
-    }
 
     repositories {
         google()
