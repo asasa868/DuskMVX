@@ -6,7 +6,12 @@ import com.google.devtools.ksp.symbol.*
 import java.io.OutputStreamWriter
 
 /**
- * 处理 @AutoService 注解的 KSP 处理器
+ * @projectName com.dusk.auto_service_ksp.AutoServiceProcessor
+ * @author Lzq
+ * @date : Created by Lzq on 2025
+ * @version 0.0.29
+ * @description: 处理 @AutoService 注解的 KSP 处理器
+ *
  */
 class AutoServiceProcessor(
     private val environment: SymbolProcessorEnvironment,
@@ -27,8 +32,9 @@ class AutoServiceProcessor(
                         it.arguments
                             .filter { it.name?.asString() == "value" }
                             .flatMap { arg ->
-                                (arg.value as List<KSType>)
-                                    .mapNotNull { it.declaration as? KSClassDeclaration }
+                                (arg.value as? List<*>) // 先安全转换为 List<*> 避免 unchecked cast
+                                    ?.filterIsInstance<KSType>() // 过滤出真正的 KSType 类型
+                                    ?.mapNotNull { it.declaration as? KSClassDeclaration } ?: emptyList()
                             }
                     // 为每个服务接口生成对应的服务文件
                     services.forEach { service ->
