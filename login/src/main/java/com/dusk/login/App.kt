@@ -3,10 +3,7 @@ package com.dusk.login
 import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
-import com.alibaba.android.arouter.launcher.ARouter
 import com.google.auto.service.AutoService
-import com.lzq.dawn.BuildConfig
-import com.lzq.dawn.DawnBridge
 import com.lzq.dawn.base.app.BaseApplicationLifecycle
 import com.lzq.dawn.util.log.LogUtils
 

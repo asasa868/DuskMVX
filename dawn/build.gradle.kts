@@ -1,5 +1,4 @@
 import groovy.util.Node
-import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -10,6 +9,7 @@ plugins {
     id("signing")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -44,8 +44,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
@@ -54,7 +54,6 @@ android {
 
     buildFeatures {
         viewBinding = true
-        compose = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = ProjectConfigs.kotlinCompiler
@@ -73,48 +72,51 @@ android {
 
     libraryVariants.all {
         artifacts {
-            archivesName.set(project.name)
         }
     }
 }
 
 dependencies {
-
+    ksp(project(":auto-service-ksp"))
+    api(project(":auto-service-ksp"))
     // ---------------------------依赖---------------------------
-    api(app.androidx.appcompat)
-    api(app.androidx.core.ktx)
-    api(app.androidx.exifinterface)
-    api(app.androidx.multidex)
+    api(libs.androidx.appcompat)
+    api(libs.androidx.core.ktx)
+    api(libs.androidx.exifinterface)
+    api(libs.androidx.multidex)
 
     api(libs.auto.service)
-    api(app.androidx.material)
 
-    api(app.androidx.lifecycle.viewmodel.ktx)
-    api(app.androidx.lifecycle.livedata.ktx)
-    api(app.androidx.lifecycle.runtime.ktx)
+    api(libs.androidx.material)
 
-    api(libs.room.runtime)
-    api(libs.room.ktx)
+    api(libs.androidx.lifecycle.viewmodel.ktx)
+    api(libs.androidx.lifecycle.livedata.ktx)
+    api(libs.androidx.lifecycle.runtime.ktx)
 
-    implementation(libs.hilt.android)
+    api(libs.androidx.room.runtime)
+    api(libs.androidx.room.ktx)
 
-    api(platform(compose.bom))
-    api(compose.androidx.activity)
-    api(compose.androidx.material3)
-    api(compose.androidx.material)
-    api(compose.androidx.ui.tooling)
-    api(compose.androidx.ui.util)
-    api(compose.androidx.material.icons.extended)
-    api(compose.accompanist.themeadapter)
-    api(compose.accompanist.systemuicontroller)
+    api(libs.hilt.android)
 
-    api(libs.kotlin.stdlib)
+    api(platform(libs.compose.bom))
+    api(libs.androidx.activity)
+    api(libs.androidx.material3)
+    api(libs.androidx.material)
+    api(libs.androidx.ui.tooling)
+    api(libs.androidx.ui.util)
+    api(libs.androidx.material.icons.extended)
+    api(libs.accompanist.themeadapter)
+    api(libs.accompanist.systemuicontroller)
+
+//    api(libs.kotlin.stdlib)
     api(libs.kotlin.coroutines.core)
     api(libs.kotlinx.coroutines.android)
 
     api(libs.gson)
     api(libs.toaster)
-    api(libs.arouter.api)
+    api(libs.arouter.api){
+        exclude("com.android.support")
+    }
     api(libs.eventbus)
     api(libs.reactivex.rxjava3)
     api(libs.reactivex.rxjava3.rxandroid)
@@ -122,22 +124,22 @@ dependencies {
     api(libs.retrofit.converter.gson)
     api(libs.okhttp.logging.interceptor)
 
-    api(libs.core.ktx)
-    api(libs.appcompat)
-    api(libs.material)
-    api(libs.activity)
-    api(libs.constraintlayout)
-    testApi(libs.junit)
-    androidTestApi(libs.ext.junit)
-    androidTestApi(libs.espresso.core)
+    api(libs.androidx.core.ktx)
+    api(libs.androidx.appcompat)
+    api(libs.androidx.material)
+    api(libs.androidx.activity)
+    api(libs.androidx.constraintlayout)
+
+    androidTestApi(libs.androidx.test.junit)
+    androidTestApi(libs.androidx.test.espresso.core)
     // ---------------------------依赖---------------------------
 
     // -------------------------注解依赖--------------------------
     ksp(libs.auto.service.annotations)
     ksp(libs.arouter.compiler)
     ksp(libs.eventbus.annotation)
-    ksp(app.androidx.lifecycle.common.compiler)
-    ksp(libs.room.compiler)
+    ksp(libs.androidx.lifecycle.common.compiler)
+    ksp(libs.androidx.room.compiler)
     ksp(libs.hilt.android.compiler)
 
     // -------------------------注解依赖--------------------------
@@ -240,8 +242,10 @@ afterEvaluate {
         }
         publications {
             create<MavenPublication>("release") {
-                println(
-                    "publish-maven Log-------> " + "PUBLISH_GROUP_ID: $mavenGroupId; " + "PUBLISH_ARTIFACT_ID: $mavenArtifactId; " + "PUBLISH_VERSION: $publishVersion"
+                println("publish-maven Log-------> "
+                        + "PUBLISH_GROUP_ID: $mavenGroupId; "
+                        + "PUBLISH_ARTIFACT_ID: $mavenArtifactId; "
+                        + "PUBLISH_VERSION: $publishVersion"
                 )
 
                 from(components.getByName("release"))
@@ -250,7 +254,7 @@ afterEvaluate {
                 version = publishVersion
 
                 // 生成的 aar 路径，修改成自己的aar地址名称
-                artifact("$buildDir/outputs/aar/${project.name}-release.aar") {
+                artifact("${layout.buildDirectory}/outputs/aar/${project.name}-release.aar") {
                     classifier = "release"
                 }
 

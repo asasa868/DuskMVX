@@ -1,9 +1,9 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 
 plugins {
     id("com.android.library")
     id("kotlin-android")
     id("com.google.devtools.ksp")
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -33,8 +33,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
         jvmTarget = ProjectConfigs.jvmTarget
@@ -62,27 +62,26 @@ android {
 
     libraryVariants.all {
         artifacts {
-            archivesName.set(project.name)
         }
     }
 }
 
 dependencies {
 
-    implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
-    implementation(libs.ui)
-    implementation(libs.ui.graphics)
-    implementation(libs.ui.tooling.preview)
-    implementation(libs.material3)
-    ksp(libs.auto.service.annotations)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.ui.tooling)
+    implementation(libs.androidx.ui.util)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.accompanist.themeadapter)
+    implementation(libs.accompanist.systemuicontroller)
+
+    ksp(project(":auto-service-ksp"))
+    implementation(project(":auto-service-ksp"))
     implementation(project(":dawn"))
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        // 设置为 true 以忽略警告
-        freeCompilerArgs += "-Xlint:none"
-    }
-}

@@ -58,7 +58,7 @@ object LogUtils {
     private const val NULL = "null"
     private const val ARGS = "args"
     private const val PLACEHOLDER = " "
-    private lateinit var config: Config
+    private var config: Config = Config()
     private var simpleDateFormat: SimpleDateFormat? = null
     private val EXECUTOR = Executors.newSingleThreadExecutor()
     private val I_FORMATTER_MAP = SimpleArrayMap<Class<*>?, IFormatter<*>>()

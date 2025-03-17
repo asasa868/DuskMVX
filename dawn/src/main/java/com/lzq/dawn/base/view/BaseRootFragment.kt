@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.alibaba.android.arouter.launcher.ARouter
 import com.lzq.dawn.base.RegisterEventBus
 import com.lzq.dawn.tools.EventBusUtils
 import com.lzq.dawn.util.network.NetworkUtils
@@ -39,7 +38,6 @@ abstract class BaseRootFragment : Fragment(), IBaseRootView, OnNetworkStatusChan
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        ARouter.getInstance().inject(this)
         NetworkUtils.registerNetworkStatusChangedListener(this)
 
         if (javaClass.isAnnotationPresent(RegisterEventBus::class.java)) {

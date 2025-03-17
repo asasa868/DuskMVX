@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 
 plugins {
     id("com.android.library")
@@ -30,8 +29,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
         jvmTarget = ProjectConfigs.jvmTarget
@@ -46,23 +45,13 @@ android {
         baseline = file(ProjectConfigs.lintName)
     }
 
-    libraryVariants.all {
-        artifacts {
-            archivesName.set(project.name)
-        }
-    }
 }
 
 dependencies {
 
-    ksp(libs.auto.service.annotations)
+    ksp(project(":auto-service-ksp"))
+    implementation(project(":auto-service-ksp"))
     implementation(project(":dawn"))
+
 }
 
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        // 设置为 true 以忽略警告
-        freeCompilerArgs += "-Xlint:none"
-    }
-}

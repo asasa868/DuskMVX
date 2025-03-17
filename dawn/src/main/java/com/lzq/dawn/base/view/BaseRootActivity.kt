@@ -2,7 +2,6 @@ package com.lzq.dawn.base.view
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.alibaba.android.arouter.launcher.ARouter
 import com.lzq.dawn.base.RegisterEventBus
 import com.lzq.dawn.tools.EventBusUtils
 import com.lzq.dawn.util.network.NetworkType
@@ -40,7 +39,6 @@ abstract class BaseRootActivity : AppCompatActivity(), IBaseRootView, OnNetworkS
         if (javaClass.isAnnotationPresent(RegisterEventBus::class.java)) {
             EventBusUtils.register(this)
         }
-        ARouter.getInstance().inject(this)
         NetworkUtils.registerNetworkStatusChangedListener(this)
 
         initView()
