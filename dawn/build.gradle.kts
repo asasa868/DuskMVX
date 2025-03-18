@@ -254,7 +254,7 @@ afterEvaluate {
                 version = publishVersion
 
                 // 生成的 aar 路径，修改成自己的aar地址名称
-                artifact("${layout.buildDirectory}/outputs/aar/${project.name}-release.aar") {
+                artifact("${layout.buildDirectory.get().asFile.absolutePath}/outputs/aar/${project.name}-release.aar") {
                     classifier = "release"
                 }
 
