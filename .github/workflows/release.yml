@@ -30,4 +30,7 @@ jobs:
       - name: Trigger JitPack lookup
         run: |
           echo "打包版本: ${{ github.repository }}&tag=${{ github.ref_name }}"
-          curl -X GET "https://jitpack.io/api/builds/lookup?repo=github.com/${{ github.repository }}&tag=${{ github.ref_name }}"
+          sleep 10
+          curl -X GET "https://jitpack.io/api/builds/com.github.asasa868/DuskMVX"
+          curl -X GET "https://jitpack.io/api/versions/com.github.asasa868/DuskMVX"
+          curl -X GET "https://jitpack.io/api/refs/com.github.asasa868/DuskMVX"
