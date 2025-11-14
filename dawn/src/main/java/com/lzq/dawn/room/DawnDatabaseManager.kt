@@ -14,9 +14,6 @@ import kotlin.concurrent.withLock
  * @date : Created by Lzq on 2025/11/14 10:00
  * @version
  * @description: Room 数据库实例的统一管理器
- */
-/**
- * Room 数据库实例的统一管理器。
  *
  * 特性：
  * - 线程安全：双检锁与全局锁，避免并发重复构建与迁移注册竞态

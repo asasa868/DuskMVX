@@ -22,7 +22,6 @@ import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import com.google.gson.Gson
 import com.hjq.toast.Toaster
-import com.lzq.dawn.di.DuskComponentUtils
 import com.lzq.dawn.util.components.acivity.ActivityLifecycleCallbacks
 import com.lzq.dawn.util.components.acivity.ActivityLifecycleImpl
 import com.lzq.dawn.util.components.acivity.ActivityUtils
@@ -104,7 +103,6 @@ object DawnBridge {
         ActivityLifecycleImpl.INSTANCE.init(mApp!!)
         CrashUtils.init()
         LogUtils.init()
-        DuskComponentUtils.init()
     }
 
     @JvmStatic

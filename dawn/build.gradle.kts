@@ -8,7 +8,6 @@ plugins {
     id("maven-publish")
     id("signing")
     id("com.google.devtools.ksp")
-    id("com.google.dagger.hilt.android")
     alias(libs.plugins.compose.compiler)
 }
 
@@ -140,7 +139,7 @@ dependencies {
     ksp(libs.eventbus.annotation)
     ksp(libs.androidx.lifecycle.common.compiler)
     ksp(libs.androidx.room.compiler)
-    ksp(libs.hilt.android.compiler)
+    //ksp(libs.hilt.android.compiler)
 
     // -------------------------注解依赖--------------------------
 }
