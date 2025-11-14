@@ -1,9 +1,8 @@
 package com.lzq.dusk.room
 
-import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.lzq.dawn.DawnBridge
+import com.lzq.dawn.room.DawnRoom
 
 /**
  * @projectName com.lzq.dusk.room
@@ -11,23 +10,9 @@ import com.lzq.dawn.DawnBridge
  * @date : Created by Lzq on 2024/6/26 09:35
  * @version
  * @description: 数据库管理类
+ * 应用侧数据库入口，委托 DawnRoom 完成注册与获取，避免重复注册与并发构建问题。
  */
 object DatabaseManager {
-    private var INSTANCE: AppDatabase? = null
-
-    fun getInstance(): AppDatabase {
-        if (INSTANCE == null) {
-            synchronized(AppDatabase::class) {
-                if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(DawnBridge.app, AppDatabase::class.java, "dusk_database")
-                        .addMigrations(migration_1_2)
-                        .addMigrations(migration_2_3)
-                        .build()
-                }
-            }
-        }
-        return INSTANCE!!
-    }
 
     private val migration_1_2 = object : Migration(1, 2) {
         override fun migrate(db: SupportSQLiteDatabase) {
@@ -60,5 +45,16 @@ object DatabaseManager {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL("ALTER TABLE harmony ADD COLUMN insertTime INTEGER NOT NULL DEFAULT ${System.currentTimeMillis()}")
         }
+    }
+
+    init {
+        DawnRoom.register<AppDatabase> {
+            name = "dusk_database"
+            migrations(migration_1_2, migration_2_3)
+        }
+    }
+
+    fun getInstance(): AppDatabase {
+        return DawnRoom.get()
     }
 }

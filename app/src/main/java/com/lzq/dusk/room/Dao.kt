@@ -5,8 +5,8 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Transaction
 import androidx.room.Update
+import com.lzq.dawn.room.BaseDao
 
 /**
  * @projectName com.lzq.dusk.room
@@ -18,20 +18,7 @@ import androidx.room.Update
 
 
 @Dao
-interface BannerDao {
-
-    @Insert
-    suspend fun insert(vararg bean: BannerBean)
-
-    @Insert
-    @Transaction
-    suspend fun insertAll(bean: List<BannerBean>)
-
-    @Delete
-    suspend fun delete(vararg bean: BannerBean)
-
-    @Update(entity = BannerBean::class)
-    suspend fun update(vararg bean: BannerBean)
+interface BannerDao : BaseDao<BannerBean> {
 
     @Query("SELECT * FROM BANNERLIST")
     suspend fun getAll(): List<BannerBean>
@@ -47,16 +34,16 @@ interface BannerDao {
 
 
 @Dao
-interface HarmonyDao {
+interface HarmonyDao : BaseDao<HarmonyBean> {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(vararg bean: HarmonyBean)
+    override suspend fun insert(vararg entity: HarmonyBean)
 
     @Delete
-    suspend fun delete(vararg bean: HarmonyBean)
+    override suspend fun delete(vararg entity: HarmonyBean)
 
     @Update(entity = HarmonyBean::class)
-    suspend fun update(vararg bean: HarmonyBean)
+    override suspend fun update(vararg entity: HarmonyBean)
 
     @Query("SELECT * FROM HARMONY")
     suspend fun getAll(): List<HarmonyBean>
@@ -66,33 +53,33 @@ interface HarmonyDao {
 }
 
 @Dao
-interface CategoryDao {
+interface CategoryDao : BaseDao<Category> {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(vararg bean: Category)
+    override suspend fun insert(vararg entity: Category)
 
     @Delete
-    suspend fun delete(vararg bean: Category)
+    override suspend fun delete(vararg entity: Category)
 
 
     @Update(entity = Category::class)
-    suspend fun update(vararg bean: Category)
+    override suspend fun update(vararg entity: Category)
 
     @Query("SELECT * FROM CATEGORY")
     suspend fun getAll(): List<Category>
 }
 
 @Dao
-interface ArticleDao {
+interface ArticleDao : BaseDao<Article> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(vararg bean: Article)
+    override suspend fun insert(vararg entity: Article)
 
     @Delete
-    suspend fun delete(vararg bean: Article)
+    override suspend fun delete(vararg entity: Article)
 
 
     @Update(entity = Article::class)
-    suspend fun update(vararg bean: Article)
+    override suspend fun update(vararg entity: Article)
 
     @Query("SELECT * FROM ARTICLES")
     suspend fun getAll(): List<Article>
