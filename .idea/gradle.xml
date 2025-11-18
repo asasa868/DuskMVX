@@ -26,7 +26,7 @@
             <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/dawn" />
             <option value="$PROJECT_DIR$/login" />
-            <option value="$PROJECT_DIR$/main_compose" />
+            <option value="$PROJECT_DIR$/main-compose" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />

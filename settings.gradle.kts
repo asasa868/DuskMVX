@@ -4,7 +4,7 @@ rootProject.name = "Dusk"
 include(":app")
 include(":dawn")
 include(":login")
-include(":main_compose")
+include(":main-compose")
 include(":auto-service-ksp")
 
 pluginManagement {
