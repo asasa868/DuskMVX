@@ -1,6 +1,5 @@
 [versions]
 auto-service = "1.1.1"
-com-alibaba-arouter-api = "1.5.2"
 eventbus = "3.2.0"
 gson = "2.10.1"
 hilt-android-compiler = "2.51.1"
@@ -109,9 +108,6 @@ androidx-animation = "1.5.4"
 [libraries]
 auto-service-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "auto-service" }
 auto-service = { module = "com.google.auto.service:auto-service", version.ref = "auto-service" }
-
-arouter-compiler = { module = "com.alibaba:arouter-compiler", version.ref = "com-alibaba-arouter-api" }
-arouter-api = { module = "com.alibaba:arouter-api", version.ref = "com-alibaba-arouter-api" }
 
 eventbus = { module = "org.greenrobot:eventbus", version.ref = "eventbus" }
 eventbus-annotation = { module = "org.greenrobot:eventbus-annotation-processor", version.ref = "eventbus" }

@@ -61,7 +61,6 @@ Fragment就是**BaseMvvmFragment**和**BaseMviFragment**，compose版本还在�
 * [Retrofit](https://github.com/square/retrofit)
 * [MMKV](https://github.com/Tencent/MMKV)
 * [Coil](https://github.com/coil-kt/coil)
-* [ARoute](https://github.com/alibaba/ARouter)
 * [EventBus](https://github.com/greenrobot/EventBus)
 * [Bugly](https://bugly.qq.com/v2/index)
 * [LeakCanary](https://github.com/square/leakcanary)

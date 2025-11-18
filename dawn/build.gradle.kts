@@ -22,11 +22,7 @@ android {
         testInstrumentationRunner = ProjectConfigs.testRunner
         consumerProguardFiles(ProjectConfigs.consumerRules, ProjectConfigs.proguardRules)
 
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments["AROUTER_MODULE_NAME"] = project.name
-            }
-        }
+
     }
 
     buildTypes {
@@ -113,9 +109,7 @@ dependencies {
 
     api(libs.gson)
     api(libs.toaster)
-    api(libs.arouter.api){
-        exclude("com.android.support")
-    }
+
     api(libs.eventbus)
     api(libs.reactivex.rxjava3)
     api(libs.reactivex.rxjava3.rxandroid)
@@ -135,7 +129,7 @@ dependencies {
 
     // -------------------------注解依赖--------------------------
     ksp(libs.auto.service.annotations)
-    ksp(libs.arouter.compiler)
+
     ksp(libs.eventbus.annotation)
     ksp(libs.androidx.lifecycle.common.compiler)
     ksp(libs.androidx.room.compiler)

@@ -3,7 +3,6 @@ package com.lzq.dawn
 import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
-import com.alibaba.android.arouter.launcher.ARouter
 import com.google.auto.service.AutoService
 import com.lzq.dawn.base.app.BaseApplicationLifecycle
 import com.lzq.dawn.util.execution.process.ProcessUtils
@@ -41,7 +40,7 @@ class DawnApplication : BaseApplicationLifecycle {
     override fun initForeground(): MutableList<() -> String> {
         val list = mutableListOf<() -> String>()
         if (ProcessUtils.isMainProcess) {
-            list.add { initARouter() }
+            list.add { initRouter() }
         }
         return list
     }
@@ -51,17 +50,9 @@ class DawnApplication : BaseApplicationLifecycle {
     }
 
 
-    /**
-     * 阿里路由 ARouter 初始化
-     */
-    private fun initARouter(): String {
-        // 测试环境下打开ARouter的日志和调试模式 正式环境需要关闭
-        if (DawnBridge.isDebug) {
-            ARouter.openLog()     // 打印日志
-            ARouter.openDebug()   // 开启调试模式(如果在InstantRun模式下运行，必须开启调试模式！线上版本需要关闭,否则有安全风险)
-        }
-        ARouter.init(DawnBridge.app)
-        return "ARouter -->> init complete"
+    private fun initRouter(): String {
+
+        return "Router -->> init complete"
     }
 
 }
