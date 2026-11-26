@@ -1,6 +1,8 @@
 package com.lzq.dawn.room
 
 import android.content.Context
+import androidx.annotation.OptIn
+import androidx.room.ExperimentalRoomApi
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
@@ -50,6 +52,7 @@ public object DawnDatabaseManager {
 
     @Suppress("UNCHECKED_CAST")
     /** 获取数据库实例（完整配置）。采用双检锁避免并发构建。 */
+    @OptIn(ExperimentalRoomApi::class)
     public fun <T : RoomDatabase> get(dbClass: Class<T>, config: DatabaseConfig): T {
         val key = dbClass to config.name
         val first = instances[key]
