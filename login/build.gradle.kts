@@ -50,7 +50,6 @@ android {
 dependencies {
 
     ksp(project(":auto-service-ksp"))
-    implementation(project(":auto-service-ksp"))
     implementation(project(":dawn"))
 
 }
