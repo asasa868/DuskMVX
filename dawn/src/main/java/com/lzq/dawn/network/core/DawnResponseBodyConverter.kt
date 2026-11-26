@@ -17,6 +17,8 @@ import java.io.IOException
  * @date : Created by Lzq on 2024/1/26 15:49
  * @version 0.0.21
  * @description: 自定义响应体解析
+ *
+ * 根据可选业务响应契约读取实体，并在所有解析出口释放响应体。
  */
 class DawnResponseBodyConverter<T>(
     private var gson: Gson,
@@ -25,45 +27,36 @@ class DawnResponseBodyConverter<T>(
     private val exception: IErrorHandler
 ) : Converter<ResponseBody, T> {
 
+    /**
+     * 业务失败抛出原业务异常，解析和取消异常继续传播，响应体始终关闭。
+     *
+     * 如果code为不是成功的code，那么就抛出异常，统一处理
+     */
     @Throws(IOException::class)
-    override fun convert(value: ResponseBody): T? {
-        if (responseCode == null) {
-            val jsonReader = gson.newJsonReader(value.charStream())
-            return value.use {
-                val result = adapter.read(jsonReader)
-                if (jsonReader.peek() != JsonToken.END_DOCUMENT) {
-                    throw DawnException(
-                        DawnConstants.NetWorkConstants.JSON_IO_CODE,
-                        "JSON document was not fully consumed."
-                    )
-                }
-                result
+    override fun convert(value: ResponseBody): T? = value.use {
+        val jsonReader = gson.newJsonReader(it.charStream())
+        val contract = responseCode
+        if (contract == null) {
+            val result = adapter.read(jsonReader)
+            if (jsonReader.peek() != JsonToken.END_DOCUMENT) {
+                throw DawnException(
+                    DawnConstants.NetWorkConstants.JSON_IO_CODE,
+                    "JSON document was not fully consumed."
+                )
             }
+            result
         } else {
-            val jsonReader = gson.newJsonReader(value.charStream())
             val jsonObject = gson.fromJson<JsonObject>(jsonReader, JsonObject::class.java)
-
-            val code = jsonObject.get(responseCode?.getCodeName())
-            val message = jsonObject.get(responseCode?.getMessageName())
-            val data = jsonObject.get(responseCode?.getDataName())
-
-
-            /**
-             * 如果code为不是成功的code，那么就抛出异常，统一处理
-             */
-            return try {
-                if (responseCode?.isSuccessCode() == code.asInt) {
-                    adapter.fromJsonTree(data)
-                } else {
-                    throw DawnException(code.asInt, message.asString)
-                }
-            } catch (e: DawnException) {
-                exception.handleError(DawnException(e.code, e.message))
-                throw e
-            } finally {
-                value.close()
+            val code = jsonObject.get(contract.getCodeName())
+            val message = jsonObject.get(contract.getMessageName())
+            val data = jsonObject.get(contract.getDataName())
+            if (contract.isSuccessCode() == code.asInt) {
+                adapter.fromJsonTree(data)
+            } else {
+                val failure = DawnException(code.asInt, message.asString)
+                failure.handleOnce(exception)
+                throw failure
             }
         }
     }
-
 }
