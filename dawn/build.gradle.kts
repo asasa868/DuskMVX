@@ -1,6 +1,6 @@
-import groovy.util.Node
-import java.io.FileInputStream
-import java.util.Properties
+import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
+import java.io.ByteArrayInputStream
 
 plugins {
     id("com.android.library")
@@ -65,6 +65,10 @@ android {
         enable.add("deprecation")
     }
 
+    testOptions { unitTests.isIncludeAndroidResources = true }
+
+    publishing { singleVariant("release") { withSourcesJar() } }
+
     libraryVariants.all {
         artifacts {
         }
@@ -72,15 +76,20 @@ android {
 }
 
 dependencies {
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("androidx.test:core:1.5.0")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.11")
     ksp(project(":auto-service-ksp"))
-    api(project(":auto-service-ksp"))
     // ---------------------------依赖---------------------------
     api(libs.androidx.appcompat)
     api(libs.androidx.core.ktx)
     api(libs.androidx.exifinterface)
     api(libs.androidx.multidex)
 
-    api(libs.auto.service)
+    api(libs.auto.service.annotations)
 
     api(libs.androidx.material)
 
@@ -123,12 +132,13 @@ dependencies {
     api(libs.androidx.activity)
     api(libs.androidx.constraintlayout)
 
-    androidTestApi(libs.androidx.test.junit)
-    androidTestApi(libs.androidx.test.espresso.core)
+    androidTestImplementation("androidx.test:core:1.5.0")
+    androidTestImplementation("junit:junit:4.13.2")
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.espresso.core)
     // ---------------------------依赖---------------------------
 
     // -------------------------注解依赖--------------------------
-    ksp(libs.auto.service.annotations)
 
     ksp(libs.eventbus.annotation)
     ksp(libs.androidx.lifecycle.common.compiler)
@@ -138,244 +148,103 @@ dependencies {
     // -------------------------注解依赖--------------------------
 }
 
-/**
- * 以下打包上传部分可以独立放在单独的.gradle.kts脚本文件中，但是遇到了问题：
- * 在kotlin dsl脚本中引入其他独立的 kotlin的dsl脚本不方便，会存在无法识别相关依赖对象的问题
- * 目前的解决办法是使用gradle脚本，不使用kotlin的dsl脚本
- * 或者写在当前模块中
- *
- * 此处不需修改，下面会读取 local.properties 中配置的信息
- * PUBLISH_VERSION            发布的版本
- * PUBLISH_GROUP_ID           分组ID
- * PUBLISH_ARTIFACT_ID
- * signing.keyId              签名的密钥后8位
- * signing.password           签名设置的密码
- * signing.secretKeyRingFile  生成的secring.gpg文件目录
- * username                   sonatype用户名
- * username                   sonatype密码
- * email                      自己的邮箱
- * isJitpack                  是否是jitpack仓库，仓库不同使用的签名不同,详情查看signing{}
- */
-extra["PUBLISH_VERSION"] = ""
-extra["PUBLISH_GROUP_ID"] = ""
-extra["PUBLISH_ARTIFACT_ID"] = ""
-extra["signing.keyId"] = ""
-extra["signing.password"] = ""
-extra["signing.secretKeyRingFile"] = ""
-extra["username"] = ""
-extra["password"] = ""
-extra["email"] = ""
-extra["isJitpack"] = ""
-// 遍历赋值
-val secretPropsFile: File = project.rootProject.file("local.properties")
-if (secretPropsFile.exists()) {
-    val p = Properties()
-    p.load(FileInputStream(secretPropsFile))
-    p.forEach { name, value ->
-        extra[name.toString()] = value
-    }
-} else {
-    println("No props file, loading env vars")
-}
 
-val versionFile: File = project.rootProject.file("gradle.properties")
-if (versionFile.exists()) {
-    val p = Properties()
-    p.load(FileInputStream(versionFile))
-    p.forEach { name, value ->
-        extra[name.toString()] = value
-    }
-} else {
-    println("No props file, loading env vars")
+// 认证只从显式参数或环境读取，不把本机私密属性复制进发布元数据。
+val publishVersion = providers.gradleProperty("PUBLISH_VERSION").get()
+val mavenGroupId = providers.gradleProperty("PUBLISH_GROUP_ID").get()
+val mavenArtifactId = providers.gradleProperty("PUBLISH_ARTIFACT_ID").get()
+require(listOf(publishVersion, mavenGroupId, mavenArtifactId).all { it.isNotBlank() }) {
+    "发布坐标不得为空"
 }
-
-var publishVersion = extra["PUBLISH_VERSION"].toString()
-var mavenGroupId = extra["PUBLISH_GROUP_ID"].toString()
-var mavenArtifactId = extra["PUBLISH_ARTIFACT_ID"].toString()
-var signingKeyId = extra["signing.keyId"].toString()
-var signingPassword = extra["signing.password"].toString()
-var secretKeyRingFile = extra["signing.secretKeyRingFile"].toString()
-var ossUsername = extra["username"].toString()
-var ossPassword = extra["password"].toString()
-var ossEmil = extra["email"].toString()
-var isJitpack = extra["isJitpack"].toString()
-// 暂存库
-val releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-// 快照库（版本名以 SNAPSHOT 结尾，就推送至快照库）
-val snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
 
 afterEvaluate {
     publishing {
         repositories {
             maven {
-                /**
-                 * 推送至远端的中央仓库，一旦发布release中央仓库版本，旧版本无法修改
-                 * 一般都在暂存库中进行测试，然后确认无误后再发布到 release中央仓库
-                 */
-                isAllowInsecureProtocol = false
-                name = mavenArtifactId
-
-                url = if (publishVersion.endsWith("SNAPSHOT")) {
-                    uri(snapshotsRepoUrl)
-                } else {
-                    uri(releasesRepoUrl)
-                }
-
+                name = "Central"
+                url = uri(if (publishVersion.endsWith("SNAPSHOT"))
+                    "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+                    else "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
                 credentials {
-                    username = ossUsername
-                    password = ossPassword
+                    username = providers.gradleProperty("publishUsername").orElse(providers.environmentVariable("MAVEN_USERNAME")).orNull
+                    password = providers.gradleProperty("publishPassword").orElse(providers.environmentVariable("MAVEN_PASSWORD")).orNull
                 }
             }
             maven {
-                // 推送至本地存储库，本机测试的时候可以用
-                isAllowInsecureProtocol = false
-                name = "Local"
-                url = uri("../maven")
+                name = "Candidate"
+                url = uri(layout.buildDirectory.dir("candidate-repository"))
             }
         }
         publications {
             create<MavenPublication>("release") {
-                println("publish-maven Log-------> "
-                        + "PUBLISH_GROUP_ID: $mavenGroupId; "
-                        + "PUBLISH_ARTIFACT_ID: $mavenArtifactId; "
-                        + "PUBLISH_VERSION: $publishVersion"
-                )
-
-                from(components.getByName("release"))
+                from(components["release"])
                 groupId = mavenGroupId
                 artifactId = mavenArtifactId
                 version = publishVersion
-
-                // 生成的 aar 路径，修改成自己的aar地址名称
-                artifact("${layout.buildDirectory.get().asFile.absolutePath}/outputs/aar/${project.name}-release.aar") {
-                    classifier = "release"
-                }
-
                 pom {
                     name.set(mavenArtifactId)
-                    // 项目描述
                     description.set("An Android application development framework")
-                    // 项目github链接
                     url.set("https://github.com/asasa868/DuskMVX")
                     licenses {
                         license {
-                            // 协议类型，一般默认Apache License2.0
                             name.set("The Apache License, Version 2.0")
-                            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
                         }
                     }
-                    developers {
-                        developer {
-                            // 修改对应的用户名、邮箱
-                            // sonatype用户名
-                            id.set(ossUsername)
-                            // 你的sonatype用户名
-                            name.set(ossPassword)
-                            // 你的sonatype注册邮箱
-                            email.set(ossEmil)
-                        }
-                    }
-                    // 版本控制信息，如果使用的是GitHub，按照下面的格式
+                    developers { developer { id.set("asasa868"); name.set("asasa868") } }
                     scm {
-                        // 你的Git地址：
-                        connection.set("scm:git@github.com:asasa868/DuskMVX.git")
-                        developerConnection.set("scm:git@github.com:asasa868/DuskMVX.git")
-                        // 分支地址：
-                        url.set("https://github.com/asasa868/DuskMVX/tree/master")
-                    }
-
-                    withXml {
-                        withXml {
-                            // 检查是否已存在 <dependencies> 节点
-                            val rootNode = asNode()
-                            val existingDependenciesNode = rootNode.children().find {
-                                (it as Node).name() == "dependencies"
-                            }
-                            val dependenciesNode: Node = if (existingDependenciesNode == null) {
-                                // 如果不存在，则添加 <dependencies> 节点
-                                rootNode.appendNode("dependencies")
-                            } else {
-                                existingDependenciesNode as Node
-                            }
-                            configurations["implementation"].dependencies.forEach { dependency ->
-                                if (dependency.version != "unspecified" && dependency.name != "unspecified") {
-                                    val dependencyNode = dependenciesNode.appendNode("dependency")
-                                    dependencyNode.appendNode("groupId", dependency.group)
-                                    dependencyNode.appendNode("artifactId", dependency.name)
-                                    dependencyNode.appendNode("version", dependency.version)
-                                }
-                            }
-                        }
+                        connection.set("scm:git:https://github.com/asasa868/DuskMVX.git")
+                        developerConnection.set("scm:git:ssh://git@github.com/asasa868/DuskMVX.git")
+                        url.set("https://github.com/asasa868/DuskMVX")
                     }
                 }
             }
         }
     }
-    signing {
-        if (isJitpack.isEmpty() || isJitpack == "null" || isJitpack == "true") {
-            useGpgCmd()
-        } else {
-            sign(publishing.publications["release"])
+    // 本地候选产物不需要真实签名；远端发布仍由维护者显式启用。
+    if (providers.gradleProperty("signRelease").orNull == "true") {
+        signing { sign(publishing.publications["release"]) }
+    }
+}
+
+val verifyCandidate by tasks.registering {
+    group = "verification"
+    description = "检查候选坐标、敏感映射与处理器依赖边界"
+    dependsOn("publishReleasePublicationToCandidateRepository")
+    doLast {
+        val candidate = layout.buildDirectory.dir("candidate-repository").get().asFile
+        val sentinel = providers.gradleProperty("credentialSentinel").orElse("SENTINEL_DUSKMVX_13_9f82c").get()
+        val files = candidate.walkTopDown().filter { it.isFile }.toList()
+        check(listOf(".aar", ".pom", ".module", "-sources.jar").all { suffix -> files.any { it.name.endsWith(suffix) } }) { "候选产物不完整" }
+        fun checkBytes(bytes: ByteArray, label: String) {
+            check(!bytes.toString(Charsets.ISO_8859_1).contains(sentinel)) { "候选产物包含敏感哨兵：$label" }
+            if (label.endsWith(".jar") || label.endsWith(".aar") || label.endsWith(".zip")) {
+                ZipInputStream(ByteArrayInputStream(bytes)).use { zip ->
+                    while (true) {
+                        val entry = zip.nextEntry ?: break
+                        if (!entry.isDirectory) checkBytes(zip.readBytes(), label + ":" + entry.name)
+                    }
+                }
+            }
+        }
+        files.forEach { file ->
+            checkBytes(file.readBytes(), file.name)
+        }
+        val pom = files.single { it.extension == "pom" }.readText()
+        check(pom.contains("<groupId>$mavenGroupId</groupId>") && pom.contains("<artifactId>$mavenArtifactId</artifactId>") && pom.contains("<version>$publishVersion</version>")) { "候选坐标不一致" }
+        check(!pom.contains("auto-service-ksp") && !pom.contains("symbol-processing-api") && !pom.contains("<artifactId>auto-service</artifactId>")) { "处理器实现泄漏到运行依赖" }
+        val report = layout.buildDirectory.file("reports/candidate-validation.txt").get().asFile
+        report.parentFile.mkdirs()
+        report.writeText("坐标=$mavenGroupId:$mavenArtifactId:$publishVersion\n文件数=" + files.size + "\n哨兵与依赖边界通过\n")
+    }
+}
+
+tasks.withType<PublishToMavenRepository>().configureEach {
+    doFirst {
+        if (repository.name == "Central") {
+            check(providers.gradleProperty("allowRemotePublish").orNull == "true") { "远端发布需要维护者单独授权" }
+            check(providers.gradleProperty("signRelease").orNull == "true") { "远端发布必须显式启用签名" }
+            check(!repository.credentials.username.isNullOrBlank() && !repository.credentials.password.isNullOrBlank()) { "远端发布认证参数缺失" }
         }
     }
-    tasks.named("generateMetadataFileForReleasePublication") {
-        inputs.files(tasks.named("androidSourcesJar"))
-    }
-}
-
-// 生成文档注释
-tasks.register("androidJavadocs", Javadoc::class) {
-    description = "Generates the Javadoc documentation for this project."
-    group = JavaBasePlugin.DOCUMENTATION_GROUP
-    title = "project docs"
-    outputs.dirs().also {
-        layout.buildDirectory.dir("docs")
-    }
-    // 设置源码所在的位置
-    source(android.sourceSets["main"].java.srcDirs)
-}
-
-// 将文档打包成jar,生成javadoc.jar
-tasks.register("androidJavadocsJar", Jar::class) {
-    description = "Generates the JavadocsJar for this project."
-    group = JavaBasePlugin.DOCUMENTATION_GROUP
-    outputs.dirs().also {
-        layout.buildDirectory.dir("docs")
-    }
-    // 指定文档名称
-    archiveClassifier.set("javadoc")
-    from(tasks["androidJavadocs"].outputs)
-}
-
-// 将源码打包 ，生成sources.jar
-tasks.register("androidSourcesJar", Jar::class) {
-    description = "Generates the SourcesJar for this project."
-    group = JavaBasePlugin.DOCUMENTATION_GROUP
-
-    archiveClassifier.set("dawn-sources")
-    from(android.sourceSets["main"].java.srcDirs)
-
-    exclude("**/R.class", "**/BuildConfig.class")
-}
-
-if (project.hasProperty("kotlin")) {
-    // 禁用创建javadocs
-    project.tasks.withType<Javadoc> {
-        enabled = false
-    }
-}
-
-tasks.withType<Javadoc> {
-    options {
-        encoding = "UTF-8"
-        charset("UTF-8")
-        version = publishVersion
-        title = "$mavenArtifactId $publishVersion"
-    }
-}
-
-// 配置需要上传到maven仓库的文件
-artifacts {
-    archives(tasks["androidSourcesJar"]) // 将源码打包进aar,这样使用方可以看到方法注释.
-    archives(tasks["androidJavadocsJar"]) // 将注释打包进aar
 }
