@@ -24,6 +24,10 @@ jobs:
           java-version: '21'
           distribution: temurin
       - uses: android-actions/setup-android@v3
+        with:
+          # 旧 Android SDK tools 包已从官方仓库下线，显式请求会报 "Failed to find package 'tools'"；
+          # 该 action 自带 command-line tools，这里只需仍受支持的 platform-tools。
+          packages: platform-tools
       - name: 校验原生环境与脚本
         run: |
           set -euo pipefail
