@@ -8,3 +8,8 @@ repositories {
     maven("https://maven.aliyun.com/repository/public")
 }
 
+dependencies {
+    // 发布入口逻辑只在本机 mock 服务上验证，不连接 Central。
+    testImplementation("junit:junit:4.13.2")
+}
+

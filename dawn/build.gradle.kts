@@ -162,9 +162,8 @@ afterEvaluate {
         repositories {
             maven {
                 name = "Central"
-                url = uri(if (publishVersion.endsWith("SNAPSHOT"))
-                    "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-                    else "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                // 旧 OSSRH 发布入口已日落，改用 Central Portal 的 OSSRH Staging API 兼容端点。
+                url = uri(CentralPortalStaging.deployUrl())
                 credentials {
                     username = providers.gradleProperty("publishUsername").orElse(providers.environmentVariable("MAVEN_USERNAME")).orNull
                     password = providers.gradleProperty("publishPassword").orElse(providers.environmentVariable("MAVEN_PASSWORD")).orNull
@@ -242,9 +241,43 @@ val verifyCandidate by tasks.registering {
 tasks.withType<PublishToMavenRepository>().configureEach {
     doFirst {
         if (repository.name == "Central") {
+            check(!publishVersion.endsWith("SNAPSHOT")) { "Central Portal staging 兼容端点不接受 SNAPSHOT 版本" }
             check(providers.gradleProperty("allowRemotePublish").orNull == "true") { "远端发布需要维护者单独授权" }
             check(providers.gradleProperty("signRelease").orNull == "true") { "远端发布必须显式启用签名" }
             check(!repository.credentials.username.isNullOrBlank() && !repository.credentials.password.isNullOrBlank()) { "远端发布认证参数缺失" }
         }
+    }
+}
+
+// 显式人工动作：把已通过兼容端点上交的制品交接为 USER_MANAGED 部署。
+// 不依赖任何上传、候选或发布任务，默认构建、CI 与 GitHub Release 路径都不会触发。
+tasks.register("centralManualUpload") {
+    group = "publishing"
+    description = "显式创建 Central Portal USER_MANAGED 部署，不执行正式发布；需要 -PallowCentralStaging=true"
+    doLast {
+        check(providers.gradleProperty("allowCentralStaging").orNull == "true") {
+            "Central Portal 部署交接需要维护者单独授权：-PallowCentralStaging=true"
+        }
+        check(!publishVersion.endsWith("SNAPSHOT")) {
+            "Central Portal staging 兼容端点不接受 SNAPSHOT 版本，请先设置发布版本"
+        }
+        // 只复用既有凭据注入机制，凭据与认证头都不得出现在日志或异常信息里。
+        val injectedUser = providers.gradleProperty("publishUsername")
+            .orElse(providers.environmentVariable("MAVEN_USERNAME")).orNull
+        val injectedPassword = providers.gradleProperty("publishPassword")
+            .orElse(providers.environmentVariable("MAVEN_PASSWORD")).orNull
+        val tokenUser = injectedUser?.takeIf { it.isNotBlank() } ?: error("缺少 Central Portal user token 用户名")
+        val tokenPassword = injectedPassword?.takeIf { it.isNotBlank() } ?: error("缺少 Central Portal user token 密码")
+        val namespace = mavenGroupId
+        val status = CentralPortalStaging.manualUpload(
+            CentralPortalStaging.BASE_URL,
+            namespace,
+            tokenUser,
+            tokenPassword,
+        )
+        logger.lifecycle(
+            "已创建 Central Portal USER_MANAGED 部署（HTTP $status，命名空间 $namespace）。" +
+                "请到 central.sonatype.com/publishing 人工发布或丢弃；本任务不执行正式发布。",
+        )
     }
 }
