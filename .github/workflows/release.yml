@@ -101,8 +101,6 @@ jobs:
     permissions:
       contents: write
       actions: read
-    env:
-      RELEASE_POLICY_FILE: ${{ runner.temp }}/duskmvx-release-policy-${{ github.run_id }}-${{ github.run_attempt }}.json
     steps:
       - uses: actions/checkout@v4
         with:
@@ -116,6 +114,8 @@ jobs:
             core.setOutput('tag', context.payload.inputs.release_tag);
       - name: 确认人工审核与标签创建保护
         uses: actions/github-script@v7
+        env:
+          RELEASE_POLICY_FILE: ${{ runner.temp }}/duskmvx-release-policy-${{ github.run_id }}-${{ github.run_attempt }}.json
         with:
           script: |
             const {data} = await github.rest.repos.getEnvironment({
@@ -141,6 +141,7 @@ jobs:
       - name: 校验候选、标签与实际发布策略
         env:
           RELEASE_TAG: ${{ steps.candidate.outputs.tag }}
+          RELEASE_POLICY_FILE: ${{ runner.temp }}/duskmvx-release-policy-${{ github.run_id }}-${{ github.run_attempt }}.json
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
