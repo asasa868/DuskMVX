@@ -34,6 +34,10 @@ interface IBaseMviView<M : IBaseRootRepository, out VB : ViewBinding, out VM : I
 
     /**
      * view层监听intent状态变化
+     *
+     * 监听不重放的一次性输出。
+     * 默认创建态在视图存在后即建立消费，接住初始化请求的同步输出；
+     * 需要后台停止消费时显式传入启动态，恢复后不补发暂停期间的事件。
      */
     fun onOutput(state: Lifecycle.State = Lifecycle.State.CREATED)
 }
