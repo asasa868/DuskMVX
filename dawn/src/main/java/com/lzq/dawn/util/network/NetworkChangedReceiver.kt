@@ -17,11 +17,14 @@ import com.lzq.dawn.util.network.NetworkUtils.networkType
  * @Time :2022/8/15 17:22
  * @Author :  Lzq
  * @Desc :
+ *
+ * 在主线程向已注册的所有者广播网络变化。
  */
 class NetworkChangedReceiver : BroadcastReceiver() {
     private var mType: NetworkType? = null
     private val mListeners: MutableSet<OnNetworkStatusChangedListener> = HashSet()
 
+    /** 注册所有者，同一实例重复注册不会叠加。 */
     @RequiresPermission(permission.ACCESS_NETWORK_STATE)
     fun registerListener(listener: OnNetworkStatusChangedListener?) {
         if (listener == null) {
@@ -38,12 +41,14 @@ class NetworkChangedReceiver : BroadcastReceiver() {
         }
     }
 
+    /** 返回所有者是否仍被本接收器持有；与页面回调同在主线程使用。 */
     fun isRegistered(listener: OnNetworkStatusChangedListener?): Boolean {
         return if (listener == null) {
             false
         } else mListeners.contains(listener)
     }
 
+    /** 移除所有者引用；最后一个所有者退出时停止系统广播监听。 */
     fun unregisterListener(listener: OnNetworkStatusChangedListener?) {
         if (listener == null) {
             return
@@ -59,19 +64,22 @@ class NetworkChangedReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (ConnectivityManager.CONNECTIVITY_ACTION == intent.action) {
-            // debouncing
+            // 延迟合并系统网络抖动；回调可以同步退出页面或注销自身。
             runOnUiThreadDelayed(Runnable {
                 val networkType = networkType
                 if (mType === networkType) {
                     return@Runnable
                 }
                 mType = networkType
+                val listeners = mListeners.toList()
                 if (networkType === NetworkType.NETWORK_NO) {
-                    for (listener in mListeners) {
+                    for (listener in listeners) {
+                        if (!mListeners.contains(listener)) continue
                         listener.onDisconnected()
                     }
                 } else {
-                    for (listener in mListeners) {
+                    for (listener in listeners) {
+                        if (!mListeners.contains(listener)) continue
                         listener.onConnected(networkType)
                     }
                 }

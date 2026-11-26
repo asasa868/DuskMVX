@@ -16,11 +16,15 @@ import kotlinx.coroutines.launch
  * @date : Created by Lzq on 2024/1/8 14:24
  * @version 0.0.1
  * @description: Activity的拓展
+ *
+ * 生命周期达到目标状态时执行的挂起回调。
  */
 fun interface LifecycleStateCallBack {
+    /** 在当前激活的协程作用域内执行。 */
     suspend fun onLifeCycle(scope: CoroutineScope)
 }
 
+/** 在活动达到目标状态时启动回调，降至目标状态以下时取消。 */
 fun AppCompatActivity.repeatOnLifecycle(
     state: Lifecycle.State = Lifecycle.State.STARTED,
     lifecycleStateCallBack: LifecycleStateCallBack,
@@ -28,13 +32,18 @@ fun AppCompatActivity.repeatOnLifecycle(
     lifecycleScope.launch { repeatOnLifecycle(state) { lifecycleStateCallBack.onLifeCycle(this) } }
 }
 
+/** 在当前视图达到目标状态时执行；必须在视图创建后调用。 */
 fun Fragment.repeatOnLifecycle(
     state: Lifecycle.State = Lifecycle.State.STARTED,
     lifecycleStateCallBack: LifecycleStateCallBack,
 ) {
-    lifecycleScope.launch { repeatOnLifecycle(state) { lifecycleStateCallBack.onLifeCycle(this) } }
+    val owner = viewLifecycleOwner
+    owner.lifecycleScope.launch {
+        owner.repeatOnLifecycle(state) { lifecycleStateCallBack.onLifeCycle(this) }
+    }
 }
 
+/** 返回归当前活动所有的控制器实例。 */
 inline fun <reified T : ViewModel> AppCompatActivity.viewModel(modelClass: Class<T>): T {
     return ViewModelProvider(this)[modelClass]
 }

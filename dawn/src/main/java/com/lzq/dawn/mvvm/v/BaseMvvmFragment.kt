@@ -18,27 +18,36 @@ import com.lzq.dawn.mvvm.vm.IBaseMvvmViewModel
  * @date : Created by Lzq on 2023/12/26 11:55
  * @version 0.0.1
  * @description: MVVM架构模式的Fragment基类
+ *
+ * 将视图绑定与状态观察限定在当前视图生命周期内的页面基类。
  */
 abstract class BaseMvvmFragment<out VB : ViewBinding, out VM : IBaseMvvmViewModel> : BaseRootFragment(),
     BaseMvvmView<VB, VM> {
 
-    private val _viewBinding: VB by lazy { createBinding() }
+    private var _viewBinding: VB? = null
 
     private val _viewModel: VM by lazy { createViewModel() }
 
-    protected val mViewBinding get() = _viewBinding
+    /** 仅在当前视图创建后到销毁前访问绑定。 */
+    protected val mViewBinding: VB
+        get() = checkNotNull(_viewBinding) { "当前视图尚未创建或已经销毁" }
 
     protected val mViewModel get() = _viewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        return _viewBinding.root
+        return createBinding().also { _viewBinding = it }.root
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onViewLifecycleCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewLifecycleCreated(view, savedInstanceState)
         observerViewState()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _viewBinding = null
     }
 
     private fun observerViewState() {

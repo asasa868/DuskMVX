@@ -15,15 +15,15 @@ import com.lzq.dawn.view.ShapeLoadingDialog
  * @description: 最初始的Activity
  * @date : Created by Lzq on 2023/12/21 10:13
  * @version 0.0.1
+ *
+ * 管理页面初始化、网络监听与加载弹窗的根页面。
  */
 abstract class BaseRootActivity : AppCompatActivity(), IBaseRootView, OnNetworkStatusChangedListener {
 
     /**
      * 占位弹窗
      */
-    private val loadingDialog by lazy {
-        ShapeLoadingDialog.Builder(this).cancelable(false).canceledOnTouchOutside(true).build()
-    }
+    private var loadingDialog: ShapeLoadingDialog? = null
 
     /**
      * 网络是否连接
@@ -40,6 +40,7 @@ abstract class BaseRootActivity : AppCompatActivity(), IBaseRootView, OnNetworkS
             EventBusUtils.register(this)
         }
         NetworkUtils.registerNetworkStatusChangedListener(this)
+        onRootContentReady()
 
         initView()
         initData()
@@ -47,7 +48,13 @@ abstract class BaseRootActivity : AppCompatActivity(), IBaseRootView, OnNetworkS
         initObserver()
     }
 
+    /** 在根内容与页面监听就绪后、子类初始化回调前执行。 */
+    protected open fun onRootContentReady() = Unit
+
     override fun onDestroy() {
+        NetworkUtils.unregisterNetworkStatusChangedListener(this)
+        loadingDialog?.dismiss()
+        loadingDialog = null
         if (EventBusUtils.isRegistered(this)) {
             EventBusUtils.unRegister(this)
         }
@@ -58,16 +65,19 @@ abstract class BaseRootActivity : AppCompatActivity(), IBaseRootView, OnNetworkS
      * 显示弹窗
      */
     override fun showLoading(content: String?) {
-        if(loadingDialog.isShowing) return
-        loadingDialog.builder.setContentTxt(content)
-        loadingDialog.show()
+        if (isFinishing || isDestroyed) return
+        val dialog = loadingDialog ?: ShapeLoadingDialog.Builder(this)
+            .cancelable(false).canceledOnTouchOutside(true).build().also { loadingDialog = it }
+        if (dialog.isShowing) return
+        dialog.builder.setContentTxt(content)
+        dialog.show()
     }
 
     /**
      * 隐藏弹窗
      */
     override fun hideLoading() {
-        loadingDialog.dismiss()
+        loadingDialog?.dismiss()
     }
 
     /**
