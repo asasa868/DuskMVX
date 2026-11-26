@@ -21,12 +21,18 @@ import com.lzq.dawn.DawnBridge
  * @Desc : 通知
  */
 object NotificationUtils {
-    const val IMPORTANCE_UNSPECIFIED = -1000
-    const val IMPORTANCE_NONE = 0
-    const val IMPORTANCE_MIN = 1
-    const val IMPORTANCE_LOW = 2
-    const val IMPORTANCE_DEFAULT = 3
-    const val IMPORTANCE_HIGH = 4
+    @field:Importance
+    const val IMPORTANCE_UNSPECIFIED = NotificationManager.IMPORTANCE_UNSPECIFIED
+    @field:Importance
+    const val IMPORTANCE_NONE = NotificationManager.IMPORTANCE_NONE
+    @field:Importance
+    const val IMPORTANCE_MIN = NotificationManager.IMPORTANCE_MIN
+    @field:Importance
+    const val IMPORTANCE_LOW = NotificationManager.IMPORTANCE_LOW
+    @field:Importance
+    const val IMPORTANCE_DEFAULT = NotificationManager.IMPORTANCE_DEFAULT
+    @field:Importance
+    const val IMPORTANCE_HIGH = NotificationManager.IMPORTANCE_HIGH
 
     /**
      * 返回是否启用通知。
@@ -175,12 +181,12 @@ object NotificationUtils {
     }
 
     @IntDef(
-        IMPORTANCE_UNSPECIFIED,
-        IMPORTANCE_NONE,
-        IMPORTANCE_MIN,
-        IMPORTANCE_LOW,
-        IMPORTANCE_DEFAULT,
-        IMPORTANCE_HIGH
+        NotificationManager.IMPORTANCE_UNSPECIFIED,
+        NotificationManager.IMPORTANCE_NONE,
+        NotificationManager.IMPORTANCE_MIN,
+        NotificationManager.IMPORTANCE_LOW,
+        NotificationManager.IMPORTANCE_DEFAULT,
+        NotificationManager.IMPORTANCE_HIGH
     )
     @Retention(
         AnnotationRetention.SOURCE
