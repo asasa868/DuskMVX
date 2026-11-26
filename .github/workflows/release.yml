@@ -1,36 +1,184 @@
-name: publish JitPack
+name: 候选验证与发布门禁
 on:
-  push:
-    tags:
-      - "*"
-
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: '留空仅验证候选；填写匹配候选版本的标签时，经发布环境审核后创建标签和正式发布'
+        required: false
+        default: ''
+        type: string
+permissions:
+  contents: read
+  actions: read
+env:
+  CI: 'true'
+  CANDIDATE_SENTINEL: 'SENTINEL_DUSKMVX_CI_54C29F'
 
 jobs:
-  release:
+  candidate:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+      - uses: android-actions/setup-android@v3
+      - name: 校验原生环境与脚本
+        run: |
+          set -euo pipefail
+          bash gradlew --version
+          python3 -m unittest discover -s scripts/tests -p 'test_*.py'
+      - name: 编译与回归
+        run: |
+          set -euo pipefail
+          bash gradlew :auto-service-ksp:test :dawn:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebug :dawn:assembleRelease --stacktrace
+      - name: 静态检查
+        run: bash gradlew :dawn:lintDebug :app:lintDebug --stacktrace
+      - name: 开启模拟器硬件加速
+        run: |
+          set -euo pipefail
+          test -e /dev/kvm
+          sudo chmod 666 /dev/kvm
+      - name: 设备生命周期回归
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: bash gradlew :dawn:connectedDebugAndroidTest --stacktrace
+      - name: 候选产物检查
+        run: bash gradlew :dawn:verifyCandidate -PpublishPassword="$CANDIDATE_SENTINEL" -PcredentialSentinel="$CANDIDATE_SENTINEL" --stacktrace
+      - name: 独立消费者验证
+        run: |
+          set -euo pipefail
+          consumer="$RUNNER_TEMP/duskmvx-consumer-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          test ! -e "$consumer"
+          cp -R scripts/consumer-fixture "$consumer"
+          repository="$GITHUB_WORKSPACE/dawn/build/candidate-repository"
+          aar="$repository/io/github/asasa868/Dusk/0.0.30/Dusk-0.0.30.aar"
+          test -f "$aar"
+          CI=true bash gradlew.local --project-dir "$consumer" -PcandidateRepository="$repository" -PcandidateAar="$aar" testDebugUnitTest assembleDebug lintDebug verifyConsumerDependencies --stacktrace
+          mkdir -p candidate-evidence/reports/consumer
+          cp -R "$consumer/build/test-results" candidate-evidence/reports/consumer/
+          cp "$consumer/build/reports/consumer-dependencies.txt" candidate-evidence/reports/consumer/
+      - name: 绑定候选提交与产物
+        run: |
+          set -euo pipefail
+          mkdir -p candidate-evidence/repository candidate-evidence/reports
+          cp -R dawn/build/candidate-repository/. candidate-evidence/repository/
+          for module in dawn app auto-service-ksp; do
+            mkdir -p "candidate-evidence/reports/$module"
+            if test "$module" = app; then
+              if test -d "$module/build/test-results"; then
+                cp -R "$module/build/test-results" "candidate-evidence/reports/$module/"
+              fi
+            else
+              test -d "$module/build/test-results"
+              cp -R "$module/build/test-results" "candidate-evidence/reports/$module/"
+            fi
+          done
+          test -d dawn/build/outputs/androidTest-results/connected
+          mkdir -p candidate-evidence/reports/dawn-device/test-results
+          cp -R dawn/build/outputs/androidTest-results/connected/. candidate-evidence/reports/dawn-device/test-results/
+          cp -R dawn/build/reports/lint-results-debug.* candidate-evidence/reports/
+          cp dawn/build/reports/candidate-validation.txt candidate-evidence/reports/
+          python3 scripts/release_gate.py record --root candidate-evidence --manifest candidate-evidence/manifest.json --commit "$GITHUB_SHA" --check build=passed --check tests=passed --check lint=passed --check candidate=passed --check consumer=passed
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-candidate-${{ github.sha }}
+          path: candidate-evidence/
+          if-no-files-found: error
+          retention-days: 30
 
+  release:
+    needs: candidate
+    if: needs.candidate.result == 'success' && inputs.release_tag != ''
+    runs-on: ubuntu-latest
+    environment: release
     permissions:
       contents: write
-
+      actions: read
+    env:
+      RELEASE_POLICY_FILE: ${{ runner.temp }}/duskmvx-release-policy-${{ github.run_id }}-${{ github.run_attempt }}.json
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Create Release with Release Notes
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 确定同提交候选与发布标签
+        id: candidate
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.setOutput('run-id', context.runId);
+            core.setOutput('tag', context.payload.inputs.release_tag);
+      - name: 确认人工审核与标签创建保护
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {data} = await github.rest.repos.getEnvironment({
+              owner: context.repo.owner, repo: context.repo.repo, environment_name: 'release'
+            });
+            const rulesets = await github.paginate(github.rest.repos.getRepoRulesets, {
+              owner: context.repo.owner, repo: context.repo.repo, includes_parents: true, per_page: 100
+            });
+            const details = [];
+            for (const ruleset of rulesets) {
+              const {data: detail} = await github.rest.repos.getRepoRuleset({
+                owner: context.repo.owner, repo: context.repo.repo, ruleset_id: ruleset.id
+              });
+              details.push(detail);
+            }
+            require('fs').writeFileSync(process.env.RELEASE_POLICY_FILE, JSON.stringify({environment: data, rulesets: details}));
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-candidate-${{ github.sha }}
+          path: candidate-evidence
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.candidate.outputs.run-id }}
+      - name: 校验候选、标签与实际发布策略
+        env:
+          RELEASE_TAG: ${{ steps.candidate.outputs.tag }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          version="$(python3 -c 'from pathlib import Path; print(next(line.split("=", 1)[1].strip() for line in Path("gradle.properties").read_text().splitlines() if line.startswith("PUBLISH_VERSION=")))')"
+          python3 scripts/release_gate.py authorize-tag --root candidate-evidence --manifest candidate-evidence/manifest.json --commit "$GITHUB_SHA" --policy "$RELEASE_POLICY_FILE" --tag "$RELEASE_TAG" --version "$version"
+      - name: 候选通过后创建同提交标签
+        uses: actions/github-script@v7
+        env:
+          RELEASE_TAG: ${{ steps.candidate.outputs.tag }}
+        with:
+          script: |
+            const tag = process.env.RELEASE_TAG;
+            try {
+              const {data: existing} = await github.rest.git.getRef({
+                owner: context.repo.owner, repo: context.repo.repo, ref: `tags/${tag}`
+              });
+              if (existing.object.type !== 'commit' || existing.object.sha !== context.sha) {
+                throw new Error('已有标签未指向当前候选提交，拒绝覆盖');
+              }
+              core.info('同提交标签已存在，继续核验渠道状态');
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              await github.rest.git.createRef({
+                owner: context.repo.owner, repo: context.repo.repo, ref: `refs/tags/${tag}`, sha: context.sha
+              });
+            }
+      - name: 校验指定版本的渠道状态
+        env:
+          RELEASE_TAG: ${{ steps.candidate.outputs.tag }}
+        run: |
+          set -euo pipefail
+          python3 scripts/release_gate.py jitpack --url "https://jitpack.io/api/builds/com.github.asasa868/DuskMVX/$RELEASE_TAG" --commit "$GITHUB_SHA" --tag "$RELEASE_TAG" --module dawn
+      - name: 创建正式发布
         uses: ncipollo/release-action@v1
         with:
+          tag: ${{ steps.candidate.outputs.tag }}
+          commit: ${{ github.sha }}
           generateReleaseNotes: true
-
-      - name: Setup Java
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'adopt'
-
-      - name: Trigger JitPack lookup
-        run: |
-          echo "打包版本: ${{ github.repository }}&tag=${{ github.ref_name }}"
-          sleep 10
-          curl -X GET "https://jitpack.io/api/builds/com.github.asasa868/DuskMVX"
-          curl -X GET "https://jitpack.io/api/versions/com.github.asasa868/DuskMVX"
-          curl -X GET "https://jitpack.io/api/refs/com.github.asasa868/DuskMVX"
+          allowUpdates: false
+          artifacts: candidate-evidence/repository/**/*.aar
+          artifactErrorsFailBuild: true
