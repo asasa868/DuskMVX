@@ -14,7 +14,6 @@ import android.os.Build
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.text.TextUtils
-import android.text.format.Formatter
 import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
 import com.lzq.dawn.DawnBridge
@@ -59,8 +58,7 @@ object NetworkUtils {
          * @return `true`: connected<br></br>`false`: disconnected
          */
         get() {
-            val info = activeNetworkInfo
-            return info != null && info.isConnected
+            return activeNetwork != null
         }
 
     /**
@@ -231,12 +229,7 @@ object NetworkUtils {
         get() {
             try {
                 val tm = app.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    return tm.isDataEnabled
-                }
-                @SuppressLint("PrivateApi") val getMobileDataEnabledMethod =
-                    tm.javaClass.getDeclaredMethod("getDataEnabled")
-                return getMobileDataEnabledMethod.invoke(tm) as Boolean
+                return tm.isDataEnabled
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -249,6 +242,7 @@ object NetworkUtils {
          * @return 如果使用代理连接到 Internet，则为 true。
          */
         get() = !(System.getProperty("http.proxyHost") == null || System.getProperty("http.proxyPort") == null)
+    @get:RequiresPermission(permission.ACCESS_NETWORK_STATE)
     val isUsingVPN: Boolean
         /**
          * 如果设备通过 VPN 连接到互联网，则返回 true。
@@ -257,10 +251,8 @@ object NetworkUtils {
          */
         get() {
             val cm = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                cm.getNetworkInfo(ConnectivityManager.TYPE_VPN)!!.isConnectedOrConnecting
-            } else {
-                cm.getNetworkInfo(NetworkCapabilities.TRANSPORT_VPN)!!.isConnectedOrConnecting
+            return cm.allNetworks.any { network ->
+                cm.getNetworkCapabilities(network)?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true
             }
         }
 
@@ -274,8 +266,7 @@ object NetworkUtils {
          * @return `true`: yes<br></br>`false`: no
          */
         get() {
-            val info = activeNetworkInfo
-            return null != info && info.isAvailable && info.type == ConnectivityManager.TYPE_MOBILE
+            return activeNetworkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true
         }
 
     /**
@@ -300,6 +291,7 @@ object NetworkUtils {
      */
     @RequiresPermission(permission.ACCESS_NETWORK_STATE)
     fun is5G(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return false
         val info = activeNetworkInfo
         return info != null && info.isAvailable && info.subtype == TelephonyManager.NETWORK_TYPE_NR
     }
@@ -345,9 +337,14 @@ object NetworkUtils {
          * @return `true`: connected<br></br>`false`: disconnected
          */
         get() {
-            val cm = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            val ni = cm.activeNetworkInfo
-            return ni != null && ni.type == ConnectivityManager.TYPE_WIFI
+            return activeNetworkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+        }
+
+    @get:RequiresPermission(permission.ACCESS_NETWORK_STATE)
+    private val activeNetworkCapabilities: NetworkCapabilities?
+        get() {
+            val network = activeNetwork ?: return null
+            return connectivityManager.getNetworkCapabilities(network)
         }
 
     @get:RequiresPermission(allOf = [permission.ACCESS_WIFI_STATE, permission.INTERNET])
@@ -417,54 +414,53 @@ object NetworkUtils {
             }
             val info = activeNetworkInfo
             return if (info != null && info.isAvailable) {
-                if (info.type == ConnectivityManager.TYPE_WIFI) {
-                    NetworkType.NETWORK_WIFI
-                } else if (info.type == ConnectivityManager.TYPE_MOBILE) {
-                    when (info.subtype) {
-                        TelephonyManager.NETWORK_TYPE_GSM, TelephonyManager.NETWORK_TYPE_GPRS, TelephonyManager.NETWORK_TYPE_CDMA, TelephonyManager.NETWORK_TYPE_EDGE, TelephonyManager.NETWORK_TYPE_1xRTT, TelephonyManager.NETWORK_TYPE_IDEN -> NetworkType.NETWORK_2G
-                        TelephonyManager.NETWORK_TYPE_TD_SCDMA, TelephonyManager.NETWORK_TYPE_EVDO_A, TelephonyManager.NETWORK_TYPE_UMTS, TelephonyManager.NETWORK_TYPE_EVDO_0, TelephonyManager.NETWORK_TYPE_HSDPA, TelephonyManager.NETWORK_TYPE_HSUPA, TelephonyManager.NETWORK_TYPE_HSPA, TelephonyManager.NETWORK_TYPE_EVDO_B, TelephonyManager.NETWORK_TYPE_EHRPD, TelephonyManager.NETWORK_TYPE_HSPAP -> NetworkType.NETWORK_3G
-                        TelephonyManager.NETWORK_TYPE_IWLAN, TelephonyManager.NETWORK_TYPE_LTE -> NetworkType.NETWORK_4G
-                        TelephonyManager.NETWORK_TYPE_NR -> NetworkType.NETWORK_5G
-                        else -> {
-                            val subtypeName = info.subtypeName
-                            if (subtypeName.equals("TD-SCDMA", ignoreCase = true) || subtypeName.equals(
-                                    "WCDMA", ignoreCase = true
-                                ) || subtypeName.equals("CDMA2000", ignoreCase = true)
-                            ) {
-                                NetworkType.NETWORK_3G
-                            } else {
-                                NetworkType.NETWORK_UNKNOWN
-                            }
-                        }
-                    }
-                } else {
-                    NetworkType.NETWORK_UNKNOWN
+                when (info.type) {
+                    ConnectivityManager.TYPE_WIFI -> NetworkType.NETWORK_WIFI
+                    ConnectivityManager.TYPE_MOBILE -> classifyCellularNetworkType(info.subtype, info.subtypeName)
+                    else -> NetworkType.NETWORK_UNKNOWN
                 }
             } else NetworkType.NETWORK_NO
         }
 
     @get:RequiresPermission(permission.ACCESS_NETWORK_STATE)
     private val isEthernet: Boolean
-        /**
-         * 返回是否使用以太网。
-         *
-         * 必须持有 `<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />`
-         *
-         * @return `true`: yes<br></br>`false`: no
-         */
         get() {
-            val cm = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            val info = cm.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET) ?: return false
-            val state = info.state ?: return false
-            return state == NetworkInfo.State.CONNECTED || state == NetworkInfo.State.CONNECTING
+            val info = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET) ?: return false
+            return info.state == NetworkInfo.State.CONNECTED || info.state == NetworkInfo.State.CONNECTING
         }
+
+    private val connectivityManager: ConnectivityManager
+        get() = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    @get:RequiresPermission(permission.ACCESS_NETWORK_STATE)
+    private val activeNetwork
+        get() = connectivityManager.activeNetwork
 
     @get:RequiresPermission(permission.ACCESS_NETWORK_STATE)
     private val activeNetworkInfo: NetworkInfo?
-        get() {
-            val cm = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            return cm.activeNetworkInfo
+        get() = connectivityManager.activeNetworkInfo
+
+    /** 保持蜂窝网络分代及旧调制解调器名称的分类约定。 */
+    internal fun classifyCellularNetworkType(subtype: Int, subtypeName: String?): NetworkType {
+        return when (subtype) {
+            TelephonyManager.NETWORK_TYPE_GSM, TelephonyManager.NETWORK_TYPE_GPRS,
+            TelephonyManager.NETWORK_TYPE_CDMA, TelephonyManager.NETWORK_TYPE_EDGE,
+            TelephonyManager.NETWORK_TYPE_1xRTT, TelephonyManager.NETWORK_TYPE_IDEN -> NetworkType.NETWORK_2G
+            TelephonyManager.NETWORK_TYPE_TD_SCDMA, TelephonyManager.NETWORK_TYPE_EVDO_A,
+            TelephonyManager.NETWORK_TYPE_UMTS, TelephonyManager.NETWORK_TYPE_EVDO_0,
+            TelephonyManager.NETWORK_TYPE_HSDPA, TelephonyManager.NETWORK_TYPE_HSUPA,
+            TelephonyManager.NETWORK_TYPE_HSPA, TelephonyManager.NETWORK_TYPE_EVDO_B,
+            TelephonyManager.NETWORK_TYPE_EHRPD, TelephonyManager.NETWORK_TYPE_HSPAP -> NetworkType.NETWORK_3G
+            TelephonyManager.NETWORK_TYPE_IWLAN, TelephonyManager.NETWORK_TYPE_LTE -> NetworkType.NETWORK_4G
+            TelephonyManager.NETWORK_TYPE_NR -> NetworkType.NETWORK_5G
+            else -> when {
+                subtypeName.equals("TD-SCDMA", ignoreCase = true) ||
+                subtypeName.equals("WCDMA", ignoreCase = true) ||
+                subtypeName.equals("CDMA2000", ignoreCase = true) -> NetworkType.NETWORK_3G
+                else -> NetworkType.NETWORK_UNKNOWN
+            }
         }
+    }
 
     /**
      * 返回IP地址。
@@ -604,7 +600,7 @@ object NetworkUtils {
         val inetAddress: InetAddress
         return try {
             inetAddress = InetAddress.getByName(domain)
-            inetAddress.hostAddress?.toString() ?: ""
+            inetAddress.hostAddress ?: ""
         } catch (e: UnknownHostException) {
             e.printStackTrace()
             ""
@@ -621,7 +617,7 @@ object NetworkUtils {
         get() {
             @SuppressLint("WifiManagerLeak") val wm =
                 app.getSystemService(Context.WIFI_SERVICE) as WifiManager
-            return Formatter.formatIpAddress(wm.dhcpInfo.ipAddress)
+            return formatIpv4Address(wm.dhcpInfo.ipAddress)
         }
 
     @get:RequiresPermission(permission.ACCESS_WIFI_STATE)
@@ -634,7 +630,7 @@ object NetworkUtils {
         get() {
             @SuppressLint("WifiManagerLeak") val wm =
                 app.getSystemService(Context.WIFI_SERVICE) as WifiManager
-            return Formatter.formatIpAddress(wm.dhcpInfo.gateway)
+            return formatIpv4Address(wm.dhcpInfo.gateway)
         }
 
     @get:RequiresPermission(permission.ACCESS_WIFI_STATE)
@@ -647,7 +643,7 @@ object NetworkUtils {
         get() {
             @SuppressLint("WifiManagerLeak") val wm =
                 app.getSystemService(Context.WIFI_SERVICE) as WifiManager
-            return Formatter.formatIpAddress(wm.dhcpInfo.netmask)
+            return formatIpv4Address(wm.dhcpInfo.netmask)
         }
 
     @get:RequiresPermission(permission.ACCESS_WIFI_STATE)
@@ -660,8 +656,16 @@ object NetworkUtils {
         get() {
             @SuppressLint("WifiManagerLeak") val wm =
                 app.getSystemService(Context.WIFI_SERVICE) as WifiManager
-            return Formatter.formatIpAddress(wm.dhcpInfo.serverAddress)
+            return formatIpv4Address(wm.dhcpInfo.serverAddress)
         }
+
+    private fun formatIpv4Address(address: Int): String {
+        // 地址整数沿用旧接口的小端顺序，逐字节转成无符号十进制，不触发域名解析。
+        return (address and 0xff).toString() + "." +
+            ((address ushr 8) and 0xff) + "." +
+            ((address ushr 16) and 0xff) + "." +
+            ((address ushr 24) and 0xff)
+    }
 
     @get:RequiresPermission(permission.ACCESS_WIFI_STATE)
     val sSID: String
@@ -824,7 +828,7 @@ object NetworkUtils {
     }
 
     private fun isSameScanResultContent(r1: ScanResult?, r2: ScanResult?): Boolean {
-        return (r1 != null && r2 != null && equals(r1.BSSID, r2.BSSID) && equals(r1.SSID, r2.SSID) && equals(
+        return (r1 != null && r2 != null && equals(r1.BSSID, r2.BSSID) && equals(r1.networkName, r2.networkName) && equals(
             r1.capabilities, r2.capabilities
         ) && r1.level == r2.level)
     }
