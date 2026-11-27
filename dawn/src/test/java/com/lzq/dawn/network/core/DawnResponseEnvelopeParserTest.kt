@@ -221,13 +221,13 @@ class DawnResponseEnvelopeParserTest {
         ).create()
         val parser = IResponseEnvelopeParser { error("请求序列化不应调用响应解析器") }
         val factory = DawnConverterFactory.createWithEnvelopeParser(gson, parser, RecordingHandler())
-        @Suppress("UNCHECKED_CAST")
         val converter = factory.requestBodyConverter(
             Payload::class.java, emptyArray(), emptyArray(), Retrofit.Builder().baseUrl("https://example.test/").build()
-        ) as Converter<Payload, RequestBody>
+        )
+        val convertMethod = converter.javaClass.getMethod("convert", Any::class.java)
         val buffer = Buffer()
 
-        converter.convert(Payload("value"))!!.writeTo(buffer)
+        (convertMethod.invoke(converter, Payload("value")) as RequestBody).writeTo(buffer)
 
         assertEquals("\"encoded\"", buffer.readUtf8())
     }
