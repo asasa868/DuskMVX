@@ -4,6 +4,7 @@ import com.lzq.dawn.DawnConstants
 import com.lzq.dawn.network.core.DawnCallAdapterFactory
 import com.lzq.dawn.network.core.DawnConverterFactory
 import com.lzq.dawn.network.core.IResponseCode
+import com.lzq.dawn.network.core.IResponseEnvelopeParser
 import com.lzq.dawn.network.error.DawnErrorHandler
 import com.lzq.dawn.network.error.IErrorHandler
 import com.lzq.dawn.network.interceptor.DawnRequestInterceptor
@@ -30,10 +31,9 @@ abstract class DawnNetWork<T>(private val clazz: Class<T>) {
             .baseUrl(getBaseUrl())
             .client(createOkhttpClient())
             .addConverterFactory(
-                DawnConverterFactory.create(
-                    getHttpResponseCode(),
-                    getErrorExceptionHandler()
-                )
+                getResponseEnvelopeParser()?.let { parser ->
+                    DawnConverterFactory.createWithEnvelopeParser(parser, getErrorExceptionHandler())
+                } ?: DawnConverterFactory.create(getHttpResponseCode(), getErrorExceptionHandler())
             )
             .addCallAdapterFactory(
                 DawnCallAdapterFactory.create(
@@ -89,6 +89,18 @@ abstract class DawnNetWork<T>(private val clazz: Class<T>) {
      * 子类可以重写，指定服务器返回的数据格式的名字
      */
     protected open fun getHttpResponseCode(): IResponseCode? {
+        return null
+    }
+
+    /**
+     * 获取自定义响应信封解析器，适用于嵌套字段、非整数状态或无固定信封的响应。
+     *
+     * 首次创建网络服务时读取；返回非空解析器时优先于 [getHttpResponseCode]。
+     * 默认返回空引用，保持原有字段映射或整响应直接解析行为。
+     *
+     * @return 当前网络实例的解析器；实现应支持并发调用。
+     */
+    protected open fun getResponseEnvelopeParser(): IResponseEnvelopeParser? {
         return null
     }
 

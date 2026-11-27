@@ -52,6 +52,101 @@ CI 与 JitPack 使用 `CI=true bash gradlew` 走项目原生 Wrapper，不依赖
 使用MVVM架构可以继承**BaseMvvmActivity**，使用MVI架构可以继承**BaseMviActivity**，
 Fragment就是**BaseMvvmFragment**和**BaseMviFragment**，compose版本还在研究。
 
+## 网络响应结构配置
+
+响应解析按每个 `DawnNetWork` 实例配置，在首次调用 `getApiService()` 创建网络配置时生效。未重写配置时，`getHttpResponseCode()` 和 `getResponseEnvelopeParser()` 都返回 `null`，直接使用 Gson 将整个响应反序列化为接口声明的数据类型；无包装对象、根数组和基础类型都可以沿用这个默认入口。库不会默认强制拆解 `{code,msg,data}`。
+
+### 顶层字段映射
+
+现有 `IResponseCode` 保持兼容，适合根对象中包含整数业务码、消息和数据字段的后端。字段名称按字面匹配，不解释点号路径。例如 `{"errorCode":0,"errorMsg":"成功","data":[{"id":1}]}` 可以继续在网络子类中重写：
+
+```kotlin
+override fun getHttpResponseCode(): IResponseCode = object : IResponseCode {
+    override fun getCodeName() = "errorCode"
+    override fun getMessageName() = "errorMsg"
+    override fun getDataName() = "data"
+    override fun isSuccessCode() = 0
+}
+```
+
+### 自定义嵌套结构与成功判断
+
+字段存在嵌套、成功标志是字符串或布尔值，或不同接口使用不同包装时，使用 `IResponseEnvelopeParser`。解析器接收完整 JSON 根节点，返回实际数据节点；数据节点仍交给原有 Gson 类型适配器处理，保留集合、嵌套泛型和已注册的数据类型适配器。解析器无需自行反序列化实体，也不要再构造 `DawnHttpResult`。
+
+以下示例处理 `{"meta":{"status":"OK","message":"成功"},"result":{"items":[{"id":1}]}}`，在网络子类中添加：
+
+```kotlin
+override fun getResponseEnvelopeParser(): IResponseEnvelopeParser =
+    IResponseEnvelopeParser { response ->
+        if (!response.isJsonObject) {
+            throw JsonParseException("响应根节点必须是对象")
+        }
+        val root = response.asJsonObject
+        val meta = root.getAsJsonObject("meta")
+            ?: throw JsonParseException("缺少响应状态")
+        val status = meta.get("status")?.asString
+            ?: throw JsonParseException("缺少业务状态")
+        if (status != "OK") {
+            // 字符串业务码在此映射为现有错误处理接口使用的整数。
+            throw DawnException(1001, meta.get("message")?.asString ?: "业务请求失败")
+        }
+        val result = root.getAsJsonObject("result")
+            ?: throw JsonParseException("缺少响应数据")
+        result.get("items") ?: throw JsonParseException("缺少列表数据")
+    }
+```
+
+对应接口仍使用既有返回形式，例如：
+
+```kotlin
+data class Item(val id: Int)
+
+interface ExampleApi {
+    @GET("items")
+    fun items(): Call<DawnHttpResult<List<Item>>>
+
+    @GET("items")
+    suspend fun suspendItems(): DawnHttpResult<List<Item>>
+}
+```
+
+示例使用 `com.lzq.dawn.network.core.IResponseEnvelopeParser`、`com.lzq.dawn.network.core.IResponseCode`、`com.lzq.dawn.network.bean.DawnHttpResult`、`com.lzq.dawn.network.error.DawnException`、`com.google.gson.JsonParseException`、`retrofit2.Call` 和 `retrofit2.http.GET`。重写方法放在现有 `DawnNetWork<ExampleApi>` 子类中，基址、请求头等其他配置保持原样。
+
+解析器也可以返回整个根节点，例如 `IResponseEnvelopeParser { response -> response }`，直接处理数组或无信封响应；也可以自行按响应内容选择不同的数据路径。布尔成功标志可在解析器中用 `asBoolean` 判断。库不提供额外的路径表达式语法，字段路径和成功规则由解析器明确控制。
+
+### 独立使用转换器
+
+不继承网络基类时，使用具名工厂配置已有 Retrofit 构建器；例如后端统一把实际数据放在 `payload` 中：
+
+```kotlin
+val parser = IResponseEnvelopeParser { response ->
+    response.asJsonObject.get("payload")
+}
+val errorHandler = DawnErrorHandler()
+val retrofit = Retrofit.Builder()
+    .baseUrl("https://example.com/")
+    .addConverterFactory(
+        DawnConverterFactory.createWithEnvelopeParser(parser, errorHandler)
+    )
+    .addCallAdapterFactory(DawnCallAdapterFactory.create(errorHandler))
+    .build()
+```
+
+上述工厂和调用适配器位于 `com.lzq.dawn.network.core`，默认错误处理器位于 `com.lzq.dawn.network.error`。自定义 Gson 使用 `DawnConverterFactory.createWithEnvelopeParser(gson, parser, errorHandler)`；该实例同时用于请求体和数据节点。新解析入口在接口返回 `DawnHttpResult<T>` 时直接按 `T` 解析数据，结果包装仍由调用适配器创建，因此无需额外注册包装类型适配器，已注册的业务数据类型适配器仍然生效。旧 `create(responseCode, errorHandler)`、`create(gson, responseCode, errorHandler)` 和构造入口继续可用，包括传入 `null` 响应契约的调用；未配置新解析器时，自定义 Gson 的原有注册要求也保持不变。
+
+### 优先级与异常约定
+
+- `getResponseEnvelopeParser()` 返回非空时优先使用新解析器，忽略 `getHttpResponseCode()`；返回 `null` 时完全沿用旧配置。不同网络实例各自持有配置，无全局解析器开关。解析器可能并发执行，应保持无状态或自行保证线程安全。
+- 成功返回实际数据节点。返回 `null` 或 JSON 空值时沿用现有空体语义，由 `DawnHttpResult.Failure` 返回 `RESPONSE_BODY_NULL_CODE`；需要把缺失字段视为格式错误时，在解析器中显式抛出 `JsonParseException`。
+- 业务失败抛出 `DawnException`。现有 `DawnException.code` 是整数，字符串或布尔业务状态由使用方决定映射规则；原业务码和消息交给 `IErrorHandler` 处理一次。异步及挂起调用继续映射为原有 `RESPONSE_EXCEPTION_NULL_CODE`，不会改变既有失败结果码；同步 `execute()` 继续抛出业务异常。
+- 格式错误及其他解析异常沿原调用链传播或映射，不冒充业务错误；取消语义、原始 HTTP 响应和响应体关闭行为保持不变。解析器处理 JSON 内容，不接收 HTTP 状态或响应头；HTTP 错误仍由既有调用适配器处理。
+
+相关回归与静态检查：
+
+```bash
+bash gradlew :dawn:testDebugUnitTest :dawn:lintDebug :app:compileDebugKotlin --stacktrace
+```
+
 
 ## 资料 
 下面就是框架中使用到的库和未来版本要添加的功能所使用到的库（包括但不限于）。
