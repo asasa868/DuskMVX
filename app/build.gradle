@@ -6,41 +6,42 @@ plugins {
 }
 
 android {
-    compileSdk ProjectConfigs.compileSdk
+    compileSdk = ProjectConfigs.compileSdk
+    ndkVersion = ProjectConfigs.ndkVersion
+
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
 
     defaultConfig {
-        applicationId ProjectConfigs.applicationId
-        minSdk ProjectConfigs.minSdk
-        targetSdk ProjectConfigs.targetSdk
-        versionCode ProjectConfigs.versionCode
-        versionName ProjectConfigs.versionName
+        applicationId = ProjectConfigs.applicationId
+        minSdk = ProjectConfigs.minSdk
+        targetSdk = ProjectConfigs.targetSdk
+        versionCode = ProjectConfigs.versionCode
+        versionName = ProjectConfigs.versionName
 
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = ProjectConfigs.jvmTarget
-    }
-    lintOptions {
-        baseline file("lint-baseline.xml")
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     viewBinding {
-        enable true
+        enable = true
     }
 
     packagingOptions {
         resources.excludes.add("META-INF/gradle/incremental.annotation.processors")
     }
-    namespace 'com.lzq.dusk'
+    namespace = 'com.lzq.dusk'
 
 
     android.applicationVariants.configureEach { variant ->
@@ -52,6 +53,12 @@ android {
                         ".apk"
             }
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 

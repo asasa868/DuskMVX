@@ -1,6 +1,8 @@
 package com.dusk.auto_service_ksp
 
 import com.google.auto.service.AutoService
+import com.google.devtools.ksp.ApiFeatures
+import com.google.devtools.ksp.KSApiFeatures
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
@@ -25,6 +27,7 @@ import com.google.devtools.ksp.validate
 class AutoServiceProcessor(
     private val environment: SymbolProcessorEnvironment,
 ) : SymbolProcessor {
+    override val apiFeatures: ApiFeatures = KSApiFeatures.DEFAULT
     private val implementations = sortedMapOf<String, MutableSet<String>>()
     private val sources = mutableMapOf<String, MutableMap<String, KSFile>>()
 
@@ -32,7 +35,7 @@ class AutoServiceProcessor(
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val deferred = mutableListOf<KSAnnotated>()
         resolver.getSymbolsWithAnnotation(AutoService::class.java.name).forEach { symbol ->
-            if (!symbol.validate()) {
+            if (!symbol.validate(apiFeatures = apiFeatures)) {
                 deferred += symbol
                 return@forEach
             }

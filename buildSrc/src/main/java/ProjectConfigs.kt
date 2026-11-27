@@ -8,7 +8,7 @@
 
 object ProjectConfigs {
     const val minSdk = 26
-    const val compileSdk = 34
+    const val compileSdk = 36
     const val targetSdk = 34
     const val versionCode = 1
     const val versionName = "1.0.0"
@@ -20,8 +20,7 @@ object ProjectConfigs {
     const val proguardRules = "proguard-rules.pro"
     const val proguardName = "proguard-android-optimize.txt"
     const val jvmTarget = "17"
-    const val kotlinCompiler = "1.5.14"
-    const val lintName = "lint-baseline.xml"
+    const val ndkVersion = "28.2.13676358"
     const val javaSrc = "src/main/java"
     const val ktSrc = "src/main/kotlin"
     const val libs = "libs"

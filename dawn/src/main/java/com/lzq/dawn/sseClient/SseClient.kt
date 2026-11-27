@@ -88,8 +88,8 @@ class SseClient(
                     }
                 }
 
-                override fun onFailure(call: Call, failure: IOException) {
-                    failTransport(failure)
+                override fun onFailure(call: Call, e: IOException) {
+                    failTransport(e)
                 }
 
                 override fun onResponse(call: Call, response: Response) {

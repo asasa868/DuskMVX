@@ -43,15 +43,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = ProjectConfigs.jvmTarget
-    }
 
     buildFeatures {
         viewBinding = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = ProjectConfigs.kotlinCompiler
     }
 
     sourceSets.named("main") {
@@ -61,8 +55,7 @@ android {
     }
 
     lint {
-        baseline = file(ProjectConfigs.lintName)
-        enable.add("deprecation")
+        enable += "Deprecated"
     }
 
     testOptions { unitTests.isIncludeAndroidResources = true }
@@ -75,13 +68,19 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
 dependencies {
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.robolectric:robolectric:4.14.1")
-    testImplementation("androidx.test:core:1.5.0")
-    testImplementation("androidx.arch.core:core-testing:2.2.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.11")
+    testImplementation(libs.junit4)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.arch.core.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.okhttp.mockwebserver)
     ksp(project(":auto-service-ksp"))
     // ---------------------------依赖---------------------------
     api(libs.androidx.appcompat)
@@ -132,8 +131,8 @@ dependencies {
     api(libs.androidx.activity)
     api(libs.androidx.constraintlayout)
 
-    androidTestImplementation("androidx.test:core:1.5.0")
-    androidTestImplementation("junit:junit:4.13.2")
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.junit4)
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
     // ---------------------------依赖---------------------------

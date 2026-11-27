@@ -1,13 +1,13 @@
 package com.lzq.dawn.room
 
 import android.content.Context
-import androidx.annotation.OptIn
 import androidx.room.ExperimentalRoomApi
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import com.lzq.dawn.DawnBridge
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.OptIn
 import kotlin.concurrent.withLock
 
 /**
@@ -72,12 +72,12 @@ public object DawnDatabaseManager {
             val allowMainThread = if (config.enforceReleaseSafety) false else config.allowMainThreadQueries
             val destructive = if (config.enforceReleaseSafety) false else config.destructiveMigration
             if (allowMainThread) builder.allowMainThreadQueries()
-            if (destructive) builder.fallbackToDestructiveMigration()
+            if (destructive) builder.fallbackToDestructiveMigration(dropAllTables = false)
             config.journalMode?.let { builder.setJournalMode(it) }
             config.queryExecutor?.let { builder.setQueryExecutor(it) }
             config.transactionExecutor?.let { builder.setTransactionExecutor(it) }
             if (config.queryCallback != null && config.queryCallbackExecutor != null) {
-                builder.setQueryCallback(config.queryCallback, config.queryCallbackExecutor!!)
+                builder.setQueryCallback(config.queryCallback, config.queryCallbackExecutor)
             }
             if (config.enableMultiInstanceInvalidation) builder.enableMultiInstanceInvalidation()
             if (config.autoCloseTimeoutMs != null && config.autoCloseTimeUnit != null) {

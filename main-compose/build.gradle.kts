@@ -36,14 +36,8 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = ProjectConfigs.jvmTarget
-    }
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = ProjectConfigs.kotlinCompiler
     }
     packaging {
         resources {
@@ -56,13 +50,15 @@ android {
         jniLibs.srcDirs(ProjectConfigs.libs, ProjectConfigs.jniLibs)
     }
 
-    lint {
-        baseline = file(ProjectConfigs.lintName)
-    }
-
     libraryVariants.all {
         artifacts {
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
