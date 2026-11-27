@@ -26,11 +26,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import android.renderscript.Allocation
-import android.renderscript.Element
-import android.renderscript.RenderScript
-import android.renderscript.RenderScript.RSMessageHandler
-import android.renderscript.ScriptIntrinsicBlur
 import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.ColorInt
@@ -38,6 +33,8 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.FloatRange
 import androidx.annotation.IntRange
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toDrawable
 import androidx.exifinterface.media.ExifInterface
 import com.lzq.dawn.DawnBridge
 import java.io.BufferedOutputStream
@@ -120,13 +117,13 @@ object ImageUtils {
             }
         }
         val bitmap: Bitmap = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
-            Bitmap.createBitmap(
+            createBitmap(
                 1,
                 1,
                 if (drawable.opacity != PixelFormat.OPAQUE) Bitmap.Config.ARGB_8888 else Bitmap.Config.RGB_565
             )
         } else {
-            Bitmap.createBitmap(
+            createBitmap(
                 drawable.intrinsicWidth,
                 drawable.intrinsicHeight,
                 if (drawable.opacity != PixelFormat.OPAQUE) Bitmap.Config.ARGB_8888 else Bitmap.Config.RGB_565
@@ -146,7 +143,7 @@ object ImageUtils {
      */
     @JvmStatic
     fun bitmap2Drawable(bitmap: Bitmap?): Drawable? {
-        return if (bitmap == null) null else BitmapDrawable(DawnBridge.app.resources, bitmap)
+        return if (bitmap == null) null else bitmap.toDrawable(DawnBridge.app.resources)
     }
 
     /**
@@ -324,7 +321,7 @@ object ImageUtils {
     fun getBitmap(@DrawableRes resId: Int): Bitmap? {
         val drawable = ContextCompat.getDrawable(DawnBridge.app, resId) ?: return null
         val canvas = Canvas()
-        val bitmap = Bitmap.createBitmap(
+        val bitmap = createBitmap(
             drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888
         )
         canvas.setBitmap(bitmap)
@@ -401,7 +398,7 @@ object ImageUtils {
         if (isEmptyBitmap(src)) {
             return null
         }
-        val ret = if (recycle) src else src.copy(src.config, true)
+        val ret = if (recycle) src else src.copy(src.config!!, true)
         val canvas = Canvas(ret)
         canvas.drawColor(color, PorterDuff.Mode.DARKEN)
         return ret
@@ -606,7 +603,7 @@ object ImageUtils {
         val height = src.height
         val size = width.coerceAtMost(height)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        val ret = Bitmap.createBitmap(width, height, src.config)
+        val ret = createBitmap(width, height, src.config!!)
         val center = size / 2f
         val rectF = RectF(0f, 0f, width.toFloat(), height.toFloat())
         rectF.inset((width - size) / 2f, (height - size) / 2f)
@@ -692,7 +689,7 @@ object ImageUtils {
         val width = src.width
         val height = src.height
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        val ret = Bitmap.createBitmap(width, height, src.config)
+        val ret = createBitmap(width, height, src.config!!)
         val shader = BitmapShader(src, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
         paint.shader = shader
         val canvas = Canvas(ret)
@@ -872,7 +869,7 @@ object ImageUtils {
         if (isEmptyBitmap(src)) {
             return null
         }
-        val ret = if (recycle) src else src.copy(src.config, true)
+        val ret = if (recycle) src else src.copy(src.config!!, true)
         val width = ret.width
         val height = ret.height
         val canvas = Canvas(ret)
@@ -916,7 +913,7 @@ object ImageUtils {
         val reflectionBitmap = Bitmap.createBitmap(
             src, 0, srcHeight - reflectionHeight, srcWidth, reflectionHeight, matrix, false
         )
-        val ret = Bitmap.createBitmap(srcWidth, srcHeight + reflectionHeight, src.config)
+        val ret = createBitmap(srcWidth, srcHeight + reflectionHeight, src.config!!)
         val canvas = Canvas(ret)
         canvas.drawBitmap(src, 0f, 0f, null)
         canvas.drawBitmap(reflectionBitmap, 0f, (srcHeight + REFLECTION_GAP).toFloat(), null)
@@ -989,7 +986,7 @@ object ImageUtils {
         if (isEmptyBitmap(src) || content == null) {
             return null
         }
-        val ret = src.copy(src.config, true)
+        val ret = src.copy(src.config!!, true)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         val canvas = Canvas(ret)
         paint.color = color
@@ -1021,7 +1018,7 @@ object ImageUtils {
         if (isEmptyBitmap(src)) {
             return null
         }
-        val ret = src.copy(src.config, true)
+        val ret = src.copy(src.config!!, true)
         if (!isEmptyBitmap(watermark)) {
             val paint = Paint(Paint.ANTI_ALIAS_FLAG)
             val canvas = Canvas(ret)
@@ -1063,7 +1060,7 @@ object ImageUtils {
         if (isEmptyBitmap(src)) {
             return null
         }
-        val ret = Bitmap.createBitmap(src.width, src.height, src.config)
+        val ret = createBitmap(src.width, src.height, src.config!!)
         val canvas = Canvas(ret)
         val paint = Paint()
         val colorMatrix = ColorMatrix()
@@ -1088,7 +1085,7 @@ object ImageUtils {
     @JvmOverloads
     fun stackBlur(src: Bitmap, radius: Int, recycle: Boolean = false): Bitmap {
         var radius = radius
-        val ret = if (recycle) src else src.copy(src.config, true)
+        val ret = if (recycle) src else src.copy(src.config!!, true)
         if (radius < 1) {
             radius = 1
         }

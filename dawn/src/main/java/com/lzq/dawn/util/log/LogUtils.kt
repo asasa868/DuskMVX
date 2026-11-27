@@ -40,8 +40,9 @@ object LogUtils {
     const val FILE = 0x10
     const val JSON = 0x20
     const val XML = 0x30
-    private val FILE_SEP = System.getProperty("file.separator")
-    val LINE_SEP = System.getProperty("line.separator")
+    private val FILE_SEP = File.separator
+    private val LINE_SEPARATOR = System.lineSeparator()
+    val LINE_SEP: String? = LINE_SEPARATOR
     private const val TOP_CORNER = "┌"
     private const val MIDDLE_CORNER = "├"
     private const val LEFT_BORDER = "│ "
@@ -189,7 +190,7 @@ object LogUtils {
         get() = getCurrentLogFilePath(Date())
     val logFiles: List<File>
         get() {
-            val dir = config.dir
+            val dir = config.dir ?: return emptyList()
             val logDir = File(dir)
             if (!logDir.exists()) {
                 return ArrayList()
@@ -379,7 +380,7 @@ object LogUtils {
             print2Console(type, tag, msg)
             return
         }
-        val lines = msg.split(LINE_SEP.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        val lines = msg.split(LINE_SEPARATOR.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         for (line in lines) {
             print2Console(type, tag, LEFT_BORDER + line)
         }
@@ -398,7 +399,7 @@ object LogUtils {
                 }
                 sb.append(MIDDLE_BORDER).append(LINE_SEP)
             }
-            for (line in msg.split(LINE_SEP.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
+            for (line in msg.split(LINE_SEPARATOR.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
                 sb.append(LEFT_BORDER).append(line).append(LINE_SEP)
             }
             sb.append(BOTTOM_BORDER)
@@ -528,12 +529,12 @@ object LogUtils {
         }
         val sdf = SimpleDateFormat("yyyy_MM_dd", Locale.getDefault())
         try {
-            val dueMillis = sdf.parse(date).time - config.saveDays * 86400000L
+            val dueMillis = (sdf.parse(date)?.time ?: return) - config.saveDays * 86400000L
             for (aFile in files) {
                 val name = aFile.name
-                val l = name.length
                 val logDay = findDate(name)
-                if (sdf.parse(logDay).time <= dueMillis) {
+                val logMillis = sdf.parse(logDay)?.time ?: continue
+                if (logMillis <= dueMillis) {
                     EXECUTOR.execute {
                         val delete = aFile.delete()
                         if (!delete) {
@@ -613,7 +614,7 @@ object LogUtils {
                 }
                 className = type.toString()
             } else { // abstract class or lambda
-                var type = objClass.genericSuperclass
+                var type = objClass.genericSuperclass ?: return objClass
                 while (type is ParameterizedType) {
                     type = type.rawType
                 }

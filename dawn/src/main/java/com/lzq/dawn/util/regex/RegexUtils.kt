@@ -267,12 +267,13 @@ object RegexUtils {
      * @param regex 正则表达式
      * @param input input.
      * @return `true`: yes<br></br>`false`: no
+     * @throws NullPointerException 正则表达式为空且输入非空。
      */
     fun isMatch(
         regex: String?,
         input: CharSequence?,
     ): Boolean {
-        return !input.isNullOrEmpty() && Pattern.matches(regex, input)
+        return !input.isNullOrEmpty() && Pattern.matches(regex ?: throw NullPointerException("regex"), input)
     }
 
     /**

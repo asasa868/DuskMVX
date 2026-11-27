@@ -2,11 +2,11 @@ package com.lzq.dawn.util.file
 
 import android.content.Intent
 import android.media.MediaScannerConnection
-import android.net.Uri
 import android.os.Build
 import android.os.StatFs
 import android.provider.MediaStore
 import android.text.TextUtils
+import androidx.core.net.toUri
 import com.lzq.dawn.DawnBridge
 import java.io.BufferedInputStream
 import java.io.File
@@ -74,7 +74,7 @@ object FileUtils {
     private fun isFileExistsApi29(filePath: String?): Boolean {
         if (Build.VERSION.SDK_INT >= 29) {
             try {
-                val uri = Uri.parse(filePath)
+                val uri = filePath!!.toUri()
                 val cr = DawnBridge.app.contentResolver
                 val afd = cr.openAssetFileDescriptor(uri, "r") ?: return false
                 try {

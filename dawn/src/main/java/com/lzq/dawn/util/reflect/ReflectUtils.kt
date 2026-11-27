@@ -56,13 +56,8 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
         }
     }
 
-    private fun getArgsType(vararg args: Any?): Array<Class<*>?> {
-        val result: Array<Class<*>?> = arrayOfNulls(args.size)
-        for (i in args.indices) {
-            val value = args[i]
-            result[i] = value?.javaClass ?: NULL::class.java
-        }
-        return result
+    private fun getArgsType(vararg args: Any?): Array<Class<*>> {
+        return Array(args.size) { index -> args[index]?.javaClass ?: NULL::class.java }
     }
 
     private fun sortConstructors(list: List<Constructor<*>>) {
@@ -74,7 +69,7 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
                 val len = types1.size
                 for (i in 0 until len) {
                     if (types1[i] != types2[i]) {
-                        return@Comparator if (wrapper(types1[i])!!.isAssignableFrom(wrapper(types2[i]))) {
+                        return@Comparator if (wrapper(types1[i]).isAssignableFrom(wrapper(types2[i]))) {
                             1
                         } else {
                             -1
@@ -88,7 +83,7 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
 
     private fun newInstance(
         constructor: Constructor<*>,
-        vararg args: Any,
+        vararg args: Any?,
     ): ReflectUtils {
         return try {
             ReflectUtils(
@@ -242,7 +237,7 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
     @Throws(NoSuchMethodException::class)
     private fun exactMethod(
         name: String,
-        types: Array<Class<*>?>,
+        types: Array<Class<*>>,
     ): Method {
         var type: Class<*>? = type()
         return try {
@@ -262,7 +257,7 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
     @Throws(NoSuchMethodException::class)
     private fun similarMethod(
         name: String,
-        types: Array<Class<*>?>,
+        types: Array<Class<*>>,
     ): Method {
         var type: Class<*>? = type()
         val methods: MutableList<Method> = ArrayList()
@@ -301,7 +296,7 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
                 val len = types1.size
                 for (i in 0 until len) {
                     if (types1[i] != types2[i]) {
-                        return@Comparator if (wrapper(types1[i])!!.isAssignableFrom(wrapper(types2[i]))) {
+                        return@Comparator if (wrapper(types1[i]).isAssignableFrom(wrapper(types2[i]))) {
                             1
                         } else {
                             -1
@@ -316,7 +311,7 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
     private fun isSimilarSignature(
         possiblyMatchingMethod: Method,
         desiredMethodName: String,
-        desiredParamTypes: Array<Class<*>?>,
+        desiredParamTypes: Array<Class<*>>,
     ): Boolean {
         return possiblyMatchingMethod.name == desiredMethodName &&
             match(
@@ -327,12 +322,12 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
 
     private fun match(
         declaredTypes: Array<Class<*>>,
-        actualTypes: Array<Class<*>?>,
+        actualTypes: Array<Class<*>>,
     ): Boolean {
         return if (declaredTypes.size == actualTypes.size) {
             for (i in actualTypes.indices) {
                 if (actualTypes[i] == NULL::class.java ||
-                    wrapper(declaredTypes[i])!!.isAssignableFrom(
+                    wrapper(declaredTypes[i]).isAssignableFrom(
                         wrapper(actualTypes[i]),
                     )
                 ) {
@@ -377,7 +372,7 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
             InvocationHandler { _, method, args ->
                 val name = method.name
                 try {
-                    return@InvocationHandler reflect(objects).method(name, *args).get<Any>()!!
+                    return@InvocationHandler reflect(objects).method(name, *(args ?: emptyArray())).get<Any>()!!
                 } catch (e: ReflectException) {
                     if (isMap) {
                         val map = objects as MutableMap<String, Any>?
@@ -394,21 +389,21 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
                     throw e
                 }
             }
-        return Proxy.newProxyInstance(
-            proxyType.classLoader,
-            arrayOf<Class<*>>(proxyType),
-            handler,
-        ) as P
+        return proxyType.cast(
+            Proxy.newProxyInstance(
+                proxyType.classLoader,
+                arrayOf<Class<*>>(proxyType),
+                handler,
+            )
+        )!!
     }
 
     private fun type(): Class<*> {
         return type
     }
 
-    private fun wrapper(type: Class<*>?): Class<*>? {
-        if (type == null) {
-            return null
-        } else if (type.isPrimitive) {
+    private fun wrapper(type: Class<*>): Class<*> {
+        if (type.isPrimitive) {
             if (Boolean::class.javaPrimitiveType == type) {
                 return Boolean::class.java
             } else if (Int::class.javaPrimitiveType == type) {
@@ -433,11 +428,10 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
     }
 
     /**
-     * 得到结果
+     * 获取包装对象，调用方需确保请求类型与实际对象相符。
      *
-     * @param <T> 值类型
-     * @return result
-     </T> */
+     * @return 包装对象，原对象为空时返回空引用。
+     */
     fun <T> get(): T? {
         return objects as T?
     }
