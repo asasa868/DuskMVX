@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.view.isGone
 import com.lzq.dawn.R
 
 /**
@@ -70,7 +71,7 @@ class ShapeLoadingView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (visibility == GONE) {
+        if (isGone) {
             return
         }
         when (mShape) {

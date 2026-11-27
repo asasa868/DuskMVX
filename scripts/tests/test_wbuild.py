@@ -255,6 +255,15 @@ class ForwardingTest(unittest.TestCase):
         self.assertEqual(23, self.invoke([":app:assembleDebug"]))
         self.assertFalse(list((self.root / "build/wbuild").glob("*/reports.tgz")))
 
+    def test_additional_module_reports_are_returned_as_verification_evidence(self):
+        for module in ("login", "main-compose", "buildSrc"):
+            with self.subTest(module=module):
+                self.archive_member = module + "/build/reports/result.txt"
+                self.assertEqual(0, self.invoke(["help"]))
+                artifacts = list((self.root / "build/wbuild").glob("*/" + self.archive_member))
+                self.assertEqual(1, len(artifacts))
+                self.assertEqual(b"result", artifacts[0].read_bytes())
+
     def test_create_failure_does_not_upload_or_execute(self):
         self.create_code = 19
         self.assertEqual(19, self.invoke(["help"]))

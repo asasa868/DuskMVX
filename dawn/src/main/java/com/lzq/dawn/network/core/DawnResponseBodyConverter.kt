@@ -1,7 +1,10 @@
 package com.lzq.dawn.network.core
 
 import com.google.gson.Gson
+import com.google.gson.JsonElement
+import com.google.gson.JsonNull
 import com.google.gson.JsonObject
+import com.google.gson.JsonParseException
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonToken
 import com.lzq.dawn.DawnConstants
@@ -19,12 +22,16 @@ import java.io.IOException
  * @description: 自定义响应体解析
  *
  * 根据可选业务响应契约读取实体，并在所有解析出口释放响应体。
+ * 自定义信封解析器优先于旧字段契约，未配置时保留原有解析行为。
+ *
+ * @param envelopeParser 可选的响应信封解析器，只提取数据节点而不改变目标数据类型。
  */
-class DawnResponseBodyConverter<T>(
+class DawnResponseBodyConverter<T> @JvmOverloads constructor(
     private var gson: Gson,
     private var adapter: TypeAdapter<T>,
     private var responseCode: IResponseCode?,
-    private val exception: IErrorHandler
+    private val exception: IErrorHandler,
+    private val envelopeParser: IResponseEnvelopeParser? = null
 ) : Converter<ResponseBody, T> {
 
     /**
@@ -36,7 +43,20 @@ class DawnResponseBodyConverter<T>(
     override fun convert(value: ResponseBody): T? = value.use {
         val jsonReader = gson.newJsonReader(it.charStream())
         val contract = responseCode
-        if (contract == null) {
+        if (envelopeParser != null) {
+            val response = gson.fromJson<JsonElement>(jsonReader, JsonElement::class.java)
+                ?: throw JsonParseException("响应体不包含有效的响应节点")
+            if (jsonReader.peek() != JsonToken.END_DOCUMENT) {
+                throw JsonParseException("响应体包含多余的响应节点")
+            }
+            val data = try {
+                envelopeParser.parse(response)
+            } catch (failure: DawnException) {
+                failure.handleOnce(exception)
+                throw failure
+            }
+            adapter.fromJsonTree(data ?: JsonNull.INSTANCE)
+        } else if (contract == null) {
             val result = adapter.read(jsonReader)
             if (jsonReader.peek() != JsonToken.END_DOCUMENT) {
                 throw DawnException(

@@ -2,6 +2,7 @@ package com.lzq.dawn.util.execution.thread
 
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.IntRange
 import com.lzq.dawn.util.execution.thread.ThreadPoolExecutor4Util.Companion.createPool
@@ -1031,7 +1032,14 @@ object ThreadUtils {
         period: Long,
         unit: TimeUnit,
     ) {
-        execute(pool, task, delay, period, unit)
+        require(delay >= 0)
+        val delayMillis = unit.toMillis(delay)
+        var periodMillis = unit.toMillis(period)
+        require(periodMillis > 0)
+        require(delayMillis <= Long.MAX_VALUE - System.currentTimeMillis())
+        // 与原定时器一致，缩短超大周期，避免后续定时计算溢出并终止共用线程。
+        if (periodMillis > Long.MAX_VALUE / 2) periodMillis /= 2
+        execute(pool, task, delayMillis, periodMillis, TimeUnit.MILLISECONDS)
     }
 
     private fun <T> execute(
@@ -1062,14 +1070,42 @@ object ThreadUtils {
             }
         } else {
             task.setSchedule(true)
-            val timerTask: TimerTask =
-                object : TimerTask() {
-                    override fun run() {
-                        pool.execute(task)
-                    }
-                }
-            TIMER.scheduleAtFixedRate(timerTask, unit!!.toMillis(delay), unit.toMillis(period))
+            val initialDelayMillis = unit!!.toMillis(delay)
+            val periodMillis = unit.toMillis(period)
+            scheduleFixedRateDispatch(
+                pool,
+                task,
+                SystemClock.elapsedRealtime() + initialDelayMillis,
+                periodMillis,
+            )
         }
+    }
+
+    private fun <T> scheduleFixedRateDispatch(
+        pool: ExecutorService,
+        task: Task<T>,
+        scheduledTimeMillis: Long,
+        periodMillis: Long,
+    ) {
+        TIMER.schedule(
+            object : TimerTask() {
+                override fun run() {
+                    if (task.isDone || pool.isShutdown) return
+                    pool.execute(task)
+                    if (task.isDone || pool.isShutdown) return
+                    val nowMillis = SystemClock.elapsedRealtime()
+                    val nextTimeMillis = nextFixedRateExecution(scheduledTimeMillis, nowMillis, periodMillis)
+                    scheduleFixedRateDispatch(pool, task, nextTimeMillis, periodMillis)
+                }
+            },
+            maxOf(0L, scheduledTimeMillis - SystemClock.elapsedRealtime()),
+        )
+    }
+
+    internal fun nextFixedRateExecution(scheduledTimeMillis: Long, nowMillis: Long, periodMillis: Long): Long {
+        require(periodMillis > 0)
+        val nextTimeMillis = scheduledTimeMillis + periodMillis
+        return if (nextTimeMillis <= nowMillis) nowMillis + periodMillis else nextTimeMillis
     }
 
     private fun getPoolByTypeAndPriority(type: Int): ExecutorService {

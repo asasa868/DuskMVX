@@ -1,6 +1,5 @@
 package com.lzq.dawn.util.encode
 
-import android.os.Build
 import android.text.Html
 import android.util.Base64
 import java.io.UnsupportedEncodingException
@@ -155,11 +154,7 @@ object EncodeUtils {
         if (input.isNullOrEmpty()) {
             return ""
         }
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(input, Html.FROM_HTML_MODE_LEGACY)
-        } else {
-            Html.fromHtml(input)
-        }
+        return Html.fromHtml(input, Html.FROM_HTML_MODE_LEGACY)
     }
 
     /**

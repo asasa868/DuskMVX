@@ -2,19 +2,24 @@ import java.util.zip.ZipFile
 import java.security.MessageDigest
 
 plugins {
-    id("com.android.library") version "8.8.1"
-    id("org.jetbrains.kotlin.android") version "2.0.0"
+    id("com.android.library") version "9.5.3"
+}
+
+buildscript {
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.21")
+    }
 }
 
 android {
     namespace = "com.example.dusk.consumer"
-    compileSdk = 34
+    compileSdk { version = release(37) { minorApiLevel = 2 } }
+    buildToolsVersion = "37.0.0"
     defaultConfig { minSdk = 26 }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
     testOptions.unitTests.all {
         it.systemProperty("candidateAar", providers.gradleProperty("candidateAar").get())
     }

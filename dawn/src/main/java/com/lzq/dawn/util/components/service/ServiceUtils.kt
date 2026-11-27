@@ -4,7 +4,6 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.Build
 import com.lzq.dawn.DawnBridge
 
 /**
@@ -44,11 +43,7 @@ object ServiceUtils {
     fun startService(intent: Intent) {
         try {
             intent.flags = Intent.FLAG_INCLUDE_STOPPED_PACKAGES
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                DawnBridge.app.startForegroundService(intent)
-            } else {
-                DawnBridge.app.startService(intent)
-            }
+            DawnBridge.app.startForegroundService(intent)
         } catch (e: Exception) {
             e.printStackTrace()
         }

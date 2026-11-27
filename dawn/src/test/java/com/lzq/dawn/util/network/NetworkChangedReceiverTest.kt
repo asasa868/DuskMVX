@@ -2,12 +2,9 @@ package com.lzq.dawn.util.network
 
 import android.app.Application
 import android.content.Context
-import android.content.Intent
 import android.net.ConnectivityManager
-import android.net.NetworkInfo
 import android.os.Looper
 import com.lzq.dawn.DawnBridge
-import java.util.concurrent.TimeUnit
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -15,9 +12,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
-import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
-import org.robolectric.shadows.ShadowNetworkInfo
+import org.robolectric.Shadows.shadowOf
 
 /**
  * @projectName com.lzq.dawn.util.network.NetworkChangedReceiverTest
@@ -27,18 +23,15 @@ import org.robolectric.shadows.ShadowNetworkInfo
  * @description: 验证网络监听器的并发修改、去重、注销与通知顺序
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [28], application = Application::class, manifest = Config.NONE)
+@Config(sdk = [26, 28, 34, 37], application = Application::class, manifest = Config.NONE)
 class NetworkChangedReceiverTest {
     private val registered = mutableListOf<OnNetworkStatusChangedListener>()
     private val receiver get() = NetworkChangedReceiver.instance
     private val application get() = RuntimeEnvironment.getApplication()
-    private val connectivity get() = application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     @Before
     fun initializeApplicationAndDisconnectedNetwork() {
         DawnBridge.init(application)
-        shadowOf(connectivity).setActiveNetworkInfo(null)
-        shadowOf(connectivity).setNetworkInfo(ConnectivityManager.TYPE_ETHERNET, null)
     }
 
     @After
@@ -60,7 +53,7 @@ class NetworkChangedReceiverTest {
             })
         }
 
-        connectAndDispatch()
+        receiver.dispatchNetworkTypeChanged(NetworkType.NETWORK_WIFI)
 
         assertEquals(3, calls)
         assertTrue(registered.none { receiver.isRegistered(it) })
@@ -79,7 +72,7 @@ class NetworkChangedReceiverTest {
             })
         }
 
-        connectAndDispatch()
+        receiver.dispatchNetworkTypeChanged(NetworkType.NETWORK_WIFI)
 
         assertEquals(1, calls)
         assertTrue(registered.none { receiver.isRegistered(it) })
@@ -95,11 +88,39 @@ class NetworkChangedReceiverTest {
         register(listener)
         receiver.registerListener(listener)
 
-        connectAndDispatch()
+        receiver.dispatchNetworkTypeChanged(NetworkType.NETWORK_WIFI)
         receiver.unregisterListener(listener)
 
         assertEquals(1, calls)
         assertFalse(receiver.isRegistered(listener))
+    }
+
+    @Test
+    fun nullOwnersDoNotRegisterASystemCallback() {
+        val manager = application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val callbacksBefore = shadowOf(manager).networkCallbacks.size
+
+        receiver.registerListener(null)
+        receiver.unregisterListener(null)
+
+        assertEquals(callbacksBefore, shadowOf(manager).networkCallbacks.size)
+        assertFalse(receiver.isRegistered(null))
+    }
+
+    @Test
+    fun lastOwnerReleasesTheOnlySystemCallback() {
+        val manager = application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val listener = object : OnNetworkStatusChangedListener {
+            override fun onConnected(networkType: NetworkType?) = Unit
+            override fun onDisconnected() = Unit
+        }
+        register(listener)
+        receiver.registerListener(listener)
+
+        assertEquals(1, shadowOf(manager).networkCallbacks.size)
+        receiver.unregisterListener(listener)
+
+        assertEquals(0, shadowOf(manager).networkCallbacks.size)
     }
 
     private fun register(listener: OnNetworkStatusChangedListener) {
@@ -107,12 +128,5 @@ class NetworkChangedReceiverTest {
         receiver.registerListener(listener)
     }
 
-    private fun connectAndDispatch() {
-        shadowOf(connectivity).setActiveNetworkInfo(ShadowNetworkInfo.newInstance(
-            NetworkInfo.DetailedState.CONNECTED, ConnectivityManager.TYPE_WIFI, 0, true, true,
-        ))
-        receiver.onReceive(application, Intent(ConnectivityManager.CONNECTIVITY_ACTION))
-        shadowOf(Looper.getMainLooper()).idleFor(1, TimeUnit.SECONDS)
-    }
 }
 

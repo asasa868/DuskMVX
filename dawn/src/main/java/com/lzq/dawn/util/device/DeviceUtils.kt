@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.net.Uri
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
@@ -16,6 +15,7 @@ import android.telephony.TelephonyManager
 import android.text.TextUtils
 import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
+import androidx.core.net.toUri
 import com.lzq.dawn.DawnBridge
 import java.io.File
 import java.net.InetAddress
@@ -323,7 +323,7 @@ object DeviceUtils {
             }
             val url = "tel:" + "123456"
             val intent = Intent()
-            intent.data = Uri.parse(url)
+            intent.data = url.toUri()
             intent.action = Intent.ACTION_DIAL
             return intent.resolveActivity(DawnBridge.app.packageManager) == null
         }

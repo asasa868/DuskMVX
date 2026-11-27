@@ -2,6 +2,17 @@ plugins {
     kotlin("jvm")
     id("com.google.devtools.ksp")
 }
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 dependencies {
     implementation(libs.ksp.api)
     implementation(libs.auto.service.annotations)
@@ -9,7 +20,7 @@ dependencies {
     testImplementation(gradleTestKit())
 }
 
-val fixtureProcessorJar by tasks.registering(Jar::class) {
+val fixtureProcessorJar = tasks.register<Jar>("fixtureProcessorJar") {
     archiveClassifier.set("test-fixture-processor")
     from(sourceSets.test.get().output)
 }

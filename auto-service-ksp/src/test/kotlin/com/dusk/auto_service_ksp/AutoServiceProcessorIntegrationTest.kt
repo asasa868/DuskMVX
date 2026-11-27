@@ -31,8 +31,8 @@ class AutoServiceProcessorIntegrationTest {
         File(fixture, "settings.gradle").writeText("rootProject.name = 'processor-fixture'\n")
         val buildScript = (
             "plugins {\n" +
-                "  id 'org.jetbrains.kotlin.jvm' version '2.0.0'\n" +
-                "  id 'com.google.devtools.ksp' version '2.0.0-1.0.23'\n" +
+                "  id 'org.jetbrains.kotlin.jvm' version '2.4.21'\n" +
+                "  id 'com.google.devtools.ksp' version '2.3.14'\n" +
                 "}\n" +
                 "repositories { mavenCentral() }\n" +
                 "dependencies {\n" +

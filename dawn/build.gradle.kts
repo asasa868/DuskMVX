@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream
 
 plugins {
     id("com.android.library")
-    id("kotlin-android")
     id("maven-publish")
     id("signing")
     id("com.google.devtools.ksp")
@@ -14,7 +13,12 @@ plugins {
 android {
     namespace = ProjectConfigs.namespace
     resourcePrefix = ProjectConfigs.resourcePrefix
-    compileSdk = ProjectConfigs.compileSdk
+    compileSdk {
+        version = release(ProjectConfigs.compileSdk) {
+            minorApiLevel = ProjectConfigs.compileSdkMinor
+        }
+    }
+    buildToolsVersion = ProjectConfigs.buildToolsVersion
 
     defaultConfig {
         minSdk = ProjectConfigs.minSdk
@@ -28,13 +32,11 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            isShrinkResources = false
             proguardFiles(getDefaultProguardFile(ProjectConfigs.proguardName), ProjectConfigs.proguardRules)
         }
 
         debug {
             isMinifyEnabled = false
-            isShrinkResources = false
         }
     }
 
@@ -43,45 +45,40 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = ProjectConfigs.jvmTarget
-    }
 
     buildFeatures {
         viewBinding = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = ProjectConfigs.kotlinCompiler
-    }
 
     sourceSets.named("main") {
         java.srcDirs(ProjectConfigs.javaSrc)
-        kotlin.srcDirs(ProjectConfigs.ktSrc)
+        kotlin.directories += ProjectConfigs.ktSrc
         jniLibs.srcDirs(ProjectConfigs.libs, ProjectConfigs.jniLibs)
     }
 
     lint {
-        baseline = file(ProjectConfigs.lintName)
-        enable.add("deprecation")
+        enable += "Deprecated"
     }
 
     testOptions { unitTests.isIncludeAndroidResources = true }
 
     publishing { singleVariant("release") { withSourcesJar() } }
 
-    libraryVariants.all {
-        artifacts {
-        }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
 dependencies {
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.robolectric:robolectric:4.14.1")
-    testImplementation("androidx.test:core:1.5.0")
-    testImplementation("androidx.arch.core:core-testing:2.2.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.11")
+    testImplementation(libs.junit4)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.arch.core.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.okhttp.mockwebserver)
     ksp(project(":auto-service-ksp"))
     // ---------------------------依赖---------------------------
     api(libs.androidx.appcompat)
@@ -132,8 +129,8 @@ dependencies {
     api(libs.androidx.activity)
     api(libs.androidx.constraintlayout)
 
-    androidTestImplementation("androidx.test:core:1.5.0")
-    androidTestImplementation("junit:junit:4.13.2")
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.junit4)
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
     // ---------------------------依赖---------------------------
@@ -206,7 +203,7 @@ afterEvaluate {
     }
 }
 
-val verifyCandidate by tasks.registering {
+val verifyCandidate = tasks.register("verifyCandidate") {
     group = "verification"
     description = "检查候选坐标、敏感映射与处理器依赖边界"
     dependsOn("publishReleasePublicationToCandidateRepository")

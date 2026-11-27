@@ -80,19 +80,19 @@ object AndroidVersion {
     }
 
     /**
-     * 是否是 Android 8.0 及以上版本
+     * 是否是安卓八及以上版本；最低支持版本已满足此条件。
      */
     @ChecksSdkIntAtLeast(api = ANDROID_8)
     fun isAndroid8(): Boolean {
-        return Build.VERSION.SDK_INT >= ANDROID_8
+        return true
     }
 
     /**
-     * 是否是 Android 6.0 及以上版本
+     * 是否是安卓六及以上版本；最低支持版本已满足此条件。
      */
     @ChecksSdkIntAtLeast(api = ANDROID_6)
     fun isAndroid6(): Boolean {
-        return Build.VERSION.SDK_INT >= ANDROID_6
+        return true
     }
 
 

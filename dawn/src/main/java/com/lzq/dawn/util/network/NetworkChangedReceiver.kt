@@ -4,8 +4,9 @@ import android.Manifest.permission
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import androidx.annotation.RequiresPermission
 import com.lzq.dawn.DawnBridge.app
 import com.lzq.dawn.DawnBridge.runOnUiThread
@@ -23,6 +24,14 @@ import com.lzq.dawn.util.network.NetworkUtils.networkType
 class NetworkChangedReceiver : BroadcastReceiver() {
     private var mType: NetworkType? = null
     private val mListeners: MutableSet<OnNetworkStatusChangedListener> = HashSet()
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) = dispatchNetworkChanged()
+
+        override fun onLost(network: Network) = dispatchNetworkChanged()
+
+        override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) =
+            dispatchNetworkChanged()
+    }
 
     /** 注册所有者，同一实例重复注册不会叠加。 */
     @RequiresPermission(permission.ACCESS_NETWORK_STATE)
@@ -35,8 +44,12 @@ class NetworkChangedReceiver : BroadcastReceiver() {
             mListeners.add(listener)
             if (preSize == 0 && mListeners.size == 1) {
                 mType = networkType
-                val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-                app.registerReceiver(Companion.instance, intentFilter)
+                try {
+                    connectivityManager.registerDefaultNetworkCallback(networkCallback)
+                } catch (error: RuntimeException) {
+                    mListeners.remove(listener)
+                    throw error
+                }
             }
         }
     }
@@ -57,33 +70,44 @@ class NetworkChangedReceiver : BroadcastReceiver() {
             val preSize = mListeners.size
             mListeners.remove(listener)
             if (preSize == 1 && mListeners.size == 0) {
-                app.unregisterReceiver(Companion.instance)
+                connectivityManager.unregisterNetworkCallback(networkCallback)
             }
         }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (ConnectivityManager.CONNECTIVITY_ACTION == intent.action) {
-            // 延迟合并系统网络抖动；回调可以同步退出页面或注销自身。
-            runOnUiThreadDelayed(Runnable {
-                val networkType = networkType
-                if (mType === networkType) {
-                    return@Runnable
-                }
-                mType = networkType
-                val listeners = mListeners.toList()
-                if (networkType === NetworkType.NETWORK_NO) {
-                    for (listener in listeners) {
-                        if (!mListeners.contains(listener)) continue
-                        listener.onDisconnected()
-                    }
-                } else {
-                    for (listener in listeners) {
-                        if (!mListeners.contains(listener)) continue
-                        listener.onConnected(networkType)
-                    }
-                }
-            }, 1000)
+        // 兼容调用方仍主动转交旧系统广播的入口，内部监听已使用网络回调。
+        if (intent.action == "android.net.conn.CONNECTIVITY_CHANGE") {
+            dispatchNetworkChanged()
+        }
+    }
+
+    private val connectivityManager: ConnectivityManager
+        get() = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    private fun dispatchNetworkChanged() {
+        // 延迟合并系统网络抖动；回调可以同步退出页面或注销自身。
+        runOnUiThreadDelayed(Runnable {
+            dispatchNetworkTypeChanged(networkType)
+        }, 1000)
+    }
+
+    internal fun dispatchNetworkTypeChanged(networkType: NetworkType) {
+        if (mType === networkType) {
+            return
+        }
+        mType = networkType
+        val listeners = mListeners.toList()
+        if (networkType === NetworkType.NETWORK_NO) {
+            for (listener in listeners) {
+                if (!mListeners.contains(listener)) continue
+                listener.onDisconnected()
+            }
+        } else {
+            for (listener in listeners) {
+                if (!mListeners.contains(listener)) continue
+                listener.onConnected(networkType)
+            }
         }
     }
 

@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <declare-styleable name="DawnLoadingView">
+        <attr name="dawn_loadingText"/>
+        <attr name="dawn_loadingTextAppearance"/>
+        <attr name="dawn_delay"/>
+    </declare-styleable>
+
     <declare-styleable name="dawn_LoadingView">
         <attr name="dawn_loadingText" format="string|reference"/>
         <attr name="dawn_loadingTextAppearance" format="reference"/>

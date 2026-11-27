@@ -1,6 +1,7 @@
 package com.lzq.dawn.util.app
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
@@ -10,6 +11,7 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Process
+import androidx.core.content.pm.PackageInfoCompat
 import com.lzq.dawn.DawnBridge
 import java.io.File
 import kotlin.system.exitProcess
@@ -188,11 +190,15 @@ object AppUtils {
      * 重启app
      *
      * @param isKillProcess 是否杀死进程
+     * @throws ActivityNotFoundException 当前应用没有可启动入口时抛出。
      */
     @JvmOverloads
     @JvmStatic
     fun relaunchApp(isKillProcess: Boolean = false) {
-        val intent: Intent = DawnBridge.getLaunchAppIntent(DawnBridge.app.packageName) ?: Intent()
+        val intent = DawnBridge.getLaunchAppIntent(DawnBridge.app.packageName)
+            ?: throw ActivityNotFoundException(
+                "应用没有可启动的入口：${DawnBridge.app.packageName}"
+            )
         intent.addFlags(
             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
         )
@@ -275,7 +281,7 @@ object AppUtils {
         } else try {
             val pm: PackageManager = DawnBridge.app.packageManager
             val pi: PackageInfo = pm.getPackageInfo(packageName ?: "", 0)
-            pi.applicationInfo.loadIcon(pm)
+            pi.applicationInfo!!.loadIcon(pm)
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
             null
@@ -397,7 +403,7 @@ object AppUtils {
         } else try {
             val pm: PackageManager = DawnBridge.app.packageManager
             val pi: PackageInfo = pm.getPackageInfo(packageName ?: "", 0)
-            pi.applicationInfo.sourceDir
+            pi.applicationInfo!!.sourceDir
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
             ""
@@ -425,7 +431,7 @@ object AppUtils {
         } else try {
             val pm: PackageManager = DawnBridge.app.packageManager
             val pi: PackageInfo = pm.getPackageInfo(packageName ?: "", 0)
-            pi.versionName
+            pi.versionName!!
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
             ""
@@ -453,11 +459,7 @@ object AppUtils {
         } else try {
             val pm: PackageManager = DawnBridge.app.packageManager
             val pi: PackageInfo = pm.getPackageInfo(packageName ?: "", 0)
-            if (AndroidVersion.isAndroid9()) {
-                return pi.longVersionCode.toInt()
-            } else {
-                return pi.versionCode
-            }
+            PackageInfoCompat.getLongVersionCode(pi).toInt()
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
             -1
@@ -487,7 +489,7 @@ object AppUtils {
                 val pi: PackageInfo =
                     pm.getPackageInfo(packageName ?: "", PackageManager.GET_SIGNING_CERTIFICATES)
                         ?: return null
-                val signingInfo = pi.signingInfo
+                val signingInfo = pi.signingInfo!!
                 if (signingInfo.hasMultipleSigners()) {
                     signingInfo.apkContentsSigners
                 } else {
@@ -519,7 +521,7 @@ object AppUtils {
             val pi: PackageInfo =
                 pm.getPackageArchiveInfo(file.absolutePath, PackageManager.GET_SIGNING_CERTIFICATES)
                     ?: return null
-            val signingInfo = pi.signingInfo
+            val signingInfo = pi.signingInfo!!
             if (signingInfo.hasMultipleSigners()) {
                 signingInfo.apkContentsSigners
             } else {
@@ -708,7 +710,7 @@ object AppUtils {
         }
         val pm: PackageManager = DawnBridge.app.packageManager ?: return null
         val pi: PackageInfo = pm.getPackageArchiveInfo(apkFilePath ?: "", 0) ?: return null
-        val appInfo = pi.applicationInfo
+        val appInfo = pi.applicationInfo!!
         appInfo.sourceDir = apkFilePath
         appInfo.publicSourceDir = apkFilePath
         return getBean(pm, pi)
@@ -733,7 +735,7 @@ object AppUtils {
             return null
         }
         val versionName = pi.versionName
-        val versionCode = pi.versionCode
+        val versionCode = PackageInfoCompat.getLongVersionCode(pi).toInt()
         val packageName = pi.packageName
         val ai =
             pi.applicationInfo ?: return AppInfo(packageName, "", null, "", versionName, versionCode, false)

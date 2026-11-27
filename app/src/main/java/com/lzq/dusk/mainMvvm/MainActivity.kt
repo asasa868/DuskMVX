@@ -7,7 +7,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.dusk.login.LoginActivity
 import com.example.main_compose.MainActivity
+import com.lzq.dusk.R
 import com.lzq.dawn.mvvm.v.BaseMvvmActivity
+import com.lzq.dawn.util.view.SystemBarInsets
 import com.lzq.dusk.databinding.ActivityMainBinding
 import com.lzq.dusk.mainMvi.MainMviActivity
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +22,9 @@ import kotlinx.coroutines.launch
 class MainActivity : BaseMvvmActivity<ActivityMainBinding, MainViewModel>() {
 
 
-    override fun initView() {}
+    override fun initView() {
+        SystemBarInsets.applyTo(mViewBinding.root)
+    }
 
     override fun initData() {}
 
@@ -37,16 +41,18 @@ class MainActivity : BaseMvvmActivity<ActivityMainBinding, MainViewModel>() {
         mViewModel.testFlow()
 
         mViewModel.successTime.observe(this) {
-            mViewBinding.tvSuccessTime.text = "success:$it"
+            mViewBinding.tvSuccessTime.text = getString(R.string.main_success_time, it)
         }
         mViewModel.successOrFailureTime.observe(this) {
-            mViewBinding.tvSuccessOrFailureTime.text = "successOrFailureTime:$it"
+            mViewBinding.tvSuccessOrFailureTime.text =
+                getString(R.string.main_success_or_failure_time, it)
         }
         mViewModel.successRxjavaTime.observe(this) {
-            mViewBinding.tvSuccessRxjavaTime.text = "successRxjavaTime:$it"
+            mViewBinding.tvSuccessRxjavaTime.text = getString(R.string.main_success_rxjava_time, it)
         }
         mViewModel.successOrFailureRxjavaTime.observe(this) {
-            mViewBinding.tvSuccessOrFailureRxjavaTime.text = "successOrFailureRxjavaTime:$it"
+            mViewBinding.tvSuccessOrFailureRxjavaTime.text =
+                getString(R.string.main_success_or_failure_rxjava_time, it)
         }
 
         mViewBinding.btnMviActivity.setOnClickListener {

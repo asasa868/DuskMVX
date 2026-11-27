@@ -8,15 +8,21 @@ import android.telephony.TelephonyManager
 import android.text.TextUtils
 import androidx.annotation.RequiresPermission
 import com.lzq.dawn.DawnBridge
-import java.lang.reflect.InvocationTargetException
 
 /**
  * @Name :PhoneUtils
  * @Time :2022/8/16 14:29
  * @Author :  Lzq
  * @Desc : 手机
+ *
+ * Android 8–9 的设备标识接口接受普通或特权电话状态权限。Android 10 起，
+ * 原生接口还受特权、运营商或设备管理等系统授权限制；deviceId/getImeiOrMeid
+ * 保留直接返回空值的约定，serial/iMSI 保留原有读取与权限异常降级流程。
+ * 特权应用须在自身清单声明权限，库不向普通应用合并系统专用权限。
  */
 object PhoneUtils {
+    private const val PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE"
+
     val isPhone: Boolean
         /**
          * Return 设备是否为手机。
@@ -28,7 +34,7 @@ object PhoneUtils {
             return tm.phoneType != TelephonyManager.PHONE_TYPE_NONE
         }
 
-    @get:RequiresPermission(permission.READ_PHONE_STATE)
+    @get:RequiresPermission(anyOf = [permission.READ_PHONE_STATE, PRIVILEGED_PHONE_STATE])
     @get:SuppressLint("HardwareIds")
     val deviceId: String
         /**
@@ -48,21 +54,18 @@ object PhoneUtils {
             }
             val tm = telephonyManager
             val deviceId = tm.deviceId
-            if (!TextUtils.isEmpty(deviceId)) {
+            if (!deviceId.isNullOrEmpty()) {
                 return deviceId
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val imei = tm.imei
-                if (!TextUtils.isEmpty(imei)) {
-                    return imei
-                }
-                val meid = tm.meid
-                return if (TextUtils.isEmpty(meid)) "" else meid
+            val imei = tm.imei
+            if (!TextUtils.isEmpty(imei)) {
+                return imei
             }
-            return ""
+            val meid = tm.meid
+            return if (TextUtils.isEmpty(meid)) "" else meid
         }
 
-    @get:RequiresPermission(permission.READ_PHONE_STATE)
+    @get:RequiresPermission(anyOf = [permission.READ_PHONE_STATE, PRIVILEGED_PHONE_STATE])
     @get:SuppressLint("HardwareIds")
     val serial: String
         /**
@@ -79,10 +82,10 @@ object PhoneUtils {
                     ""
                 }
             }
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Build.getSerial() else Build.SERIAL
+            return Build.getSerial()
         }
 
-    @get:RequiresPermission(permission.READ_PHONE_STATE)
+    @get:RequiresPermission(anyOf = [permission.READ_PHONE_STATE, PRIVILEGED_PHONE_STATE])
     val iMEI: String?
         /**
          * Return IMEI
@@ -97,7 +100,7 @@ object PhoneUtils {
          */
         get() = getImeiOrMeid(true)
 
-    @get:RequiresPermission(permission.READ_PHONE_STATE)
+    @get:RequiresPermission(anyOf = [permission.READ_PHONE_STATE, PRIVILEGED_PHONE_STATE])
     val mEID: String?
         /**
          * Return  MEID.
@@ -110,59 +113,23 @@ object PhoneUtils {
          */
         get() = getImeiOrMeid(false)
 
+    /**
+     * 返回双卡标识中字典序较小的非空值；受隐私限制的新系统继续返回空字符串。
+     *
+     * @param isImei 是否读取国际移动设备识别码，否则读取移动设备识别码。
+     * @return 选中的设备标识，没有可用值时返回空字符串。
+     */
     @SuppressLint("HardwareIds")
-    @RequiresPermission(permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = [permission.READ_PHONE_STATE, PRIVILEGED_PHONE_STATE])
     fun getImeiOrMeid(isImei: Boolean): String? {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             return ""
         }
         val tm = telephonyManager
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (isImei) {
-                getMinOne(tm.getImei(0), tm.getImei(1))
-            } else {
-                getMinOne(tm.getMeid(0), tm.getMeid(1))
-            }
+        return if (isImei) {
+            getMinOne(tm.getImei(0), tm.getImei(1))
         } else {
-            val ids = getSystemPropertyByReflect(if (isImei) "ril.gsm.imei" else "ril.cdma.meid")
-            if (!TextUtils.isEmpty(ids)) {
-                val idArr = ids.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                return if (idArr.size == 2) {
-                    getMinOne(idArr[0], idArr[1])
-                } else {
-                    idArr[0]
-                }
-            }
-            var id0 = tm.deviceId
-            var id1 = ""
-            try {
-                val method = tm.javaClass.getMethod("getDeviceId", Int::class.javaPrimitiveType)
-                id1 = method.invoke(
-                    tm, if (isImei) TelephonyManager.PHONE_TYPE_GSM else TelephonyManager.PHONE_TYPE_CDMA
-                ) as String
-            } catch (e: NoSuchMethodException) {
-                e.printStackTrace()
-            } catch (e: IllegalAccessException) {
-                e.printStackTrace()
-            } catch (e: InvocationTargetException) {
-                e.printStackTrace()
-            }
-            if (isImei) {
-                if (id0 != null && id0.length < 15) {
-                    id0 = ""
-                }
-                if (id1.length < 15) {
-                    id1 = ""
-                }
-            } else {
-                if (id0 != null && id0.length == 14) {
-                    id0 = ""
-                }
-                if (id1.length == 14) {
-                    id1 = ""
-                }
-            }
-            getMinOne(id0, id1)
+            getMinOne(tm.getMeid(0), tm.getMeid(1))
         }
     }
 
@@ -184,17 +151,7 @@ object PhoneUtils {
         } else s1
     }
 
-    private fun getSystemPropertyByReflect(key: String): String {
-        try {
-            @SuppressLint("PrivateApi") val clz = Class.forName("android.os.SystemProperties")
-            val getMethod = clz.getMethod("get", String::class.java, String::class.java)
-            return getMethod.invoke(clz, key, "") as String
-        } catch (e: Exception) { /**/
-        }
-        return ""
-    }
-
-    @get:RequiresPermission(permission.READ_PHONE_STATE)
+    @get:RequiresPermission(anyOf = [permission.READ_PHONE_STATE, PRIVILEGED_PHONE_STATE])
     @get:SuppressLint("HardwareIds")
     val iMSI: String
         /**

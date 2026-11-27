@@ -282,7 +282,7 @@ object StringUtils {
         if (text != null) {
             if (args.isNotEmpty()) {
                 try {
-                    text = String.format(str!!, *args)
+                    text = String.format(str, *args)
                 } catch (e: IllegalFormatException) {
                     e.printStackTrace()
                 }

@@ -4,7 +4,6 @@ import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
@@ -12,6 +11,7 @@ import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.Log
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import com.lzq.dawn.DawnBridge
 import java.io.File
 import java.io.FileNotFoundException
@@ -36,7 +36,7 @@ object UriUtils {
      * @return uri
      */
     fun res2Uri(resPath: String): Uri {
-        return Uri.parse("android.resource://" + DawnBridge.app.packageName + "/" + resPath)
+        return ("android.resource://" + DawnBridge.app.packageName + "/" + resPath).toUri()
     }
 
     /**
@@ -47,15 +47,11 @@ object UriUtils {
      */
     @JvmStatic
     fun file2Uri(file: File?): Uri? {
-        if (!DawnBridge.isFileExists(file)) {
+        if (file == null || !DawnBridge.isFileExists(file)) {
             return null
         }
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val authority = DawnBridge.app.packageName + ".init.fileprovider"
-            FileProvider.getUriForFile(DawnBridge.app, authority, file!!)
-        } else {
-            Uri.fromFile(file)
-        }
+        val authority = DawnBridge.app.packageName + ".init.fileprovider"
+        return FileProvider.getUriForFile(DawnBridge.app, authority, file)
     }
 
     /**
@@ -113,7 +109,7 @@ object UriUtils {
         val authority = uri.authority
         val scheme = uri.scheme
         val path = uri.path
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && path != null) {
+        if (path != null) {
             val externals = arrayOf("/external/", "/external_path/")
             var file: File?
             for (external in externals) {
@@ -193,10 +189,10 @@ object UriUtils {
                         val getPath = storageVolumeClazz.getMethod("getPath")
                         val isPrimary = storageVolumeClazz.getMethod("isPrimary")
                         val isEmulated = storageVolumeClazz.getMethod("isEmulated")
-                        val result = getVolumeList.invoke(mStorageManager)
+                        val result = getVolumeList.invoke(mStorageManager) ?: return null
                         val length = java.lang.reflect.Array.getLength(result)
                         for (i in 0 until length) {
-                            val storageVolumeElement = result?.let { java.lang.reflect.Array.get(it, i) }
+                            val storageVolumeElement = java.lang.reflect.Array.get(result, i) ?: continue
                             // String uuid = (String) getUuid.invoke(storageVolumeElement);
                             val mounted =
                                 Environment.MEDIA_MOUNTED == getState.invoke(storageVolumeElement) || Environment.MEDIA_MOUNTED_READ_ONLY ==
@@ -219,7 +215,8 @@ object UriUtils {
                             }
                             val uuid = getUuid.invoke(storageVolumeElement) as String
                             if (uuid == type) {
-                                return File(getPath.invoke(storageVolumeElement).toString() + "/" + split[1])
+                                val volumePath = getPath.invoke(storageVolumeElement)?.toString() ?: continue
+                                return File(volumePath + "/" + split[1])
                             }
                         }
                     } catch (ex: Exception) {
@@ -252,7 +249,7 @@ object UriUtils {
                         "content://downloads/my_downloads",
                     )
                 for (contentUriPrefix in contentUriPrefixesToTry) {
-                    val contentUri = ContentUris.withAppendedId(Uri.parse(contentUriPrefix), availableId)
+                    val contentUri = ContentUris.withAppendedId(contentUriPrefix.toUri(), availableId)
                     try {
                         val file = getFileFromUri(contentUri, "1_1")
                         if (file != null) {

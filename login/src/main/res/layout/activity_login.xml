@@ -12,5 +12,5 @@
         android:layout_height="match_parent"
         android:textSize="20sp"
         android:gravity="center"
-        android:text="111111111"/>
+        android:text="@string/login_placeholder"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

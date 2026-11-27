@@ -1,10 +1,8 @@
 package com.lzq.dawn.util.components.acivity
 
-import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
@@ -36,6 +34,7 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
      */
     private val mActivityLifecycleCallbacksMap: MutableMap<Activity, MutableList<ActivityLifecycleCallbacks>> =
         ConcurrentHashMap()
+    private val mGlobalActivityLifecycleCallbacks = CopyOnWriteArrayList<ActivityLifecycleCallbacks>()
 
     /**
      * 前台计数
@@ -96,7 +95,9 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
     }
 
     fun addActivityLifecycleCallbacks(listener: ActivityLifecycleCallbacks?) {
-        addActivityLifecycleCallbacks(STUB, listener)
+        if (listener != null) {
+            DawnBridge.runOnUiThread { mGlobalActivityLifecycleCallbacks.addIfAbsent(listener) }
+        }
     }
 
     fun addActivityLifecycleCallbacks(
@@ -127,7 +128,9 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
     }
 
     fun removeActivityLifecycleCallbacks(callbacks: ActivityLifecycleCallbacks?) {
-        removeActivityLifecycleCallbacks(STUB, callbacks)
+        if (callbacks != null) {
+            DawnBridge.runOnUiThread { mGlobalActivityLifecycleCallbacks.remove(callbacks) }
+        }
     }
 
     fun removeActivityLifecycleCallbacks(activity: Activity?) {
@@ -157,7 +160,7 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
 
     private fun consumeActivityLifecycleCallbacks(activity: Activity, event: Lifecycle.Event) {
         consumeLifecycle(activity, event, mActivityLifecycleCallbacksMap[activity])
-        consumeLifecycle(activity, event, mActivityLifecycleCallbacksMap[STUB])
+        consumeLifecycle(activity, event, mGlobalActivityLifecycleCallbacks)
     }
 
     private fun consumeLifecycle(
@@ -205,7 +208,6 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
         if (mActivityList.size == 0) {
             postStatus(activity, true)
         }
-        setAnimatorsEnabled()
         setTopActivity(activity)
         consumeActivityLifecycleCallbacks(activity, Lifecycle.Event.ON_CREATE)
     }
@@ -335,7 +337,7 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
 
     private fun setTopActivity(activity: Activity) {
         if (mActivityList.contains(activity)) {
-            if (mActivityList.first != activity) {
+            if (mActivityList.first() != activity) {
                 mActivityList.remove(activity)
                 mActivityList.addFirst(activity)
             }
@@ -417,29 +419,5 @@ class ActivityLifecycleImpl : Application.ActivityLifecycleCallbacks {
         @JvmField
         val INSTANCE = ActivityLifecycleImpl()
 
-        private val STUB = Activity()
-
-        /**
-         * 设置启用动画器。
-         */
-        @SuppressLint("SoonBlockedPrivateApi")
-        private fun setAnimatorsEnabled() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && ValueAnimator.areAnimatorsEnabled()) {
-                return
-            }
-            try {
-                val sDurationScaleField = ValueAnimator::class.java.getDeclaredField("sDurationScale")
-                sDurationScaleField.isAccessible = true
-                val sDurationScale = sDurationScaleField[null] as Float
-                if (sDurationScale == 0f) {
-                    sDurationScaleField[null] = 1f
-                    Log.i("UtilsActivityLifecycle", "setAnimatorsEnabled: Animators are enabled now!")
-                }
-            } catch (e: NoSuchFieldException) {
-                e.printStackTrace()
-            } catch (e: IllegalAccessException) {
-                e.printStackTrace()
-            }
-        }
     }
 }
