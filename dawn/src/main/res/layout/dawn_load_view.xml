@@ -16,6 +16,8 @@
         android:layout_height="3dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="56dp"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no"
         android:src="@drawable/dawn_shadow" />
 
     <TextView
