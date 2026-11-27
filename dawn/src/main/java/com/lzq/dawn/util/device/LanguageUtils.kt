@@ -3,7 +3,6 @@ package com.lzq.dawn.util.device
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.os.Build
 import android.util.Log
 import com.lzq.dawn.DawnBridge
 import java.util.Locale
@@ -153,11 +152,7 @@ object LanguageUtils {
     }
 
     private fun getLocal(configuration: Configuration): Locale {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            configuration.locales[0]
-        } else {
-            configuration.locale
-        }
+        return configuration.locales[0]
     }
 
     private fun setLocal(configuration: Configuration, locale: Locale) {

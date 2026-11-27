@@ -1,9 +1,10 @@
 package com.lzq.dawn.util.notification
 
+import android.app.Notification
 import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.media.AudioAttributes
 import android.net.Uri
-import android.os.Build
 import com.lzq.dawn.DawnBridge
 import com.lzq.dawn.util.notification.NotificationUtils.Importance
 
@@ -14,13 +15,7 @@ import com.lzq.dawn.util.notification.NotificationUtils.Importance
  * @Desc :
  */
 class ChannelConfig(id: String?, name: CharSequence?, @Importance importance: Int) {
-    var notificationChannel: NotificationChannel? = null
-
-    init {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationChannel = NotificationChannel(id, name, importance)
-        }
-    }
+    var notificationChannel: NotificationChannel? = NotificationChannel(id, name, importance)
 
     /**
      * 设置发布到此频道的通知是否可以在 [android.app.NotificationManager.Policy.INTERRUPTION_FILTER_PRIORITY] 模式下中断用户。
@@ -29,9 +24,7 @@ class ChannelConfig(id: String?, name: CharSequence?, @Importance importance: In
      * 只能由系统和通知排序器修改
      */
     fun setBypassDnd(bypassDnd: Boolean): ChannelConfig {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationChannel!!.setBypassDnd(bypassDnd)
-        }
+        notificationChannel!!.setBypassDnd(bypassDnd)
         return this
     }
 
@@ -42,9 +35,7 @@ class ChannelConfig(id: String?, name: CharSequence?, @Importance importance: In
      * 建议的最大长度为 300 个字符；如果值太长，可能会被截断。
      */
     fun setDescription(description: String?): ChannelConfig {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationChannel!!.description = description
-        }
+        notificationChannel!!.description = description
         return this
     }
 
@@ -57,12 +48,10 @@ class ChannelConfig(id: String?, name: CharSequence?, @Importance importance: In
      *
      * 只能在频道提交到 [NotificationManager.createNotificationChannel] 之前修改，除非频道当前不是组的一部分。
      *
-     * @param groupId 由 [)][NotificationManager.createNotificationChannelGroup] 创建的组的 ID。
+     * @param groupId 由 [NotificationManager.createNotificationChannelGroup] 创建的组标识。
      */
     fun setGroup(groupId: String?): ChannelConfig {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationChannel!!.group = groupId
-        }
+        notificationChannel!!.group = groupId
         return this
     }
 
@@ -75,9 +64,7 @@ class ChannelConfig(id: String?, name: CharSequence?, @Importance importance: In
      * @param importance 用户应该被来自该频道的通知打断的数量。
      */
     fun setImportance(@Importance importance: Int): ChannelConfig {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationChannel!!.importance = importance
-        }
+        notificationChannel!!.importance = importance
         return this
     }
 
@@ -85,13 +72,10 @@ class ChannelConfig(id: String?, name: CharSequence?, @Importance importance: In
      * 如果此通道上的灯[enabled][NotificationChannel.enableLights] 且设备支持该功能，则为发布到此通道的通知设置通知灯颜色。
      *
      *
-     * Only modifiable before the channel is submitted to
-     * [NotificationManager.createNotificationChannel].
+     * 只能在频道提交到 [NotificationManager.createNotificationChannel] 之前修改。
      */
     fun setLightColor(argb: Int): ChannelConfig {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationChannel!!.lightColor = argb
-        }
+        notificationChannel!!.lightColor = argb
         return this
     }
 
@@ -102,9 +86,7 @@ class ChannelConfig(id: String?, name: CharSequence?, @Importance importance: In
      * 只能由系统和通知排序器修改。
      */
     fun setLockscreenVisibility(lockscreenVisibility: Int): ChannelConfig {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationChannel!!.lockscreenVisibility = lockscreenVisibility
-        }
+        notificationChannel!!.lockscreenVisibility = lockscreenVisibility
         return this
     }
 
@@ -115,9 +97,7 @@ class ChannelConfig(id: String?, name: CharSequence?, @Importance importance: In
      * 建议的最大长度为 40 个字符；如果值太长，可能会被截断。
      */
     fun setName(name: CharSequence?): ChannelConfig {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationChannel!!.name = name
-        }
+        notificationChannel!!.name = name
         return this
     }
 
@@ -130,9 +110,7 @@ class ChannelConfig(id: String?, name: CharSequence?, @Importance importance: In
      * @param showBadge 如果应允许显示徽章，则为 true。
      */
     fun setShowBadge(showBadge: Boolean): ChannelConfig {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationChannel!!.setShowBadge(showBadge)
-        }
+        notificationChannel!!.setShowBadge(showBadge)
         return this
     }
 
@@ -143,9 +121,7 @@ class ChannelConfig(id: String?, name: CharSequence?, @Importance importance: In
      * [NotificationManager.createNotificationChannel].
      */
     fun setSound(sound: Uri?, audioAttributes: AudioAttributes?): ChannelConfig {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationChannel!!.setSound(sound, audioAttributes)
-        }
+        notificationChannel!!.setSound(sound, audioAttributes)
         return this
     }
 
@@ -156,9 +132,7 @@ class ChannelConfig(id: String?, name: CharSequence?, @Importance importance: In
      * [NotificationManager.createNotificationChannel].
      */
     fun setVibrationPattern(vibrationPattern: LongArray?): ChannelConfig {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationChannel!!.vibrationPattern = vibrationPattern
-        }
+        notificationChannel!!.vibrationPattern = vibrationPattern
         return this
     }
 

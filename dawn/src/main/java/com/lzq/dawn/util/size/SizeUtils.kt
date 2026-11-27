@@ -4,6 +4,7 @@ import android.content.res.Resources
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.util.TypedValueCompat
 
 /**
  * @Name :SizeUtils
@@ -37,33 +38,33 @@ object SizeUtils {
     }
 
     /**
-     * sp to   px.
+     * 将字体缩放单位转换为像素，兼容系统的非线性字体缩放。
      *
-     * @param spValue sp的值
-     * @return value of px
+     * @param spValue 字体缩放单位的值。
+     * @return 沿用原有舍入方式得到的像素整数。
      */
     @JvmStatic
     fun sp2px(spValue: Float): Int {
-        val fontScale = Resources.getSystem().displayMetrics.scaledDensity
-        return (spValue * fontScale + 0.5f).toInt()
+        val pixels = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_SP, spValue, Resources.getSystem().displayMetrics
+        )
+        return (pixels + 0.5f).toInt()
     }
 
     /**
-     * px to  sp.
+     * 将像素转换为字体缩放单位，兼容最低支持版本。
      *
-     * @param pxValue px的值
-     * @return value of sp
+     * @param pxValue 像素值。
+     * @return 沿用原有舍入方式得到的字体缩放单位整数。
      */
     @JvmStatic
     fun px2sp(pxValue: Float): Int {
-        val fontScale = Resources.getSystem().displayMetrics.scaledDensity
-        return (pxValue / fontScale + 0.5f).toInt()
+        return (TypedValueCompat.pxToSp(pxValue, Resources.getSystem().displayMetrics) + 0.5f).toInt()
     }
 
     /**
      * 将包含维度的未打包复杂数据值转换为其最终浮点值。
-     * The two parameters <var>unit</var> and <var>value</var>
-     * are as in [TypedValue.TYPE_DIMENSION].
+     * 单位和值的含义与系统尺寸类型一致。
      *
      * @param value 要将单位应用到的值。
      * @param unit  要从中转换的单位。
@@ -77,7 +78,7 @@ object SizeUtils {
         return when (unit) {
             TypedValue.COMPLEX_UNIT_PX -> value
             TypedValue.COMPLEX_UNIT_DIP -> value * metrics.density
-            TypedValue.COMPLEX_UNIT_SP -> value * metrics.scaledDensity
+            TypedValue.COMPLEX_UNIT_SP -> TypedValue.applyDimension(unit, value, metrics)
             TypedValue.COMPLEX_UNIT_PT -> value * metrics.xdpi * (1.0f / 72)
             TypedValue.COMPLEX_UNIT_IN -> value * metrics.xdpi
             TypedValue.COMPLEX_UNIT_MM -> value * metrics.xdpi * (1.0f / 25.4f)

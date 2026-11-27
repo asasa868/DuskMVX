@@ -5,7 +5,9 @@ import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.pm.PackageManager
+import androidx.core.os.BundleCompat
 import com.lzq.dawn.DawnBridge
+import java.io.Serializable
 
 /**
  * @Name :MetaDataUtils
@@ -26,7 +28,7 @@ object MetaDataUtils {
         val packageName = DawnBridge.app.packageName
         try {
             val ai = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-            value = ai.metaData[key].toString()
+            value = BundleCompat.getSerializable(ai.metaData, key, Serializable::class.java).toString()
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
         }
@@ -61,7 +63,7 @@ object MetaDataUtils {
         val componentName = ComponentName(DawnBridge.app, clz)
         try {
             val ai = pm.getActivityInfo(componentName, PackageManager.GET_META_DATA)
-            value = ai.metaData[key].toString()
+            value = BundleCompat.getSerializable(ai.metaData, key, Serializable::class.java).toString()
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
         }
@@ -96,7 +98,7 @@ object MetaDataUtils {
         val componentName = ComponentName(DawnBridge.app, clz)
         try {
             val info = pm.getServiceInfo(componentName, PackageManager.GET_META_DATA)
-            value = info.metaData[key].toString()
+            value = BundleCompat.getSerializable(info.metaData, key, Serializable::class.java).toString()
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
         }
@@ -131,7 +133,7 @@ object MetaDataUtils {
         val componentName = ComponentName(DawnBridge.app, clz)
         try {
             val info = pm.getReceiverInfo(componentName, PackageManager.GET_META_DATA)
-            value = info.metaData[key].toString()
+            value = BundleCompat.getSerializable(info.metaData, key, Serializable::class.java).toString()
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
         }

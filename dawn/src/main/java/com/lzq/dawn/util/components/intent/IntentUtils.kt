@@ -5,12 +5,12 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
 import androidx.annotation.RequiresPermission
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import com.lzq.dawn.DawnBridge
 import java.io.File
 import java.util.LinkedList
@@ -64,13 +64,8 @@ object IntentUtils {
         if (!DawnBridge.isFileExists(file)) {
             return null
         }
-        val uri: Uri
-        uri = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            Uri.fromFile(file)
-        } else {
-            val authority = DawnBridge.app.packageName + ".fileprovider"
-            FileProvider.getUriForFile(DawnBridge.app, authority, file!!)
-        }
+        val authority = DawnBridge.app.packageName + ".fileprovider"
+        val uri = FileProvider.getUriForFile(DawnBridge.app, authority, file!!)
         return getInstallAppIntent(uri)
     }
 
@@ -91,9 +86,7 @@ object IntentUtils {
         val intent = Intent(Intent.ACTION_VIEW)
         val type = "application/vnd.android.package-archive"
         intent.setDataAndType(uri, type)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-        }
+        intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
         return intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 
@@ -109,7 +102,7 @@ object IntentUtils {
     @JvmStatic
     fun getUninstallAppIntent(pkgName: String): Intent {
         val intent = Intent(Intent.ACTION_DELETE)
-        intent.data = Uri.parse("package:$pkgName")
+        intent.data = "package:$pkgName".toUri()
         return intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 
@@ -150,7 +143,7 @@ object IntentUtils {
     @JvmStatic
     fun getLaunchAppDetailsSettingsIntent(pkgName: String, isNewTask: Boolean): Intent {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-        intent.data = Uri.parse("package:$pkgName")
+        intent.data = "package:$pkgName".toUri()
         return getIntent(intent, isNewTask)
     }
 
@@ -395,12 +388,7 @@ object IntentUtils {
          * @return 返回关闭的意图
          */
         get() {
-            val intent: Intent
-            intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Intent("com.android.internal.intent.action.REQUEST_SHUTDOWN")
-            } else {
-                Intent("android.intent.action.ACTION_REQUEST_SHUTDOWN")
-            }
+            val intent = Intent("com.android.internal.intent.action.REQUEST_SHUTDOWN")
             intent.putExtra("android.intent.extra.KEY_CONFIRM", false)
             return intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
@@ -413,7 +401,7 @@ object IntentUtils {
      */
     @JvmStatic
     fun getDialIntent(phoneNumber: String): Intent {
-        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + Uri.encode(phoneNumber)))
+        val intent = Intent(Intent.ACTION_DIAL, ("tel:" + Uri.encode(phoneNumber)).toUri())
         return getIntent(intent, true)
     }
 
@@ -428,7 +416,7 @@ object IntentUtils {
     @JvmStatic
     @RequiresPermission(permission.CALL_PHONE)
     fun getCallIntent(phoneNumber: String): Intent {
-        val intent = Intent("android.intent.action.CALL", Uri.parse("tel:" + Uri.encode(phoneNumber)))
+        val intent = Intent("android.intent.action.CALL", ("tel:" + Uri.encode(phoneNumber)).toUri())
         return getIntent(intent, true)
     }
 
@@ -441,7 +429,7 @@ object IntentUtils {
      */
     @JvmStatic
     fun getSendSmsIntent(phoneNumber: String, content: String?): Intent {
-        val uri = Uri.parse("smsto:" + Uri.encode(phoneNumber))
+        val uri = ("smsto:" + Uri.encode(phoneNumber)).toUri()
         val intent = Intent(Intent.ACTION_SENDTO, uri)
         intent.putExtra("sms_body", content)
         return getIntent(intent, true)

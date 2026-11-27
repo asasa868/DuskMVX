@@ -1,6 +1,5 @@
 package com.lzq.dawn.util.file
 
-import android.os.Build
 import android.os.Environment
 import android.text.TextUtils
 import com.lzq.dawn.DawnBridge
@@ -44,9 +43,7 @@ object PathUtils {
          *
          * @return 返回内部应用数据路径
          */
-        get() = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            DawnBridge.app.applicationInfo.dataDir
-        } else getAbsolutePath(DawnBridge.app.dataDir)
+        get() = getAbsolutePath(DawnBridge.app.dataDir)
     val internalAppCodeCacheDir: String
         /**
          * 返回文件系统上用于存储缓存代码的应用程序特定缓存目录的绝对路径

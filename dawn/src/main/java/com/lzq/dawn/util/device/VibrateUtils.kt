@@ -23,7 +23,7 @@ object VibrateUtils {
                     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
                         (DawnBridge.app.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
                     } else {
-                        DawnBridge.app.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                        DawnBridge.app.getSystemService(Vibrator::class.java)
                     }
             }
             return field
@@ -39,11 +39,7 @@ object VibrateUtils {
     @RequiresPermission(permission.VIBRATE)
     fun vibrate(milliseconds: Long) {
         val vibrator = vibrator ?: return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            vibrator.vibrate(milliseconds)
-        }
+        vibrator.vibrate(VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE))
     }
 
     /**
@@ -60,11 +56,7 @@ object VibrateUtils {
         repeat: Int,
     ) {
         val vibrator = vibrator ?: return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createWaveform(pattern, repeat))
-        } else {
-            vibrator.vibrate(pattern, repeat)
-        }
+        vibrator.vibrate(VibrationEffect.createWaveform(pattern, repeat))
     }
 
     /**

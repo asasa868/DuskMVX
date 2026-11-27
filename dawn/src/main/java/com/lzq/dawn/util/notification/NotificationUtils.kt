@@ -6,7 +6,6 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.annotation.IntDef
 import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
@@ -104,20 +103,21 @@ object NotificationUtils {
             .notify(tag, id, getNotification(channelConfig, consumer))
     }
 
+    /**
+     * 创建配置中的通知通道，并通过消费者完成通知内容设置。
+     *
+     * @param channelConfig 通知通道配置。
+     * @param consumer 可选的通知构建回调。
+     * @return 使用指定通道构建的通知。
+     */
     @JvmStatic
     fun getNotification(
         channelConfig: ChannelConfig,
         consumer: DawnBridge.Consumer<NotificationCompat.Builder?>?
     ): Notification {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val nm = DawnBridge.app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            nm.createNotificationChannel(channelConfig.notificationChannel!!)
-        }
-        val builder: NotificationCompat.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationCompat.Builder(DawnBridge.app, channelConfig.notificationChannel!!.id)
-        } else {
-            NotificationCompat.Builder(DawnBridge.app)
-        }
+        val nm = DawnBridge.app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.createNotificationChannel(channelConfig.notificationChannel!!)
+        val builder = NotificationCompat.Builder(DawnBridge.app, channelConfig.notificationChannel!!.id)
         consumer?.accept(builder)
         return builder.build()
     }
