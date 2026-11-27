@@ -106,7 +106,7 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
      */
     fun field(name: String): ReflectUtils {
         return try {
-            val field = getField(name)
+            val field = getAccessibleField(name)
             ReflectUtils(field.type, field[objects])
         } catch (e: IllegalAccessException) {
             throw ReflectException(e)
@@ -119,13 +119,14 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
      * @param name  字段的名称。
      * @param value value.
      * @return [ReflectUtils] 实例
+     * @throws ReflectException 字段不可写；新系统限制的静态 final 字段不能借此绕过。
      */
     fun field(
         name: String,
         value: Any,
     ): ReflectUtils {
         return try {
-            val field = getField(name)
+            val field = prepareFieldForWrite(name)
             field[objects] = unwrap(value)
             this
         } catch (e: Exception) {
@@ -134,7 +135,7 @@ class ReflectUtils private constructor(private val type: Class<*>, private val o
     }
 
     @Throws(IllegalAccessException::class)
-    private fun getField(name: String): Field {
+    private fun prepareFieldForWrite(name: String): Field {
         val field = getAccessibleField(name)
         if (field.modifiers and Modifier.FINAL == Modifier.FINAL) {
             try {

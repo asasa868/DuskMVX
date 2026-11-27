@@ -62,6 +62,29 @@ class ReflectUtilsNullabilityTest {
         assertThrows(ReflectException::class.java) { ReflectUtils.reflect(MethodTarget()).method("missing") }
     }
 
+    @Test fun finalFieldsCanBeReadWithoutPreparingThemForMutation() {
+        val target = FieldTarget()
+
+        assertEquals("final", ReflectUtils.reflect(target).field("finalValue").get<String>())
+        assertEquals("static", ReflectUtils.reflect(FieldTarget::class.java).field("STATIC_FINAL").get<String>())
+    }
+
+    @Test fun mutableFieldsRetainTheirExistingWriteBehavior() {
+        val target = FieldTarget()
+
+        assertSame(target, ReflectUtils.reflect(target).field("mutableValue", "after").get<FieldTarget>())
+        assertEquals("after", target.mutableValue)
+    }
+
+    private class FieldTarget {
+        val finalValue = "final"
+        var mutableValue = "before"
+
+        companion object {
+            const val STATIC_FINAL = "static"
+        }
+    }
+
     private class ConstructorTarget {
         val selected: String
 

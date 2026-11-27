@@ -52,6 +52,16 @@ CI 与 JitPack 使用 `CI=true bash gradlew` 走项目原生 Wrapper，不依赖
 使用MVVM架构可以继承**BaseMvvmActivity**，使用MVI架构可以继承**BaseMviActivity**，
 Fragment就是**BaseMvvmFragment**和**BaseMviFragment**，compose版本还在研究。
 
+## Android 构建与运行版本
+
+当前稳定工具链为 Gradle `9.9.2`、Android Gradle Plugin `9.5.3`、Kotlin/Compose Compiler `2.4.21`、KSP `2.3.14`、Build Tools `37.0.0` 与 NDK `30.0.16248370`。Android 模块使用 AGP 内置 Kotlin 和公开 Variant API；Gradle 发行包启用 SHA-256 校验，Wrapper JAR 与启动脚本已按官方版本更新并核验。运行 Gradle 和 API37 Robolectric 测试使用 JDK21，产物仍以 JVM17 为目标。
+
+- 最低系统版本保持 API26；编译平台为稳定版 `37.2`，示例 App 的 `targetSdk` 为 `37`（目标版本没有小版本设置）。
+- 库的公开 AndroidX/Compose 依赖也已升级；接入方需要支持 SDK37.2 的构建工具链。旧编译器或旧构建插件不在此次接入验证范围。
+- target35 起的示例界面在系统35及以上处理系统栏和刘海剩余安全区域；旧系统保留原有布局行为，Compose 使用安全区域 padding。
+- target37 的局域网访问需要宿主按功能声明并请求权限，见下方说明；公网请求不增加局域网权限弹窗。
+- 新系统继续采用平台的证书透明度、预测返回与后台限制，不通过关闭平台保护维持旧行为。跨版本单测不等于已验证所有厂商系统或真实网络环境。
+
 ## 网络响应结构配置
 
 响应解析按每个 `DawnNetWork` 实例配置，在首次调用 `getApiService()` 创建网络配置时生效。未重写配置时，`getHttpResponseCode()` 和 `getResponseEnvelopeParser()` 都返回 `null`，直接使用 Gson 将整个响应反序列化为接口声明的数据类型；无包装对象、根数组和基础类型都可以沿用这个默认入口。库不会默认强制拆解 `{code,msg,data}`。
@@ -146,6 +156,42 @@ val retrofit = Retrofit.Builder()
 ```bash
 bash gradlew :dawn:testDebugUnitTest :dawn:lintDebug :app:compileDebugKotlin --stacktrace
 ```
+
+## Android 17 接入与升级边界
+
+Android 17 对 `targetSdk >= 37` 的应用启用局域网运行时权限。仅访问公网的应用无需请求此权限；需要连接局域网设备、广播、多播或本地服务发现的宿主，按实际功能在自己的清单声明：
+
+```xml
+<uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+```
+
+Dawn 和示例应用不会合并注入该权限。宿主在用户发起局域网操作时检查 `com.lzq.dawn.util.network.LocalNetworkPermission.isGranted(context)`，未授权时使用 Activity Result 请求；以下代码放在宿主 Activity 中，`connectToLocalDevice()` 和 `showLocalNetworkPermissionDenied()` 由宿主实现：
+
+```kotlin
+private val requestLocalNetwork = registerForActivityResult(
+    ActivityResultContracts.RequestPermission()
+) { granted ->
+    if (granted && LocalNetworkPermission.isGranted(this)) {
+        connectToLocalDevice()
+    } else {
+        showLocalNetworkPermissionDenied()
+    }
+}
+
+fun onConnectToLocalDeviceClick() {
+    if (LocalNetworkPermission.isGranted(this)) {
+        connectToLocalDevice()
+    } else {
+        requestLocalNetwork.launch(LocalNetworkPermission.PERMISSION)
+    }
+}
+```
+
+示例还需导入 `androidx.activity.result.contract.ActivityResultContracts` 和 `com.lzq.dawn.util.network.LocalNetworkPermission`。权限请求必须由局域网功能触发，不在启动或普通公网请求前统一弹出。拒绝时保留可重试的局域网界面状态；永久拒绝由宿主提供设置入口。每次操作前重新检查，授权后仍需处理实际连接失败与授权撤销。工具类只检查系统与目标版本以及当前授权，不猜测 URL 或自动请求，网络公开入口及原有异常传播保持不变；旧系统或 `targetSdk < 37` 时该辅助检查直接允许，其他网络、位置和 Wi-Fi 权限仍按各 API 要求处理。Android 16 的局域网保护可选测试模式不属于这一默认检查策略。
+
+Android 17 的目标版本行为还限制后台音量修改：没有相应前台资格时，系统可能忽略 `VolumeUtils.setVolume()` 的调用，宿主应把用户音量操作放在可见界面中，不能把方法返回当成系统已完成调整。反射写入也受静态 `final` 字段保护；`ReflectUtils.field(name, value)` 不保证能修改常量，拒绝写入时沿用 `ReflectException` 失败出口，宿主应改用正常可变状态或公开配置接口。
+
+权限与行为规则见 [Android 局域网权限说明](https://developer.android.com/privacy-and-security/local-network-permission) 和 [Android 17 目标版本行为变更](https://developer.android.com/about/versions/17/behavior-changes-17)。新增回归用例针对旧系统和显式版本策略条件，不能替代 Android 17 设备上的授权弹窗、局域网连接与后台音量验证。
 
 
 ## 资料 

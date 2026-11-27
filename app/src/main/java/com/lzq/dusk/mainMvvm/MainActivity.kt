@@ -9,6 +9,7 @@ import com.dusk.login.LoginActivity
 import com.example.main_compose.MainActivity
 import com.lzq.dusk.R
 import com.lzq.dawn.mvvm.v.BaseMvvmActivity
+import com.lzq.dawn.util.view.SystemBarInsets
 import com.lzq.dusk.databinding.ActivityMainBinding
 import com.lzq.dusk.mainMvi.MainMviActivity
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +22,9 @@ import kotlinx.coroutines.launch
 class MainActivity : BaseMvvmActivity<ActivityMainBinding, MainViewModel>() {
 
 
-    override fun initView() {}
+    override fun initView() {
+        SystemBarInsets.applyTo(mViewBinding.root)
+    }
 
     override fun initData() {}
 
