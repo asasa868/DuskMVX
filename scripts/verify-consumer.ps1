@@ -2,6 +2,7 @@
     [Parameter(Mandatory = $true)][string]$SourceRoot,
     [Parameter(Mandatory = $true)][string]$CandidateRepository,
     [Parameter(Mandatory = $true)][string]$WorkRoot,
+    [string]$CandidateVersion = '',
     [string]$SdkRoot = ''
 )
 
@@ -15,6 +16,11 @@ try {
     $source = (Resolve-Path -LiteralPath $SourceRoot).Path
     $candidate = (Resolve-Path -LiteralPath $CandidateRepository).Path
     $work = [System.IO.Path]::GetFullPath($WorkRoot)
+    if ([string]::IsNullOrWhiteSpace($CandidateVersion)) {
+        $versionLine = Get-Content -LiteralPath (Join-Path $source 'gradle.properties') | Where-Object { $_ -match '^PUBLISH_VERSION=' } | Select-Object -First 1
+        if ($null -eq $versionLine) { throw '未配置候选发布版本' }
+        $CandidateVersion = ($versionLine -split '=', 2)[1].Trim()
+    }
     Write-Host "消费者源码根：$source"
     Write-Host "候选仓库绝对路径：$candidate"
     Write-Host "消费者独立目录：$work"
@@ -22,7 +28,7 @@ try {
     if (Test-Path -LiteralPath $work) { throw '消费者目录已经存在，拒绝覆盖已有状态，请提供新的隔离目录' }
     $fixture = Join-Path $source 'scripts/consumer-fixture'
     if (-not (Test-Path -LiteralPath $fixture -PathType Container)) { throw '消费者夹具不存在' }
-    $aar = Join-Path $candidate 'io/github/asasa868/Dusk/0.0.30/Dusk-0.0.30.aar'
+    $aar = Join-Path $candidate ("io/github/asasa868/Dusk/$CandidateVersion/Dusk-$CandidateVersion.aar")
     if (-not (Test-Path -LiteralPath $aar -PathType Leaf)) { throw '候选归档不存在' }
     if ([string]::IsNullOrWhiteSpace($SdkRoot)) { $SdkRoot = $env:ANDROID_HOME }
     if ([string]::IsNullOrWhiteSpace($SdkRoot)) { $SdkRoot = $env:ANDROID_SDK_ROOT }
@@ -47,6 +53,7 @@ try {
     $arguments = @(
         ('-PcandidateRepository=' + $candidate),
         ('-PcandidateAar=' + $aar),
+        ('-PcandidateVersion=' + $CandidateVersion),
         'assembleDebug', 'testDebugUnitTest', 'lintDebug', 'verifyConsumerDependencies',
         '--stacktrace', '--info', '--no-daemon', '--refresh-dependencies'
     )

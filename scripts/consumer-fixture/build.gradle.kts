@@ -5,6 +5,8 @@ plugins {
     id("com.android.library") version "9.5.3"
 }
 
+val candidateVersion = providers.gradleProperty("candidateVersion").get()
+
 buildscript {
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.21")
@@ -26,7 +28,7 @@ android {
 }
 
 dependencies {
-    implementation("io.github.asasa868:Dusk:0.0.30")
+    implementation("io.github.asasa868:Dusk:$candidateVersion")
     testImplementation("junit:junit:4.13.2")
 }
 
@@ -35,7 +37,7 @@ val candidateArchive by configurations.creating {
     isCanBeResolved = true
     isTransitive = false
 }
-dependencies { add(candidateArchive.name, "io.github.asasa868:Dusk:0.0.30@aar") }
+dependencies { add(candidateArchive.name, "io.github.asasa868:Dusk:$candidateVersion@aar") }
 
 // 从实际解析结果取证，不依赖本仓库项目坐标或手工补充处理器依赖。
 tasks.register("verifyConsumerDependencies") {
@@ -49,7 +51,7 @@ tasks.register("verifyConsumerDependencies") {
             val coordinates = components.mapNotNull { it.moduleVersion?.toString() }.sorted()
             lines += name
             lines += coordinates
-            check(coordinates.any { it == "io.github.asasa868:Dusk:0.0.30" }) { "未解析到候选坐标" }
+            check(coordinates.any { it == "io.github.asasa868:Dusk:$candidateVersion" }) { "未解析到候选坐标" }
             check(coordinates.any { it.startsWith("com.google.auto.service:auto-service-annotations:") }) { "注解消费契约缺失" }
             check(coordinates.none { it.contains("auto-service-ksp") || it.startsWith("com.google.devtools.ksp:") || it.startsWith("com.google.auto.service:auto-service:") }) {
                 "业务类路径不应携带处理器实现或处理器接口依赖"
