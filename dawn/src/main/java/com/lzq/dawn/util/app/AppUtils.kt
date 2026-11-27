@@ -1,6 +1,7 @@
 package com.lzq.dawn.util.app
 
 import android.app.Activity
+import android.Manifest.permission
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -12,6 +13,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Process
 import androidx.core.content.pm.PackageInfoCompat
+import androidx.annotation.RequiresPermission
 import com.lzq.dawn.DawnBridge
 import java.io.File
 import kotlin.system.exitProcess
@@ -167,6 +169,7 @@ object AppUtils {
      * @return `true`: yes<br></br>`false`: no
      */
     @JvmStatic
+    @RequiresPermission(permission.PACKAGE_USAGE_STATS)
     fun isAppForeground(pkgName: String): Boolean {
         return !DawnBridge.isSpace(pkgName) && pkgName == DawnBridge.foregroundProcessName
     }

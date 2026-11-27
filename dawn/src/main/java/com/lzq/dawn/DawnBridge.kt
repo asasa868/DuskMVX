@@ -438,6 +438,7 @@ object DawnBridge {
         get() = Settings.canDrawOverlays(app)
     val isMainProcess: Boolean
         get() = ProcessUtils.isMainProcess
+    @get:RequiresPermission(permission.PACKAGE_USAGE_STATS)
     val foregroundProcessName: String?
         get() = ProcessUtils.foregroundProcessName
     val currentProcessName: String

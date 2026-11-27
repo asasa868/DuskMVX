@@ -27,6 +27,7 @@ import java.util.Collections
  * @Desc : 进程
  */
 object ProcessUtils {
+    @get:RequiresPermission(permission.PACKAGE_USAGE_STATS)
     @JvmStatic
     val foregroundProcessName: String?
         /**
