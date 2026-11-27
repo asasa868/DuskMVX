@@ -47,16 +47,32 @@ def count_tests(root):
     for path in Path(root).rglob("TEST-*.xml"):
         try:
             suite = ET.parse(path).getroot()
-            if suite.tag != "testsuite":
-                raise GateError("测试报告根节点必须为测试套件")
-            tests = int(suite.attrib.get("tests", "0"))
-            failures = int(suite.attrib.get("failures", "0")) + int(suite.attrib.get("errors", "0"))
-            skipped = int(suite.attrib.get("skipped", "0"))
+            if suite.tag == "testsuite":
+                suites = [suite]
+            elif suite.tag == "testsuites":
+                suites = suite.findall("testsuite")
+                if not suites:
+                    raise GateError("测试报告不包含测试套件")
+                for attribute in ("tests", "failures", "errors", "skipped"):
+                    if attribute in suite.attrib:
+                        reported = int(suite.attrib[attribute])
+                        aggregated = sum(int(child.attrib.get(attribute, "0")) for child in suites)
+                        if reported != aggregated:
+                            raise GateError("测试报告汇总与测试套件不一致")
+            else:
+                raise GateError("测试报告根节点必须为测试套件集合")
+            counts = [
+                (int(item.attrib.get("tests", "0")),
+                 int(item.attrib.get("failures", "0")) + int(item.attrib.get("errors", "0")),
+                 int(item.attrib.get("skipped", "0")))
+                for item in suites
+            ]
         except (ET.ParseError, ValueError) as error:
             raise GateError("测试报告格式错误") from error
-        if failures or skipped or tests <= 0 or tests < skipped:
-            raise GateError("测试报告存在失败或跳过")
-        total += tests - skipped
+        for tests, failures, skipped in counts:
+            if failures or skipped or tests <= 0 or tests < skipped:
+                raise GateError("测试报告存在失败或跳过")
+            total += tests - skipped
     if total == 0:
         raise GateError("没有实际执行通过的测试")
     return total

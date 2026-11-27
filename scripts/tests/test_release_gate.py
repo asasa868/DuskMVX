@@ -137,6 +137,8 @@ class ReleaseGateTest(unittest.TestCase):
             '<testsuite tests="3" failures="1"/>',
             '<testsuite tests="3" errors="1"/>',
             '<testsuites tests="3"/>',
+            '<testsuites tests="1" failures="0" errors="0" skipped="0"><testsuite tests="1" failures="1" errors="0" skipped="0"/></testsuites>',
+            '<testsuites tests="2"><testsuite tests="1"/></testsuites>',
             '<testsuite tests="invalid"/>',
             'not xml',
         )
@@ -150,6 +152,18 @@ class ReleaseGateTest(unittest.TestCase):
                         self.record()
             finally:
                 report.write_bytes(original)
+
+    def test_android_instrumentation_testsuites_report_is_counted(self):
+        report = self.module_report("dawn-device")
+        report.write_text(
+            "<?xml version='1.0' encoding='UTF-8' ?>"
+            '<testsuites tests="1" failures="0" errors="0" skipped="0">'
+            '<testsuite name="com.lzq.dawn.lifecycle.DevicePageLifecycleTest" '
+            'tests="1" failures="0" errors="0" skipped="0">'
+            '<testcase name="deviceLifecycle"/></testsuite></testsuites>', encoding="utf-8")
+
+        self.assertEqual(1, gate.count_tests(report.parent))
+        self.assertEqual(1, self.record()["moduleTests"]["dawn-device"])
 
     def test_downloaded_manifest_requires_matching_module_counts(self):
         evidence = self.record()
