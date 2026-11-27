@@ -18,21 +18,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAllCaps="false"
-        android:text="to_MVIActivity"/>
+        android:text="@string/main_to_mvi"/>
 
     <Button
         android:id="@+id/btn_loginActivity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAllCaps="false"
-        android:text="to_LoginActivity"/>
+        android:text="@string/main_to_login"/>
 
     <Button
         android:id="@+id/btn_composeActivity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAllCaps="false"
-        android:text="to_ComposeMainActivity"/>
+        android:text="@string/main_to_compose"/>
   </LinearLayout>
 
   <TextView
@@ -43,7 +43,7 @@
       app:layout_constraintBottom_toBottomOf="parent"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="                         "/>
+      android:text="@string/main_blank_placeholder"/>
   <TextView
       android:id="@+id/tv_successOrFailureTime"
       app:layout_constraintTop_toBottomOf="@+id/tv_successTime"
@@ -52,7 +52,7 @@
       app:layout_constraintBottom_toBottomOf="parent"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="                         "/>
+      android:text="@string/main_blank_placeholder"/>
 
   <TextView
       android:id="@+id/tv_successRxjavaTime"
@@ -62,7 +62,7 @@
       app:layout_constraintBottom_toBottomOf="parent"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="                         "/>
+      android:text="@string/main_blank_placeholder"/>
 
   <TextView
       android:id="@+id/tv_successOrFailureRxjavaTime"
@@ -72,6 +72,6 @@
       app:layout_constraintBottom_toBottomOf="parent"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="                         "/>
+      android:text="@string/main_blank_placeholder"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Dusk</string>
+    <string name="main_to_mvi">to_MVIActivity</string>
+    <string name="main_to_login">to_LoginActivity</string>
+    <string name="main_to_compose">to_ComposeMainActivity</string>
+    <string name="main_blank_placeholder">\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020</string>
+    <string name="main_success_time">success:%1$d</string>
+    <string name="main_success_or_failure_time">successOrFailureTime:%1$d</string>
+    <string name="main_success_rxjava_time">successRxjavaTime:%1$d</string>
+    <string name="main_success_or_failure_rxjava_time">successOrFailureRxjavaTime:%1$d</string>
+    <string name="main_mvi_banner_append">%1$s%2$s</string>
+    <string name="main_mvi_harmony_append">%1$s  %2$s</string>
 </resources>
