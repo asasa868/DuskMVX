@@ -58,7 +58,7 @@ try {
 }
 Write-Output ('结束时间：' + [DateTime]::UtcNow.ToString('o') + ' 退出码=' + $code)
 # 单目录同样保留数组类型，避免原生命令展开字符串时逐字符传参。
-$paths = @(@('dawn/build/reports','dawn/build/test-results','dawn/build/outputs','dawn/build/publications','dawn/build/candidate-repository','app/build/reports','app/build/test-results','app/build/outputs','auto-service-ksp/build/reports','auto-service-ksp/build/test-results','auto-service-ksp/build/ksp-fixtures') | Where-Object { Test-Path -LiteralPath $_ })
+$paths = @(@('dawn/build/reports','dawn/build/test-results','dawn/build/outputs','dawn/build/publications','dawn/build/candidate-repository','app/build/reports','app/build/test-results','app/build/outputs','auto-service-ksp/build/reports','auto-service-ksp/build/test-results','auto-service-ksp/build/ksp-fixtures','login/build/reports','login/build/test-results','main-compose/build/reports','main-compose/build/test-results','buildSrc/build/reports','buildSrc/build/test-results') | Where-Object { Test-Path -LiteralPath $_ })
 if ($paths.Count -gt 0) {
     & tar -czf reports.tgz @paths
     if ($LASTEXITCODE -ne 0 -and $code -eq 0) { $code = $LASTEXITCODE }

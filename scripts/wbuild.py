@@ -168,7 +168,8 @@ def main(arguments):
                     target = (artifact / member.name).resolve()
                     if (not target.is_relative_to(artifact.resolve())
                             or not (member.isfile() or member.isdir())
-                            or not member.name.startswith(('dawn/build/', 'app/build/', 'auto-service-ksp/build/'))):
+                            or not member.name.startswith(('dawn/build/', 'app/build/', 'auto-service-ksp/build/',
+                                                           'login/build/', 'main-compose/build/', 'buildSrc/build/'))):
                         code = code or 1
                         raise ValueError('报告包含不安全路径或文件类型')
                 source.extractall(artifact)
