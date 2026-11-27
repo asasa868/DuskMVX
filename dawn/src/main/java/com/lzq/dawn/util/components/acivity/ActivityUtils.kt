@@ -1896,7 +1896,7 @@ object ActivityUtils {
             try {
                 val mActivityContextField = context.javaClass.getDeclaredField("mActivityContext")
                 mActivityContextField.isAccessible = true
-                return (mActivityContextField[context] as WeakReference<Activity?>).get()
+                return (mActivityContextField[context] as? WeakReference<*>)?.get() as? Activity
             } catch (ignore: Exception) {
             }
         }
