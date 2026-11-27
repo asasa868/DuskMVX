@@ -24,7 +24,7 @@ import java.io.File
 
 /** 验证移除最低系统版本以下分支后，文件定位与存储信息入口保持可用。 */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [26, 34], application = Application::class, manifest = Config.NONE)
+@Config(sdk = [26, 34, 37], application = Application::class, manifest = Config.NONE)
 class UriAndStorageCompatibilityTest {
     private val storageManager
         get() = RuntimeEnvironment.getApplication().getSystemService(Context.STORAGE_SERVICE) as StorageManager

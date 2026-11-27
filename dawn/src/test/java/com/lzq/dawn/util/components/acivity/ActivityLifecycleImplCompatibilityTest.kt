@@ -18,7 +18,7 @@ import org.robolectric.shadow.api.Shadow
 /** 验证生命周期登记、次序与销毁清理保持既有公开行为。 */
 @RunWith(RobolectricTestRunner::class)
 @Config(
-    sdk = [26, 34],
+    sdk = [26, 34, 37],
     shadows = [ActivityLifecycleImplCompatibilityTest.RecordingCallbacksShadow::class],
     instrumentedPackages = ["com.lzq.dawn.util.components.acivity"],
 )

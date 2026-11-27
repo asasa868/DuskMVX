@@ -8,8 +8,9 @@
 
 object ProjectConfigs {
     const val minSdk = 26
-    const val compileSdk = 36
-    const val targetSdk = 34
+    const val compileSdk = 37
+    const val compileSdkMinor = 2
+    const val targetSdk = 37
     const val versionCode = 1
     const val versionName = "1.0.0"
     const val applicationId = "com.lzq.dusk"
@@ -20,7 +21,8 @@ object ProjectConfigs {
     const val proguardRules = "proguard-rules.pro"
     const val proguardName = "proguard-android-optimize.txt"
     const val jvmTarget = "17"
-    const val ndkVersion = "28.2.13676358"
+    const val ndkVersion = "30.0.16248370"
+    const val buildToolsVersion = "37.0.0"
     const val javaSrc = "src/main/java"
     const val ktSrc = "src/main/kotlin"
     const val libs = "libs"

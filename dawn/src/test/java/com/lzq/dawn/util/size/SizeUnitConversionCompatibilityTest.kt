@@ -13,7 +13,7 @@ import org.robolectric.annotation.Config
 
 /** 验证字体单位转换在最低支持版本和新系统上保留舍入与边界约定。 */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [26, 34], qualifiers = "mdpi", application = Application::class, manifest = Config.NONE)
+@Config(sdk = [26, 34, 37], qualifiers = "mdpi", application = Application::class, manifest = Config.NONE)
 class SizeUnitConversionCompatibilityTest {
     @Before
     fun resetFontScale() {

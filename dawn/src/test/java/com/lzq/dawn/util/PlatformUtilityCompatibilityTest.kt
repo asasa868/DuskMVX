@@ -38,7 +38,7 @@ import java.util.Locale
 
 /** 验证移除旧系统分支后，最低支持版本和目标版本的公开行为保持一致。 */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [26, 34], application = Application::class, manifest = Config.NONE)
+@Config(sdk = [26, 34, 37], application = Application::class, manifest = Config.NONE)
 class PlatformUtilityCompatibilityTest {
     private val application get() = RuntimeEnvironment.getApplication()
     private val telephony get() = requireNotNull(application.getSystemService(TelephonyManager::class.java))

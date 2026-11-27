@@ -89,7 +89,7 @@ class PhoneDeviceIdentifierCompatibilityTest {
     }
 
     @Test
-    @Config(sdk = [34])
+    @Config(sdk = [34, 37])
     fun privacyRestrictedSystemKeepsTheEmptyResultWithoutReadingHardwareIds() {
         shadowOf(telephony).setReadPhoneStatePermission(false)
 

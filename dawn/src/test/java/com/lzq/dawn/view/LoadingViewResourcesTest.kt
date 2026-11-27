@@ -19,7 +19,7 @@ import org.robolectric.annotation.Config
 
 /** 验证加载动画中的装饰阴影不产生无意义的无障碍播报。 */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [26, 34])
+@Config(sdk = [26, 34, 37])
 class LoadingViewResourcesTest {
     @Test fun legacyConstructorsAndStyleableRemainAvailable() {
         val context = RuntimeEnvironment.getApplication()

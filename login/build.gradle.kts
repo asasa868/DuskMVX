@@ -1,13 +1,17 @@
 
 plugins {
     id("com.android.library")
-    id("kotlin-android")
     id("com.google.devtools.ksp")
 }
 
 android {
     namespace = "com.dusk.login"
-    compileSdk = ProjectConfigs.compileSdk
+    compileSdk {
+        version = release(ProjectConfigs.compileSdk) {
+            minorApiLevel = ProjectConfigs.compileSdkMinor
+        }
+    }
+    buildToolsVersion = ProjectConfigs.buildToolsVersion
 
     defaultConfig {
         minSdk = ProjectConfigs.minSdk
@@ -19,13 +23,11 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            isShrinkResources = false
             proguardFiles(getDefaultProguardFile(ProjectConfigs.proguardName), ProjectConfigs.proguardRules)
         }
 
         debug {
             isMinifyEnabled = false
-            isShrinkResources = false
         }
     }
     compileOptions {
@@ -34,7 +36,7 @@ android {
     }
     sourceSets.named("main") {
         java.srcDirs(ProjectConfigs.javaSrc)
-        kotlin.srcDirs(ProjectConfigs.ktSrc)
+        kotlin.directories += ProjectConfigs.ktSrc
         jniLibs.srcDirs(ProjectConfigs.libs, ProjectConfigs.jniLibs)
     }
 

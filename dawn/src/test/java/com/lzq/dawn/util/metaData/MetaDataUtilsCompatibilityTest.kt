@@ -24,7 +24,7 @@ import org.robolectric.annotation.Config
 
 /** 验证类型读取迁移后，清单值与七个公开入口保留原有结果和异常约定。 */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [26, 33, 34], application = Application::class, manifest = Config.NONE)
+@Config(sdk = [26, 33, 34, 37], application = Application::class, manifest = Config.NONE)
 class MetaDataUtilsCompatibilityTest {
     private val application get() = RuntimeEnvironment.getApplication()
 

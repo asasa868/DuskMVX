@@ -28,6 +28,8 @@ jobs:
           # 旧 Android SDK tools 包已从官方仓库下线，显式请求会报 "Failed to find package 'tools'"；
           # 该 action 自带 command-line tools，这里只需仍受支持的 platform-tools。
           packages: platform-tools
+      - name: 安装当前稳定编译工具
+        run: sdkmanager "platforms;android-37.2" "build-tools;37.0.0" "ndk;30.0.16248370"
       - name: 校验原生环境与脚本
         run: |
           set -euo pipefail
@@ -38,17 +40,17 @@ jobs:
           set -euo pipefail
           bash gradlew :auto-service-ksp:test :dawn:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebug :dawn:assembleRelease --stacktrace
       - name: 静态检查
-        run: bash gradlew :dawn:lintDebug :app:lintDebug --stacktrace
+        run: bash gradlew :dawn:lintDebug :app:lintDebug :login:lintDebug :main-compose:lintDebug --stacktrace
       - name: 开启模拟器硬件加速
         run: |
           set -euo pipefail
           test -e /dev/kvm
           sudo chmod 666 /dev/kvm
-      - name: 设备生命周期回归
+      - name: Android 17 设备生命周期回归
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
-          target: google_apis
+          api-level: '37.2'
+          target: google_apis_ps16k
           arch: x86_64
           profile: pixel_6
           disable-animations: true

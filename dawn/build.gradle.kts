@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream
 
 plugins {
     id("com.android.library")
-    id("kotlin-android")
     id("maven-publish")
     id("signing")
     id("com.google.devtools.ksp")
@@ -14,7 +13,12 @@ plugins {
 android {
     namespace = ProjectConfigs.namespace
     resourcePrefix = ProjectConfigs.resourcePrefix
-    compileSdk = ProjectConfigs.compileSdk
+    compileSdk {
+        version = release(ProjectConfigs.compileSdk) {
+            minorApiLevel = ProjectConfigs.compileSdkMinor
+        }
+    }
+    buildToolsVersion = ProjectConfigs.buildToolsVersion
 
     defaultConfig {
         minSdk = ProjectConfigs.minSdk
@@ -28,13 +32,11 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            isShrinkResources = false
             proguardFiles(getDefaultProguardFile(ProjectConfigs.proguardName), ProjectConfigs.proguardRules)
         }
 
         debug {
             isMinifyEnabled = false
-            isShrinkResources = false
         }
     }
 
@@ -50,7 +52,7 @@ android {
 
     sourceSets.named("main") {
         java.srcDirs(ProjectConfigs.javaSrc)
-        kotlin.srcDirs(ProjectConfigs.ktSrc)
+        kotlin.directories += ProjectConfigs.ktSrc
         jniLibs.srcDirs(ProjectConfigs.libs, ProjectConfigs.jniLibs)
     }
 
@@ -62,10 +64,6 @@ android {
 
     publishing { singleVariant("release") { withSourcesJar() } }
 
-    libraryVariants.all {
-        artifacts {
-        }
-    }
 }
 
 kotlin {
@@ -205,7 +203,7 @@ afterEvaluate {
     }
 }
 
-val verifyCandidate by tasks.registering {
+val verifyCandidate = tasks.register("verifyCandidate") {
     group = "verification"
     description = "检查候选坐标、敏感映射与处理器依赖边界"
     dependsOn("publishReleasePublicationToCandidateRepository")

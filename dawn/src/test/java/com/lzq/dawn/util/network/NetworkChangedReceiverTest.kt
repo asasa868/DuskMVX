@@ -23,7 +23,7 @@ import org.robolectric.Shadows.shadowOf
  * @description: 验证网络监听器的并发修改、去重、注销与通知顺序
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [28], application = Application::class, manifest = Config.NONE)
+@Config(sdk = [26, 28, 34, 37], application = Application::class, manifest = Config.NONE)
 class NetworkChangedReceiverTest {
     private val registered = mutableListOf<OnNetworkStatusChangedListener>()
     private val receiver get() = NetworkChangedReceiver.instance

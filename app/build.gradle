@@ -1,12 +1,16 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
     id 'com.google.devtools.ksp'
     id 'androidx.room'
 }
 
 android {
-    compileSdk = ProjectConfigs.compileSdk
+    compileSdk {
+        version = release(ProjectConfigs.compileSdk) {
+            minorApiLevel = ProjectConfigs.compileSdkMinor
+        }
+    }
+    buildToolsVersion = ProjectConfigs.buildToolsVersion
     ndkVersion = ProjectConfigs.ndkVersion
 
     bundle {
@@ -34,24 +38,22 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    viewBinding {
-        enable = true
+    buildFeatures {
+        viewBinding = true
     }
 
-    packagingOptions {
+    packaging {
         resources.excludes.add("META-INF/gradle/incremental.annotation.processors")
     }
     namespace = 'com.lzq.dusk'
 
 
-    android.applicationVariants.configureEach { variant ->
-        variant.outputs.configureEach { output ->
-            if (outputFileName != null && outputFileName.endsWith('.apk')) {
-                outputFileName = "${ProjectConfigs.applicationId}" +
-                        "${ProjectConfigs.versionName}" +
-                        "_${variant.buildType.name}" +
-                        ".apk"
-            }
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.outputs.each { output ->
+            output.outputFileName.set("${ProjectConfigs.applicationId}${ProjectConfigs.versionName}_${variant.buildType}.apk")
         }
     }
 }

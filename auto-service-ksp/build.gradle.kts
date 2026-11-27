@@ -20,7 +20,7 @@ dependencies {
     testImplementation(gradleTestKit())
 }
 
-val fixtureProcessorJar by tasks.registering(Jar::class) {
+val fixtureProcessorJar = tasks.register<Jar>("fixtureProcessorJar") {
     archiveClassifier.set("test-fixture-processor")
     from(sourceSets.test.get().output)
 }

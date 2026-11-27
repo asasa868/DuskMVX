@@ -24,7 +24,7 @@ import org.robolectric.util.ReflectionHelpers
 
 /** 验证版本读取和活动管理清理告警后保持原有公开行为。 */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [26, 34], application = Application::class, manifest = Config.NONE)
+@Config(sdk = [26, 34, 37], application = Application::class, manifest = Config.NONE)
 class UtilityCompatibilityTest {
     private val application get() = RuntimeEnvironment.getApplication()
     private val controllers = mutableListOf<ActivityController<Activity>>()
